@@ -53,7 +53,7 @@ export default class Header extends React.Component {
         let isLoggedIn = this.state.isLoggedIn;
         let name = 'jon' //this.state.user.fname;
         return (
-            <header id="header" className="container">
+            <header id="header">
                 { this.state.showMobile && this.getMobileMenu() }
                 <div className="inner">
                     <Link to="/" className="logo">Home</Link>
