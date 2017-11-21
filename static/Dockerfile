@@ -6,7 +6,6 @@ RUN apt-get update && \
     apt-get install -y nodejs
 
 COPY . /usr/share/nginx/html
-
 WORKDIR /usr/share/nginx/html
 
-RUN ./build.sh
+RUN chmod +x build.sh

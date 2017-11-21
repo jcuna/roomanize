@@ -17,6 +17,7 @@ services:
     environment:
      - NGINX_HOST=martires.joncuna.com
      - APP_ENV=develop
-    command: [nginx-debug, '-g', 'daemon off;']
+     - APP_PATH=/usr/share/nginx/html
+    command: /bin/bash -c "./build.sh && nginx -g 'daemon off;'"
     depends_on:
       - backend-service

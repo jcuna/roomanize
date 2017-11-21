@@ -1,3 +1,11 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-echo APP_ENV
+cd $APP_PATH
+
+npm install
+
+if [ "$APP_ENV" = "develop" ]; then
+    npm run watch
+else
+    npm run build
+fi
