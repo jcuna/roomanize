@@ -100,9 +100,12 @@ ENV/
 # mypy
 .mypy_cache/
 
-#Mac junk
+# Mac junk
 .DS_Store
 
-#node stuff
+# node stuff
 node_modules/
 package-lock.json
+
+# intellij stuff
+.idea
