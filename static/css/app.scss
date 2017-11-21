@@ -1,0 +1,42 @@
+$height-footer: 110px;
+
+html {
+  min-height: 100%;
+  position: relative;
+  body {
+    margin-bottom: $height-footer;
+
+    .inner {
+      max-width: 75em;
+      margin: 0 auto;
+    }
+    .content-area {
+    }
+
+    .footer {
+      bottom: 0;
+      width: 100%;
+      position: absolute;
+      height: $height-footer;
+    }
+  }
+  .fa-bars {
+    float: right;
+  }
+
+  @media screen and (min-width: 769px) {
+    .fa-bars {
+      display: none;
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    #nav {
+      display: none;
+    }
+  }
+
+  .sortable {
+    cursor: pointer;
+  }
+}
