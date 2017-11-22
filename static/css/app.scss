@@ -7,20 +7,32 @@ html {
   position: relative;
   body {
     margin-bottom: $height-footer;
-
+    overflow: hidden;
     .inner {
       max-width: 75em;
       margin: 0 auto;
     }
-    .content-area {
-    }
-
     .footer {
       bottom: 0;
       width: 100%;
       position: absolute;
       height: $height-footer;
     }
+  }
+
+  .body-container {
+    left: 0;
+    position: relative;
+    height: 100%;
+    -webkit-transition: all 1s ease;
+    -moz-transition: all 1s ease;
+    -o-transition: all 1s ease;
+    -ms-transition: all 1s ease;
+    transition: all 1s ease;
+  }
+
+  .body-container.body-displaced {
+    left: -50%;
   }
 
   .sortable {
