@@ -1,7 +1,8 @@
+@import "vars";
 .mobile-menu {
   margin-right: -50%;
   position: absolute;
-  background: #5385c1;
+  background: $blue;
   height: 100%;
   width: 50%;
   right: 0;
@@ -33,7 +34,6 @@
       display: block;
       padding: 10px;
       border-top: solid 1px rgba(255, 255, 255, 0.25);
-      color: #d4e0ef;
     }
 
   }

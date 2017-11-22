@@ -39,4 +39,7 @@ services:
       - "5000"
     ports:
       - "5000:5000"
-    command: gunicorn -w 1 --bind :5000 wsgi:app --log-level=debug --log-file=-
+    environment:
+      - APP_ENV=develop
+      - APP_PATH=/usr/src/app
+    command: /bin/bash -c "./run.sh"

@@ -22,7 +22,7 @@ export default class Menu extends React.Component {
     }
 
     render() {
-        let isLoggedIn = true;
+        let isLoggedIn = false;
         let name = 'jon';
         return (
             <div className={this.className}>
