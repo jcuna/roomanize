@@ -1,3 +1,6 @@
+$theme: #d1604d;
+$themeDark: #b64e3d;
+
 #header {
   color: #d4e0ef;
   font-size: 20px;
@@ -5,44 +8,31 @@
   height: 250px;
   .logo {
     color: #ffffff;
+    background-color: $themeDark;
     font-weight: 600;
     height: inherit;
     line-height: inherit;
     margin: 0;
-    padding: 0;
+    padding: 25px;
     position: absolute;
-    left: 12px;
+    left: 0;
+    top: 0;
   }
 
   .inner {
     position: relative;
     z-index: 9999;
-    background-color: #d1604d;
-    padding: 10px;
-    #nav {
-      margin: 0;
-      padding: 0;
-      border: 0;
-      vertical-align: baseline;
-      text-align: right;
-      a {
-        -moz-transition: color 0.2s ease-in-out;
-        -webkit-transition: color 0.2s ease-in-out;
-        -ms-transition: color 0.2s ease-in-out;
-        transition: color 0.2s ease-in-out;
-        display: inline-block;
-        padding: 0 0.75em;
-        color: inherit;
-        text-decoration: none;
-        font-size: .8em;
-      }
+    background-color: $theme;
+    padding: 40px;
 
-      .user-logout {
-        margin-left: 10px;
-        font-size: 20px;
-        &:hover {
-          color: #fff;
-        }
+    .fa-bars {
+      right: 0;
+      top: 0;
+      font-size: 36px;
+      position: absolute;
+      padding: 22px;
+      &:hover {
+        background-color: $themeDark;
       }
     }
   }
@@ -63,7 +53,8 @@
     .fa {
       cursor: pointer;
       float: right;
-      padding: 10px;
+      padding: 20px;
+      font-size: 40px;
       &:hover {
         opacity: 0.5;
       }
@@ -72,7 +63,6 @@
       text-align: left;
       clear: both;
       font-weight: 500;
-      padding: 20px;
       a {
         display: block;
         padding: 10px;
@@ -84,8 +74,8 @@
   }
 
   #banner {
-    padding-top: 50px;
-    height: 200px;
+    padding-top: 95px;
+    height: 220px;
     background-image: url("/images/workbook.jpg");
     background-size: cover;
     background-position: top;

@@ -57,24 +57,12 @@ export default class Header extends React.Component {
                 { this.state.showMobile && this.getMobileMenu() }
                 <div className="inner">
                     <Link to="/" className="logo">Home</Link>
-                    <nav id="nav">
-                        {isLoggedIn &&
-                        <Link to="/new-movie">Add movie</Link>
-                        }
-                        <Link to="/find-movie">Find movies</Link>
-                        <Link to="/catalog">Catalog</Link>
-                        <span>|</span>
-                        <Link to={isLoggedIn ? "/logout": "/login"}>
-                            <span>{isLoggedIn ? `${name}`: "login"}</span>
-                            {isLoggedIn && <i className="user-logout fa fa-sign-out"></i>}
-                        </Link>
-                    </nav>
                     <a className="navPanelToggle" onClick={this.toggleMobileMenu}>
                         <span className="fa fa-bars"></span>
                     </a>
                 </div>
                 <section id="banner">
-                    <h1>Martires</h1>
+                    <h1>Mártires</h1>
                     <p>Contabilidad y manejo de clientes</p>
                 </section>
             </header>

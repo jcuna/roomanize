@@ -22,21 +22,6 @@ html {
       height: $height-footer;
     }
   }
-  .fa-bars {
-    float: right;
-  }
-
-  @media screen and (min-width: 769px) {
-    .fa-bars {
-      display: none;
-    }
-  }
-
-  @media screen and (max-width: 768px) {
-    #nav {
-      display: none;
-    }
-  }
 
   .sortable {
     cursor: pointer;
