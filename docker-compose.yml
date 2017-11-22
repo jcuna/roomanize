@@ -1,23 +1,42 @@
 version: '3.3'
  
 services:
-  backend-service:
+
+  ngix:
+    image: nginx:latest
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      - NGINX_PORT=80
+      - NGINX_HOST=martires.joncuna.com
+    volumes:
+      - ./static:/usr/share/nginx/html
+      - ./nginx.template:/etc/nginx/conf.d/nginx.template
+    command: /bin/bash -c "envsubst \$$NGINX_PORT < /etc/nginx/conf.d/nginx.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+    links:
+      - api:api
+    depends_on:
+      - static
+      - api
+
+  static:
+    build: ./static
+    volumes:
+      - ./static:/app
+    environment:
+     - APP_ENV=develop
+     - APP_PATH=/app
+    command: /bin/bash -c "./build.sh"
+    depends_on:
+      - api
+
+  api:
     build: ./api
     volumes:
       - ./api:/usr/src/app
+    expose:
+      - "5000"
     ports:
-      - 5000:80
-
-  frontend-service:
-    build: ./static
-    volumes:
-      - ./static:/usr/share/nginx/html
-    ports:
-     - "80:80"
-    environment:
-     - NGINX_HOST=martires.joncuna.com
-     - APP_ENV=develop
-     - APP_PATH=/usr/share/nginx/html
-    command: /bin/bash -c "./build.sh && nginx -g 'daemon off;'"
-    depends_on:
-      - backend-service
+      - "5000:5000"
+    command: gunicorn -w 1 --bind :5000 wsgi:app --log-level=debug --log-file=-
