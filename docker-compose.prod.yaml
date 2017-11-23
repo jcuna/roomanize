@@ -1,9 +1,0 @@
-api:
-  environment:
-    - APP_ENV=production
-    - APP_PATH=/usr/src/app
-
-static:
-  environment:
-   - APP_ENV=production
-   - APP_PATH=/app
