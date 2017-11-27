@@ -14,6 +14,6 @@ class Router:
         for concat_data, route in register().items():
             parts = re.split('\W+', concat_data)
 
-            pack = __import__('controllers.' + parts[0], fromlist=[parts[1]])
+            pack = __import__('views.' + parts[0], fromlist=[parts[1]])
             mod = getattr(pack, parts[1])
             api.add_resource(mod, '/' + self.version + '/' + route, endpoint=parts[2])
