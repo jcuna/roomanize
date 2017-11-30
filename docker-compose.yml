@@ -40,6 +40,7 @@ services:
     ports:
       - "5000:5000"
     environment:
+      - APP_SETTINGS_PATH=/usr/src/app/config/settings.py
       - APP_ENV=develop
       - APP_PATH=/usr/src/app
     command: /bin/bash -c "./run.sh"

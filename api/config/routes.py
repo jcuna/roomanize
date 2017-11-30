@@ -1,8 +1,9 @@
 
 def register():
     """
-        declare routes as follows: 'module.class@endpoint': 'route'
+        declare routes as follows: 'module.PluralNameClass@endpoint': 'route'
     """
     return {
-        'user.User@user': 'login'
+        'users.Users@user_url': '/user',
+        'users.Login@login_url': '/login'
     }
