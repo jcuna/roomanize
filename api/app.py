@@ -11,8 +11,9 @@ def init_app() -> Flask:
     this_app.debug = os.environ['APP_ENV'] == 'develop'
 
     core.Router(this_app)
-
     db.init_app(this_app)
+
+    this_app.wsgi_app = core.Middleware(this_app.wsgi_app)
     return this_app
 
 

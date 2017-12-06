@@ -6,26 +6,28 @@ import Menu from './Menu.jsx';
 import Header from './Header.jsx';
 import Footer from './Footer.jsx';
 import Routes from './Routes.jsx';
+import { Redirect } from 'react-router'
 import { BrowserRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { getUser } from '../actions/userActions';
 import '../../css/app.scss';
 
-export default class Layout extends React.Component {
-    constructor() {
-        super();
-        this.state = {
-            showMobileMenu: false
-        };
+class Layout extends React.Component {
 
-        this.toggleMobileMenu = this.toggleMobileMenu.bind(this);
+    componentWillMount() {
+        if (!this.props.loggedIn && this.props.token !== 'expired') {
+            this.props.dispatch(getUser())
+        }
     }
+
     render() {
         return (
             <BrowserRouter>
                 <div>
-                    <Menu slide={this.state.showMobileMenu} toggleMobileMenu={this.toggleMobileMenu}/>
+                    <Menu {...this.props}/>
                     <div className={this.getClassName()}>
-                        <Header toggleMobileMenu={this.toggleMobileMenu} {...this.state}/>
-                        <Routes session={this.state}/>
+                        <Header {...this.props}/>
+                        <Routes {...this.props}/>
                         <Footer/>
                     </div>
                 </div>
@@ -33,17 +35,23 @@ export default class Layout extends React.Component {
         )
     }
 
-    toggleMobileMenu() {
-        this.setState({
-            showMobileMenu: !this.state.showMobileMenu
-        })
-    }
-
     getClassName() {
         let className = 'body-container';
-        if (this.state.showMobileMenu) {
+        if (this.props.showMobileMenu) {
             className += ' body-displaced';
         }
         return className
     }
 }
+
+const getInitialState = (state) => {
+    return {
+        user: state.user.user,
+        loggedIn: state.user.loggedIn,
+        token: state.user.token,
+        showMobileMenu: state.app.showMobileMenu,
+        flashMessages: state.app.flashMessages
+    }
+};
+
+export default connect(getInitialState)(Layout);

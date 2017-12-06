@@ -35,7 +35,7 @@ class User(db.Model):
     def get_token(self):
         exp = datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
         return jwt.encode(
-            {'id': self.id, 'exp': exp},
+            {'username': self.username, 'exp': exp},
             current_app.config['SECRET_KEY']
         ).decode('utf-8')
 

@@ -4,16 +4,20 @@
  * This file bootstraps react and all dependencies to the app tree
  */
 
-const ReactDOM = require('react-dom');
 
-require('babel-polyfill');
-require('whatwg-fetch');
-
-import Layout from './components/Layout.jsx'
+import ReactDOM from 'react-dom';
+import 'babel-polyfill';
+import { Provider } from 'react-redux';
+import Layout from './components/Layout.jsx';
+import store from './store'
 
 class Bootstrap {
     constructor() {
-        ReactDOM.render(<Layout/>, document.querySelector('#content'));
+        ReactDOM.render(
+            <Provider store={store}>
+                <Layout/>
+            </Provider>, document.querySelector('#content')
+        );
     }
 }
 

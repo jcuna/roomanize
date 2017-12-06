@@ -4,36 +4,25 @@
 
 import {Link} from 'react-router-dom';
 import '../../css/menu.scss';
+import { toggleMobileMenu } from '../actions/appActions'
 
 export default class Menu extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            slide: false
-        }
-    }
 
-    componentWillReceiveProps(next) {
-        if (next.slide !== this.state.slide) {
-            this.setState({
-                slide: next.slide
-            })
-        }
+        this.toggleMenu = this.toggleMenu.bind(this);
     }
 
     render() {
-        let isLoggedIn = false;
-        let name = 'jon';
+        const { user, loggedIn} = this.props;
         return (
             <div className={this.className}>
-                <i onClick={this.props.toggleMobileMenu} className="fa fa-times" aria-hidden="true"></i>
+                <i onClick={this.toggleMenu} className="fa fa-times" aria-hidden="true"></i>
                 <nav id="mobile-nav">
-                    {isLoggedIn && <Link to="/new-movie" onClick={this.props.toggleMobileMenu}>Add movie</Link>}
-                    <Link to="/find-movie" onClick={this.props.toggleMobileMenu}>Find movies</Link>
-                    <Link to="/catalog" onClick={this.props.toggleMobileMenu}>Catalog</Link>
-                    <Link to={isLoggedIn ? "/logout": "/login"}  onClick={this.props.toggleMobileMenu}>
-                        <span>{isLoggedIn ? `${name}`: "login"}</span>
-                        {isLoggedIn && <i className="user-logout fa fa-sign-out"></i>}
+                    {this.getLinksBasedOffAccess()}
+                    <Link to={loggedIn ? "/logout": "/login"}  onClick={this.toggleMenu}>
+                        <span>{loggedIn ? `${user.first_name}`: "login"}</span>
+                        {loggedIn && <i className="user-logout fa fa-sign-out"></i>}
                     </Link>
                 </nav>
             </div>
@@ -42,9 +31,23 @@ export default class Menu extends React.Component {
 
     get className() {
         let className = 'mobile-menu';
-        if (this.state.slide) {
+        if (this.props.showMobileMenu) {
             className += ' slide'
         }
         return className;
+    }
+
+    getLinksBasedOffAccess() {
+        const routes = [
+            {link: "/nueva-habitacion", name: "Agregar habitación"},
+            {link: "/edittar-habitacion", name: "Ver/Modificar habitación"},
+            {link: "/nuevo-contrato", name: "Nuevo Inquilino"}
+        ];
+
+        return routes.map(item => <Link key={item.link} to={item.link} onClick={this.toggleMenu}>{item.name}</Link>)
+    }
+
+    toggleMenu() {
+        this.props.dispatch(toggleMobileMenu(this.props.showMobileMenu))
     }
 }

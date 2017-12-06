@@ -1,25 +1,24 @@
-from flask_restful import Resource, request, output_json
+from flask_restful import Resource, request
 from dal.shared import get_fillable
 from dal.models import User, db
 
 
 class Users(Resource):
-
     def get(self):
-        users = User.query.all()
+        user = User.query.first()
 
-        output = []
+        if user:
+            return {
+                'user': {
+                    'email': user.email,
+                    'username': user.username,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name
+                },
+                'token': user.get_token()
+            }
 
-        for user in users:
-            user_data = {'id': user.id,
-                         'email': user.email,
-                         'username': user.username,
-                         'first_name': user.first_name,
-                         'last_name': user.last_name
-                         }
-
-            output.append(user_data)
-        return output
+        return {'message': 'no session'}, 403
 
     def post(self):
         data = get_fillable(User, **request.get_json())
@@ -33,7 +32,6 @@ class Users(Resource):
 
 
 class Login(Resource):
-
     def post(self):
         auth = request.authorization
 
