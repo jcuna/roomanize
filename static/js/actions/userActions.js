@@ -1,5 +1,5 @@
 import api from '../utils/api'
-import {notifications} from "./appActions";
+import {clearLandingPage, notifications} from "./appActions";
 
 export function login(email, password) {
     return function (dispatch) {
@@ -16,6 +16,7 @@ export function login(email, password) {
                     type: "USER_LOGIN_SUCCESSFUL",
                     payload: data.data
                 });
+                dispatch(clearLandingPage());
             } else {
                 dispatch({
                     type: "USER_LOGIN_FAIL",

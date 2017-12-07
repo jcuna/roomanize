@@ -6,9 +6,9 @@ import { Route, Switch } from 'react-router-dom'
 import Login from './user/Login.jsx'
 import RequiresLogin from './user/RequiresLogin.jsx';
 import FlashMessages from './Notifications.jsx'
-// import Home from './Home.jsx'
-// import ErrorPage from './ErrorPage.jsx';
+import ErrorPage from './ErrorPage.jsx';
 import Logout from './user/Logout.jsx'
+import Home from "./Home";
 
 export default class Routes extends React.Component {
 
@@ -22,14 +22,17 @@ export default class Routes extends React.Component {
                         <Switch>
                             <Route path="/login" render={() => <Login {...props}/>}/>
                             <RequiresLogin {...props}>
-                                {/*<Route exact path="/" component={Home}/>*/}
+                                <Switch>
+                                <Route exact path="/" render={() => <Home {...props} />}/>
                                 <Route path="/logout" render={() => <Logout {...props}/>} />
-                                {/*<Route component={ErrorPage}/>*/}
+
+                                <Route component={ErrorPage} />
+                                </Switch>
                             </RequiresLogin>
                         </Switch>
                     </div>
                 )
-            }} />
+            }}/>
         )
     }
 }
