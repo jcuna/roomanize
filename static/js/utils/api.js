@@ -18,7 +18,7 @@ const api = function(request, data, jsonp = false) {
 
     let url = request.url;
     let crossDomain = url.indexOf('http') === 0;
-    let method = request.method === undefined ? 'GET' : method;
+    let method = request.method === undefined ? 'GET' : request.method;
 
     if (url.indexOf('/') !== 0 && !crossDomain) {
         url = '/' + url;

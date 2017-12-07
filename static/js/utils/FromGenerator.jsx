@@ -8,13 +8,10 @@ export default class FormGenerator extends React.Component {
 
         this.state = props;
 
-        // this.state.formName = this.state.formName || 'form';
-        // this.state.buttonValue = this.state.buttonValue || 'submit';
-
         if (typeof this.state.elements === undefined || typeof this.state.elements !== 'object') {
-            throw "Invalid elements property";
+            throw Error("Invalid elements property");
         } else if (typeof this.state.formName === undefined) {
-            throw "Must specify formName";
+            throw Error("Must specify formName");
         }
     }
 
@@ -30,7 +27,7 @@ export default class FormGenerator extends React.Component {
         let form = this.generateForm(
             this.state.elements,
             this.state.formName,
-            this.state.buttonValue
+            this.state.button
         );
         return (<div>{form}</div>);
     }
@@ -42,6 +39,9 @@ export default class FormGenerator extends React.Component {
         if (typeof this.state.object !== "undefined") {
             this.state.object.refs = this.refs;
         }
+        if (this.props.initialRefs !== undefined) {
+            this.props.initialRefs(this.state.object.refs);
+        }
     }
 
     /**
@@ -49,10 +49,10 @@ export default class FormGenerator extends React.Component {
      *
      * @param elements
      * @param formName
-     * @param buttonValue
+     * @param button
      * @returns {*}
      */
-    generateForm(elements, formName, buttonValue) {
+    generateForm(elements, formName, button) {
         return React.createElement('form', {className: formName, onSubmit: this.state.callback},
             elements.map((b, k) => {
                 if (b.$$typeof !== undefined) {
@@ -79,11 +79,8 @@ export default class FormGenerator extends React.Component {
             }),
             React.createElement('div', {className: 'form-group'},
                 React.createElement(
-                    'button', {
-                        type: 'submit',
-                        className: "btn btn-primary",
-                    },
-                    buttonValue
+                    'button', {...button, className: `btn btn-${button.type || 'primary'}`},
+                    button.value || 'Submit'
                 )
             )
         )
@@ -91,10 +88,10 @@ export default class FormGenerator extends React.Component {
 
     getReference(key) {
         let reference = null;
-        if (key.placeholder !== undefined) {
-            reference = key.placeholder.replace(/[^\w]/g, '_').toLowerCase();
-        } else if (key.name !== undefined) {
+        if (key.name !== undefined) {
             reference = key.name.replace(/[^\w]/g, '_').toLowerCase();
+        } else if (key.placeholder !== undefined) {
+            reference = key.placeholder.replace(/[^\w]/g, '_').toLowerCase();
         }
 
         return reference;

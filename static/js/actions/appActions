@@ -9,18 +9,31 @@ export function toggleMobileMenu(currentValue) {
     }
 }
 
-export function flashMessage(messages) {
+export function notifications(messages) {
     if (!Array.isArray(messages)) {
         messages = [messages];
     }
     return {
-        type: "FLASH_MESSAGE",
+        type: "NOTIFICATIONS",
         payload: messages
     };
 }
 
-export function clearFlashMessages() {
+export function clearNotifications() {
     return {
-        type: "CLEAR_FLASH_MESSAGES",
+        type: "CLEAR_NOTIFICATIONS",
     };
+}
+
+export function setLandingPage(landingPage) {
+    return {
+        type: "SET_LANDING_PAGE",
+        payload: landingPage
+    }
+}
+
+export function clearLandingPage() {
+    return {
+        type: "CLEAR_LANDING_PAGE"
+    }
 }

@@ -5,5 +5,5 @@ def register():
     """
     return {
         'users.Users@user_url': '/user',
-        'users.Login@login_url': '/login'
+        'users.Session@login_url': '/login'
     }

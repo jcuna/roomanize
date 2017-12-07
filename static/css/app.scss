@@ -29,6 +29,16 @@ html {
     -o-transition: all 1s ease;
     -ms-transition: all 1s ease;
     transition: all 1s ease;
+    & .alert {
+      & .fa {
+        position: absolute;
+        right: 0;
+        top: 0;
+        cursor: hand;
+        padding: 4px;
+        font-size: 20px;
+      }
+    }
   }
 
   .body-container.body-displaced {

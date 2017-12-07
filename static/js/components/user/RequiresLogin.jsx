@@ -2,21 +2,29 @@
  * Created by Jon on 12/6/17.
  */
 
-import {flashMessage} from "../../actions/appActions";
+import {setLandingPage, notifications} from "../../actions/appActions";
 
 export default class RequiresLogin extends React.Component {
 
     componentWillReceiveProps(next, current) {
-        if (next.token === 'expired') {
-            this.props.dispatch(flashMessage([
+        if (! this.safeStatus.includes(next.user.status)) {
+            this.props.dispatch(notifications([
                 {type: 'warning', message: "Tienes que iniciar sessión"}
             ]));
+            this.props.dispatch(setLandingPage(this.props.history.location.pathname));
             this.props.history.push("/login");
         }
     }
 
     render() {
-        return null;
+        return this.props.children;
     }
 
+    get safeStatus() {
+        return [
+            'logged_in',
+            'logging_in',
+            'logging_out'
+        ]
+    }
 }

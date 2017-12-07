@@ -12,12 +12,11 @@ user_roles = db.Table('user_roles',
 
 
 class User(db.Model):
-    fillable = ['username', 'password', 'email', 'first_name', 'last_name', 'deleted']
+    fillable = ['password', 'email', 'first_name', 'last_name', 'deleted']
     __tablename__ = 'users'
     id = db.Column(db.BigInteger, primary_key=True)
-    username = db.Column(db.String(50), unique=True)
-    password = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(50), nullable=False, unique=True)
+    password = db.Column(db.String(80), nullable=False)
     first_name = db.Column(db.String(50), nullable=False)
     last_name = db.Column(db.String(50), nullable=False)
     deleted = db.Column(db.Boolean, nullable=False, server_default='0', index=True)
@@ -35,7 +34,7 @@ class User(db.Model):
     def get_token(self):
         exp = datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
         return jwt.encode(
-            {'username': self.username, 'exp': exp},
+            {'email': self.email, 'exp': exp},
             current_app.config['SECRET_KEY']
         ).decode('utf-8')
 

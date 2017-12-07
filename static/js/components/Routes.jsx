@@ -5,10 +5,10 @@
 import { Route, Switch } from 'react-router-dom'
 import Login from './user/Login.jsx'
 import RequiresLogin from './user/RequiresLogin.jsx';
-import FlashMessages from './FlashMessages.jsx'
+import FlashMessages from './Notifications.jsx'
 // import Home from './Home.jsx'
 // import ErrorPage from './ErrorPage.jsx';
-// import Logout from './session/Logout.jsx'
+import Logout from './user/Logout.jsx'
 
 export default class Routes extends React.Component {
 
@@ -22,9 +22,9 @@ export default class Routes extends React.Component {
                         <Switch>
                             <Route path="/login" render={() => <Login {...props}/>}/>
                             <RequiresLogin {...props}>
-                            {/*<Route exact path="/" component={Home}/>*/}
-                            {/*<Route exact path="/logout" component={Logout}/>*/}
-                            {/*<Route component={ErrorPage}/>*/}
+                                {/*<Route exact path="/" component={Home}/>*/}
+                                <Route path="/logout" render={() => <Logout {...props}/>} />
+                                {/*<Route component={ErrorPage}/>*/}
                             </RequiresLogin>
                         </Switch>
                     </div>

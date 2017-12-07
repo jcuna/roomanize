@@ -15,7 +15,7 @@ import '../../css/app.scss';
 class Layout extends React.Component {
 
     componentWillMount() {
-        if (!this.props.loggedIn && this.props.token !== 'expired') {
+        if (this.props.user.status === 'pending') {
             this.props.dispatch(getUser())
         }
     }
@@ -47,10 +47,10 @@ class Layout extends React.Component {
 const getInitialState = (state) => {
     return {
         user: state.user.user,
-        loggedIn: state.user.loggedIn,
         token: state.user.token,
         showMobileMenu: state.app.showMobileMenu,
-        flashMessages: state.app.flashMessages
+        notifications: state.app.notifications,
+        landingPage: state.app.landingPage
     }
 };
 

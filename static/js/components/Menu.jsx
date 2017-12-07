@@ -14,7 +14,8 @@ export default class Menu extends React.Component {
     }
 
     render() {
-        const { user, loggedIn} = this.props;
+        const { user } = this.props;
+        const loggedIn = user.status === 'logged_in';
         return (
             <div className={this.className}>
                 <i onClick={this.toggleMenu} className="fa fa-times" aria-hidden="true"></i>
