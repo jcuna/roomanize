@@ -23,10 +23,10 @@ export default class Routes extends React.Component {
                             <Route path="/login" render={() => <Login {...props}/>}/>
                             <RequiresLogin {...props}>
                                 <Switch>
-                                <Route exact path="/" render={() => <Home {...props} />}/>
-                                <Route path="/logout" render={() => <Logout {...props}/>} />
+                                    <Route exact path="/" render={() => <Home {...props} />}/>
+                                    <Route path="/logout" render={() => <Logout {...props}/>} />
 
-                                <Route component={ErrorPage} />
+                                    <Route component={ErrorPage} />
                                 </Switch>
                             </RequiresLogin>
                         </Switch>

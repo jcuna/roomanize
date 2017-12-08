@@ -33,7 +33,7 @@ export default class Menu extends React.Component {
     get className() {
         let className = 'mobile-menu';
         if (this.props.showMobileMenu) {
-            className += ' slide'
+            className += ' slide';
         }
         return className;
     }
@@ -41,7 +41,7 @@ export default class Menu extends React.Component {
     getLinksBasedOffAccess() {
         const routes = [
             {link: "/nueva-habitacion", name: "Agregar habitación"},
-            {link: "/edittar-habitacion", name: "Ver/Modificar habitación"},
+            {link: "/editar-habitacion", name: "Ver/Modificar habitación"},
             {link: "/nuevo-contrato", name: "Nuevo Inquilino"}
         ];
 

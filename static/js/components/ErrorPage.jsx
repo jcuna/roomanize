@@ -12,7 +12,7 @@ export default class ErrorPage extends React.Component {
                     404
                 </div>
                 <div className="card-block">
-                    <blockquote style={{margin: "14px"}} className="card-blockquote">
+                    <blockquote className="card-blockquote">
                         <p>La página solicitada no existe.</p>
                     </blockquote>
                 </div>

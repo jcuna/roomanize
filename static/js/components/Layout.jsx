@@ -11,6 +11,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { getUser } from '../actions/userActions';
 import '../../css/app.scss';
+import '../../css/overrides.scss';
 
 class Layout extends React.Component {
 
