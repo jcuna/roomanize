@@ -9,7 +9,7 @@ import ReactDOM from 'react-dom';
 import 'babel-polyfill';
 import { Provider } from 'react-redux';
 import Layout from './components/Layout.jsx';
-import store from './store'
+import store from './store';
 
 class Bootstrap {
     constructor() {

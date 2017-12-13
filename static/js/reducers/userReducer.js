@@ -2,6 +2,17 @@
  * Created by Jon on 12/4/17.
  */
 
+import {
+    USER_RECEIVED,
+    USER_MUST_LOGIN,
+    USER_LOGGING_IN,
+    USER_LOGIN_SUCCESSFUL,
+    USER_LOGIN_FAIL,
+    USER_LOGIN_ERROR,
+    USER_LOGGING_OUT,
+    USER_LOGGED_OUT
+} from '../actions/userActions';
+
 export default function userReducer(state = {
     user: {
         status: 'pending'
@@ -9,25 +20,23 @@ export default function userReducer(state = {
     token: ''
 }, action) {
     switch(action.type) {
-        case "USER_RECEIVED":
+        case USER_RECEIVED:
             return {
                 ...state,
                 user: {...action.payload.user, status: 'logged_in'},
                 token: action.payload.token
             };
-            break;
-        case "USER_MUST_LOGIN":
+        case USER_MUST_LOGIN:
             return {...state, user: {status: 'logged_out'}};
-            break;
-        case "USER_LOGGING_IN":
+        case USER_LOGGING_IN:
             return {...state, user: {status: 'logging_in'}};
-        case "USER_LOGIN_SUCCESSFUL":
+        case USER_LOGIN_SUCCESSFUL:
             return {
                 ...state,
                 user: {...action.payload.user, status: 'logged_in'},
                 token: action.payload.token,
             };
-        case "USER_LOGIN_FAIL":
+        case USER_LOGIN_FAIL:
             return {
                 ...state,
                 user: {
@@ -36,7 +45,7 @@ export default function userReducer(state = {
                     password: action.payload.password
                 }
             };
-        case "USER_LOGIN_ERROR":
+        case USER_LOGIN_ERROR:
             return {
                 ...state,
                 user: {
@@ -45,15 +54,13 @@ export default function userReducer(state = {
                     password: action.payload.password
                 }
             };
-            break;
-        case "USER_LOGGING_OUT":
+        case USER_LOGGING_OUT:
             return {
                 ...state,
                 user: {...state.user, status: 'logging_out'}
             };
-        case "USER_LOGGED_OUT":
+        case USER_LOGGED_OUT:
             return {...state, user: {status: 'logged_out'}, token: ''};
-            break;
         default:
             return state;
     }
