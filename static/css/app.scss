@@ -1,21 +1,14 @@
-$height-footer: 110px;
-
+@import 'vars';
 @import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700");
 
 html {
   min-height: 100%;
   position: relative;
   body {
-    margin-bottom: $height-footer;
-    overflow: hidden;
-    .inner {
-      max-width: 75em;
-      margin: 0 auto;
-    }
+    margin-bottom: $height-footer + $headerHeight + 36;
+    overflow-x: hidden;
     .footer {
-      bottom: 0;
       width: 100%;
-      position: absolute;
       height: $height-footer;
     }
   }
@@ -38,6 +31,10 @@ html {
         padding: 4px;
         font-size: 20px;
       }
+    }
+
+    & .content-area {
+      min-height: 100%;
     }
   }
 

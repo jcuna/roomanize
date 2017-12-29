@@ -15,7 +15,7 @@ export const USER_LOGGED_OUT = "USER_LOGGED_OUT";
 
 export function login(email, password) {
     return function (dispatch) {
-        dispatch({type: 'USER_LOGGING_IN'});
+        dispatch({type: USER_LOGGING_IN});
         const request = {
             url: '/login',
             method: "POST",

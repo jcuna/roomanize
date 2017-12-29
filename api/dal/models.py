@@ -33,10 +33,10 @@ class User(db.Model):
 
     def get_token(self):
         exp = datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
-        return jwt.encode(
-            {'email': self.email, 'exp': exp},
-            current_app.config['SECRET_KEY']
-        ).decode('utf-8')
+        return {
+            'value': jwt.encode({'email': self.email, 'exp': exp}, current_app.config['SECRET_KEY']).decode('utf-8'),
+            'expires': round(exp.timestamp())
+        }
 
 
 class Role(db.Model):

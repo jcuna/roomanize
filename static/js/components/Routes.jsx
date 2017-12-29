@@ -9,6 +9,7 @@ import FlashMessages from './Notifications.jsx'
 import ErrorPage from './ErrorPage.jsx';
 import Logout from './user/Logout.jsx'
 import Home from "./Home";
+import Roles from "./user/Roles";
 
 export default class Routes extends React.Component {
 
@@ -25,7 +26,7 @@ export default class Routes extends React.Component {
                                 <Switch>
                                     <Route exact path="/" render={() => <Home {...props} />}/>
                                     <Route path="/logout" render={() => <Logout {...props}/>} />
-
+                                    <Route path="/roles" render={() => <Roles {...props}/>} />
                                     <Route component={ErrorPage} />
                                 </Switch>
                             </RequiresLogin>

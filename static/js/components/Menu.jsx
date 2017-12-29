@@ -40,9 +40,10 @@ export default class Menu extends React.Component {
 
     getLinksBasedOffAccess() {
         const routes = [
-            {link: "/nueva-habitacion", name: "Agregar habitación"},
-            {link: "/editar-habitacion", name: "Ver/Modificar habitación"},
-            {link: "/nuevo-contrato", name: "Nuevo Inquilino"}
+            {link: "/nueva-habitacion", name: "Agregar habitación", access: ['admin', 'user']},
+            {link: "/editar-habitacion", name: "Ver/Modificar habitación", access: ['admin', 'user']},
+            {link: "/nuevo-contrato", name: "Nuevo Inquilino", access: ['admin', 'user']},
+            {link: "/roles", name: "Permisos", access: ['admin']}
         ];
 
         return routes.map(item => <Link key={item.link} to={item.link} onClick={this.toggleMenu}>{item.name}</Link>)

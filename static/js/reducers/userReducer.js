@@ -17,7 +17,7 @@ export default function userReducer(state = {
     user: {
         status: 'pending'
     },
-    token: ''
+    token: {}
 }, action) {
     switch(action.type) {
         case USER_RECEIVED:
