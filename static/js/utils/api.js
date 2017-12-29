@@ -7,9 +7,9 @@ import 'whatwg-fetch';
 // let urlEncode = require('query-string');
 /**
  *
- * @param request
+ * @param request {Object}
  * @param data
- * @param jsonp
+ * @param jsonp {Boolean}
  * @returns {Promise}
  */
 const api = function(request, data, jsonp = false) {
@@ -34,11 +34,11 @@ const api = function(request, data, jsonp = false) {
 
 /**
  *
- * @param url
- * @param method
+ * @param url {String}
+ * @param method {String}
  * @param data
- * @param crossDomain
- * @param headers
+ * @param crossDomain {Boolean}
+ * @param headers  {Object}
  * @returns {Promise}
  */
 const normalFetch = function(url, method, data, crossDomain, headers = {}) {
@@ -72,9 +72,9 @@ const normalFetch = function(url, method, data, crossDomain, headers = {}) {
 
 /**
  *
- * @param url
+ * @param url {String}
  * @param data
- * @returns {*}
+ * @returns {Promise}
  */
 const jsonpFetch = function (url, data) {
     let queryString = urlEncode.stringify(data);

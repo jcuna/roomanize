@@ -3,17 +3,29 @@ import api from "./api";
 
 class Token {
 
+    /**
+     *
+     * @param props {Object}
+     */
     set data(props) {
         this._data = props;
     }
 
-    get timestamp() {
+    /**
+     *
+     * @returns {number}
+     */
+    static get timestamp() {
         return Math.round((new Date()).getTime() / 1000);
     }
 
+    /**
+     *
+     * @returns {Promise}
+     */
     through() {
         return new Promise((resolve, reject) => {
-            this.expired(this.timestamp).then(didExpire => {
+            this.expired(Token.timestamp).then(didExpire => {
                 if (didExpire) {
                     api({url: '/user'}).then(data => {
                         if (data.status < 300) {
@@ -41,6 +53,11 @@ class Token {
         });
     }
 
+    /**
+     *
+     * @param timestamp {int}
+     * @returns {Promise}
+     */
     expired(timestamp) {
         return new Promise(resolve => {
             if (this._data === undefined) {
@@ -53,6 +70,10 @@ class Token {
         });
     }
 
+    /**
+     *
+     * @returns {Object}
+     */
     authHeaders() {
         return {
             "x-access-token": this._data.token.value
