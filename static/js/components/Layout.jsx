@@ -9,23 +9,28 @@ import Routes from './Routes.jsx';
 import {Redirect} from 'react-router'
 import {BrowserRouter} from 'react-router-dom';
 import {connect} from 'react-redux';
-import {getUser} from '../actions/userActions';
+import {fetchUser} from '../actions/userActions';
 import '../../css/app.scss';
 import '../../css/overrides.scss';
 import {token} from "../utils/token";
 import Spinner from "./Spinner";
+import {fetchPermissions} from "../actions/roleActions";
+import Overlay from "./Overlay";
 
 class Layout extends React.Component {
 
     componentWillMount() {
         if (this.props.user.status === 'pending') {
-            this.props.dispatch(getUser())
+            this.props.dispatch(fetchUser())
+        }
+        if (this.props.roles.permissions.length === 0) {
+            this.props.dispatch(fetchPermissions())
         }
     }
 
-    componentWillReceiveProps(prev) {
-        if (prev.token.value !== '') {
-            token.data = prev
+    componentWillReceiveProps(props) {
+        if (props.token.value !== '') {
+            token.data = props
         }
     }
 
@@ -39,13 +44,14 @@ class Layout extends React.Component {
 
         return (
             <BrowserRouter>
-                <div>
+                <div className="parent-container">
                     <Menu {...this.props}/>
                     <div className={this.getClassName()}>
                         <Header {...this.props}/>
                         {render}
                         <Footer/>
                     </div>
+                    <Overlay {...this.props}/>
                 </div>
             </BrowserRouter>
         )
@@ -64,10 +70,11 @@ const getInitialState = (state) => {
     return {
         user: state.user.user,
         token: state.user.token,
+        roles: state.roles.roles,
         showMobileMenu: state.app.showMobileMenu,
         notifications: state.app.notifications,
         landingPage: state.app.landingPage,
-        roles: state.roles.roles
+        overlay: state.app.overlay
     }
 };
 

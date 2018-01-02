@@ -2,9 +2,9 @@
  * Created by Jon on 11/20/17.
  */
 
-import { Link } from 'react-router-dom';
+import {Link} from 'react-router-dom';
 import '../../css/header.scss';
-import { toggleMobileMenu } from "../actions/appActions";
+import {toggleMobileMenu} from "../actions/appActions";
 
 export default class Header extends React.Component {
     constructor(props) {

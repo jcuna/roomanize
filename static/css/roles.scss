@@ -1,0 +1,96 @@
+@import 'vars';
+$height: 93%;
+
+
+.roles-layout tr i {
+  font-size: 28px;
+  cursor: hand;
+  position: absolute;
+  margin-top: -4px;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.permissions-container {
+  height: calc(100% - #{$heightResolve});
+  ul {
+    list-style: none;
+  }
+  .permissions {
+    display: inline-block;
+    width: 100%;
+    border: 1px solid;
+    height: $height;
+    vertical-align: top;
+    padding: 0 10px;
+    overflow: scroll;
+  }
+  .spacer {
+    height: $height;
+    border: 1px solid;
+    position: relative;
+    width: 5%;
+    background-color: $blue;
+    display: inline-block;
+
+    i {
+      text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
+      font-size: 33px;
+      position: absolute;
+      top: 45%;
+      color: #fff;
+      cursor: pointer;
+      left: 4px;
+      &:hover {
+        color: beige;
+      }
+    }
+  }
+
+  .endpoint {
+    .half {
+      width: 36%;
+    }
+    .name {
+      text-align: right;
+      input {
+        position: absolute;
+        left: 0;
+        top: 4px;
+      }
+    }
+    position: relative;
+    margin: 28px 0 52px;
+    .grant {
+      position: absolute;
+      top: -24px;
+      left: 60%;
+
+      input {
+        bottom: 2px;
+        position: relative;
+        margin-right: 4px;
+      }
+    }
+
+    &:after {
+      content: "";
+      position: absolute;
+      width: 168px;
+      height: 4px;
+      left: 38%;
+      top: 10px;
+      background: $blue;
+    }
+  }
+
+  > div {
+
+    width: 50%;
+    > ul {
+      padding-left: 0;
+    }
+  }
+}

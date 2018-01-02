@@ -4,7 +4,7 @@
 
 import {Link} from 'react-router-dom';
 import '../../css/menu.scss';
-import { toggleMobileMenu } from '../actions/appActions'
+import {toggleMobileMenu} from '../actions/appActions'
 
 export default class Menu extends React.Component {
     constructor(props) {
@@ -14,7 +14,7 @@ export default class Menu extends React.Component {
     }
 
     render() {
-        const { user } = this.props;
+        const {user} = this.props;
         const loggedIn = user.status === 'logged_in';
         return (
             <div className={this.className}>

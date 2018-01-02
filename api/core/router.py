@@ -3,13 +3,12 @@ from flask_restful import Api
 from config.routes import register
 import re
 
-access = []
+permissions = []
 
 
 class Router:
 
     version = 'v1.0'
-
     routes = {}
 
     def __init__(self, app: Flask):
@@ -22,7 +21,7 @@ class Router:
             pack = __import__(pack_name, fromlist=[parts[1]])
             mod = getattr(pack, parts[1])
             api.add_resource(mod, '/' + self.version + route, endpoint=parts[2])
-            access.append(pack_name + '.' + parts[1])
+            permissions.append(pack_name + '.' + parts[1])
 
             with app.test_request_context():
                 self.routes.update({parts[2]: url_for(parts[2])})

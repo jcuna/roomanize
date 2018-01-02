@@ -6,5 +6,6 @@ def register():
     return {
         'users.Users@users_url': '/user',
         'users.Session@login_url': '/login',
-        'users.Roles@roles_url': '/roles'
+        'users.Roles@roles_url': '/roles',
+        'users.Permissions@permissions_url': '/permissions'
     }

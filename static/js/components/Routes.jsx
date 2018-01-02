@@ -2,7 +2,7 @@
  * Created by Jon on 11/20/17.
  */
 
-import { Route, Switch } from 'react-router-dom'
+import {Route, Switch} from 'react-router-dom'
 import Login from './user/Login.jsx'
 import RequiresLogin from './user/RequiresLogin.jsx';
 import FlashMessages from './Notifications.jsx'

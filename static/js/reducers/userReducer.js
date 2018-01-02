@@ -3,10 +3,10 @@
  */
 
 import {
-    USER_RECEIVED,
+    USER_FETCHED,
     USER_MUST_LOGIN,
     USER_LOGGING_IN,
-    USER_LOGIN_SUCCESSFUL,
+    USER_LOGIN_SUCCESS,
     USER_LOGIN_FAIL,
     USER_LOGIN_ERROR,
     USER_LOGGING_OUT,
@@ -17,10 +17,13 @@ export default function userReducer(state = {
     user: {
         status: 'pending'
     },
-    token: {}
+    token: {
+        value: '',
+        expires: ''
+    }
 }, action) {
     switch(action.type) {
-        case USER_RECEIVED:
+        case USER_FETCHED:
             return {
                 ...state,
                 user: {...action.payload.user, status: 'logged_in'},
@@ -30,7 +33,7 @@ export default function userReducer(state = {
             return {...state, user: {status: 'logged_out'}};
         case USER_LOGGING_IN:
             return {...state, user: {status: 'logging_in'}};
-        case USER_LOGIN_SUCCESSFUL:
+        case USER_LOGIN_SUCCESS:
             return {
                 ...state,
                 user: {...action.payload.user, status: 'logged_in'},

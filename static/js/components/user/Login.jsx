@@ -2,7 +2,7 @@
  * Created by Jon on 12/3/17.
  */
 import FormGenerator from "../../utils/FromGenerator";
-import { login } from "../../actions/userActions";
+import {login} from "../../actions/userActions";
 import Spinner from "../Spinner";
 
 export default class Login extends React.Component {

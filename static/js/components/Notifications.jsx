@@ -2,7 +2,7 @@
  * Created by Jon on 12/6/17.
  */
 
-import { clearNotifications } from '../actions/appActions';
+import {clearNotifications} from '../actions/appActions';
 
 export default class Notifications extends React.Component {
 
@@ -13,7 +13,7 @@ export default class Notifications extends React.Component {
     }
 
     render() {
-        const { notifications } = this.props;
+        const {notifications} = this.props;
         if (this.props.notifications.length !== 0) {
             return notifications.map((item, key) => {
                 if (item.type === undefined || item.message === undefined) {

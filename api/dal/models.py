@@ -1,3 +1,5 @@
+import json
+
 from dal import db
 from werkzeug.security import generate_password_hash, check_password_hash
 import datetime
@@ -44,3 +46,10 @@ class Role(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     name = db.Column(db.String(30), index=True)
     permissions = db.Column(db.Text)
+
+    @property
+    def get_permissions(self):
+        if self.permissions:
+            return json.loads(self.permissions)
+
+        return self.permissions

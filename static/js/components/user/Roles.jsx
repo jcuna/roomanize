@@ -2,9 +2,11 @@
  * Created by Jon on 12/23/17.
  */
 import FormGenerator from "../../utils/FromGenerator";
-import {createRole, fetchRoles} from "../../actions/roleActions";
+import {commitPermissions, createRole, fetchRoles} from "../../actions/roleActions";
 import Spinner from "../Spinner";
-import {notifications} from "../../actions/appActions";
+import {hideOverlay, notifications, showOverlay} from "../../actions/appActions";
+import '../../../css/roles.scss';
+import Permissions from "../Permissions";
 
 export default class Roles extends React.Component {
 
@@ -12,7 +14,11 @@ export default class Roles extends React.Component {
         super();
         this.state = {
             button: {value: 'Agregar role', disabled: "disabled"}
-        }
+        };
+
+        this.modifyPermissions = this.modifyPermissions.bind(this);
+        this.confirmChanges = this.confirmChanges.bind(this);
+        this.updateObject = this.updateObject.bind(this);
     }
 
     componentWillMount() {
@@ -23,7 +29,7 @@ export default class Roles extends React.Component {
 
     render () {
         return (
-            <div>
+            <div className="roles-layout">
                 {this.rolesTable}
                 <FormGenerator {...{
                     formName: 'roles-form',
@@ -53,7 +59,7 @@ export default class Roles extends React.Component {
     submit(e) {
         e.preventDefault();
         let exists = false;
-        this.props.roles.data.forEach((item) => {
+        this.props.roles.assigned.forEach((item) => {
             if (item.name.toLowerCase() === this.refs.role.value.toLowerCase()) {
                 exists = true;
             }
@@ -84,16 +90,42 @@ export default class Roles extends React.Component {
             </tr>
             </thead>
             <tbody>
-            {this.props.roles.data.map((item, i) => {
+            {this.props.roles.assigned.map((item, i) => {
                 i++;
                 return <tr key={i}>
                     <th scope="row">{i}</th>
                     <td>{item.id}</td>
                     <td>{item.name}</td>
-                    <td>{item.permissions}</td>
+                    <td>
+                        <i className="fa fa-pencil-square-o" data-id={item.id} aria-hidden="true" onClick={this.modifyPermissions}/>
+                    </td>
                 </tr>
             })}
             </tbody>
         </table>
     }
+
+    modifyPermissions(e) {
+        const button = <button
+            type="button" onClick={this.confirmChanges} className="btn btn-primary">OK
+        </button>;
+        this.props.dispatch(showOverlay(
+            <Permissions {...this.props} id={Number(e.target.getAttribute('data-id'))} onUpdate={this.updateObject}/>,
+            'Editar Permisos',
+            true,
+            button)
+        );
+    }
+
+    confirmChanges() {
+        if (this.updatedPermissions !== undefined) {
+            this.props.dispatch(commitPermissions(this.updatedPermissions))
+        }
+        this.props.dispatch(hideOverlay());
+    }
+
+    updateObject(updatedPermissions) {
+        this.updatedPermissions = updatedPermissions;
+    }
+
 }

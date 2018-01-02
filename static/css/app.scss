@@ -38,6 +38,30 @@ html {
     }
   }
 
+  .parent-container {
+    .overlay {
+      opacity: 1;
+    }
+
+    .modal {
+
+      display: block;
+      background-color: rgba(0, 0, 0, 0.4);
+
+      button {
+        &:focus {
+          outline: none;
+        }
+        span {
+          cursor: hand;
+        }
+      }
+    }
+    .modal-dialog {
+      margin: 60px auto;
+    }
+  }
+
   .body-container.body-displaced {
     left: -50%;
   }
@@ -48,5 +72,58 @@ html {
 
   .btn {
     cursor: pointer;
+  }
+}
+
+.chart:before {
+  content: "";
+  position: absolute;
+  width: 4px;
+  height: 16px;
+  left: 34px;
+  background: $blue;
+  border-radius: 3px 0 0 3px;
+  margin-top: 4px;
+}
+
+.up:after {
+  content: "";
+  background: none;
+  width: 11px;
+  height: 26px;
+  border-left: 4px solid $blue;
+  border-bottom: 4px solid $blue;
+  border-bottom-left-radius: 10px;
+  position: absolute;
+  left: 24px;
+  bottom: 9px;
+}
+
+.down:after {
+  content: "";
+  width: 11px;
+  height: 24px;
+  border-left: 4px solid $blue;
+  border-top: 4px solid $blue;
+  border-top-left-radius: 8px;
+  position: absolute;
+  left: 24px;
+  top: 10px;
+}
+
+
+.line:after {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 4px;
+  left: 12px;
+  top: 34px;
+  background: $blue;
+}
+
+@media (min-width: 768px) {
+  .modal-dialog {
+    max-width: 764px;
   }
 }

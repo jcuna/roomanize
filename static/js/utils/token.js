@@ -1,4 +1,4 @@
-import {USER_MUST_LOGIN, USER_RECEIVED} from "../actions/userActions";
+import {USER_MUST_LOGIN, USER_FETCHED} from "../actions/userActions";
 import api from "./api";
 
 class Token {
@@ -27,24 +27,24 @@ class Token {
         return new Promise((resolve, reject) => {
             this.expired(Token.timestamp).then(didExpire => {
                 if (didExpire) {
-                    api({url: '/user'}).then(data => {
-                        if (data.status < 300) {
+                    api({url: '/user'}).then(resp => {
+                        if (resp.status < 300) {
                             this._data.dispatch({
-                                type: USER_RECEIVED,
-                                payload: data.data
+                                type: USER_FETCHED,
+                                payload: resp.data
                             });
                             resolve(this.authHeaders());
                         } else {
                             reject(Error('No active session'));
                             this._data.dispatch({
                                 type: USER_MUST_LOGIN,
-                                payload: data.message
+                                payload: resp.message
                             });
                         }
                     }, err => {
                         reject(err);
                     });
-                } else if (this._data.token.value !== undefined) {
+                } else if (this._data.token.value !== '') {
                     resolve(this.authHeaders())
                 } else {
                     reject(Error('No active session'));
@@ -55,19 +55,32 @@ class Token {
 
     /**
      *
-     * @param timestamp {int}
+     * @param timestamp {Number}
      * @returns {Promise}
      */
     expired(timestamp) {
         return new Promise(resolve => {
             if (this._data === undefined) {
-                setTimeout(() => {
-                    return this.expired(timestamp);
-                }, 1);
+                this.waitForData(resolve, timestamp);
             } else {
                 resolve(timestamp + 10 > this._data.token.expires);
             }
         });
+    }
+
+    /**
+     *
+     * @param resolve {Function}
+     * @param timestamp {Number}
+     */
+    waitForData(resolve, timestamp) {
+        setTimeout(() => {
+            if (this._data === undefined) {
+                this.waitForData(resolve, timestamp);
+            } else {
+                resolve(timestamp + 10 > this._data.token.expires);
+            }
+        }, 1);
     }
 
     /**

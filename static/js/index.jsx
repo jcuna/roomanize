@@ -7,7 +7,7 @@
 
 import ReactDOM from 'react-dom';
 import 'babel-polyfill';
-import { Provider } from 'react-redux';
+import {Provider} from 'react-redux';
 import Layout from './components/Layout.jsx';
 import store from './store';
 

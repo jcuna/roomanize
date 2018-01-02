@@ -2,7 +2,7 @@
  * Created by Jon on 12/7/17.
  */
 
-import { logout } from "../../actions/userActions";
+import {logout} from "../../actions/userActions";
 import Spinner from "../Spinner";
 
 export default class Logout extends React.Component {

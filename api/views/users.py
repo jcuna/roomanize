@@ -1,7 +1,9 @@
 import sys
 from flask_restful import Resource, request
-from flask import session
+from flask import session, json
 from sqlalchemy.orm import joinedload
+
+from core.router import permissions
 from dal.shared import get_fillable, token_required
 from dal.models import User, db, Role
 
@@ -59,7 +61,6 @@ class Session(Resource):
 
 
 class Roles(Resource):
-
     @token_required
     def post(self):
         role = request.get_json()
@@ -90,14 +91,27 @@ class Roles(Resource):
             data.append({
                 'id': role.id,
                 'name': role.name,
-                'permissions': role.permissions
+                'permissions': role.get_permissions
             })
 
         return data
 
+    @token_required
+    def put(self):
+        data = request.get_json()
+        role = Role.query.filter_by(id=data['id']).first()
+        role.permissions = json.dumps(data['permissions'])
+        db.session.commit()
+        return {'message': 'success'}, 201
+
+
+class Permissions(Resource):
+    @token_required
+    def get(self):
+        return permissions
+
 
 def user_to_dict(user: User) -> dict:
-
     return {
         'user': {
             'email': user.email,
@@ -108,4 +122,3 @@ def user_to_dict(user: User) -> dict:
         },
         'token': user.get_token()
     }
-
