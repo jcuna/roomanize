@@ -1,10 +1,8 @@
-import sys
 from flask_restful import Resource, request
 from flask import session, json
 from sqlalchemy.orm import joinedload
-
 from core.router import permissions
-from dal.shared import get_fillable, token_required
+from dal.shared import get_fillable, token_required, access_required
 from dal.models import User, db, Role
 
 
@@ -61,7 +59,9 @@ class Session(Resource):
 
 
 class Roles(Resource):
+
     @token_required
+    @access_required
     def post(self):
         role = request.get_json()
 
@@ -84,6 +84,7 @@ class Roles(Resource):
         }
 
     @token_required
+    @access_required
     def get(self):
         roles = Role.query.all()
         data = []
@@ -97,6 +98,7 @@ class Roles(Resource):
         return data
 
     @token_required
+    @access_required
     def put(self):
         data = request.get_json()
         role = Role.query.filter_by(id=data['id']).first()
@@ -107,8 +109,9 @@ class Roles(Resource):
 
 class Permissions(Resource):
     @token_required
+    @access_required
     def get(self):
-        return permissions
+        return list(permissions.values())
 
 
 def user_to_dict(user: User) -> dict:
@@ -118,7 +121,11 @@ def user_to_dict(user: User) -> dict:
             'first_name': user.first_name,
             'last_name': user.last_name,
             'roles':
-                list(map(lambda a: {'name': a.name, 'id': a.id}, user.roles))
+                list(map(lambda r: {
+                    'name': r.name,
+                    'id': r.id,
+                    'permissions': r.get_permissions
+                }, user.roles))
         },
         'token': user.get_token()
     }

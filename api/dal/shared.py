@@ -1,4 +1,6 @@
+import sys
 from flask_sqlalchemy import SQLAlchemy, request
+from sqlalchemy.orm import joinedload
 from functools import wraps
 import jwt
 
@@ -35,7 +37,7 @@ def token_required(f):
 
         try:
             data = jwt.decode(token, current_app.config['SECRET_KEY'])
-            current_user = User.query.filter_by(email=data['email']).first()
+            current_user = User.query.options(joinedload('roles')).filter_by(email=data['email']).first()
         except:
             return {'message': 'Token is invalid!'}, 401
 
@@ -43,3 +45,40 @@ def token_required(f):
         return f(*args, **kwargs)
 
     return decorated
+
+
+def access_required(f):
+
+    from flask import request
+    from core.router import permissions
+
+    @wraps(f)
+    def access_decorator(*args, **kwargs):
+
+        if not request.user:
+            return {'message': 'Invalid user'}
+
+        has_access = False
+
+        for role in request.user.roles:
+            for name, grant in role.get_permissions.items():
+                if name == permissions[request.endpoint]:
+                    for access in grant:
+                        if access == access_map()[request.method]:
+                            has_access = True
+
+        if not has_access:
+            return {'message': 'Access denied'}, 403
+
+        return f(*args, **kwargs)
+
+    return access_decorator
+
+
+def access_map():
+    return {
+        'GET': 'read',
+        'PUT': 'write',
+        'POST': 'write',
+        'DELETE': 'delete'
+    }
