@@ -23,7 +23,7 @@ class Layout extends React.Component {
         if (this.props.user.status === 'pending') {
             this.props.dispatch(fetchUser())
         }
-        if (this.props.roles.permissions.length === 0) {
+        if (Object.keys(this.props.roles.permissions).length === 0) {
             this.props.dispatch(fetchPermissions())
         }
     }

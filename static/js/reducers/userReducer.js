@@ -15,7 +15,8 @@ import {
 
 export default function userReducer(state = {
     user: {
-        status: 'pending'
+        status: 'pending',
+        roles: []
     },
     token: {
         value: '',
@@ -30,9 +31,9 @@ export default function userReducer(state = {
                 token: action.payload.token
             };
         case USER_MUST_LOGIN:
-            return {...state, user: {status: 'logged_out'}};
+            return {...state, user: {...state.user, status: 'logged_out'}};
         case USER_LOGGING_IN:
-            return {...state, user: {status: 'logging_in'}};
+            return {...state, user: {...state.user, status: 'logging_in'}};
         case USER_LOGIN_SUCCESS:
             return {
                 ...state,
@@ -43,6 +44,7 @@ export default function userReducer(state = {
             return {
                 ...state,
                 user: {
+                    ...state.user,
                     status: 'failed',
                     email: action.payload.email,
                     password: action.payload.password
@@ -52,6 +54,7 @@ export default function userReducer(state = {
             return {
                 ...state,
                 user: {
+                    ...state.user,
                     status: 'error',
                     email: action.payload.email,
                     password: action.payload.password
@@ -63,7 +66,7 @@ export default function userReducer(state = {
                 user: {...state.user, status: 'logging_out'}
             };
         case USER_LOGGED_OUT:
-            return {...state, user: {status: 'logged_out'}, token: ''};
+            return {...state, user: {status: 'logged_out', roles: []}, token: {value: '', expires: ''}};
         default:
             return state;
     }

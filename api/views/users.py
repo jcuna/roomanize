@@ -109,9 +109,8 @@ class Roles(Resource):
 
 class Permissions(Resource):
     @token_required
-    @access_required
     def get(self):
-        return list(permissions.values())
+        return permissions
 
 
 def user_to_dict(user: User) -> dict:

@@ -66,6 +66,7 @@ def access_required(f):
                     for access in grant:
                         if access == access_map()[request.method]:
                             has_access = True
+                            break
 
         if not has_access:
             return {'message': 'Access denied'}, 403

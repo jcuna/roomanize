@@ -39,17 +39,38 @@ export default class Menu extends React.Component {
     }
 
     getLinksBasedOffAccess() {
-        const routes = [
-            {link: "/nueva-habitacion", name: "Agregar habitación", access: ['admin', 'user']},
-            {link: "/editar-habitacion", name: "Ver/Modificar habitación", access: ['admin', 'user']},
-            {link: "/nuevo-contrato", name: "Nuevo Inquilino", access: ['admin', 'user']},
-            {link: "/roles", name: "Permisos", access: ['admin']}
-        ];
+        if (Object.keys(this.props.roles.permissions).length === 0) {
+            return null
+        }
 
-        return routes.map(item => <Link key={item.link} to={item.link} onClick={this.toggleMenu}>{item.name}</Link>)
+        return routes.map(item => {
+            if (item.endpoint !== undefined && item.endpoint !== "") {
+                let link;
+                for (let i = 0; i < this.props.user.roles.length; i++) {
+                    let role = this.props.user.roles[i];
+                    const perm = this.props.roles.permissions[item.endpoint];
+                    if (perm !== undefined && role.permissions[perm] !== undefined) {
+                        link = <Link key={item.link} to={item.link} onClick={this.toggleMenu}>{item.name}</Link>
+                        break
+                    }
+                }
+                if (link !== undefined) {
+                    return link;
+                }
+            } else {
+                return <Link key={item.link} to={item.link} onClick={this.toggleMenu}>{item.name}</Link>
+            }
+        });
     }
 
     toggleMenu() {
         this.props.dispatch(toggleMobileMenu(this.props.showMobileMenu))
     }
 }
+
+const routes = [
+    {link: "/nueva-habitacion", name: "Agregar habitación", endpoint: ""},
+    {link: "/editar-habitacion", name: "Ver/Modificar habitación", endpoint: ""},
+    {link: "/nuevo-contrato", name: "Nuevo Inquilino", endpoint: ""},
+    {link: "/roles", name: "Roles", endpoint: "roles_url"}
+];

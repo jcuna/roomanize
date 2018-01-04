@@ -8,7 +8,7 @@ export default function rolesReducer(state = {
     roles: {
         assigned: [],
         status: 'pending',
-        permissions: []
+        permissions: {}
     }
 }, action) {
     switch(action.type) {
