@@ -106,6 +106,14 @@ class Roles(Resource):
         db.session.commit()
         return {'message': 'success'}, 201
 
+    @token_required
+    @access_required
+    def delete(self):
+        role_id = request.get_json()
+        Role.query.filter_by(id=role_id).delete()
+        db.session.commit()
+        return {'message': 'success'}
+
 
 class Permissions(Resource):
     @token_required

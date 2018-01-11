@@ -111,6 +111,30 @@ html {
   top: 10px;
 }
 
+.loading-button {
+  position: relative;
+  cursor: progress!important;
+  &:before {
+    content: "\F110";
+    position: absolute;
+    font: normal normal normal 25px/1 FontAwesome;
+    left: 36%;
+    z-index: 1;
+    -webkit-animation: fa-spin 2s infinite linear;
+    animation: fa-spin 2s infinite linear;
+  }
+
+  &:after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.4);
+  }
+}
+
 
 .line:after {
   content: "";
@@ -120,6 +144,13 @@ html {
   left: 12px;
   top: 34px;
   background: $blue;
+}
+
+.warning-prompt {
+  i {
+    color: $warning;
+    margin: 0 4px;
+  }
 }
 
 @media (min-width: 768px) {

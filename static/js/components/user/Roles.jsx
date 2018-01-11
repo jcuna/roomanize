@@ -2,9 +2,9 @@
  * Created by Jon on 12/23/17.
  */
 import FormGenerator from "../../utils/FromGenerator";
-import {commitPermissions, createRole, fetchRoles} from "../../actions/roleActions";
+import {commitPermissions, createRole, deleteRole, fetchRoles} from "../../actions/roleActions";
 import Spinner from "../Spinner";
-import {hideOverlay, notifications, showOverlay} from "../../actions/appActions";
+import {notifications, showOverlay} from "../../actions/appActions";
 import '../../../css/roles.scss';
 import Permissions from "../Permissions";
 
@@ -13,12 +13,14 @@ export default class Roles extends React.Component {
     constructor() {
         super();
         this.state = {
-            button: {value: 'Agregar role', disabled: "disabled"}
+            button: {value: 'Agregar role', disabled: "disabled"},
+            deleteButtonClass: 'btn btn-danger'
         };
 
         this.modifyPermissions = this.modifyPermissions.bind(this);
         this.confirmChanges = this.confirmChanges.bind(this);
         this.updateObject = this.updateObject.bind(this);
+        this.confirmRoleDeletion = this.confirmRoleDeletion.bind(this);
     }
 
     componentWillMount() {
@@ -87,6 +89,7 @@ export default class Roles extends React.Component {
                 <th>id</th>
                 <th>Nombre</th>
                 <th>Permisos</th>
+                <th>Borrar</th>
             </tr>
             </thead>
             <tbody>
@@ -98,6 +101,9 @@ export default class Roles extends React.Component {
                     <td>{item.name}</td>
                     <td>
                         <i className="fa fa-pencil-square-o" data-id={item.id} aria-hidden="true" onClick={this.modifyPermissions}/>
+                    </td>
+                    <td>
+                        <i className="danger fa fa-trash-o" data-id={item.id} aria-hidden="true" onClick={this.confirmRoleDeletion}/>
                     </td>
                 </tr>
             })}
@@ -117,15 +123,33 @@ export default class Roles extends React.Component {
         );
     }
 
-    confirmChanges() {
-        if (this.updatedPermissions !== undefined) {
+    confirmChanges(e) {
+        if (this.updatedPermissions !== undefined && !this.props.roles.processing) {
+            e.target.className += ' loading-button';
             this.props.dispatch(commitPermissions(this.updatedPermissions))
         }
-        this.props.dispatch(hideOverlay());
     }
 
     updateObject(updatedPermissions) {
         this.updatedPermissions = updatedPermissions;
     }
 
+    confirmRoleDeletion(e) {
+        let roleId = e.target.getAttribute('data-id');
+
+        const button = <button
+            type="button" onClick={(b) => {
+                if (!this.props.roles.processing) {
+                    b.target.className += ' loading-button';
+                    this.props.dispatch(deleteRole(Number(roleId)));
+                }
+            }} className={this.state.deleteButtonClass}>Confirmar</button>;
+
+        this.props.dispatch(showOverlay(
+            <div className="panel">Estas seguro que quieres elimiar el rol seleccionado?</div>,
+            <div className="warning-prompt"><i className="fa fa-exclamation-triangle"/>Cuidado...</div>,
+            true,
+            button)
+        );
+    }
 }

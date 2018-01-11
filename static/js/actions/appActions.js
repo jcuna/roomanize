@@ -19,15 +19,18 @@ export function toggleMobileMenu(currentValue) {
 /**
  *
  * @param messages {[{type: string, message: string}]}
- * @returns {{type: string, payload: *}}
+ * @returns {Function}
  */
 export function notifications(messages) {
     if (!Array.isArray(messages)) {
         messages = [messages];
     }
-    return {
-        type: NOTIFICATIONS_SET,
-        payload: messages
+    return function (dispatch) {
+        dispatch(hideOverlay());
+        dispatch({
+            type: NOTIFICATIONS_SET,
+            payload: messages
+        });
     };
 }
 

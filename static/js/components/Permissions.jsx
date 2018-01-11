@@ -25,7 +25,7 @@ export default class Permissions extends React.Component {
 
     render() {
         return <div className="permissions-container">
-            <h3>Admin</h3>
+            <h3>{this.role.name}</h3>
             <div className="permissions right">
                 <ul>{Object.values(this.props.roles.permissions).map((item, i) => {
                     const hasStuff = this.state.selectedPermissions[item] !== undefined;
