@@ -58,13 +58,19 @@ export function deleteRole(id) {
                     message: 'Role borrado correctamente.'
                 }]));
             } else {
+                let message = 'No tienes accesso a borrar roles';
+                if (resp.status === 409) {
+                    message = 'No puedes borrar un rol que ha sido asignado a un usuario, ' +
+                        'primero quitale el rol al usuario.'
+                }
                 dispatch({type: ROLE_DELETE_FAILED});
                 dispatch(notifications([{
                     type: 'warning',
-                    message: 'No tienes accesso a borrar roles'
+                    message: message
                 }]));
             }
         }, err => {
+            console.log(err);
                 dispatch({type: ROLE_DELETE_FAILED});
                 dispatch(notifications([{
                         type: 'warning',

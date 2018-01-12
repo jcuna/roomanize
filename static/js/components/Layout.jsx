@@ -16,6 +16,7 @@ import {token} from "../utils/token";
 import Spinner from "./Spinner";
 import {fetchPermissions} from "../actions/roleActions";
 import Overlay from "./Overlay";
+import {setStateData} from "../utils/config";
 
 class Layout extends React.Component {
 
@@ -23,20 +24,26 @@ class Layout extends React.Component {
         if (this.props.user.status === 'pending') {
             this.props.dispatch(fetchUser())
         }
-        if (Object.keys(this.props.roles.permissions).length === 0) {
+        if (this.permissionsPending()) {
             this.props.dispatch(fetchPermissions())
         }
     }
 
+    permissionsPending() {
+        return Object.keys(this.props.roles.permissions).length === 0
+    }
+
     componentWillReceiveProps(props) {
         if (props.token.value !== '') {
-            token.data = props
+            token.data = props;
+            setStateData(props);
         }
     }
 
     render() {
+
         let render;
-        if (this.props.user.status === 'pending') {
+        if (this.props.user.status === 'pending' || this.permissionsPending()) {
             render = <Spinner/>
         } else {
             render = <Routes {...this.props}/>

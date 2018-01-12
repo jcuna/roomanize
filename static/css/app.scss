@@ -118,7 +118,9 @@ html {
     content: "\F110";
     position: absolute;
     font: normal normal normal 25px/1 FontAwesome;
-    left: 36%;
+    left: 0;
+    right: 0;
+    margin: auto;
     z-index: 1;
     -webkit-animation: fa-spin 2s infinite linear;
     animation: fa-spin 2s infinite linear;

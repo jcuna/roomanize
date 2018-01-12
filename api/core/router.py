@@ -1,3 +1,4 @@
+import sys
 from flask import Flask, url_for, render_template
 from flask_restful import Api
 from config.routes import register
@@ -10,6 +11,11 @@ class Router:
 
     version = 'v1.0'
     routes = {}
+    noPermissions = [
+        'views.users.Session',
+        'views.users.Users',
+        'views.users.Permissions'
+    ]
 
     def __init__(self, app: Flask):
         api = Api(app)
@@ -21,7 +27,8 @@ class Router:
             pack = __import__(pack_name, fromlist=[parts[1]])
             mod = getattr(pack, parts[1])
             api.add_resource(mod, '/' + self.version + route, endpoint=parts[2])
-            permissions.update({parts[2]: pack_name + '.' + parts[1]})
+            if pack_name + '.' + parts[1] not in self.noPermissions:
+                permissions.update({parts[2]: pack_name + '.' + parts[1]})
 
             with app.test_request_context():
                 self.routes.update({parts[2]: url_for(parts[2])})

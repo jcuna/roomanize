@@ -51,4 +51,4 @@ class Role(db.Model):
         if self.permissions:
             return json.loads(self.permissions)
 
-        return self.permissions
+        return {}

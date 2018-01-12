@@ -1,3 +1,6 @@
+import sys
+
+import sqlalchemy
 from flask_restful import Resource, request
 from flask import session, json
 from sqlalchemy.orm import joinedload
@@ -16,6 +19,15 @@ class Users(Resource):
 
         return {'message': 'no session'}, 403
 
+
+class UsersManager(Resource):
+    @token_required
+    @access_required
+    def get(self):
+        pass
+
+    @token_required
+    @access_required
     def post(self):
         data = get_fillable(User, **request.get_json())
         user = User(**data)
@@ -110,8 +122,12 @@ class Roles(Resource):
     @access_required
     def delete(self):
         role_id = request.get_json()
-        Role.query.filter_by(id=role_id).delete()
-        db.session.commit()
+        try:
+            Role.query.filter_by(id=role_id).delete()
+            db.session.commit()
+        except sqlalchemy.exc.IntegrityError as e:
+            return {'message': 'integrity constraint'}, 409
+
         return {'message': 'success'}
 
 

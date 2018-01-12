@@ -6,14 +6,13 @@ export default class ErrorPage extends React.Component {
 
     render() {
         return (
-
             <div className="card">
                 <div className="card-header">
-                    404
+                    {this.props.type}
                 </div>
                 <div className="card-block">
                     <blockquote className="card-blockquote">
-                        <p>La página solicitada no existe.</p>
+                        <p>{this.props.textMap[this.props.type]}</p>
                     </blockquote>
                 </div>
             </div>
@@ -21,3 +20,10 @@ export default class ErrorPage extends React.Component {
     }
 }
 
+ErrorPage.defaultProps = {
+    type: 404,
+    textMap: {
+        404: 'La página solicitada no existe.',
+        403: 'No Tienes accesso al recurso solicitado'
+    }
+};
