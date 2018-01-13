@@ -6,7 +6,7 @@ import {clearNotifications} from '../actions/appActions';
 
 export default class Notifications extends React.Component {
 
-    componentWillReceiveProps(next, current) {
+    componentWillReceiveProps(next) {
         if (next.notifications === this.props.notifications) {
             this.props.dispatch(clearNotifications());
         }

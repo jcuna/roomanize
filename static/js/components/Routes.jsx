@@ -11,16 +11,14 @@ import Logout from './user/Logout.jsx'
 import Home from "./Home";
 import Roles from "./user/Roles";
 import {hasAccess} from "../utils/config";
+import Users from "./user/Users";
 
 export default class Routes extends React.Component {
-
-    location = '';
 
     render() {
         return (
             <Route render = {props => {
                 props = {...this.props, ...props};
-                this.location = props.history.location.pathname;
                 return (
                     <div className="content-area container">
                         <FlashMessages {...this.props}/>
@@ -31,19 +29,19 @@ export default class Routes extends React.Component {
                                     <Route exact path="/" render={() => <Home {...props} />}/>
                                     <Route path="/logout" render={() => <Logout {...props}/>} />
                                     <Route path="/roles" render={() => this.getComponent(props, Roles)} />
-                                    <Route path="/users" render={() => this.getComponent(props, Roles)} />
+                                    <Route path="/users" render={() => this.getComponent(props, Users)} />
                                     <Route component={ErrorPage} />
                                 </Switch>
                             </RequiresLogin>
                         </Switch>
                     </div>
-                )
+                );
             }}/>
         )
     }
 
     getComponent(props, Component) {
-        if (hasAccess(this.location)) {
+        if (hasAccess(props.history.location.pathname)) {
             return <Component {...props}/>;
         }
         return <ErrorPage type={403}/>;
