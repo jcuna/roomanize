@@ -28,7 +28,6 @@ export function login(email, password) {
                     type: USER_LOGIN_SUCCESS,
                     payload: resp.data
                 });
-                dispatch(clearLandingPage());
             } else {
                 dispatch({
                     type: USER_LOGIN_FAIL,

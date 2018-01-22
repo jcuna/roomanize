@@ -4,6 +4,7 @@
 import FormGenerator from "../../utils/FromGenerator";
 import {login} from "../../actions/userActions";
 import Spinner from "../Spinner";
+import {clearLandingPage} from "../../actions/appActions";
 
 export default class Login extends React.Component {
 
@@ -18,11 +19,12 @@ export default class Login extends React.Component {
         this.initialRefs = this.initialRefs.bind(this);
     }
 
-    componentWillReceiveProps(next, current) {
+    componentWillMount() {
         const {history} = this.props;
-        if (next.user.status === 'logged_in') {
+        if (this.props.user.status === 'logged_in') {
             if (this.props.landingPage !== "" && this.props.landingPage !== '/logout') {
-                history.push(this.props.landingPage)
+                history.push(this.props.landingPage);
+                this.props.dispatch(clearLandingPage());
             } else {
                 history.push("/")
             }

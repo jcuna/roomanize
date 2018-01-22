@@ -7,7 +7,15 @@ import {setLandingPage, notifications} from "../../actions/appActions";
 export default class RequiresLogin extends React.Component {
 
     componentWillReceiveProps(next) {
-        if (! this.safeStatus.includes(next.user.status)) {
+        this.makeThemLogin(next);
+    }
+
+    componentWillMount() {
+        this.makeThemLogin(this.props);
+    }
+
+    makeThemLogin(props) {
+        if (! this.safeStatus.includes(props.user.status)) {
             this.props.dispatch(notifications([
                 {type: 'warning', message: "Tienes que iniciar sessión"}
             ]));
