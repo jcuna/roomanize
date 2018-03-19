@@ -24,7 +24,7 @@ class UsersManager(Resource):
     @token_required
     @access_required
     def get(self):
-        pass
+        users = User.query.all()
 
     @token_required
     @access_required

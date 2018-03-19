@@ -16,7 +16,8 @@ import {
 export default function userReducer(state = {
     user: {
         status: 'pending',
-        roles: []
+        roles: [],
+        list: []
     },
     token: {
         value: '',
@@ -27,17 +28,17 @@ export default function userReducer(state = {
         case USER_FETCHED:
             return {
                 ...state,
-                user: {...action.payload.user, status: 'logged_in'},
+                user: {...action.payload.user, status: 'logged_in', list: []},
                 token: action.payload.token
             };
         case USER_MUST_LOGIN:
-            return {...state, user: {...state.user, status: 'logged_out'}};
+            return {...state, user: {...state.user, status: 'logged_out'}, list: []};
         case USER_LOGGING_IN:
-            return {...state, user: {...state.user, status: 'logging_in'}};
+            return {...state, user: {...state.user, status: 'logging_in'}, list: []};
         case USER_LOGIN_SUCCESS:
             return {
                 ...state,
-                user: {...action.payload.user, status: 'logged_in'},
+                user: {...action.payload.user, status: 'logged_in', list: []},
                 token: action.payload.token,
             };
         case USER_LOGIN_FAIL:
@@ -47,7 +48,8 @@ export default function userReducer(state = {
                     ...state.user,
                     status: 'failed',
                     email: action.payload.email,
-                    password: action.payload.password
+                    password: action.payload.password,
+                    list: []
                 }
             };
         case USER_LOGIN_ERROR:
@@ -57,16 +59,18 @@ export default function userReducer(state = {
                     ...state.user,
                     status: 'error',
                     email: action.payload.email,
-                    password: action.payload.password
+                    password: action.payload.password,
+                    list: []
                 }
             };
         case USER_LOGGING_OUT:
             return {
                 ...state,
-                user: {...state.user, status: 'logging_out'}
+                user: {...state.user, status: 'logging_out'},
+                list: []
             };
         case USER_LOGGED_OUT:
-            return {...state, user: {status: 'logged_out', roles: []}, token: {value: '', expires: ''}};
+            return {...state, user: {status: 'logged_out', roles: []}, token: {value: '', expires: ''}, list: []};
         default:
             return state;
     }

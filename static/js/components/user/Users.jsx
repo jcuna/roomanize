@@ -4,6 +4,10 @@
 
 export default class Users extends React.Component {
 
+    componentWillMount() {
+
+    }
+
     render() {
         return <div>
             <h2>Users will be here...</h2>

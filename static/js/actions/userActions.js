@@ -11,6 +11,9 @@ export const USER_MUST_LOGIN = 'USER_MUST_LOGIN';
 export const USER_LOGIN_ERROR = 'USER_LOGIN_ERROR';
 export const USER_LOGGING_OUT = 'USER_LOGGING_OUT';
 export const USER_LOGGED_OUT = 'USER_LOGGED_OUT';
+export const USERS_FETCHING = 'USERS_FETCHING';
+export const USERS_FETCHED = 'USERS_FETCHED';
+export const USERS_FETCH_FAEILED = 'USERS_FETCH_FAEILED';
 
 
 export function login(email, password) {
@@ -100,4 +103,13 @@ export function logout() {
 
         })
     }
+}
+
+export function getUsers() {
+    return function(dispatch) {
+        dispatch({
+            type: USERS_FETCHING
+        })
+    }
+
 }

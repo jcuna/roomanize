@@ -31,17 +31,19 @@ export default class Permissions extends React.Component {
                     const hasStuff = this.state.selectedPermissions[item] !== undefined;
                     const allChecked = hasStuff && this.state.selectedPermissions[item].length === 3;
                     return <li key={i} className="endpoint">
-                        <div className="half name">
+                        <div className="half name checkbox">
                             <input
                                 checked={allChecked}
                                 type="checkbox"
                                 data-type="*"
                                 data-id={item}
+                                id={item}
                                 onChange={this.selectCheckBox}/>
+                            <label htmlFor={item}></label>
                             <span>{item.split('.')[2]}</span>
                         </div>
                         <div className="half">
-                            <ul className="grant">
+                            <ul className="grant checkbox">
                                 {this.methods.map((obj, i) => <li className={obj.className} key={i}>
                                     <input
                                         checked={allChecked || hasStuff &&
@@ -50,6 +52,7 @@ export default class Permissions extends React.Component {
                                         data-type={obj.name}
                                         data-id={item}
                                         onChange={this.selectCheckBox}/>
+                                    <label/>
                                     {obj.nombre}
                                     </li>)}
                             </ul>
