@@ -5,8 +5,8 @@ services:
   ngix:
     image: nginx:latest
     restart: always
-    ports:
-      - "80:80"
+#    ports:
+#      - "80:80"
     environment:
       - NGINX_PORT=80
       - NGINX_HOST=martires.joncuna.com
@@ -19,6 +19,10 @@ services:
     depends_on:
       - static
       - api
+    labels:
+      - 'traefik.backend=nginx'
+      - 'traefik.port=80'
+      - 'traefik.frontend.rule=Host:martires.localhost'
 
   static:
     build: ./static
@@ -44,3 +48,37 @@ services:
       - APP_ENV=develop
       - APP_PATH=/usr/src/app
     command: /bin/bash -c "./run.sh"
+
+  mailhog:
+    image: mailhog/mailhog
+    labels:
+      - 'traefik.backend=mailhog'
+      - 'traefik.port=8025'
+      - 'traefik.frontend.rule=Host:mailhog.localhost'
+
+  portainer:
+    image: portainer/portainer
+    command: --no-auth -H unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - 'traefik.backend=portainer'
+      - 'traefik.port=9000'
+      - 'traefik.frontend.rule=Host:portainer.localhost'
+
+  traefik:
+    image: traefik
+    command:
+      - --accesslogsfile=/data/access.log
+      - --web
+      - --docker
+      - --docker.domain=localhost
+      - --logLevel=DEBUG
+      - --entryPoints=Name:http Address::80 #Redirect.EntryPoint:https
+#      - --entryPoints=Name:https Address::443 TLS:/certs/cert.pem,/certs/key.pem
+#      - --defaultentrypoints=http,https
+    ports:
+      - '80:80'
+      - '8080:8080' # Dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
