@@ -71,7 +71,8 @@ export default class Roles extends React.Component {
             this.props.dispatch(notifications([
                 {type: 'danger', message: "Role con mismo nombre ya existe"}
             ]));
-            this.refs.role.value = ''
+            this.refs.role.value = '';
+            this.toggleButtonDisabled();
         } else {
             this.props.dispatch(createRole(this.refs.role.value));
             this.refs.role.value = '';

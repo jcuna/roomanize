@@ -1,6 +1,7 @@
 /**
  * Created by Jon on 12/31/17.
  */
+import Checkbox from "../utils/Checkbox";
 
 export default class Permissions extends React.Component {
 
@@ -27,39 +28,26 @@ export default class Permissions extends React.Component {
         return <div className="permissions-container">
             <h3>{this.role.name}</h3>
             <div className="permissions right">
-                <ul>{Object.values(this.props.roles.permissions).map((item, i) => {
+                <ul>
+                    {Object.values(this.props.roles.permissions).map((item, i) => {
                     const hasStuff = this.state.selectedPermissions[item] !== undefined;
                     const allChecked = hasStuff && this.state.selectedPermissions[item].length === 3;
-                    return <li key={i} className="endpoint">
-                        <div className="half name checkbox">
-                            <input
-                                checked={allChecked}
-                                type="checkbox"
-                                data-type="*"
-                                data-id={item}
-                                id={item}
-                                onChange={this.selectCheckBox}/>
-                            <label htmlFor={item}></label>
-                            <span>{item.split('.')[2]}</span>
-                        </div>
-                        <div className="half">
-                            <ul className="grant checkbox">
-                                {this.methods.map((obj, i) => <li className={obj.className} key={i}>
-                                    <input
-                                        checked={allChecked || hasStuff &&
-                                        this.state.selectedPermissions[item].includes(obj.name)}
-                                        type="checkbox"
-                                        data-type={obj.name}
-                                        data-id={item}
-                                        onChange={this.selectCheckBox}/>
-                                    <label/>
-                                    {obj.nombre}
+                    return (
+                        <li key={i} className="endpoint">
+                            <div className="half name">
+                                <Checkbox name={item} label={item.split('.')[2]} checked={allChecked} onChange={this.selectCheckBox}/>
+                            </div>
+                            <div className="half">
+                                <ul className="grant">
+                                    {this.methods.map((obj, i) => <li className={obj.className} key={i}>
+                                        <Checkbox name={item} id={obj.name} label={obj.nombre} checked={allChecked || hasStuff &&
+                                        this.state.selectedPermissions[item].includes(obj.name)} onChange={this.selectCheckBox}/>
                                     </li>)}
-                            </ul>
-                        </div>
-                    </li>
-                })}
-                    </ul>
+                                </ul>
+                            </div>
+                        </li>)
+                    })}
+                </ul>
             </div>
         </div>
     }
@@ -72,10 +60,10 @@ export default class Permissions extends React.Component {
         ]
     }
 
-    selectCheckBox(e) {
-        const checked = e.currentTarget.checked;
-        let name = e.currentTarget.getAttribute('data-id');
-        let type = e.currentTarget.getAttribute('data-type');
+    selectCheckBox(checkbox) {
+        const checked = checkbox.checked;
+        let name = checkbox.name;
+        let type = checkbox.id || '*';
 
         if (this.state.selectedPermissions[name] === undefined) {
             this.setState({

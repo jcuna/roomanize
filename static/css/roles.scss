@@ -53,14 +53,6 @@ $height: 93%;
     .half {
       width: 36%;
     }
-    .name {
-      text-align: right;
-      input {
-        position: absolute;
-        left: 0;
-        top: 4px;
-      }
-    }
     position: relative;
     margin: 28px 0 52px;
     .grant {
@@ -68,10 +60,8 @@ $height: 93%;
       top: -24px;
       left: 60%;
 
-      input {
-        bottom: 2px;
-        position: relative;
-        margin-right: 4px;
+      & .char {
+        height: 25px;
       }
     }
 

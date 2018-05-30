@@ -4,8 +4,11 @@
 
 export default class Home extends React.Component {
 
-    render() {
-        return <h2>Home</h2>
+    componentWillMount() {
+        console.log(this);
     }
 
+    render() {
+        return <h1>Hi</h1>
+    }
 }
