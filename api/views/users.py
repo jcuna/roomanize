@@ -24,7 +24,17 @@ class UsersManager(Resource):
     @token_required
     @access_required
     def get(self):
-        users = User.query.all()
+        users = User.query.options(joinedload('roles')).all()
+
+        return list(map(lambda user: {
+            'name': user.first_name + ' ' + user.last_name,
+            'id': user.id,
+            'email': user.email,
+            'roles': list(map(lambda r: {
+                'name': r.name,
+                'id': r.id
+            }, user.roles))
+        }, users))
 
     @token_required
     @access_required

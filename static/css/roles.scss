@@ -1,18 +1,6 @@
 @import 'vars';
 $height: 93%;
 
-
-.roles-layout tr i {
-  font-size: 28px;
-  cursor: hand;
-  position: absolute;
-  margin-top: -4px;
-
-  &:hover {
-    opacity: 0.8;
-  }
-}
-
 .permissions-container {
   height: calc(100% - #{$heightResolve});
   ul {

@@ -1,5 +1,6 @@
 import api from '../utils/api'
 import {clearLandingPage, notifications} from "./appActions";
+import {token} from "../utils/token";
 
 
 export const USER_LOGGING_IN = 'USER_LOGGING_IN';
@@ -13,7 +14,7 @@ export const USER_LOGGING_OUT = 'USER_LOGGING_OUT';
 export const USER_LOGGED_OUT = 'USER_LOGGED_OUT';
 export const USERS_FETCHING = 'USERS_FETCHING';
 export const USERS_FETCHED = 'USERS_FETCHED';
-export const USERS_FETCH_FAEILED = 'USERS_FETCH_FAEILED';
+export const USERS_FETCH_FAILED = 'USERS_FETCH_FAEILED';
 
 
 export function login(email, password) {
@@ -101,15 +102,31 @@ export function logout() {
             });
         }, err => {
 
-        })
+        });
     }
 }
 
-export function getUsers() {
+export function getUsers(page = 1, limit = 50, offset = 0) {
     return function(dispatch) {
         dispatch({
             type: USERS_FETCHING
-        })
-    }
+        });
 
+        token.through().then(header => {
+            api({url: `/users?limit=${limit}&page=${page}&offset=${offset}`, method: 'GET', headers: header}).then((resp) => {
+                dispatch({
+                    type: USERS_FETCHED,
+                    payload: resp.data
+                });
+            }, err => {
+                dispatch({
+                    type: USERS_FETCH_FAILED,
+                });
+            });
+        }, err => {
+            dispatch({
+                type: USERS_FETCH_FAILED,
+            });
+        });
+    }
 }

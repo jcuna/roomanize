@@ -206,3 +206,15 @@ html {
     margin-left: 10px;
   }
 }
+
+.fa-trash-o,
+.fa-pencil-square-o {
+  font-size: 28px;
+  cursor: hand;
+  position: absolute;
+  margin-top: -4px;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}

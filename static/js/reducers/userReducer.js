@@ -10,7 +10,7 @@ import {
     USER_LOGIN_FAIL,
     USER_LOGIN_ERROR,
     USER_LOGGING_OUT,
-    USER_LOGGED_OUT
+    USER_LOGGED_OUT, USERS_FETCHED
 } from '../actions/userActions';
 
 export default function userReducer(state = {
@@ -71,6 +71,9 @@ export default function userReducer(state = {
             };
         case USER_LOGGED_OUT:
             return {...state, user: {status: 'logged_out', roles: []}, token: {value: '', expires: ''}, list: []};
+
+        case USERS_FETCHED:
+            return {...state, user: {...state.user, list: action.payload}};
         default:
             return state;
     }
