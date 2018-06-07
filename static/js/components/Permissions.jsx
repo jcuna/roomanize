@@ -6,11 +6,11 @@ import Checkbox from "../utils/Checkbox";
 export default class Permissions extends React.Component {
 
     constructor(props) {
-        super(props);
+        super();
         let role = '';
         let selectedPermissions = [];
-        this.props.roles.assigned.forEach(item => {
-            if (item.id === this.props.id) {
+        props.roles.assigned.forEach(item => {
+            if (item.id === props.id) {
                 role = item;
                 if (item.permissions !== null) {
                     selectedPermissions = item.permissions

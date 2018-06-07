@@ -70,7 +70,6 @@ export function deleteRole(id) {
                 }]));
             }
         }, err => {
-            console.log(err);
                 dispatch({type: ROLE_DELETE_FAILED});
                 dispatch(notifications([{
                         type: 'warning',

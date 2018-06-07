@@ -39,7 +39,6 @@ export default function rolesReducer(state = {
         case ROLE_DELETE_SUCCESS:
             let assignedRoles = [];
             state.roles.assigned.forEach(r => {
-                console.log(r.id, action.payload);
                 if (r.id !== action.payload) {
                     assignedRoles.push(r);
                 }

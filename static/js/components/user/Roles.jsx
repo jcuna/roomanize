@@ -101,10 +101,10 @@ export default class Roles extends React.Component {
                     <td>{item.id}</td>
                     <td>{item.name}</td>
                     <td>
-                        <i className="fa fa-pencil-square-o" data-id={item.id} aria-hidden="true" onClick={this.modifyPermissions}/>
+                        <i className="fas fa-edit" data-id={item.id} aria-hidden="true" onClick={this.modifyPermissions}/>
                     </td>
                     <td>
-                        <i className="danger fa fa-trash-o" data-id={item.id} aria-hidden="true" onClick={this.confirmRoleDeletion}/>
+                        <i className="text-danger fas fa-trash" data-id={item.id} aria-hidden="true" onClick={this.confirmRoleDeletion}/>
                     </td>
                 </tr>
             })}

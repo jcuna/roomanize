@@ -207,14 +207,21 @@ html {
   }
 }
 
-.fa-trash-o,
-.fa-pencil-square-o {
+.fa-ban,
+.fa-user-edit,
+.fa-trash,
+.fa-edit {
   font-size: 28px;
-  cursor: hand;
   position: absolute;
   margin-top: -4px;
 
   &:hover {
     opacity: 0.8;
   }
+}
+
+.fa-user-edit,
+.fa-trash,
+.fa-edit {
+  cursor: hand;
 }

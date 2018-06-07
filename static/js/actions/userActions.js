@@ -106,14 +106,18 @@ export function logout() {
     }
 }
 
-export function getUsers(page = 1, limit = 50, offset = 0) {
+export function getUsers(page = 1, limit = 50, offset = 0, orderBy = 'id', orderDir = 'ASC') {
     return function(dispatch) {
         dispatch({
             type: USERS_FETCHING
         });
 
         token.through().then(header => {
-            api({url: `/users?limit=${limit}&page=${page}&offset=${offset}`, method: 'GET', headers: header}).then((resp) => {
+            api({
+                url: `/users?limit=${limit}&page=${page}&offset=${offset}&orderBy=${orderBy}&orderDir=${orderDir}`,
+                method: 'GET',
+                headers: header
+            }).then((resp) => {
                 dispatch({
                     type: USERS_FETCHED,
                     payload: resp.data

@@ -17,6 +17,7 @@ import Spinner from "./Spinner";
 import {fetchPermissions} from "../actions/roleActions";
 import Overlay from "./Overlay";
 import {setStateData} from "../utils/config";
+import PropTypes from 'prop-types';
 
 class Layout extends React.Component {
 
@@ -69,6 +70,10 @@ class Layout extends React.Component {
             className += ' body-displaced';
         }
         return className
+    }
+
+    static propTypes = {
+        dispatch: PropTypes.func.isRequired
     }
 }
 

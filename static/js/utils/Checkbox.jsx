@@ -15,6 +15,9 @@ export default class Checkbox extends React.Component {
             if (this.props.id !== undefined) {
                 checkboxObj['id'] = this.props.id
             }
+            if (this.props.value !== undefined) {
+                checkboxObj['value'] = this.props.value;
+            }
             this.props.onChange(checkboxObj);
         }}><span className={
             `checkbox ${this.props.checked ? 'ticked' : ''}`

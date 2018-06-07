@@ -7,8 +7,8 @@ import '../../css/header.scss';
 import {toggleMobileMenu} from "../actions/appActions";
 
 export default class Header extends React.Component {
-    constructor(props) {
-        super(props);
+    constructor() {
+        super();
         this.toggleMenu = this.toggleMenu.bind(this);
     }
 

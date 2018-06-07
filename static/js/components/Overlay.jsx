@@ -11,6 +11,15 @@ export default class Overlay extends React.Component {
         this.hideOverlay = this.hideOverlay.bind(this);
     }
 
+    componentDidMount() {
+        window.addEventListener('keyup', (e) => {
+            if (e.keyCode === 27) {
+                this.hideOverlay();
+            }
+        });
+    }
+
+
     render() {
         if (this.props.overlay.display) {
             return <ReactCSSTransitionGroup
@@ -56,6 +65,7 @@ export default class Overlay extends React.Component {
     }
 
     hideOverlay() {
+        window.removeEventListener('keyup', this.hideOverlay);
         if (this.props.overlay.afterClose !== undefined) {
             {this.props.overlay.afterClose()}
         }

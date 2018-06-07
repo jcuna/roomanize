@@ -8,9 +8,8 @@ import {toggleMobileMenu} from '../actions/appActions'
 import {hasAccess, routes} from '../utils/config';
 
 export default class Menu extends React.Component {
-    constructor(props) {
-        super(props);
-
+    constructor() {
+        super();
         this.toggleMenu = this.toggleMenu.bind(this);
     }
 
