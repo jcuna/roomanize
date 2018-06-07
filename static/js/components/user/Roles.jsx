@@ -10,7 +10,7 @@ import Permissions from "../Permissions";
 
 export default class Roles extends React.Component {
 
-    constructor() {
+    constructor(props) {
         super();
         this.state = {
             button: {value: 'Agregar role', disabled: "disabled"},
@@ -21,11 +21,9 @@ export default class Roles extends React.Component {
         this.confirmChanges = this.confirmChanges.bind(this);
         this.updateObject = this.updateObject.bind(this);
         this.confirmRoleDeletion = this.confirmRoleDeletion.bind(this);
-    }
 
-    componentWillMount() {
-        if (this.props.roles.status === 'pending') {
-            this.props.dispatch(fetchRoles());
+        if (props.roles.status === 'pending') {
+            props.dispatch(fetchRoles());
         }
     }
 
@@ -101,7 +99,7 @@ export default class Roles extends React.Component {
                     <td>{item.id}</td>
                     <td>{item.name}</td>
                     <td>
-                        <i className="fas fa-edit" data-id={item.id} aria-hidden="true" onClick={this.modifyPermissions}/>
+                        <i className="text-info fas fa-edit" data-id={item.id} aria-hidden="true" onClick={this.modifyPermissions}/>
                     </td>
                     <td>
                         <i className="text-danger fas fa-trash" data-id={item.id} aria-hidden="true" onClick={this.confirmRoleDeletion}/>

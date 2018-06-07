@@ -17,7 +17,7 @@ class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.BigInteger, primary_key=True)
     email = db.Column(db.String(50), nullable=False, unique=True)
-    password = db.Column(db.String(80), nullable=False)
+    password = db.Column(db.String(80), nullable=True)
     first_name = db.Column(db.String(50), nullable=False)
     last_name = db.Column(db.String(50), nullable=False)
     deleted = db.Column(db.Boolean, nullable=False, server_default='0', index=True)

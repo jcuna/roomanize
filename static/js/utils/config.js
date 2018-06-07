@@ -12,7 +12,7 @@ export function setStateData(props) {
     state = {...props};
 }
 
-export function hasAccess(path) {
+export function hasAccess(path, type) {
 
     if (state.user === undefined || state.user.status !== 'logged_in'
         || Object.keys(state.roles.permissions).length === 0) {
@@ -31,13 +31,16 @@ export function hasAccess(path) {
             for (let j = 0; j < state.user.roles.length; j++) {
                 let role = state.user.roles[j];
                 const perm = state.roles.permissions[item.endpoint];
-                if (perm !== undefined && role.permissions[perm] === undefined) {
+                if (role.permissions[perm] === undefined) {
                     hasAccess = false;
                     break
+                } else if (type !== undefined) {
+                    hasAccess = role.permissions[perm].includes(type);
+                    break;
                 }
             }
         }
     }
 
-    return hasAccess;
+    return hasAccess
 }

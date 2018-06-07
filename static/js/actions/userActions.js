@@ -1,7 +1,6 @@
 import api from '../utils/api'
-import {clearLandingPage, notifications} from "./appActions";
 import {token} from "../utils/token";
-
+import {hideOverlay, notifications} from "./appActions";
 
 export const USER_LOGGING_IN = 'USER_LOGGING_IN';
 export const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS';
@@ -14,7 +13,10 @@ export const USER_LOGGING_OUT = 'USER_LOGGING_OUT';
 export const USER_LOGGED_OUT = 'USER_LOGGED_OUT';
 export const USERS_FETCHING = 'USERS_FETCHING';
 export const USERS_FETCHED = 'USERS_FETCHED';
-export const USERS_FETCH_FAILED = 'USERS_FETCH_FAEILED';
+export const USERS_FETCH_FAIL = 'USERS_FETCH_FAIL';
+export const USER_CREATING = 'USER_CREATING';
+export const USER_CREATED = 'USER_CREATED';
+export const USER_CREATE_FAIL = 'USER_CREATE_FAIL';
 
 
 export function login(email, password) {
@@ -92,9 +94,7 @@ export function fetchUser() {
 
 export function logout() {
     return function(dispatch) {
-        dispatch({
-            type: USER_LOGGING_OUT,
-        });
+        dispatch({type: USER_LOGGING_OUT});
 
         api({url: '/login', method: 'DELETE'}).then(() => {
             dispatch({
@@ -108,9 +108,7 @@ export function logout() {
 
 export function getUsers(page = 1, limit = 50, offset = 0, orderBy = 'id', orderDir = 'ASC') {
     return function(dispatch) {
-        dispatch({
-            type: USERS_FETCHING
-        });
+        dispatch({type: USERS_FETCHING});
 
         token.through().then(header => {
             api({
@@ -124,13 +122,42 @@ export function getUsers(page = 1, limit = 50, offset = 0, orderBy = 'id', order
                 });
             }, err => {
                 dispatch({
-                    type: USERS_FETCH_FAILED,
+                    type: USERS_FETCH_FAIL,
                 });
             });
         }, err => {
             dispatch({
-                type: USERS_FETCH_FAILED,
+                type: USERS_FETCH_FAIL,
             });
         });
+    }
+}
+
+export function createUser(user) {
+    user = {...user, roles: user.roles.map(role => role.id)}
+    return function (dispatch) {
+        dispatch({type: USER_CREATING});
+        token.through().then(header => {
+            api({
+                url: '/users',
+                method: 'POST',
+                headers: header,
+            }, user).then(resp => {
+                dispatch({
+                    type: USER_CREATED,
+                    payload: resp.data
+                });
+                dispatch(hideOverlay());
+                dispatch(notifications([
+                    {type: 'success', message: "Usuario creado satisfactoriamente"}
+                ]));
+            }, err => {
+                dispatch(hideOverlay());
+                dispatch({type: USER_CREATE_FAIL});
+                dispatch(notifications([
+                    {type: 'danger', message: "Hubo un error creando el usuario"}
+                ]));
+            })
+        })
     }
 }

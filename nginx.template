@@ -1,5 +1,9 @@
 # Define the parameters for a specific virtual host/server
 server {
+
+    rewrite ^(/install)$ /api/$1 permanent;
+    rewrite ^(/routes)$ /api/$1 permanent;
+
     # Define the directory where the contents being requested are stored
     # root /usr/share/nginx/html;
 

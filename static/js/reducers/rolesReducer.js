@@ -1,8 +1,8 @@
 
 import {
     ROLE_CREATE_SUCCESS, ROLES_FETCHING, ROLES_FETCHED, ROLES_FAIL,
-    PERMISSIONS_FETCHED, PERMISSIONS_COMMIT, ROLE_DELETE_SUCCESS, ROLE_DELETE_FAILED, ROLE_CREATE_DISPATCHED,
-    ROLE_DELETE_DISPATCHED, PERMISSIONS_COMMIT_FAILED
+    PERMISSIONS_FETCHED, PERMISSIONS_COMMIT, ROLE_DELETE_SUCCESS, ROLE_DELETE_FAIL, ROLE_CREATE_DISPATCHED,
+    ROLE_DELETE_DISPATCHED, PERMISSIONS_COMMIT_FAIL
 } from "../actions/roleActions";
 
 export default function rolesReducer(state = {
@@ -32,7 +32,7 @@ export default function rolesReducer(state = {
         case PERMISSIONS_COMMIT:
             let assigned = getUpdatedRolesPermissions(state, action.payload);
             return {...state, roles: {...state.roles, assigned: assigned, processing: false}};
-        case PERMISSIONS_COMMIT_FAILED:
+        case PERMISSIONS_COMMIT_FAIL:
             return {...state, roles: {...state.roles, processing: false}};
         case ROLE_DELETE_DISPATCHED:
             return {...state, roles: {...state.roles, processing: true}};
@@ -44,7 +44,7 @@ export default function rolesReducer(state = {
                 }
             });
             return {...state, roles: {...state.roles, assigned: assignedRoles, processing: false}};
-        case ROLE_DELETE_FAILED:
+        case ROLE_DELETE_FAIL:
             return {...state, roles: {...state.roles, processing: false}};
         default:
             return state;

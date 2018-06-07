@@ -9,13 +9,13 @@ export const ROLES_FAIL = 'ROLES_FAIL';
 export const ROLE_CREATE_SUCCESS = 'ROLE_CREATE_SUCCESS';
 export const ROLE_DELETE_SUCCESS = 'ROLE_DELETE_SUCCESS';
 export const ROLE_DELETE_DISPATCHED = 'ROLE_DELETE_DISPATCHED';
-export const ROLE_DELETE_FAILED = 'ROLE_DELETE_FAILED';
+export const ROLE_DELETE_FAIL = 'ROLE_DELETE_FAIL';
 export const ROLE_CREATE_DISPATCHED = 'ROLE_CREATE_DISPATCHED';
 export const ROLE_CREATE_FAIL = 'ROLE_CREATE_FAIL';
 export const PERMISSIONS_FETCHING = 'PERMISSIONS_FETCHING';
 export const PERMISSIONS_FETCHED = 'PERMISSIONS_FETCHED';
 export const PERMISSIONS_COMMIT = 'PERMISSIONS_COMMIT';
-export const PERMISSIONS_COMMIT_FAILED = 'PERMISSIONS_COMMIT_FAILED';
+export const PERMISSIONS_COMMIT_FAIL = 'PERMISSIONS_COMMIT_FAIL';
 
 export function createRole(name) {
     return function (dispatch) {
@@ -63,14 +63,14 @@ export function deleteRole(id) {
                     message = 'No puedes borrar un rol que ha sido asignado a un usuario, ' +
                         'primero quitale el rol al usuario.'
                 }
-                dispatch({type: ROLE_DELETE_FAILED});
+                dispatch({type: ROLE_DELETE_FAIL});
                 dispatch(notifications([{
                     type: 'warning',
                     message: message
                 }]));
             }
         }, err => {
-                dispatch({type: ROLE_DELETE_FAILED});
+                dispatch({type: ROLE_DELETE_FAIL});
                 dispatch(notifications([{
                         type: 'warning',
                         message: 'Error inesperado'
@@ -135,14 +135,14 @@ export function commitPermissions(permissions) {
                     message: 'Acceso actualizado correctamente'
                 }]));
             } else {
-                dispatch({type: PERMISSIONS_COMMIT_FAILED});
+                dispatch({type: PERMISSIONS_COMMIT_FAIL});
                 dispatch(notifications([{
                     type: 'warning',
                     message: 'No se pudo actualizar los accesos'
                 }]));
             }
         }, err => {
-            dispatch({type: PERMISSIONS_COMMIT_FAILED});
+            dispatch({type: PERMISSIONS_COMMIT_FAIL});
             dispatch(notifications([{
                 type: 'warning',
                 message: 'No se pudo actualizar los accesos'

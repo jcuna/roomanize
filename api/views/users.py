@@ -41,9 +41,15 @@ class UsersManager(Resource):
     @token_required
     @access_required
     def post(self):
-        data = get_fillable(User, **request.get_json())
-        user = User(**data)
-        user.hash_password()
+        raw_data = request.get_json()
+        user_data = get_fillable(User, **raw_data)
+        user = User(**user_data)
+        if 'password' in raw_data:
+            user.hash_password()
+
+        if raw_data['roles']:
+            for role in Role.query.filter(Role.id.in_(raw_data['roles'])):
+                user.roles.append(role)
 
         db.session.add(user)
         db.session.commit()

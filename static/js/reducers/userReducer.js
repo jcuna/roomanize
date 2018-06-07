@@ -10,14 +10,17 @@ import {
     USER_LOGIN_FAIL,
     USER_LOGIN_ERROR,
     USER_LOGGING_OUT,
-    USER_LOGGED_OUT, USERS_FETCHED
+    USER_LOGGED_OUT, USERS_FETCHED, USER_CREATED, USERS_FETCHING
 } from '../actions/userActions';
 
 export default function userReducer(state = {
     user: {
         status: 'pending',
         roles: [],
-        list: []
+        list: {
+            status: 'pending',
+            users: []
+        }
     },
     token: {
         value: '',
@@ -28,17 +31,17 @@ export default function userReducer(state = {
         case USER_FETCHED:
             return {
                 ...state,
-                user: {...action.payload.user, status: 'logged_in', list: []},
+                user: {...state.user, ...action.payload.user, status: 'logged_in'},
                 token: action.payload.token
             };
         case USER_MUST_LOGIN:
-            return {...state, user: {...state.user, status: 'logged_out'}, list: []};
+            return {...state, user: {...state.user, status: 'logged_out'}};
         case USER_LOGGING_IN:
-            return {...state, user: {...state.user, status: 'logging_in'}, list: []};
+            return {...state, user: {...state.user, status: 'logging_in'}};
         case USER_LOGIN_SUCCESS:
             return {
                 ...state,
-                user: {...action.payload.user, status: 'logged_in', list: []},
+                user: {...state.user, ...action.payload.user, status: 'logged_in'},
                 token: action.payload.token,
             };
         case USER_LOGIN_FAIL:
@@ -49,7 +52,6 @@ export default function userReducer(state = {
                     status: 'failed',
                     email: action.payload.email,
                     password: action.payload.password,
-                    list: []
                 }
             };
         case USER_LOGIN_ERROR:
@@ -60,20 +62,23 @@ export default function userReducer(state = {
                     status: 'error',
                     email: action.payload.email,
                     password: action.payload.password,
-                    list: []
                 }
             };
         case USER_LOGGING_OUT:
             return {
                 ...state,
                 user: {...state.user, status: 'logging_out'},
-                list: []
             };
         case USER_LOGGED_OUT:
-            return {...state, user: {status: 'logged_out', roles: []}, token: {value: '', expires: ''}, list: []};
+            return {...state, user: {status: 'logged_out', roles: []}, token: {value: '', expires: ''}};
 
+        case USERS_FETCHING:
+            return {...state, user: {...state.user, list: {status: 'fetching', users: []}}};
         case USERS_FETCHED:
-            return {...state, user: {...state.user, list: action.payload}};
+            return {...state, user: {...state.user, list: {status: 'fetched', users: action.payload}}};
+
+        case USER_CREATED:
+            return {...state, user: {...state.user}};
         default:
             return state;
     }

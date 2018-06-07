@@ -13,7 +13,7 @@ def init_app() -> Flask:
     core.Router(this_app)
     db.init_app(this_app)
 
-    this_app.wsgi_app = core.Middleware(this_app.wsgi_app)
+    this_app.wsgi_app = core.Middleware(this_app.wsgi_app, this_app.debug)
     return this_app
 
 

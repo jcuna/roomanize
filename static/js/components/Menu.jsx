@@ -45,7 +45,7 @@ export default class Menu extends React.Component {
 
         return routes.map(item => {
 
-            if (hasAccess(item.link)) {
+            if (hasAccess(item.link, 'read')) {
                 return <Link key={item.link} to={item.link} onClick={this.toggleMenu}>{item.name}</Link>
             }
         });

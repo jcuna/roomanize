@@ -1,14 +1,15 @@
 /**
  * Created by Jon on 1/11/18.
  */
-import {getUsers} from "../../actions/userActions";
+import {createUser, getUsers} from "../../actions/userActions";
 import Spinner from "../Spinner";
 import {hideOverlay, showOverlay} from "../../actions/appActions";
 import UserManager from "./UserManager";
 import {fetchRoles} from "../../actions/roleActions";
+import {hasAccess} from "../../utils/config";
 
 export default class Users extends React.Component {
-    constructor() {
+    constructor(props) {
         super();
         this.openUserManager = this.openUserManager.bind(this);
         this.editUser = this.editUser.bind(this);
@@ -18,29 +19,36 @@ export default class Users extends React.Component {
 
         this.state = {
             newUser: {}
+        };
+        if (props.roles.assigned.length === 0) {
+            props.dispatch(fetchRoles());
         }
     }
 
-    componentWillMount() {
-        this.props.dispatch(getUsers());
-        if (this.props.roles.assigned.length === 0) {
-            this.props.dispatch(fetchRoles());
+    static getDerivedStateFromProps(props, state) {
+        if (props.user.list.status !== 'fetching' && props.user.list.users.length === 0) {
+            props.dispatch(getUsers());
         }
+        return state;
     }
 
     render() {
         return <div>
             <h2>Usuarios</h2>
-            <div style={{textAlign: 'right', width: '100%'}}>
+            <div style={{textAlign: 'right', width: '100%', padding: '10px'}}>
+                <input placeholder='Buscar'
+                       onChange={() => {}}
+                       className='form-control'
+                       style={{width: '160px', marginRight: '10px', display: 'inline', top: '2px', position: 'relative'}}
+                />
                 <button
                     disabled={this.props.roles.assigned.length === 0}
                     onClick={() => this.openUserManager()}
-                    style={{marginBottom: '10px'}}
                     className='btn btn-success'>
                     Nuevo Usuario
                 </button>
             </div>
-            {this.props.user.list.length === 0 && <Spinner/>}
+            {this.props.user.list.users.length === 0 && <Spinner/>}
             <table className="table table-striped">
             <thead>
             <tr>
@@ -54,10 +62,11 @@ export default class Users extends React.Component {
             </tr>
             </thead>
             <tbody>
-            {this.props.user.list.map((user, i) => {
+            {this.props.user.list.users.map((user, i) => {
                 i++;
                 const rolesCount = user.roles.length;
-                const canEdit = user.email !== this.props.user.email;
+                const canEdit = hasAccess('/users', 'write') && user.email !== this.props.user.email;
+                const canDelete = hasAccess('/users', 'delete') && user.email !== this.props.user.email;
                 return <tr key={i}>
                     <th scope="row">{i}</th>
                     <td>{user.id}</td>
@@ -65,14 +74,14 @@ export default class Users extends React.Component {
                     <td>{user.email}</td>
                     <td>{user.roles.map((obj, r) => r < rolesCount - 1 ? `${obj.name}, ` : obj.name)}</td>
                     <td>
-                        <i className={canEdit ? 'fas fa-user-edit' : 'fas fa-ban'}
+                        <i className={canEdit ? 'text-info fas fa-user-edit' : 'fas fa-ban'}
                            aria-hidden="true"
                            onClick={canEdit? () => this.openUserManager({...user, roles: user.roles.slice()}) : undefined}/>
                     </td>
                     <td>
-                        <i className={canEdit ? 'text-danger fas fa-trash' : 'fas fa-ban'}
+                        <i className={canDelete ? 'text-danger fas fa-trash' : 'fas fa-ban'}
                            aria-hidden="true"
-                           onClick={canEdit? () => this.deleteUser(user.id) : undefined}/>
+                           onClick={canDelete? () => this.deleteUser(user.id) : undefined}/>
                     </td>
                 </tr>
             })}
@@ -97,7 +106,9 @@ export default class Users extends React.Component {
 
     createUser(e) {
         e.preventDefault();
-        console.log(this.state.newUser);
+        e.target.disabled = true;
+        e.target.className += ' loading-button';
+        this.props.dispatch(createUser(this.state.newUser))
     }
 
     deleteUser(id) {

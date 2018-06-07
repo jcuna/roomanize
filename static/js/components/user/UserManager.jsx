@@ -108,17 +108,25 @@ export default class UserManager extends React.Component {
 
     updateUserDataRoles(checkbox) {
         this.recordCheckboxValues(checkbox);
+        let newRole = {
+            name: checkbox.name,
+            id: checkbox.value,
+        };
         let roles = this.state.roles;
         let roleInserted = false;
         roles.forEach((role, i) => {
-            if (role.name === checkbox.name) {
-                roleInserted = true;
-                roles.splice(i, 1, checkbox);
+            if (role.id === newRole.id) {
+                if (checkbox.checked) {
+                    roleInserted = true;
+                    roles.splice(i, 1, newRole);
+                } else {
+                    roles.splice(i, 1);
+                }
             }
         });
 
-        if (!roleInserted) {
-            roles.push(checkbox);
+        if (!roleInserted && checkbox.checked) {
+            roles.push(newRole);
         }
 
         let user = {
