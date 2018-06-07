@@ -18,12 +18,12 @@ export default class Menu extends React.Component {
         const loggedIn = user.status === 'logged_in';
         return (
             <div className={this.className}>
-                <i onClick={this.toggleMenu} className="fa fa-times" aria-hidden="true"/>
+                <i onClick={this.toggleMenu} className="fas fa-times" aria-hidden="true"/>
                 <nav id="mobile-nav">
                     {this.getLinksBasedOffAccess()}
                     <Link to={loggedIn ? "/logout": "/login"}  onClick={this.toggleMenu}>
                         <span>{loggedIn ? `${user.first_name}`: "login"}</span>
-                        {loggedIn && <i className="user-logout fa fa-sign-out"/>}
+                        {loggedIn && <i className="user-logout fas fa-sign-out-alt"/>}
                     </Link>
                 </nav>
             </div>

@@ -18,7 +18,7 @@ export default class Header extends React.Component {
                 <div className="inner">
                     <Link to="/" className="logo"><img src="../images/building.png"/></Link>
                     <a className="navPanelToggle" onClick={this.toggleMenu}>
-                        <span className="fa fa-bars"></span>
+                        <span className="fas fa-bars"></span>
                     </a>
                 </div>
                 <section id="banner">

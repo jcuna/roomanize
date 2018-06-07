@@ -23,7 +23,7 @@ export default class Notifications extends React.Component {
                 }
                 return (
                     <div key={key} className={`alert alert-${item.type}`} role="alert">
-                        <i className="fa fa-times" aria-hidden="true" onClick={
+                        <i className="fas fa-times" aria-hidden="true" onClick={
                             () => this.props.dispatch(clearNotifications())
                         }>{}</i>
                        {item.message}

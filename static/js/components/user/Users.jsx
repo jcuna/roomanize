@@ -110,7 +110,7 @@ export default class Users extends React.Component {
 
         this.props.dispatch(showOverlay(
             <div className="panel">Estas seguro que quieres elimiar el usuario seleccionado?</div>,
-            <div className="warning-prompt"><i className="fa fa-exclamation-triangle"/>Cuidado...</div>,
+            <div className="warning-prompt"><i className="fas fa-exclamation-triangle"/>Cuidado...</div>,
             true,
             button)
         );
