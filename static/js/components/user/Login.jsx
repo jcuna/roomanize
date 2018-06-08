@@ -3,7 +3,7 @@
  */
 import FormGenerator from "../../utils/FromGenerator";
 import {login} from "../../actions/userActions";
-import Spinner from "../Spinner";
+import Spinner from "../../utils/Spinner";
 import {clearLandingPage} from "../../actions/appActions";
 
 export default class Login extends React.Component {

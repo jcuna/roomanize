@@ -6,22 +6,23 @@ import Menu from './Menu.jsx';
 import Header from './Header.jsx';
 import Footer from './Footer.jsx';
 import Routes from './Routes.jsx';
-import {Redirect} from 'react-router'
 import {BrowserRouter} from 'react-router-dom';
 import {connect} from 'react-redux';
 import {fetchUser} from '../actions/userActions';
 import '../../css/app.scss';
 import '../../css/overrides.scss';
 import {token} from "../utils/token";
-import Spinner from "./Spinner";
+import Spinner from "../utils/Spinner";
 import {fetchPermissions} from "../actions/roleActions";
-import Overlay from "./Overlay";
+import Overlay from "../utils/Overlay";
 import {setStateData} from "../utils/config";
 import PropTypes from 'prop-types';
 
 class Layout extends React.Component {
 
-    componentWillMount() {
+    constructor(props) {
+        super(props);
+
         if (this.props.user.status === 'pending') {
             this.props.dispatch(fetchUser())
         }

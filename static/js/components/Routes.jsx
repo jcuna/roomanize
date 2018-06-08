@@ -5,7 +5,7 @@
 import {Route, Switch} from 'react-router-dom'
 import Login from './user/Login.jsx'
 import RequiresLogin from './user/RequiresLogin.jsx';
-import FlashMessages from './Notifications.jsx'
+import FlashMessages from '../utils/Notifications.jsx'
 import ErrorPage from './ErrorPage.jsx';
 import Logout from './user/Logout.jsx'
 import Home from "./Home";

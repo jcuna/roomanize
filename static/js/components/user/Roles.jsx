@@ -3,7 +3,7 @@
  */
 import FormGenerator from "../../utils/FromGenerator";
 import {commitPermissions, createRole, deleteRole, fetchRoles} from "../../actions/roleActions";
-import Spinner from "../Spinner";
+import Spinner from "../../utils/Spinner";
 import {notifications, showOverlay} from "../../actions/appActions";
 import '../../../css/roles.scss';
 import Permissions from "../Permissions";

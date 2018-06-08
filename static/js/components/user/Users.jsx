@@ -2,7 +2,7 @@
  * Created by Jon on 1/11/18.
  */
 import {createUser, fetchUsers} from "../../actions/userActions";
-import Spinner from "../Spinner";
+import Spinner from "../../utils/Spinner";
 import {hideOverlay, showOverlay} from "../../actions/appActions";
 import UserManager from "./UserManager";
 import {fetchRoles} from "../../actions/roleActions";
