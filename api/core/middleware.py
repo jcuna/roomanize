@@ -11,6 +11,6 @@ class Middleware:
     def __call__(self, environ, start_response) -> Flask:
         if self.debug:
             logging.basicConfig()
-            logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
+            #logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
 
         return self.app(environ, start_response)

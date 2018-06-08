@@ -78,7 +78,7 @@ export default function userReducer(state = {
             return {...state, user: {...state.user, list: {status: 'fetched', users: action.payload}}};
 
         case USER_CREATED:
-            return {...state, user: {...state.user}};
+            return {...state, user: {...state.user, list: {status: 'pending', users: []}}};
         default:
             return state;
     }

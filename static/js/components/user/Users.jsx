@@ -1,7 +1,7 @@
 /**
  * Created by Jon on 1/11/18.
  */
-import {createUser, getUsers} from "../../actions/userActions";
+import {createUser, fetchUsers} from "../../actions/userActions";
 import Spinner from "../Spinner";
 import {hideOverlay, showOverlay} from "../../actions/appActions";
 import UserManager from "./UserManager";
@@ -16,9 +16,13 @@ export default class Users extends React.Component {
         this.deleteUser = this.deleteUser.bind(this);
         this.createUser = this.createUser.bind(this);
         this.updateNewUserData = this.updateNewUserData.bind(this);
+        this.orderBy = this.orderBy.bind(this);
 
         this.state = {
-            newUser: {}
+            newUser: {},
+            orderDir: 'asc',
+            orderBy: 'id',
+            page: 1,
         };
         if (props.roles.assigned.length === 0) {
             props.dispatch(fetchRoles());
@@ -27,12 +31,13 @@ export default class Users extends React.Component {
 
     static getDerivedStateFromProps(props, state) {
         if (props.user.list.status !== 'fetching' && props.user.list.users.length === 0) {
-            props.dispatch(getUsers());
+            props.dispatch(fetchUsers());
         }
         return state;
     }
 
     render() {
+        let dir = this.state.orderDir === 'asc' ? 'down' : 'up';
         return <div>
             <h2>Usuarios</h2>
             <div style={{textAlign: 'right', width: '100%', padding: '10px'}}>
@@ -48,14 +53,13 @@ export default class Users extends React.Component {
                     Nuevo Usuario
                 </button>
             </div>
-            {this.props.user.list.users.length === 0 && <Spinner/>}
             <table className="table table-striped">
             <thead>
             <tr>
                 <th>#</th>
-                <th>id</th>
-                <th>Nombre</th>
-                <th>Email</th>
+                <th>id <i className={`text-info fas fa-sort-numeric-${dir}`} onClick={() => this.orderBy('id')}/></th>
+                <th>Nombre <i className={`text-info fas fa-sort-alpha-${dir}`} onClick={() => this.orderBy('last_name')}/></th>
+                <th>Email <i className={`text-info fas fa-sort-alpha-${dir}`} onClick={() => this.orderBy('email')}/></th>
                 <th>Roles</th>
                 <th>Editar</th>
                 <th>Borrar</th>
@@ -83,10 +87,10 @@ export default class Users extends React.Component {
                            aria-hidden="true"
                            onClick={canDelete? () => this.deleteUser(user.id) : undefined}/>
                     </td>
-                </tr>
-            })}
+                </tr>})}
             </tbody>
-        </table>
+            </table>
+            {this.props.user.list.users.length === 0 && <div style={{position: 'absolute', left: '50%'}}><Spinner/></div>}
         </div>
     }
 
@@ -133,5 +137,14 @@ export default class Users extends React.Component {
                 newUser: user
             });
         }
+    }
+
+    orderBy(column) {
+        let orderDir = this.state.orderDir;
+        if (this.state.orderBy === column) {
+            orderDir = orderDir === 'asc' ? 'desc' : 'asc'
+        }
+        this.setState({orderBy: column, orderDir: orderDir});
+        this.props.dispatch(fetchUsers(column, orderDir));
     }
 }

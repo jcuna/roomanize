@@ -1,4 +1,3 @@
-import sys
 
 import sqlalchemy
 from flask_restful import Resource, request
@@ -24,7 +23,12 @@ class UsersManager(Resource):
     @token_required
     @access_required
     def get(self):
-        users = User.query.options(joinedload('roles')).all()
+
+        limit = request.args.get('limit')
+        order_by = getattr(User, request.args.get('orderBy'))
+        order_dir = getattr(order_by, request.args.get('orderDir'))
+
+        users = User.query.options(joinedload('roles')).order_by(order_dir()).limit(limit)
 
         return list(map(lambda user: {
             'first_name': user.first_name,

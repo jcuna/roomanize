@@ -226,3 +226,12 @@ html {
 .fa-edit {
   cursor: hand;
 }
+
+table {
+  th {
+    .fas {
+      cursor: pointer;
+      font-size: 24px;
+    }
+  }
+}
