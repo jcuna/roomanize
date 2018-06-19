@@ -13,20 +13,21 @@ export default class UserManager extends React.Component {
     constructor(props) {
         super();
 
-        let checkboxes = {};
+        const checkboxes = {};
         let roles = [];
-        if (props.editingUser !== undefined) {
+
+        if (typeof props.editingUser !== 'undefined') {
             props.editingUser.roles.forEach(role => {
                 checkboxes[role.name] = true;
             });
-            roles = props.editingUser.roles
+            roles = props.editingUser.roles;
         }
 
         this.state = {
             deleteButtonClass: 'btn btn-danger',
             actionButtonDisabled: true,
-            checkboxes: checkboxes,
-            roles: roles
+            checkboxes,
+            roles
         };
 
         this.updateUserData = this.updateUserData.bind(this);
@@ -43,50 +44,53 @@ export default class UserManager extends React.Component {
         }),
         roles: PropTypes.object,
         onDataChanged: PropTypes.func,
-        onSubmit: PropTypes.func
+        onSubmit: PropTypes.func,
+        dispatch: PropTypes.func,
     };
 
     render() {
-        return <div><FormGenerator {...{
+        return <div><FormGenerator { ...{
             formName: 'create-user-form',
             object: this,
             elements: this.formElements
-        }}/>
-            <h5>Aplicar los siguientes roles al usuario</h5>
-            <hr/>
-            <ul style={{
-                listStyle: 'none',
-                columnCount: 2,
-                columnGap: '20px',
-                marginTop: '10px'
-            }}>
+        } }/>
+        <h5>Aplicar los siguientes roles al usuario</h5>
+        <hr/>
+        <ul style={ {
+            listStyle: 'none',
+            columnCount: 2,
+            columnGap: '20px',
+            marginTop: '10px'
+        } }>
             {this.props.roles.assigned.map(role => {
-                let checked = this.state.checkboxes[role.name] === true;
-                return <li key={role.id}><Checkbox
-                    checked={checked}
-                    onChange={(this.updateUserDataRoles)}
-                    name={role.name}
-                    value={role.id}
-                    label={role.name}/></li>
+                const checked = this.state.checkboxes[role.name] === true;
+
+                return <li key={ role.id }><Checkbox
+                    checked={ checked }
+                    onChange={ (this.updateUserDataRoles) }
+                    name={ role.name }
+                    value={ role.id }
+                    label={ role.name }/></li>;
             })}
-            </ul>
-            <div style={{textAlign: 'right'}}>
-                <hr/>
-                <button className='btn btn-secondary'
-                        style={{marginRight: '10px'}}
-                        onClick={() => this.props.dispatch(hideOverlay())}>Cerrar
-                </button>
-                <button className='btn btn-success'
-                        disabled={this.state.actionButtonDisabled}
-                        onClick={this.props.onSubmit}>
-                    {this.props.editingUser === undefined ? 'Crear Usuario' : 'Guardar'}
-                </button>
-            </div>
+        </ul>
+        <div style={ { textAlign: 'right' } }>
+            <hr/>
+            <button className='btn btn-secondary'
+                style={ { marginRight: '10px' } }
+                onClick={ () => this.props.dispatch(hideOverlay()) }>Cerrar
+            </button>
+            <button className='btn btn-success'
+                disabled={ this.state.actionButtonDisabled }
+                onClick={ this.props.onSubmit }>
+                { typeof this.props.editingUser === 'undefined' ? 'Crear Usuario' : 'Guardar'}
+            </button>
         </div>
+        </div>;
     }
 
     recordCheckboxValues(checkbox) {
-        let checkboxState = this.state.checkboxes;
+        const checkboxState = this.state.checkboxes;
+
         checkboxState[checkbox.name] = checkbox.checked;
         this.setState({
             checkboxes: checkboxState
@@ -94,13 +98,14 @@ export default class UserManager extends React.Component {
     }
 
     updateUserData() {
-        let user = {
+        const user = {
             first_name: this.refs.first_name.value,
             last_name: this.refs.last_name.value,
             email: this.refs.email.value,
             roles: this.state.roles
         };
-        if (this.props.editingUser !== undefined) {
+
+        if (typeof this.props.editingUser !== 'undefined') {
             user.id = this.props.editingUser.id;
         }
         this.props.onDataChanged(user);
@@ -109,12 +114,13 @@ export default class UserManager extends React.Component {
 
     updateUserDataRoles(checkbox) {
         this.recordCheckboxValues(checkbox);
-        let newRole = {
+        const newRole = {
             name: checkbox.name,
             id: checkbox.value,
         };
-        let roles = this.state.roles;
+        const roles = this.state.roles;
         let roleInserted = false;
+
         roles.forEach((role, i) => {
             if (role.id === newRole.id) {
                 if (checkbox.checked) {
@@ -130,18 +136,18 @@ export default class UserManager extends React.Component {
             roles.push(newRole);
         }
 
-        let user = {
+        const user = {
             first_name: this.refs.first_name.value,
             last_name: this.refs.last_name.value,
             email: this.refs.email.value,
-            roles: roles
+            roles
         };
 
-        if (this.props.editingUser !== undefined) {
+        if (typeof this.props.editingUser !== 'undefined') {
             user.id = this.props.editingUser.id;
         }
         this.setState({
-           roles: roles
+            roles,
         });
 
         this.props.onDataChanged(user);
@@ -150,26 +156,27 @@ export default class UserManager extends React.Component {
 
     userIsValid(user) {
         if (user.first_name !== '' && user.last_name !== '' && user.email !== '') {
-            this.setState({actionButtonDisabled: false})
+            this.setState({ actionButtonDisabled: false });
         } else {
-            this.setState({actionButtonDisabled: true})
+            this.setState({ actionButtonDisabled: true });
         }
     }
 
     get formElements() {
-        let elements = [
-            {type: 'input', placeholder: 'Nombre', onChange: this.updateUserData, name: 'first-name'},
-            {type: 'input', placeholder: 'Apellidos', onChange: this.updateUserData, name: 'last-name'},
-            {type: 'input', placeholder: 'Email', onChange: this.updateUserData, name: 'email'}
+        const elements = [
+            { type: 'input', placeholder: 'Nombre', onChange: this.updateUserData, name: 'first-name' },
+            { type: 'input', placeholder: 'Apellidos', onChange: this.updateUserData, name: 'last-name' },
+            { type: 'input', placeholder: 'Email', onChange: this.updateUserData, name: 'email' }
         ];
-        if (this.props.editingUser !== undefined) {
+
+        if (typeof this.props.editingUser !== 'undefined') {
             elements.forEach(item => {
                 item.defaultValue = this.props.editingUser[item.name.replace('-', '_')];
                 if (item.name === 'email') {
                     item.readOnly = true;
                 }
-            })
+            });
         }
-        return elements
+        return elements;
     }
 }

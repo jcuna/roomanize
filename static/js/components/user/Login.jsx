@@ -3,66 +3,66 @@
  */
 
 import React from 'react';
-import FormGenerator from "../../utils/FromGenerator";
-import {login} from "../../actions/userActions";
-import Spinner from "../../utils/Spinner";
-import {clearLandingPage} from "../../actions/appActions";
+import PropTypes from 'prop-types';
+import FormGenerator from '../../utils/FromGenerator';
+import { login } from '../../actions/userActions';
+import Spinner from '../../utils/Spinner';
+import { clearLandingPage } from '../../actions/appActions';
 
 export default class Login extends React.Component {
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
 
         this.state = {
-            button: {value: 'Login'}
+            button: { value: 'Login' }
         };
 
         this.validateFields = this.validateFields.bind(this);
         this.initialRefs = this.initialRefs.bind(this);
-    }
 
-    componentWillMount() {
-        const {history} = this.props;
+        const { history } = this.props;
+
         if (this.props.user.status === 'logged_in') {
-            if (this.props.landingPage !== "" && this.props.landingPage !== '/logout') {
+            if (this.props.landingPage !== '' && this.props.landingPage !== '/logout') {
                 history.push(this.props.landingPage);
                 this.props.dispatch(clearLandingPage());
             } else {
-                history.push("/")
+                history.push('/');
             }
         }
     }
 
     render() {
-        let {user} = this.props;
-        let email = user.email || '';
-        let password = user.password || '';
+        const { user } = this.props;
+        const email = user.email || '';
+        const password = user.password || '';
 
         if (user.status === 'logging_in' || user.status === 'logging_out') {
-            return <Spinner/>
+            return <Spinner/>;
         }
 
-        return <FormGenerator {...{
+        return <FormGenerator { ...{
             formName: 'login-form',
             button: this.state.button,
             elements: [
-                {type: 'text', placeholder: 'Email', onChange: this.validateFields, name: 'email', defaultValue: email},
-                {type: 'password', placeholder: 'Contraseña', onChange: this.validateFields, name: 'password', defaultValue: password}
+                { type: 'text', placeholder: 'Email', onChange: this.validateFields, name: 'email', defaultValue: email },
+                { type: 'password', placeholder: 'Contraseña', onChange: this.validateFields, name: 'password', defaultValue: password }
             ],
             callback: this.handleSubmit.bind(this),
             object: this,
             initialRefs: this.initialRefs
-        }}/>
+        } }/>;
     }
 
     validateFields() {
         if (this.refs.email.value !== '' && this.refs.password.value !== '') {
             this.setState({
-                button: {value: 'Login'}
+                button: { value: 'Login' }
             });
-        } else if (this.state.button.disabled === undefined) {
+        } else if (typeof this.state.button.disabled === 'undefined') {
             this.setState({
-                button: {value: 'Login', disabled: "disabled"}
+                button: { value: 'Login', disabled: 'disabled' }
             });
         }
     }
@@ -76,8 +76,14 @@ export default class Login extends React.Component {
         if (refs.email.value === '' || refs.password.value === '') {
             this.setState({
                 button: {value: 'Login', disabled: 'disabled'}
-            })
+            });
         }
     }
 
+    static propTypes = {
+        history: PropTypes.object,
+        user: PropTypes.object,
+        landingPage: PropTypes.string,
+        dispatch: PropTypes.func,
+    }
 }

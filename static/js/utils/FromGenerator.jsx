@@ -26,6 +26,7 @@ export default class FormGenerator extends React.Component {
             this.state.formName,
             this.state.button
         );
+
         return (<div>{form}</div>);
     }
 
@@ -103,6 +104,6 @@ export default class FormGenerator extends React.Component {
         callback: PropTypes.func,
         object: PropTypes.object,
         elements: PropTypes.array,
-        initialRefs: PropTypes.object,
+        initialRefs: PropTypes.func,
     }
 }

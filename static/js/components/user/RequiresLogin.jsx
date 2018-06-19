@@ -3,25 +3,29 @@
  */
 
 import React from 'react';
-import {setLandingPage, notifications} from "../../actions/appActions";
+import PropTypes from 'prop-types';
+import { setLandingPage, notifications } from '../../actions/appActions';
 
 export default class RequiresLogin extends React.Component {
+    constructor(props) {
+        super();
 
-    componentWillReceiveProps(next) {
-        this.makeThemLogin(next);
+        RequiresLogin.makeThemLogin(props);
+        this.state = {};
     }
 
-    componentWillMount() {
-        this.makeThemLogin(this.props);
+    static getDerivedStateFromProps(nextProps) {
+        RequiresLogin.makeThemLogin(nextProps);
+        return null;
     }
 
-    makeThemLogin(props) {
-        if (! this.safeStatus.includes(props.user.status)) {
-            this.props.dispatch(notifications([
-                {type: 'warning', message: "Tienes que iniciar sessión"}
+    static makeThemLogin(props) {
+        if (!RequiresLogin.safeStatus.includes(props.user.status)) {
+            props.dispatch(notifications([
+                { type: 'warning', message: 'Tienes que iniciar sessión' }
             ]));
-            this.props.dispatch(setLandingPage(this.props.history.location.pathname));
-            this.props.history.push("/login");
+            props.dispatch(setLandingPage(props.history.location.pathname));
+            props.history.push('/login');
         }
     }
 
@@ -29,11 +33,17 @@ export default class RequiresLogin extends React.Component {
         return this.props.children;
     }
 
-    get safeStatus() {
+    static get safeStatus() {
         return [
             'logged_in',
             'logging_in',
             'logging_out'
-        ]
+        ];
+    }
+
+    static propTypes = {
+        dispatch: PropTypes.func,
+        children: PropTypes.object,
+        history: PropTypes.object,
     }
 }

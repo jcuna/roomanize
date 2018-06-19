@@ -3,20 +3,28 @@
  */
 
 import React from 'react';
-import {logout} from "../../actions/userActions";
-import Spinner from "../../utils/Spinner";
+import PropTypes from 'prop-types';
+import { logout } from '../../actions/userActions';
+import Spinner from '../../utils/Spinner';
 
 export default class Logout extends React.Component {
+    constructor(props) {
+        super(props);
 
-    componentWillMount() {
-        if (this.props.user.status === 'logged_in') {
-            this.props.dispatch(logout());
+        if (props.user.status === 'logged_in') {
+            props.dispatch(logout());
         } else {
-            this.props.history.push("/");
+            props.history.push('/');
         }
     }
 
     render() {
-        return <Spinner/>
+        return <Spinner/>;
     }
-}
+
+    static propTypes = {
+        user: PropTypes.object,
+        dispatch: PropTypes.func,
+        history: PropTypes.object,
+    };
+};

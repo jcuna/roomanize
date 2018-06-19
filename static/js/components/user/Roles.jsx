@@ -3,19 +3,19 @@
  */
 
 import React from 'react';
-import FormGenerator from "../../utils/FromGenerator";
-import {commitPermissions, createRole, deleteRole, fetchRoles} from "../../actions/roleActions";
-import Spinner from "../../utils/Spinner";
-import {notifications, showOverlay} from "../../actions/appActions";
+import PropTypes from 'prop-types';
+import FormGenerator from '../../utils/FromGenerator';
+import { commitPermissions, createRole, deleteRole, fetchRoles } from '../../actions/roleActions';
+import Spinner from '../../utils/Spinner';
+import { notifications, showOverlay } from '../../actions/appActions';
 import '../../../css/roles.scss';
-import Permissions from "../Permissions";
+import Permissions from '../Permissions';
 
 export default class Roles extends React.Component {
-
     constructor(props) {
         super();
         this.state = {
-            button: {value: 'Agregar role', disabled: "disabled"},
+            button: { value: 'Agregar role', disabled: 'disabled' },
             deleteButtonClass: 'btn btn-danger'
         };
 
@@ -29,31 +29,31 @@ export default class Roles extends React.Component {
         }
     }
 
-    render () {
+    render() {
         return (
-            <div className="roles-layout">
-                {this.rolesTable}
-                <FormGenerator {...{
+            <div className='roles-layout'>
+                { this.rolesTable }
+                <FormGenerator { ...{
                     formName: 'roles-form',
                     button: this.state.button,
                     callback: this.submit.bind(this),
                     object: this,
                     elements: [
-                        {type: 'input', placeholder: 'Role', onChange: this.toggleButtonDisabled.bind(this), name: 'role'}
+                        { type: 'input', placeholder: 'Role', onChange: this.toggleButtonDisabled.bind(this), name: 'role' }
                     ]
-                }}/>
+                } }/>
             </div>
-        )
+        );
     }
 
     toggleButtonDisabled() {
-        if (this.refs.role.value !== '' && this.state.button.disabled !== undefined) {
+        if (this.refs.role.value !== '' && typeof this.state.button.disabled !== 'undefined') {
             this.setState({
-                button: {value: 'Agregar role'}
+                button: { value: 'Agregar role' }
             });
-        } else if (this.refs.role.value === '' && this.state.button.disabled === undefined) {
+        } else if (this.refs.role.value === '' && typeof this.state.button.disabled === 'undefined') {
             this.setState({
-                button: {value: 'Agregar role', disabled: "disabled"}
+                button: { value: 'Agregar role', disabled: 'disabled' }
             });
         }
     }
@@ -61,6 +61,7 @@ export default class Roles extends React.Component {
     submit(e) {
         e.preventDefault();
         let exists = false;
+
         this.props.roles.assigned.forEach((item) => {
             if (item.name.toLowerCase() === this.refs.role.value.toLowerCase()) {
                 exists = true;
@@ -69,7 +70,7 @@ export default class Roles extends React.Component {
 
         if (exists) {
             this.props.dispatch(notifications([
-                {type: 'danger', message: "Role con mismo nombre ya existe"}
+                { type: 'danger', message: 'Role con mismo nombre ya existe' }
             ]));
             this.refs.role.value = '';
             this.toggleButtonDisabled();
@@ -83,41 +84,42 @@ export default class Roles extends React.Component {
         if (this.props.roles.status === 'fetching') {
             return <Spinner/>;
         }
-        return <table className="table table-striped">
+        return <table className='table table-striped'>
             <thead>
-            <tr>
-                <th>#</th>
-                <th>id</th>
-                <th>Nombre</th>
-                <th>Permisos</th>
-                <th>Borrar</th>
-            </tr>
+                <tr>
+                    <th>#</th>
+                    <th>id</th>
+                    <th>Nombre</th>
+                    <th>Permisos</th>
+                    <th>Borrar</th>
+                </tr>
             </thead>
             <tbody>
-            {this.props.roles.assigned.map((item, i) => {
-                i++;
-                return <tr key={i}>
-                    <th scope="row">{i}</th>
-                    <td>{item.id}</td>
-                    <td>{item.name}</td>
-                    <td>
-                        <i className="text-info fas fa-edit" data-id={item.id} aria-hidden="true" onClick={this.modifyPermissions}/>
-                    </td>
-                    <td>
-                        <i className="text-danger fas fa-trash" data-id={item.id} aria-hidden="true" onClick={this.confirmRoleDeletion}/>
-                    </td>
-                </tr>
-            })}
+                {this.props.roles.assigned.map((item, i) => {
+                    i++;
+                    return <tr key={ i }>
+                        <th scope='row'>{ i }</th>
+                        <td>{item.id}</td>
+                        <td>{item.name}</td>
+                        <td>
+                            <i className='text-info fas fa-edit' data-id={ item.id } aria-hidden='true' onClick={ this.modifyPermissions }/>
+                        </td>
+                        <td>
+                            <i className='text-danger fas fa-trash' data-id={ item.id } aria-hidden='true' onClick={ this.confirmRoleDeletion }/>
+                        </td>
+                    </tr>;
+                })}
             </tbody>
-        </table>
+        </table>;
     }
 
     modifyPermissions(e) {
         const button = <button
-            type="button" onClick={this.confirmChanges} className="btn btn-primary">OK
+            type='button' onClick={this.confirmChanges} className='btn btn-primary'>OK
         </button>;
+
         this.props.dispatch(showOverlay(
-            <Permissions {...this.props} id={Number(e.target.getAttribute('data-id'))} onUpdate={this.updateObject}/>,
+            <Permissions { ...this.props } id={Number(e.target.getAttribute('data-id')) } onUpdate={ this.updateObject }/>,
             'Editar Permisos',
             true,
             button)
@@ -125,9 +127,9 @@ export default class Roles extends React.Component {
     }
 
     confirmChanges(e) {
-        if (this.updatedPermissions !== undefined && !this.props.roles.processing) {
+        if (typeof this.updatedPermissions !== 'undefined' && !this.props.roles.processing) {
             e.target.className += ' loading-button';
-            this.props.dispatch(commitPermissions(this.updatedPermissions))
+            this.props.dispatch(commitPermissions(this.updatedPermissions));
         }
     }
 
@@ -136,21 +138,26 @@ export default class Roles extends React.Component {
     }
 
     confirmRoleDeletion(e) {
-        let roleId = e.target.getAttribute('data-id');
+        const roleId = e.target.getAttribute('data-id');
 
         const button = <button
-            type="button" onClick={(b) => {
+            type='button' onClick={ (b) => {
                 if (!this.props.roles.processing) {
                     b.target.className += ' loading-button';
                     this.props.dispatch(deleteRole(Number(roleId)));
                 }
-            }} className={this.state.deleteButtonClass}>Confirmar</button>;
+            } } className={this.state.deleteButtonClass}>Confirmar</button>;
 
         this.props.dispatch(showOverlay(
-            <div className="panel">Estas seguro que quieres elimiar el rol seleccionado?</div>,
-            <div className="warning-prompt"><i className="fas fa-exclamation-triangle"/>Cuidado...</div>,
+            <div className='panel'>Estas seguro que quieres elimiar el rol seleccionado?</div>,
+            <div className='warning-prompt'><i className='fas fa-exclamation-triangle'/>Cuidado...</div>,
             true,
             button)
         );
+    }
+
+    static propTypes = {
+        roles: PropTypes.object,
+        dispatch: PropTypes.func,
     }
 }
