@@ -23,12 +23,21 @@ server {
     error_log   /var/log/nginx/error_nginx.log;
 
     # Configure NGINX to deliver static content from the specified folder
+    # location / {
+    #     gzip_static on;
+    #     expires max;
+    #     add_header Cache-Control public;
+    #     root /usr/share/nginx/html;
+    #     try_files $uri /index.html;
+    # }
+
     location / {
-        gzip_static on;
-        expires max;
-        add_header Cache-Control public;
-        root /usr/share/nginx/html;
-        try_files $uri /index.html;
+       proxy_pass   http://static:3000;
+       proxy_redirect off;
+
+       proxy_http_version 1.1;
+       proxy_set_header Upgrade $http_upgrade;
+       proxy_set_header Connection "upgrade";
     }
 
     # Configure NGINX to reverse proxy HTTP requests to the upstream server (Gunicorn (WSGI server))

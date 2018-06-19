@@ -2,6 +2,7 @@
  * Created by Jon on 6/22/17.
  */
 
+import React from 'react';
 import '../../css/spinner.scss';
 
 export default class Spinner extends React.Component {

@@ -1,6 +1,8 @@
 /**
  * Created by Jon on 12/29/17.
  */
+
+import React from 'react';
 import {hideOverlay} from "../actions/appActions";
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 

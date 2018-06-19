@@ -2,23 +2,24 @@
  * Created by Jon on 12/7/17.
  */
 
-export default class ErrorPage extends React.Component {
+import React from 'react';
+import PropTypes from 'prop-types';
 
-    render() {
-        return (
-            <div className="card">
-                <div className="card-header">
-                    {this.props.type}
-                </div>
-                <div className="card-block">
-                    <blockquote className="card-blockquote">
-                        <p>{this.props.textMap[this.props.type]}</p>
-                    </blockquote>
-                </div>
+const ErrorPage = (props) => {
+
+    return (
+        <div className="card">
+            <div className="card-header">
+                {props.type}
             </div>
-        )
-    }
-}
+            <div className="card-block">
+                <blockquote className="card-blockquote">
+                    <p>{props.textMap[props.type]}</p>
+                </blockquote>
+            </div>
+        </div>
+    );
+};
 
 ErrorPage.defaultProps = {
     type: 404,
@@ -27,3 +28,10 @@ ErrorPage.defaultProps = {
         403: 'No Tienes accesso al recurso solicitado'
     }
 };
+
+ErrorPage.propTypes = {
+    type: PropTypes.number,
+    textMap: PropTypes.object,
+};
+
+export default ErrorPage;

@@ -2,9 +2,11 @@
  * Created by Jon on 11/20/17.
  */
 
-import {Link} from 'react-router-dom';
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 import '../../css/header.scss';
-import {toggleMobileMenu} from "../actions/appActions";
+import { toggleMobileMenu } from '../actions/appActions';
 
 export default class Header extends React.Component {
     constructor() {
@@ -12,13 +14,13 @@ export default class Header extends React.Component {
         this.toggleMenu = this.toggleMenu.bind(this);
     }
 
-    render () {
+    render() {
         return (
             <header id="header">
                 <div className="inner">
                     <Link to="/" className="logo"><img src="../images/building.png"/></Link>
-                    <a className="navPanelToggle" onClick={this.toggleMenu}>
-                        <span className="fas fa-bars"></span>
+                    <a className="navPanelToggle" onClick={ this.toggleMenu }>
+                        <span className="fas fa-bars"/>
                     </a>
                 </div>
                 <section id="banner">
@@ -30,6 +32,12 @@ export default class Header extends React.Component {
     }
 
     toggleMenu() {
-        this.props.dispatch(toggleMobileMenu(this.props.showMobileMenu))
+        this.props.dispatch(toggleMobileMenu(this.props.showMobileMenu));
+    }
+
+    // noinspection JSUnusedGlobalSymbols
+    static propTypes = {
+        dispatch: PropTypes.func,
+        showMobileMenu: PropTypes.bool
     }
 }

@@ -5,7 +5,7 @@ cd $APP_PATH
 npm install
 
 if [ "$APP_ENV" = "develop" ]; then
-    npm run watch
+    npm run start:dev
 else
     npm run build
     rm -rf css

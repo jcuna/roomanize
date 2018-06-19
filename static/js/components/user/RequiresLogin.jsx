@@ -2,6 +2,7 @@
  * Created by Jon on 12/6/17.
  */
 
+import React from 'react';
 import {setLandingPage, notifications} from "../../actions/appActions";
 
 export default class RequiresLogin extends React.Component {

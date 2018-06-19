@@ -2,6 +2,7 @@
  * Created by Jon on 12/7/17.
  */
 
+import React from 'react';
 import {logout} from "../../actions/userActions";
 import Spinner from "../../utils/Spinner";
 

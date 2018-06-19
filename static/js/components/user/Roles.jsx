@@ -1,6 +1,8 @@
 /**
  * Created by Jon on 12/23/17.
  */
+
+import React from 'react';
 import FormGenerator from "../../utils/FromGenerator";
 import {commitPermissions, createRole, deleteRole, fetchRoles} from "../../actions/roleActions";
 import Spinner from "../../utils/Spinner";

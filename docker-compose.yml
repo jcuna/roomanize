@@ -28,6 +28,8 @@ services:
     build: ./static
     volumes:
       - ./static:/app
+    ports:
+      - "3000:3000"
     environment:
      - APP_ENV=develop
      - APP_PATH=/app

@@ -1,11 +1,16 @@
 const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const path = require('path');
 
 const config = {
-    entry:  __dirname + '/js/index.jsx',
+    entry: [
+        'webpack/hot/dev-server',
+        path.resolve(__dirname, 'js/index.jsx')
+    ],
     output: {
-        path: __dirname + '/dist',
-        filename: 'bundle.js'
+        path: path.resolve(__dirname, '/dist'),
+        filename: 'bundle.js',
+        publicPath : '/dist/'
     },
     resolve: {
         extensions: ['.js', '.jsx', '.css']
@@ -31,14 +36,23 @@ const config = {
         ]
     },
     plugins: [
-        new webpack.ProvidePlugin({
-            React: 'react'
-        }),
         new ExtractTextPlugin({
             filename: 'style.css',
             disable: false,
             allChunks: true
-        })
-    ]
+        }),
+        new webpack.HotModuleReplacementPlugin()
+    ],
+    devServer: {
+        contentBase: path.resolve(__dirname),
+        hot: true,
+        compress: true,
+        publicPath:  path.resolve(__dirname, '/dist'),
+        port: 3000,
+        host: '0.0.0.0',
+        disableHostCheck: true,
+        historyApiFallback: true,
+    },
 };
+
 module.exports = config;

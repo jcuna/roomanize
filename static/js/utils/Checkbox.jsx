@@ -2,6 +2,8 @@
  * Created by Jon on 5/26/18.
  */
 
+import React from 'react';
+
 import PropTypes from 'prop-types';
 
 export default class Checkbox extends React.Component {

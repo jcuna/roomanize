@@ -1,6 +1,8 @@
 /**
  * Created by Jon on 1/11/18.
  */
+
+import React from 'react';
 import {createUser, fetchUsers} from "../../actions/userActions";
 import Spinner from "../../utils/Spinner";
 import {hideOverlay, showOverlay} from "../../actions/appActions";
@@ -23,6 +25,7 @@ export default class Users extends React.Component {
             orderDir: 'asc',
             orderBy: 'id',
             page: 1,
+            searching: -1
         };
         if (props.roles.assigned.length === 0) {
             props.dispatch(fetchRoles());
@@ -90,7 +93,8 @@ export default class Users extends React.Component {
                 </tr>})}
             </tbody>
             </table>
-            {this.props.user.list.users.length === 0 && <div style={{position: 'absolute', left: '50%'}}><Spinner/></div>}
+            {this.props.user.list.users.length === 0 &&
+            <div style={{position: 'absolute', left: '50%'}}><Spinner/></div>}
         </div>
     }
 

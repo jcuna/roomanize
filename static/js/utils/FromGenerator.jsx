@@ -2,6 +2,7 @@
  * Created by Jon on 9/21/16.
  */
 
+import React from 'react';
 import PropTypes from 'prop-types';
 
 export default class FormGenerator extends React.Component {
@@ -9,12 +10,6 @@ export default class FormGenerator extends React.Component {
         super();
 
         this.state = props;
-
-        if (typeof this.state.elements === undefined || typeof this.state.elements !== 'object') {
-            throw Error("Invalid elements property");
-        } else if (typeof this.state.formName === undefined) {
-            throw Error("Must specify formName");
-        }
     }
 
     componentWillReceiveProps (nextProps) {
@@ -26,7 +21,7 @@ export default class FormGenerator extends React.Component {
      * @returns {XML}
      */
     render() {
-        let form = this.generateForm(
+        const form = this.generateForm(
             this.state.elements,
             this.state.formName,
             this.state.button
@@ -38,10 +33,10 @@ export default class FormGenerator extends React.Component {
      * pass refs down to callee
      */
     componentDidMount() {
-        if (typeof this.state.object !== "undefined") {
+        if (typeof this.state.object !== 'undefined') {
             this.state.object.refs = this.refs;
         }
-        if (this.props.initialRefs !== undefined) {
+        if (typeof this.props.initialRefs !== 'undefined') {
             this.props.initialRefs(this.state.object.refs);
         }
     }
@@ -49,53 +44,54 @@ export default class FormGenerator extends React.Component {
     /**
      * @private
      *
-     * @param elements
-     * @param formName
-     * @param button
+     * @param {array} elements
+     * @param {string} formName
+     * @param {object} button
      * @returns {*}
      */
     generateForm(elements, formName, button) {
         return React.createElement('form', {className: formName, onSubmit: this.state.callback},
             elements.map((b, k) => {
-                if (b.$$typeof !== undefined) {
+                if (typeof b.$$typeof !== 'undefined') {
                     return b;
                 }
-                let formElement = b.formElement === undefined ? 'input' : b.formElement;
-                let reference = this.getReference(b);
-                let className = 'form-control';
+                const formElement = typeof b.formElement === 'undefined' ? 'input' : b.formElement;
+                const reference = FormGenerator.getReference(b);
+                const className = 'form-control';
 
-                return React.createElement('div', {className: 'form-group', key: k},
+                return React.createElement('div', { className: 'form-group', key: k },
                     React.createElement(formElement, {
-                            type: b.type,
-                            name: b.name,
-                            placeholder: b.placeholder,
-                            className: b.className === undefined ? className : `${className} ${b.className}`,
-                            onChange: b.onChange,
-                            ref: reference,
-                            value: b.value,
-                            defaultValue: b.defaultValue,
-                            disabled: b.disabled || false,
-                            readOnly: b.readOnly || false
-                        },
-                        b.options && b.options.map((val, k) => React.createElement('option', { value: val, key: k }, val))
+                        type: b.type,
+                        name: b.name,
+                        placeholder: b.placeholder,
+                        className: typeof b.className === 'undefined' ? className : `${className} ${b.className}`,
+                        onChange: b.onChange,
+                        ref: reference,
+                        value: b.value,
+                        defaultValue: b.defaultValue,
+                        disabled: b.disabled || false,
+                        readOnly: b.readOnly || false
+                    },
+                    b.options && b.options.map((val, p) => React.createElement('option', { value: val, key: p }, val))
                     )
-                )
+                );
             }),
-            button !== undefined &&
-            React.createElement('div', {className: 'form-group'},
+            typeof button !== 'undefined' &&
+            React.createElement('div', { className: 'form-group' },
                 React.createElement(
-                    'button', {...button, className: `btn btn-${button.type || 'primary'}`},
+                    'button', { ...button, className: `btn btn-${button.type || 'primary'}` },
                     button.value || 'Submit'
                 )
             )
-        )
+        );
     }
 
-    getReference(key) {
+    static getReference(key) {
         let reference = null;
-        if (key.name !== undefined) {
+
+        if (typeof key.name !== 'undefined') {
             reference = key.name.replace(/[^\w]/g, '_').toLowerCase();
-        } else if (key.placeholder !== undefined) {
+        } else if (typeof key.placeholder !== 'undefined') {
             reference = key.placeholder.replace(/[^\w]/g, '_').toLowerCase();
         }
 
@@ -106,6 +102,7 @@ export default class FormGenerator extends React.Component {
         formName: PropTypes.string.isRequired,
         callback: PropTypes.func,
         object: PropTypes.object,
-        elements: PropTypes.array
+        elements: PropTypes.array,
+        initialRefs: PropTypes.object,
     }
 }

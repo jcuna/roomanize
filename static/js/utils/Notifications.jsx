@@ -2,6 +2,7 @@
  * Created by Jon on 12/6/17.
  */
 
+import React from 'react';
 import {clearNotifications} from '../actions/appActions';
 
 export default class Notifications extends React.Component {

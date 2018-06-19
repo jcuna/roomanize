@@ -1,6 +1,8 @@
 /**
  * Created by Jon on 12/3/17.
  */
+
+import React from 'react';
 import FormGenerator from "../../utils/FromGenerator";
 import {login} from "../../actions/userActions";
 import Spinner from "../../utils/Spinner";

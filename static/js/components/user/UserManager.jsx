@@ -2,6 +2,7 @@
  * Created by Jon on 6/5/18.
  */
 
+import React from 'react';
 import PropTypes from 'prop-types';
 import FormGenerator from "../../utils/FromGenerator";
 import Checkbox from "../../utils/Checkbox";

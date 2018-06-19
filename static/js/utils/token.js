@@ -1,11 +1,10 @@
-import {USER_MUST_LOGIN, USER_FETCHED} from "../actions/userActions";
-import api from "./api";
+import { USER_MUST_LOGIN, USER_FETCHED } from '../actions/userActions';
+import api from './api';
 
 class Token {
-
     /**
      *
-     * @param props {Object}
+     * @param {object} props {Object}
      */
     set data(props) {
         this._data = props;
@@ -27,7 +26,7 @@ class Token {
         return new Promise((resolve, reject) => {
             this.expired(Token.timestamp).then(didExpire => {
                 if (didExpire) {
-                    api({url: '/user'}).then(resp => {
+                    api({ url: '/user' }).then(resp => {
                         if (resp.status < 300) {
                             this._data.dispatch({
                                 type: USER_FETCHED,
@@ -45,7 +44,7 @@ class Token {
                         reject(err);
                     });
                 } else if (this._data.token.value !== '') {
-                    resolve(this.authHeaders())
+                    resolve(this.authHeaders());
                 } else {
                     reject(Error('No active session'));
                 }
@@ -55,12 +54,12 @@ class Token {
 
     /**
      *
-     * @param timestamp {Number}
+     * @param {int} timestamp {Number}
      * @returns {Promise}
      */
     expired(timestamp) {
         return new Promise(resolve => {
-            if (this._data === undefined) {
+            if (typeof this._data === 'undefined') {
                 this.waitForData(resolve, timestamp);
             } else {
                 resolve(timestamp + 10 > this._data.token.expires);
@@ -70,12 +69,12 @@ class Token {
 
     /**
      *
-     * @param resolve {Function}
-     * @param timestamp {Number}
+     * @param {function} resolve {Function}
+     * @param {int} timestamp {Number}
      */
     waitForData(resolve, timestamp) {
         setTimeout(() => {
-            if (this._data === undefined) {
+            if (typeof this._data === 'undefined') {
                 this.waitForData(resolve, timestamp);
             } else {
                 resolve(timestamp + 10 > this._data.token.expires);
@@ -89,8 +88,8 @@ class Token {
      */
     authHeaders() {
         return {
-            "x-access-token": this._data.token.value
-        }
+            'x-access-token': this._data.token.value
+        };
     }
 }
 
