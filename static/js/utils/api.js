@@ -49,7 +49,7 @@ const normalFetch = (url, method, data, crossDomain, headers = {}) => {
 /**
  *
  * @param {string} url
- * @param {data} data
+ * @param {object} data
  * @returns {Promise}
  */
 const jsonpFetch = function (url, data) {
@@ -68,7 +68,7 @@ const jsonpFetch = function (url, data) {
  * @param {boolean} jsonp
  * @returns {Promise}
  */
-const api = (request, data = null, jsonp = false) => {
+const api = (request, data, jsonp = false) => {
 
     const URL_PREFIX = '/api/v1.0';
 
