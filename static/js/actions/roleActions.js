@@ -37,16 +37,16 @@ export function createRole(name) {
                 });
             });
         });
-    }
+    };
 }
 
 export function deleteRole(id) {
     return function (dispatch) {
-        dispatch({type: ROLE_DELETE_DISPATCHED});
-        token.through().then(token => api({
+        dispatch({ type: ROLE_DELETE_DISPATCHED });
+        token.through().then(auth => api({
             url: '/roles',
             method: 'DELETE',
-            headers: token
+            headers: auth
         }, id).then(resp => {
             if (resp.status < 300) {
                 dispatch({
@@ -59,6 +59,7 @@ export function deleteRole(id) {
                 }]));
             } else {
                 let message = 'No tienes accesso a borrar roles';
+
                 if (resp.status === 409) {
                     message = 'No puedes borrar un rol que ha sido asignado a un usuario, ' +
                         'primero quitale el rol al usuario.'
@@ -66,24 +67,22 @@ export function deleteRole(id) {
                 dispatch({type: ROLE_DELETE_FAIL});
                 dispatch(notifications([{
                     type: 'warning',
-                    message: message
+                    message
                 }]));
             }
-        }, err => {
-                dispatch({type: ROLE_DELETE_FAIL});
-                dispatch(notifications([{
-                        type: 'warning',
-                        message: 'Error inesperado'
-                    }])
-                );
-            })
-        );
-    }
+        }, () => {
+            dispatch({ type: ROLE_DELETE_FAIL });
+            dispatch(notifications([{
+                type: 'warning',
+                message: 'Error inesperado'
+            }]));
+        }));
+    };
 }
 
 export function fetchRoles() {
     return function (dispatch) {
-        dispatch({type: ROLES_FETCHING});
+        dispatch({ type: ROLES_FETCHING });
         token.through().then(header => api({
             url: '/roles',
             method: 'GET',
@@ -94,9 +93,9 @@ export function fetchRoles() {
                 payload: resp.data
             });
         }, err => {
-            dispatch({type: ROLES_FAIL, payload: err})
-        }), err => dispatch({type: ROLES_FAIL, payload: err}));
-    }
+            dispatch({ type: ROLES_FAIL, payload: err })
+        }), err => dispatch({ type: ROLES_FAIL, payload: err }));
+    };
 }
 
 export function fetchPermissions() {
@@ -112,14 +111,14 @@ export function fetchPermissions() {
                     type: PERMISSIONS_FETCHED,
                     payload: resp.data
                 });
-            }, err => {})
-        }, err => {})
-    }
+            }, err => {});
+        }, err => {});
+    };
 }
 
 export function commitPermissions(permissions) {
     return function (dispatch) {
-        dispatch({type: ROLE_CREATE_DISPATCHED});
+        dispatch({ type: ROLE_CREATE_DISPATCHED });
         token.through().then(header => api({
             url: 'roles',
             method: 'PUT',
@@ -135,18 +134,18 @@ export function commitPermissions(permissions) {
                     message: 'Acceso actualizado correctamente'
                 }]));
             } else {
-                dispatch({type: PERMISSIONS_COMMIT_FAIL});
+                dispatch({ type: PERMISSIONS_COMMIT_FAIL });
                 dispatch(notifications([{
                     type: 'warning',
                     message: 'No se pudo actualizar los accesos'
                 }]));
             }
-        }, err => {
-            dispatch({type: PERMISSIONS_COMMIT_FAIL});
+        }, () => {
+            dispatch({ type: PERMISSIONS_COMMIT_FAIL });
             dispatch(notifications([{
                 type: 'warning',
                 message: 'No se pudo actualizar los accesos'
             }]));
         }));
-    }
+    };
 }

@@ -92,9 +92,10 @@ export default class Users extends React.Component {
                             <td>
                                 <i className={ canDelete ? 'text-danger fas fa-trash' : 'fas fa-ban' }
                                     aria-hidden='true'
-                                    onClick={ canDelete? () => this.deleteUser(user.id) : undefined }/>
+                                    onClick={ canDelete ? () => this.deleteUser(user.id) : undefined }/>
                             </td>
-                        </tr>})}
+                        </tr>;
+                    })}
                 </tbody>
             </table>
             { this.props.user.list.users.length === 0 &&
@@ -121,14 +122,14 @@ export default class Users extends React.Component {
         e.preventDefault();
         e.target.disabled = true;
         e.target.className += ' loading-button';
-        this.props.dispatch(createUser(this.state.newUser))
+        this.props.dispatch(createUser(this.state.newUser));
     }
 
     deleteUser(id) {
         const button = <button
             type='button' onClick={ () => {
                 this.props.dispatch(hideOverlay());
-                console.log('deleting user')
+                console.log('deleting user');
                 // this.props.dispatch(deleteUser(id));
             } } className='btn btn-danger'>Confirmar</button>;
 

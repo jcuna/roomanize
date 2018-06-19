@@ -13,7 +13,7 @@ import store from './store';
 
 const bootstrap = () => {
     ReactDOM.render(
-        <Provider store={store}>
+        <Provider store={ store }>
             <Layout/>
         </Provider>, document.querySelector('#content')
     );

@@ -13,7 +13,7 @@ export function toggleMobileMenu(currentValue) {
             type: TOGGLE_MOBILE_MENU,
             payload: !currentValue
         });
-    }
+    };
 }
 
 /**
@@ -44,34 +44,34 @@ export function setLandingPage(landingPage) {
     return {
         type: LANDING_PAGE_SET,
         payload: landingPage
-    }
+    };
 }
 
 export function clearLandingPage() {
     return {
         type: LANDING_PAGE_CLEAR
-    }
+    };
 }
 
 /**
  *
- * @param childComponent {XML}
- * @param title {string}
- * @param closeButton {boolean}
- * @param actionButton {XML}
- * @returns {{type: String, payload: {component: XML, title: String, closeButton: boolean, actionButton: XML}}}
+ * @param {JSX} childComponent
+ * @param {string} title
+ * @param {boolean} closeButton
+ * @param {JSX} actionButton
+ * @returns {object}
  */
 export function showOverlay(childComponent, title, closeButton = false, actionButton = null) {
     return {
         type: OVERLAY_SHOW, payload: {
             component: childComponent,
-            title: title,
-            closeButton: closeButton,
-            actionButton: actionButton
+            title,
+            closeButton,
+            actionButton
         }
-    }
+    };
 }
 
 export function hideOverlay() {
-    return {type: OVERLAY_HIDE}
+    return { type: OVERLAY_HIDE };
 }

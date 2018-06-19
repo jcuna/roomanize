@@ -3,18 +3,15 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import '../../css/spinner.scss';
 
-export default class Spinner extends React.Component {
-    render() {
-        return <div style={this.getColorStyle()} id="continous-spinner"></div>
-    }
+const Spinner = (props) => {
+    return <div style={ props.color } id="continous-spinner"/>;
+};
 
-    getColorStyle() {
-        if (this.props.color !== undefined) {
-            return {
-                color: this.props.color
-            }
-        }
-    }
-}
+Spinner.propTypes = {
+    color: PropTypes.object,
+};
+
+export default Spinner;

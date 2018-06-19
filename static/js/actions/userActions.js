@@ -1,6 +1,6 @@
 import api from '../utils/api'
-import {token} from "../utils/token";
-import {hideOverlay, notifications} from "./appActions";
+import { token } from '../utils/token';
+import { hideOverlay, notifications} from './appActions';
 
 export const USER_LOGGING_IN = 'USER_LOGGING_IN';
 export const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS';
@@ -18,14 +18,13 @@ export const USER_CREATING = 'USER_CREATING';
 export const USER_CREATED = 'USER_CREATED';
 export const USER_CREATE_FAIL = 'USER_CREATE_FAIL';
 
-
 export function login(email, password) {
     return function (dispatch) {
-        dispatch({type: USER_LOGGING_IN});
+        dispatch({ type: USER_LOGGING_IN });
         const request = {
             url: '/login',
-            method: "POST",
-            headers: {'Authorization': 'Basic ' + btoa(email + ":" + password)}
+            method: 'POST',
+            headers: { Authorization: 'Basic ' + btoa(email + ':' + password) }
         };
 
         api(request).then(resp => {
@@ -39,12 +38,12 @@ export function login(email, password) {
                     type: USER_LOGIN_FAIL,
                     payload: {
                         message: resp.message,
-                        email: email,
-                        password: password
+                        email,
+                        password
                     }
                 });
                 dispatch(notifications([
-                    {type: 'danger', message: "Nombre de usuario o contraseña no son válidos"}
+                    { type: 'danger', message: 'Nombre de usuario o contraseña no son válidos' }
                 ]));
             }
         }, err => {
@@ -52,21 +51,21 @@ export function login(email, password) {
                 type: USER_LOGIN_ERROR,
                 payload: {
                     error: err,
-                    email: email,
-                    password: password
+                    email,
+                    password,
                 }
             });
             dispatch(notifications([
-                {type: 'danger', message: "Ha ocurrido un error inesperado."}
+                { type: 'danger', message: 'Ha ocurrido un error inesperado.' }
             ]));
         });
-    }
+    };
 }
 
 export function fetchUser() {
     return function (dispatch) {
-        dispatch({type: USER_FETCHING});
-        api({url: '/user'}).then(resp => {
+        dispatch({ type: USER_FETCHING });
+        api({ url: '/user' }).then(resp => {
             if (resp.status < 300) {
                 dispatch({
                     type: USER_FETCHED,
@@ -76,7 +75,7 @@ export function fetchUser() {
                 dispatch({
                     type: USER_MUST_LOGIN,
                     payload: resp.message
-                })
+                });
             }
         }, err => {
             dispatch({
@@ -86,29 +85,29 @@ export function fetchUser() {
                 }
             });
             dispatch(notifications([
-                {type: 'danger', message: "Ha ocurrido un error inesperado."}
+                { type: 'danger', message: 'Ha ocurrido un error inesperado.' }
             ]));
         });
-    }
+    };
 }
 
 export function logout() {
-    return function(dispatch) {
-        dispatch({type: USER_LOGGING_OUT});
+    return function (dispatch) {
+        dispatch({ type: USER_LOGGING_OUT });
 
-        api({url: '/login', method: 'DELETE'}).then(() => {
+        api({ url: '/login', method: 'DELETE' }).then(() => {
             dispatch({
                 type: USER_LOGGED_OUT,
             });
         }, err => {
 
         });
-    }
+    };
 }
 
 export function fetchUsers(orderBy = 'id', orderDir = 'asc', page = 1, limit = 50) {
-    return function(dispatch) {
-        dispatch({type: USERS_FETCHING});
+    return function (dispatch) {
+        dispatch({ type: USERS_FETCHING });
 
         token.through().then(header => {
             api({
@@ -130,13 +129,14 @@ export function fetchUsers(orderBy = 'id', orderDir = 'asc', page = 1, limit = 5
                 type: USERS_FETCH_FAIL,
             });
         });
-    }
+    };
 }
 
 export function createUser(user) {
-    user = {...user, roles: user.roles.map(role => role.id)}
+    user = { ...user, roles: user.roles.map(role => role.id) };
+
     return function (dispatch) {
-        dispatch({type: USER_CREATING});
+        dispatch({ type: USER_CREATING });
         token.through().then(header => {
             api({
                 url: '/users',
@@ -149,15 +149,15 @@ export function createUser(user) {
                 });
                 dispatch(hideOverlay());
                 dispatch(notifications([
-                    {type: 'success', message: "Usuario creado satisfactoriamente"}
+                    { type: 'success', message: 'Usuario creado satisfactoriamente' }
                 ]));
             }, err => {
                 dispatch(hideOverlay());
-                dispatch({type: USER_CREATE_FAIL});
+                dispatch({ type: USER_CREATE_FAIL });
                 dispatch(notifications([
-                    {type: 'danger', message: "Hubo un error creando el usuario"}
+                    { type: 'danger', message: 'Hubo un error creando el usuario' }
                 ]));
-            })
-        })
-    }
+            });
+        });
+    };
 }
