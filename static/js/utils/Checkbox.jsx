@@ -19,8 +19,10 @@ const Checkbox = (props) => {
             checkboxObj.value = props.value;
         }
         props.onChange(checkboxObj);
-    } }><span className={ `checkbox ${props.checked ? 'ticked' : '' }`
-        }/><span className="checkbox-label">{props.label}</span></div>;
+    } }>
+        <span className={ `checkbox ${props.checked ? 'ticked' : '' }` }/>
+        <span className="checkbox-label">{props.label}</span>
+    </div>;
 };
 
 Checkbox.propTypes = {
@@ -28,7 +30,7 @@ Checkbox.propTypes = {
     onChange: PropTypes.func.isRequired,
     checked: PropTypes.bool,
     label: PropTypes.string,
-    id: PropTypes.number,
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     value: PropTypes.number
 };
 
