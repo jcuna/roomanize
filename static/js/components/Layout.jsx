@@ -29,42 +29,39 @@ class Layout extends React.Component {
         if (this.permissionsPending()) {
             props.dispatch(fetchPermissions());
         }
-        this.state = {};
     }
 
     permissionsPending() {
         return Object.keys(this.props.roles.permissions).length === 0;
     }
 
-    componentDidUpdate() {
+    render() {
         const { props } = this;
 
         if (props.token.value !== '') {
             token.data = { ...props };
             setStateData({ ...props });
         }
-    }
 
-    render() {
         let render;
 
-        if (this.props.user.status === 'pending' || this.permissionsPending() &&
-            this.props.user.status === 'logged_in') {
+        if (props.user.status === 'pending' || this.permissionsPending() &&
+            props.user.status === 'logged_in') {
             render = <Spinner/>;
         } else {
-            render = <Routes { ...this.props }/>;
+            render = <Routes { ...props }/>;
         }
 
         return (
             <BrowserRouter>
                 <div className="parent-container">
-                    <Menu { ...this.props }/>
+                    <Menu { ...props }/>
                     <div className={ this.getClassName() }>
-                        <Header { ...this.props }/>
+                        <Header { ...props }/>
                         {render}
                         <Footer/>
                     </div>
-                    <Overlay { ...this.props }/>
+                    <Overlay { ...props }/>
                 </div>
             </BrowserRouter>
         );

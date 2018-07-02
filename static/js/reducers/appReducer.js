@@ -20,17 +20,17 @@ export default function appReducer(state = {
     },
     checkedBoxes: {}
 }, action) {
-    switch(action.type) {
+    switch (action.type) {
         case TOGGLE_MOBILE_MENU:
-            return {...state, showMobileMenu: action.payload};
+            return { ...state, showMobileMenu: action.payload };
         case NOTIFICATIONS_SET:
-            return {...state, notifications: action.payload};
+            return { ...state, notifications: action.payload };
         case NOTIFICATIONS_CLEAR:
-            return {...state, notifications: []};
+            return { ...state, notifications: [] };
         case LANDING_PAGE_SET:
-            return {...state, landingPage: action.payload};
+            return { ...state, landingPage: action.payload };
         case LANDING_PAGE_CLEAR:
-            return {...state, landingPage: ''};
+            return { ...state, landingPage: '' };
         case OVERLAY_SHOW:
             return {
                 ...state,
