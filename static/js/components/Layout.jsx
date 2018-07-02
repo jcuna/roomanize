@@ -36,13 +36,13 @@ class Layout extends React.Component {
         return Object.keys(this.props.roles.permissions).length === 0;
     }
 
-    // noinspection JSUnusedGlobalSymbols
-    static getDerivedStateFromProps(nextProps) {
-        if (nextProps.token.value !== '') {
-            token.data = { ...nextProps };
-            setStateData({ ...nextProps });
+    componentDidUpdate() {
+        const { props } = this;
+
+        if (props.token.value !== '') {
+            token.data = { ...props };
+            setStateData({ ...props });
         }
-        return null;
     }
 
     render() {
@@ -79,7 +79,6 @@ class Layout extends React.Component {
         return className;
     }
 
-    // noinspection JSUnusedGlobalSymbols
     static propTypes = {
         dispatch: PropTypes.func.isRequired,
         showMobileMenu: PropTypes.bool,

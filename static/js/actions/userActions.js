@@ -1,6 +1,6 @@
 import api from '../utils/api'
 import { token } from '../utils/token';
-import { hideOverlay, notifications} from './appActions';
+import { clearNotifications, hideOverlay, notifications } from './appActions';
 
 export const USER_LOGGING_IN = 'USER_LOGGING_IN';
 export const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS';
@@ -33,6 +33,7 @@ export function login(email, password) {
                     type: USER_LOGIN_SUCCESS,
                     payload: resp.data
                 });
+                dispatch(clearNotifications())
             } else {
                 dispatch({
                     type: USER_LOGIN_FAIL,

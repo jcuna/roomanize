@@ -32,7 +32,7 @@ class Token {
                                 type: USER_FETCHED,
                                 payload: resp.data
                             });
-                            resolve(this.authHeaders());
+                            resolve(this.authHeaders);
                         } else {
                             reject(Error('No active session'));
                             this._data.dispatch({
@@ -44,7 +44,7 @@ class Token {
                         reject(err);
                     });
                 } else if (this._data.token.value !== '') {
-                    resolve(this.authHeaders());
+                    resolve(this.authHeaders);
                 } else {
                     reject(Error('No active session'));
                 }
@@ -86,7 +86,7 @@ class Token {
      *
      * @returns {Object}
      */
-    authHeaders() {
+    get authHeaders() {
         return {
             'x-access-token': this._data.token.value
         };
