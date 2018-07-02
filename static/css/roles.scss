@@ -3,6 +3,7 @@ $height: 93%;
 
 .permissions-container {
   height: calc(100% - #{$heightResolve});
+  min-height: 200px;
   ul {
     list-style: none;
   }

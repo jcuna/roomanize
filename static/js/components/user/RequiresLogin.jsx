@@ -11,12 +11,12 @@ export default class RequiresLogin extends React.Component {
         super();
 
         RequiresLogin.makeThemLogin(props);
-        this.state = {};
     }
 
-    static getDerivedStateFromProps(nextProps) {
-        RequiresLogin.makeThemLogin(nextProps);
-        return null;
+    componentDidUpdate(prevProps) {
+        if (prevProps.user.status !== this.props.user.status) {
+            RequiresLogin.makeThemLogin(this.props);
+        }
     }
 
     static makeThemLogin(props) {
@@ -45,5 +45,6 @@ export default class RequiresLogin extends React.Component {
         dispatch: PropTypes.func,
         children: PropTypes.object,
         history: PropTypes.object,
+        user: PropTypes.object,
     }
 }

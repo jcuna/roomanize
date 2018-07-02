@@ -6,25 +6,19 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 export default class FormGenerator extends React.Component {
-    constructor(props) {
+    constructor() {
         super();
-
-        this.state = props;
-    }
-
-    componentWillReceiveProps (nextProps) {
-        this.setState(nextProps);
     }
 
     /**
      *
-     * @returns {XML}
+     * @returns {*}
      */
     render() {
         const form = this.generateForm(
-            this.state.elements,
-            this.state.formName,
-            this.state.button
+            this.props.elements,
+            this.props.formName,
+            this.props.button
         );
 
         return (<div>{form}</div>);
@@ -34,11 +28,11 @@ export default class FormGenerator extends React.Component {
      * pass refs down to callee
      */
     componentDidMount() {
-        if (typeof this.state.object !== 'undefined') {
-            this.state.object.refs = this.refs;
+        if (typeof this.props.object !== 'undefined') {
+            this.props.object.refs = { ...this.refs };
         }
         if (typeof this.props.initialRefs !== 'undefined') {
-            this.props.initialRefs(this.state.object.refs);
+            this.props.initialRefs(this.refs);
         }
     }
 
@@ -51,11 +45,8 @@ export default class FormGenerator extends React.Component {
      * @returns {*}
      */
     generateForm(elements, formName, button) {
-        return React.createElement('form', {className: formName, onSubmit: this.state.callback},
+        return React.createElement('form', { className: formName, onSubmit: this.props.callback },
             elements.map((b, k) => {
-                if (typeof b.$$typeof !== 'undefined') {
-                    return b;
-                }
                 const formElement = typeof b.formElement === 'undefined' ? 'input' : b.formElement;
                 const reference = FormGenerator.getReference(b);
                 const className = 'form-control';
@@ -73,7 +64,8 @@ export default class FormGenerator extends React.Component {
                         disabled: b.disabled || false,
                         readOnly: b.readOnly || false
                     },
-                    b.options && b.options.map((val, p) => React.createElement('option', { value: val, key: p }, val))
+                    b.options && b.options.map((val, p) =>
+                        React.createElement('option', { value: val, key: p }, val))
                     )
                 );
             }),
@@ -103,7 +95,18 @@ export default class FormGenerator extends React.Component {
         formName: PropTypes.string.isRequired,
         callback: PropTypes.func,
         object: PropTypes.object,
-        elements: PropTypes.array,
+        elements: PropTypes.arrayOf(PropTypes.shape({
+            formElement: PropTypes.string,
+            type: PropTypes.string,
+            placeholder: PropTypes.string,
+            className: PropTypes.string,
+            onChange: PropTypes.func,
+            value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+            defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+            disabled: PropTypes.bool,
+            readOnly: PropTypes.bool,
+        })),
         initialRefs: PropTypes.func,
+        button: PropTypes.object
     }
 }

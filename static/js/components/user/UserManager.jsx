@@ -4,12 +4,11 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import FormGenerator from "../../utils/FromGenerator";
-import Checkbox from "../../utils/Checkbox";
-import {hideOverlay} from "../../actions/appActions";
+import FormGenerator from '../../utils/FromGenerator';
+import Checkbox from '../../utils/Checkbox';
+import { hideOverlay } from '../../actions/appActions';
 
 export default class UserManager extends React.Component {
-
     constructor(props) {
         super();
 
@@ -62,7 +61,7 @@ export default class UserManager extends React.Component {
             columnGap: '20px',
             marginTop: '10px'
         } }>
-            {this.props.roles.assigned.map(role => {
+            { this.props.roles.assigned.map(role => {
                 const checked = this.state.checkboxes[role.name] === true;
 
                 return <li key={ role.id }><Checkbox

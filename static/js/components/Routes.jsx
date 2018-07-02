@@ -3,19 +3,18 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom'
-import Login from './user/Login.jsx'
+import { Route, Switch } from 'react-router-dom';
+import Login from './user/Login.jsx';
 import RequiresLogin from './user/RequiresLogin.jsx';
-import FlashMessages from '../utils/Notifications.jsx'
+import FlashMessages from '../utils/Notifications.jsx';
 import ErrorPage from './ErrorPage.jsx';
-import Logout from './user/Logout.jsx'
+import Logout from './user/Logout.jsx';
 import Home from './Home';
 import Roles from './user/Roles';
 import { hasAccess } from '../utils/config';
 import Users from './user/Users';
 
 export default class Routes extends React.Component {
-
     render() {
         return (
             <Route render = { props => {
@@ -37,8 +36,8 @@ export default class Routes extends React.Component {
                         </Switch>
                     </div>
                 );
-            }}/>
-        )
+            } }/>
+        );
     }
 
     static getComponent(props, Component) {
