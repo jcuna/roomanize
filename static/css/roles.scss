@@ -1,5 +1,5 @@
 @import 'vars';
-$height: 93%;
+$height: 85%;
 
 .permissions-container {
   height: calc(100% - #{$heightResolve});
@@ -10,7 +10,7 @@ $height: 93%;
   .permissions {
     display: inline-block;
     width: 100%;
-    border: 1px solid;
+    border: 2px solid $theme;
     height: $height;
     vertical-align: top;
     padding: 0 10px;

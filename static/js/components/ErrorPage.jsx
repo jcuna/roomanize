@@ -10,11 +10,11 @@ const ErrorPage = (props) => {
     return (
         <div className="card">
             <div className="card-header">
-                {props.type}
+                { props.type }
             </div>
             <div className="card-block">
                 <blockquote className="card-blockquote">
-                    <p>{props.textMap[props.type]}</p>
+                    <p>{ props.textMap[props.type] }</p>
                 </blockquote>
             </div>
         </div>
@@ -25,8 +25,8 @@ ErrorPage.defaultProps = {
     type: 404,
     textMap: {
         404: 'La página solicitada no existe.',
-        403: 'No Tienes accesso al recurso solicitado'
-    }
+        403: 'No Tienes accesso al recurso solicitado',
+    },
 };
 
 ErrorPage.propTypes = {

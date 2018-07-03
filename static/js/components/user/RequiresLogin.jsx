@@ -8,7 +8,7 @@ import { setLandingPage, notifications } from '../../actions/appActions';
 
 export default class RequiresLogin extends React.Component {
     constructor(props) {
-        super();
+        super(props);
 
         RequiresLogin.makeThemLogin(props);
     }

@@ -47,7 +47,7 @@ class Layout extends React.Component {
 
         if (props.user.status === 'pending' || this.permissionsPending() &&
             props.user.status === 'logged_in') {
-            render = <Spinner/>;
+            render = <div className="first-load-spinner"><Spinner/></div>;
         } else {
             render = <Routes { ...props }/>;
         }

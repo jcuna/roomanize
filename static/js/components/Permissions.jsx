@@ -9,7 +9,7 @@ import Checkbox from '../utils/Checkbox';
 export default class Permissions extends React.Component {
 
     constructor(props) {
-        super();
+        super(props);
         let role = '';
         let selectedPermissions = [];
 

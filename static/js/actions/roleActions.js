@@ -1,7 +1,6 @@
-
-import api from "../utils/api";
-import {token} from "../utils/token";
-import {notifications} from "./appActions";
+import api from '../utils/api';
+import { token } from '../utils/token';
+import { notifications } from './appActions';
 
 export const ROLES_FETCHING = 'ROLES_FETCHING';
 export const ROLES_FETCHED = 'ROLES_FETCHED';
@@ -17,135 +16,137 @@ export const PERMISSIONS_FETCHED = 'PERMISSIONS_FETCHED';
 export const PERMISSIONS_COMMIT = 'PERMISSIONS_COMMIT';
 export const PERMISSIONS_COMMIT_FAIL = 'PERMISSIONS_COMMIT_FAIL';
 
-export function createRole(name) {
-    return function (dispatch) {
-        dispatch({type: ROLE_CREATE_DISPATCHED});
+export const createRole = (name) => {
+    return (dispatch) => {
+        dispatch({ type: ROLE_CREATE_DISPATCHED });
         token.through().then(header => {
             api({
                 url: '/roles',
                 method: 'POST',
-                headers: header
+                headers: header,
             }, name).then(resp => {
                 dispatch({
                     type: ROLE_CREATE_SUCCESS,
-                    payload: resp.data
+                    payload: resp.data,
                 });
             }, err => {
                 dispatch({
                     type: ROLE_CREATE_FAIL,
-                    payload: err
+                    payload: err,
                 });
             });
         });
     };
-}
+};
 
-export function deleteRole(id) {
-    return function (dispatch) {
+export const deleteRole = (id) => {
+    return (dispatch) => {
         dispatch({ type: ROLE_DELETE_DISPATCHED });
         token.through().then(auth => api({
             url: '/roles',
             method: 'DELETE',
-            headers: auth
+            headers: auth,
         }, id).then(resp => {
             if (resp.status < 300) {
                 dispatch({
                     type: ROLE_DELETE_SUCCESS,
-                    payload: id
+                    payload: id,
                 });
                 dispatch(notifications([{
                     type: 'info',
-                    message: 'Role borrado correctamente.'
+                    message: 'Role borrado correctamente.',
                 }]));
             } else {
                 let message = 'No tienes accesso a borrar roles';
 
                 if (resp.status === 409) {
                     message = 'No puedes borrar un rol que ha sido asignado a un usuario, ' +
-                        'primero quitale el rol al usuario.'
+                        'primero quitale el rol al usuario.';
                 }
-                dispatch({type: ROLE_DELETE_FAIL});
+                dispatch({ type: ROLE_DELETE_FAIL });
                 dispatch(notifications([{
                     type: 'warning',
-                    message
+                    message,
                 }]));
             }
         }, () => {
             dispatch({ type: ROLE_DELETE_FAIL });
             dispatch(notifications([{
                 type: 'warning',
-                message: 'Error inesperado'
+                message: 'Error inesperado',
             }]));
         }));
     };
-}
+};
 
-export function fetchRoles() {
-    return function (dispatch) {
+export const fetchRoles = () => {
+    return (dispatch) => {
         dispatch({ type: ROLES_FETCHING });
         token.through().then(header => api({
             url: '/roles',
             method: 'GET',
-            headers: header
+            headers: header,
         }).then(resp => {
             dispatch({
                 type: ROLES_FETCHED,
-                payload: resp.data
+                payload: resp.data,
             });
         }, err => {
-            dispatch({ type: ROLES_FAIL, payload: err })
+            dispatch({ type: ROLES_FAIL, payload: err });
         }), err => dispatch({ type: ROLES_FAIL, payload: err }));
     };
-}
+};
 
-export function fetchPermissions() {
-    return function (dispatch) {
-        dispatch({type: PERMISSIONS_FETCHING});
+export const fetchPermissions = () => {
+    return (dispatch) => {
+        dispatch({ type: PERMISSIONS_FETCHING });
         token.through().then(header => {
             api({
                 url: 'permissions',
                 method: 'GET',
-                headers: header
+                headers: header,
             }).then(resp => {
                 dispatch({
                     type: PERMISSIONS_FETCHED,
-                    payload: resp.data
+                    payload: resp.data,
                 });
-            }, err => {});
-        }, err => {});
+            }, err => {
+            });
+        }, err => {
+        });
     };
-}
+};
 
-export function commitPermissions(permissions) {
-    return function (dispatch) {
+export const commitPermissions = (permissions) => {
+    return (dispatch) => {
         dispatch({ type: ROLE_CREATE_DISPATCHED });
         token.through().then(header => api({
             url: 'roles',
             method: 'PUT',
-            headers: header
+            headers: header,
         }, permissions).then(resp => {
             if (resp.status < 300) {
                 dispatch({
                     type: PERMISSIONS_COMMIT,
-                    payload: permissions
+                    payload: permissions,
                 });
                 dispatch(notifications([{
                     type: 'success',
-                    message: 'Acceso actualizado correctamente'
+                    message: 'Acceso actualizado correctamente',
                 }]));
             } else {
                 dispatch({ type: PERMISSIONS_COMMIT_FAIL });
                 dispatch(notifications([{
                     type: 'warning',
-                    message: 'No se pudo actualizar los accesos'
+                    message: 'No se pudo actualizar los accesos',
                 }]));
             }
         }, () => {
             dispatch({ type: PERMISSIONS_COMMIT_FAIL });
             dispatch(notifications([{
                 type: 'warning',
-                message: 'No se pudo actualizar los accesos'
+                message: 'No se pudo actualizar los accesos',
             }]));
         }));
     };
-}
+};

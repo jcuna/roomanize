@@ -9,8 +9,8 @@ import '../../css/header.scss';
 import { toggleMobileMenu } from '../actions/appActions';
 
 export default class Header extends React.Component {
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.toggleMenu = this.toggleMenu.bind(this);
     }
 
@@ -35,7 +35,6 @@ export default class Header extends React.Component {
         this.props.dispatch(toggleMobileMenu(this.props.showMobileMenu));
     }
 
-    // noinspection JSUnusedGlobalSymbols
     static propTypes = {
         dispatch: PropTypes.func,
         showMobileMenu: PropTypes.bool

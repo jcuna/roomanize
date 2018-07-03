@@ -1,4 +1,4 @@
-import api from '../utils/api'
+import api from '../utils/api';
 import { token } from '../utils/token';
 import { clearNotifications, hideOverlay, notifications } from './appActions';
 
@@ -18,8 +18,8 @@ export const USER_CREATING = 'USER_CREATING';
 export const USER_CREATED = 'USER_CREATED';
 export const USER_CREATE_FAIL = 'USER_CREATE_FAIL';
 
-export function login(email, password) {
-    return function (dispatch) {
+export const login = (email, password) => {
+    return (dispatch) => {
         dispatch({ type: USER_LOGGING_IN });
         const request = {
             url: '/login',
@@ -61,10 +61,10 @@ export function login(email, password) {
             ]));
         });
     };
-}
+};
 
-export function fetchUser() {
-    return function (dispatch) {
+export const fetchUser = () => {
+    return (dispatch) => {
         dispatch({ type: USER_FETCHING });
         api({ url: '/user' }).then(resp => {
             if (resp.status < 300) {
@@ -90,10 +90,14 @@ export function fetchUser() {
             ]));
         });
     };
-}
+};
 
-export function logout() {
-    return function (dispatch) {
+/**
+ *
+ * @returns {Function}
+ */
+export const logout = () => {
+    return (dispatch) => {
         dispatch({ type: USER_LOGGING_OUT });
 
         api({ url: '/login', method: 'DELETE' }).then(() => {
@@ -104,10 +108,10 @@ export function logout() {
 
         });
     };
-}
+};
 
-export function fetchUsers(orderBy = 'id', orderDir = 'asc', page = 1, limit = 50) {
-    return function (dispatch) {
+export const fetchUsers = (orderBy = 'id', orderDir = 'asc', page = 1, limit = 50) => {
+    return (dispatch) => {
         dispatch({ type: USERS_FETCHING });
 
         token.through().then(header => {
@@ -131,12 +135,12 @@ export function fetchUsers(orderBy = 'id', orderDir = 'asc', page = 1, limit = 5
             });
         });
     };
-}
+};
 
-export function createUser(user) {
+export const createUser = (user) => {
     user = { ...user, roles: user.roles.map(role => role.id) };
 
-    return function (dispatch) {
+    return (dispatch) => {
         dispatch({ type: USER_CREATING });
         token.through().then(header => {
             api({
@@ -161,4 +165,4 @@ export function createUser(user) {
             });
         });
     };
-}
+};

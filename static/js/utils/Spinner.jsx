@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import '../../css/spinner.scss';
 
 const Spinner = (props) => {
-    return <div style={ props.color } id="continous-spinner"/>;
+    return <div style={ props.color } id="continuous-spinner"/>;
 };
 
 Spinner.propTypes = {

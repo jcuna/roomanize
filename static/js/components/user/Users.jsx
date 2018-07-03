@@ -13,7 +13,8 @@ import { hasAccess } from '../../utils/config';
 
 export default class Users extends React.Component {
     constructor(props) {
-        super();
+        super(props);
+
         this.openUserManager = this.openUserManager.bind(this);
         this.editUser = this.editUser.bind(this);
         this.deleteUser = this.deleteUser.bind(this);
@@ -31,13 +32,9 @@ export default class Users extends React.Component {
         if (props.roles.assigned.length === 0) {
             props.dispatch(fetchRoles());
         }
-    }
-
-    static getDerivedStateFromProps(props, state) {
         if (props.user.list.status !== 'fetching' && props.user.list.users.length === 0) {
             props.dispatch(fetchUsers());
         }
-        return state;
     }
 
     render() {

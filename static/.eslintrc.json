@@ -246,6 +246,7 @@
     "no-dupe-args": "error",
     "no-dupe-keys": "error",
     "no-duplicate-case": "error",
+    "no-case-declarations": [0, "never"],
     "no-empty-character-class": "error",
     "no-empty": "error",
     "no-ex-assign": "error",

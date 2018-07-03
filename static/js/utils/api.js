@@ -64,12 +64,11 @@ const jsonpFetch = function (url, data) {
 /**
  *
  * @param {object} request
- * @param {object} data
- * @param {boolean} jsonp
+ * @param {object} [data] - {}
+ * @param {boolean} [jsonp] - false
  * @returns {Promise}
  */
 const api = (request, data, jsonp = false) => {
-
     const URL_PREFIX = '/api/v1.0';
 
     let url = request.url;

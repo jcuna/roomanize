@@ -4,7 +4,7 @@
 
 import {
     TOGGLE_MOBILE_MENU, NOTIFICATIONS_SET, NOTIFICATIONS_CLEAR, LANDING_PAGE_SET,
-    LANDING_PAGE_CLEAR, OVERLAY_SHOW, OVERLAY_HIDE
+    LANDING_PAGE_CLEAR, OVERLAY_SHOW, OVERLAY_HIDE,
 } from '../actions/appActions';
 
 export default function appReducer(state = {
@@ -16,9 +16,9 @@ export default function appReducer(state = {
         component: null,
         title: '',
         closeButton: false,
-        actionButton: null
+        actionButton: null,
     },
-    checkedBoxes: {}
+    checkedBoxes: {},
 }, action) {
     switch (action.type) {
         case TOGGLE_MOBILE_MENU:
@@ -39,8 +39,8 @@ export default function appReducer(state = {
                     component: action.payload.component,
                     title: action.payload.title,
                     closeButton: action.payload.closeButton || false,
-                    actionButton: action.payload.actionButton || null
-                }
+                    actionButton: action.payload.actionButton || null,
+                },
             };
         case OVERLAY_HIDE:
             return {
@@ -50,8 +50,8 @@ export default function appReducer(state = {
                     component: null,
                     title: '',
                     closeButton: false,
-                    actionButton: null
-                }
+                    actionButton: null,
+                },
             };
         default:
             return state;

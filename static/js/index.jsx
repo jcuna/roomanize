@@ -20,4 +20,3 @@ const bootstrap = () => {
 };
 
 bootstrap();
-

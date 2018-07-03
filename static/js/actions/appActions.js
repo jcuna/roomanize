@@ -1,4 +1,3 @@
-
 export const TOGGLE_MOBILE_MENU = 'TOGGLE_MOBILE_MENU';
 export const NOTIFICATIONS_SET = 'NOTIFICATIONS_SET';
 export const NOTIFICATIONS_CLEAR = 'NOTIFICATIONS_CLEAR';
@@ -7,21 +6,25 @@ export const LANDING_PAGE_CLEAR = 'LANDING_PAGE_CLEAR';
 export const OVERLAY_SHOW = 'OVERLAY_SHOW';
 export const OVERLAY_HIDE = 'OVERLAY_HIDE';
 
-export function toggleMobileMenu(currentValue) {
+export const toggleMobileMenu = (currentValue) => {
     return function (dispatch) {
         return dispatch({
             type: TOGGLE_MOBILE_MENU,
-            payload: !currentValue
+            payload: !currentValue,
         });
     };
-}
+};
+
+export const hideOverlay = () => {
+    return { type: OVERLAY_HIDE };
+};
 
 /**
  *
  * @param messages {[{type: string, message: string}]}
  * @returns {Function}
  */
-export function notifications(messages) {
+export const notifications = (messages) => {
     if (!Array.isArray(messages)) {
         messages = [messages];
     }
@@ -29,29 +32,29 @@ export function notifications(messages) {
         dispatch(hideOverlay());
         dispatch({
             type: NOTIFICATIONS_SET,
-            payload: messages
+            payload: messages,
         });
     };
-}
+};
 
-export function clearNotifications() {
+export const clearNotifications = () => {
     return {
         type: NOTIFICATIONS_CLEAR,
     };
-}
+};
 
-export function setLandingPage(landingPage) {
+export const setLandingPage = (landingPage) => {
     return {
         type: LANDING_PAGE_SET,
-        payload: landingPage
+        payload: landingPage,
     };
-}
+};
 
-export function clearLandingPage() {
+export const clearLandingPage = () => {
     return {
-        type: LANDING_PAGE_CLEAR
+        type: LANDING_PAGE_CLEAR,
     };
-}
+};
 
 /**
  *
@@ -61,17 +64,13 @@ export function clearLandingPage() {
  * @param {JSX} actionButton
  * @returns {object}
  */
-export function showOverlay(childComponent, title, closeButton = false, actionButton = null) {
+export const showOverlay = (childComponent, title, closeButton = false, actionButton = null) => {
     return {
         type: OVERLAY_SHOW, payload: {
             component: childComponent,
             title,
             closeButton,
-            actionButton
-        }
+            actionButton,
+        },
     };
-}
-
-export function hideOverlay() {
-    return { type: OVERLAY_HIDE };
-}
+};
