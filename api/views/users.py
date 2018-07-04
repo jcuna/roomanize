@@ -60,6 +60,16 @@ class UsersManager(Resource):
 
         return {'id': user.id}
 
+    @token_required
+    @access_required
+    def put(self):
+        return {}
+
+    @token_required
+    @access_required
+    def delete(self, user_id):
+        return {'user_id': user_id}
+
 
 class Session(Resource):
     def post(self):

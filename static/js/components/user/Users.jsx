@@ -4,7 +4,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { createUser, fetchUsers } from '../../actions/userActions';
+import { createUser, deleteUser, editUser, fetchUsers } from '../../actions/userActions';
 import Spinner from '../../utils/Spinner';
 import { hideOverlay, showOverlay } from '../../actions/appActions';
 import UserManager from './UserManager';
@@ -112,7 +112,8 @@ export default class Users extends React.Component {
 
     editUser(e) {
         e.preventDefault();
-        console.log(this.state.newUser);
+        this.props.dispatch(hideOverlay());
+        this.props.dispatch(editUser(this.state.newUser));
     }
 
     createUser(e) {
@@ -126,8 +127,7 @@ export default class Users extends React.Component {
         const button = <button
             type='button' onClick={ () => {
                 this.props.dispatch(hideOverlay());
-                console.log('deleting user');
-                // this.props.dispatch(deleteUser(id));
+                this.props.dispatch(deleteUser(id));
             } } className='btn btn-danger'>Confirmar</button>;
 
         this.props.dispatch(showOverlay(

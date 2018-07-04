@@ -17,6 +17,12 @@ export const USERS_FETCH_FAIL = 'USERS_FETCH_FAIL';
 export const USER_CREATING = 'USER_CREATING';
 export const USER_CREATED = 'USER_CREATED';
 export const USER_CREATE_FAIL = 'USER_CREATE_FAIL';
+export const USER_DELETE_DISPATCHED = 'USER_DELETE_DISPATCHED';
+export const USER_DELETE_SUCCESS = 'USER_DELETE_SUCCESS';
+export const USER_DELETE_FAIL = 'USER_DELETE_FAIL';
+export const USER_UPDATE_DISPATCHED = 'USER_UPDATE_DISPATCHED';
+export const USER_UPDATE_SUCCESS = 'USER_UPDATE_SUCCESS';
+export const USER_UPDATE_FAIL = 'USER_UPDATE_FAIL';
 
 export const login = (email, password) => {
     return (dispatch) => {
@@ -166,3 +172,29 @@ export const createUser = (user) => {
         });
     };
 };
+
+export const deleteUser = id =>
+    (dispatch) => {
+        dispatch({ type: USER_DELETE_DISPATCHED });
+        token.through().then(header =>
+            api({
+                url: `/users/${id}`,
+                method: 'DELETE',
+                headers: header
+            }).then(() =>
+                (dispatch({ type: USER_DELETE_SUCCESS })), () => (dispatch({ type: USER_DELETE_FAIL }))
+            ));
+    };
+
+export const editUser = userData =>
+    (dispatch) => {
+        dispatch({ type: USER_UPDATE_DISPATCHED });
+        token.through().then(header =>
+            api({
+                url: '/users',
+                method: 'PUT',
+                headers: header
+            }, userData).then(() => (dispatch({ type: USER_UPDATE_SUCCESS })), () =>
+                (dispatch({ type: USER_UPDATE_FAIL }))
+            ));
+    };
