@@ -44,10 +44,10 @@ export default class Permissions extends React.Component {
                                 </div>
                                 <div className="half">
                                     <ul className="grant">
-                                        {Permissions.methods.map((obj, g) => <li className={ obj.className } key={ g }>
+                                        { Permissions.methods.map((obj, g) => <li className={ obj.className } key={ g }>
                                             <Checkbox name={ item } id={ obj.name } label={ obj.nombre } checked={ allChecked || hasStuff &&
                                             this.state.selectedPermissions[item].includes(obj.name) } onChange={ this.selectCheckBox }/>
-                                        </li>)}
+                                        </li>) }
                                     </ul>
                                 </div>
                             </li>
@@ -67,14 +67,12 @@ export default class Permissions extends React.Component {
     }
 
     selectCheckBox(checkbox) {
-        const checked = checkbox.checked;
-        const name = checkbox.name;
         const type = checkbox.id || '*';
+        const { checked, name } = checkbox;
+        let newState = {};
 
         if (typeof this.state.selectedPermissions[name] === 'undefined') {
-            this.setState({
-                selectedPermissions: { [name]: [] }
-            });
+            newState = { selectedPermissions: { [name]: [] }};
         }
 
         if (checked) {
@@ -84,9 +82,7 @@ export default class Permissions extends React.Component {
                 Permissions.methods.forEach(item => {
                     methods.push(item.name);
                 });
-                this.setState({
-                    selectedPermissions: { ...this.state.selectedPermissions, [name]: methods }
-                });
+                newState = { selectedPermissions: { ...this.state.selectedPermissions, [name]: methods }};
             } else {
                 let methods = [];
 
@@ -94,33 +90,25 @@ export default class Permissions extends React.Component {
                     methods = this.state.selectedPermissions[name].slice();
                 }
                 methods.push(type);
-                this.setState({
-                    selectedPermissions: { ...this.state.selectedPermissions, [name]: methods }
-                });
+                newState = { selectedPermissions: { ...this.state.selectedPermissions, [name]: methods } };
             }
         } else {
             if (type === '*') {
                 const methods = { ...this.state.selectedPermissions };
 
                 delete methods[name];
-                this.setState({
-                    selectedPermissions: methods
-                });
+                newState = { selectedPermissions: methods };
             } else {
                 if (this.state.selectedPermissions[name].includes(type)) {
                     const items = this.state.selectedPermissions[name].slice();
 
                     items.splice(items.indexOf(type), 1);
-                    this.setState({
-                        selectedPermissions: { ...this.state.selectedPermissions, [name]: items }
-                    });
+                    newState = { selectedPermissions: { ...this.state.selectedPermissions, [name]: items }};
                 }
             }
         }
-    }
-
-    componentDidUpdate(prevProps, prevState) {
-        this.props.onUpdate({ id: this.props.id, permissions: prevState.selectedPermissions });
+        this.setState(newState);
+        this.props.onUpdate({ id: this.props.id, permissions: { ...newState.selectedPermissions }});
     }
 
     static propTypes = {

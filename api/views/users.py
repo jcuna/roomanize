@@ -1,4 +1,4 @@
-
+from core import c_print
 import sqlalchemy
 from flask_restful import Resource, request
 from flask import session, json
@@ -62,13 +62,32 @@ class UsersManager(Resource):
 
     @token_required
     @access_required
-    def put(self):
-        return {}
+    def put(self, user_id):
+        raw_data = request.get_json()
+        user = User.query.options(joinedload('roles')).filter_by(id=user_id).first()
+        user.first_name = raw_data['first_name']
+        user.last_name = raw_data['last_name']
+        user.roles = []
+
+        if raw_data['roles']:
+            for role in Role.query.filter(Role.id.in_(
+                    list(map(
+                        lambda r: r['id'], raw_data['roles'])
+                    ))):
+                user.roles.append(role)
+
+        db.session.commit()
+
+        return {'message': 'success'}
 
     @token_required
     @access_required
     def delete(self, user_id):
-        return {'user_id': user_id}
+        user = User.query.options(joinedload('roles')).filter_by(id=user_id).first()
+        user.roles = []
+        db.session.delete(user)
+        db.session.commit()
+        return {'message': 'success'}
 
 
 class Session(Resource):

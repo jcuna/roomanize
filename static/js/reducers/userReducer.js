@@ -10,7 +10,7 @@ import {
     USER_LOGIN_FAIL,
     USER_LOGIN_ERROR,
     USER_LOGGING_OUT,
-    USER_LOGGED_OUT, USERS_FETCHED, USER_CREATED, USERS_FETCHING,
+    USER_LOGGED_OUT, USERS_FETCHED, USER_CREATED, USERS_FETCHING, USER_DELETE_SUCCESS, USER_UPDATE_SUCCESS,
 } from '../actions/userActions';
 
 export default function userReducer(state = {
@@ -79,7 +79,10 @@ export default function userReducer(state = {
             return { ...state, user: { ...state.user, list: { status: 'fetched', users: action.payload }}};
 
         case USER_CREATED:
+        case USER_DELETE_SUCCESS:
+        case USER_UPDATE_SUCCESS:
             return { ...state, user: { ...state.user, list: { status: 'pending', users: [] }}};
+
         default:
             return state;
     }

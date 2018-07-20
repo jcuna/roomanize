@@ -23,7 +23,9 @@ class User(db.Model):
     deleted = db.Column(db.Boolean, nullable=False, server_default='0', index=True)
     roles = db.relationship('Role',
                             secondary=user_roles, lazy='subquery',
-                            backref=db.backref('users', lazy='dynamic')
+                            backref=db.backref('users', lazy='dynamic'),
+                            # cascade="all, delete-orphan",
+                            # single_parent=True
                             )
 
     def hash_password(self):

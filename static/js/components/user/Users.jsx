@@ -112,8 +112,14 @@ export default class Users extends React.Component {
 
     editUser(e) {
         e.preventDefault();
-        this.props.dispatch(hideOverlay());
-        this.props.dispatch(editUser(this.state.newUser));
+        e.target.className += ' loading-button';
+        this.props.dispatch(editUser(this.state.newUser, () => {
+            // show notification
+            this.props.dispatch(hideOverlay());
+        }, () => {
+            // show notification
+            this.props.dispatch(hideOverlay());
+        }));
     }
 
     createUser(e) {
@@ -125,9 +131,9 @@ export default class Users extends React.Component {
 
     deleteUser(id) {
         const button = <button
-            type='button' onClick={ () => {
-                this.props.dispatch(hideOverlay());
-                this.props.dispatch(deleteUser(id));
+            type='button' onClick={ ({ target }) => {
+                target.className += ' loading-button';
+                this.props.dispatch(deleteUser(id, () => this.props.dispatch(hideOverlay())));
             } } className='btn btn-danger'>Confirmar</button>;
 
         this.props.dispatch(showOverlay(
@@ -154,6 +160,12 @@ export default class Users extends React.Component {
         }
         this.setState({ orderBy: column, orderDir });
         this.props.dispatch(fetchUsers(column, orderDir));
+    }
+
+    componentDidUpdate() {
+        if (this.props.user.list.status !== 'fetching' && this.props.user.list.users.length === 0) {
+            this.props.dispatch(fetchUsers());
+        }
     }
 
     static propTypes = {

@@ -115,11 +115,11 @@ export default class Roles extends React.Component {
 
     modifyPermissions(e) {
         const button = <button
-            type='button' onClick={this.confirmChanges} className='btn btn-primary'>OK
+            type='button' onClick={ this.confirmChanges } className='btn btn-primary'>OK
         </button>;
 
         this.props.dispatch(showOverlay(
-            <Permissions { ...this.props } id={Number(e.target.getAttribute('data-id')) } onUpdate={ this.updateObject }/>,
+            <Permissions { ...this.props } id={ Number(e.target.getAttribute('data-id')) } onUpdate={ this.updateObject }/>,
             'Editar Permisos',
             true,
             button)
@@ -146,7 +146,7 @@ export default class Roles extends React.Component {
                     b.target.className += ' loading-button';
                     this.props.dispatch(deleteRole(Number(roleId)));
                 }
-            } } className={this.state.deleteButtonClass}>Confirmar</button>;
+            } } className={ this.state.deleteButtonClass }>Confirmar</button>;
 
         this.props.dispatch(showOverlay(
             <div className='panel'>Estas seguro que quieres elimiar el rol seleccionado?</div>,

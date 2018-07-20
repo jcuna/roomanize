@@ -173,7 +173,7 @@ export const createUser = (user) => {
     };
 };
 
-export const deleteUser = id =>
+export const deleteUser = (id, done, fail) =>
     (dispatch) => {
         dispatch({ type: USER_DELETE_DISPATCHED });
         token.through().then(header =>
@@ -181,20 +181,30 @@ export const deleteUser = id =>
                 url: `/users/${id}`,
                 method: 'DELETE',
                 headers: header
-            }).then(() =>
-                (dispatch({ type: USER_DELETE_SUCCESS })), () => (dispatch({ type: USER_DELETE_FAIL }))
-            ));
+            }).then(() => {
+                done();
+                dispatch({ type: USER_DELETE_SUCCESS });
+            }, () => {
+                fail();
+                dispatch({ type: USER_DELETE_FAIL });
+            })
+        );
     };
 
-export const editUser = userData =>
+export const editUser = (data, success, fail) =>
     (dispatch) => {
-        dispatch({ type: USER_UPDATE_DISPATCHED });
+        dispatch({ type: USER_DELETE_DISPATCHED });
         token.through().then(header =>
             api({
-                url: '/users',
+                url: `/users/${data.id}`,
                 method: 'PUT',
                 headers: header
-            }, userData).then(() => (dispatch({ type: USER_UPDATE_SUCCESS })), () =>
-                (dispatch({ type: USER_UPDATE_FAIL }))
-            ));
+            }, data).then(() => {
+                success();
+                dispatch({ type: USER_UPDATE_SUCCESS });
+            }, () => {
+                fail();
+                dispatch({ type: USER_UPDATE_FAIL });
+            })
+        );
     };
