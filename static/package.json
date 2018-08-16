@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack -p --progress --config webpack.config.js",
-    "start:dev": "webpack-dev-server -d --progress --inline --hotOnly",
+    "start:dev": "webpack-dev-server --env.NODE_ENV=local -d --progress --inline --hotOnly",
     "dev:build": "webpack --progress -d --config webpack.config.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "webpack --progress -d --config webpack.config.js --watch"

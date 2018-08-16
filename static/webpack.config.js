@@ -1,3 +1,4 @@
+/* eslint-disable */
 const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const path = require('path');
@@ -24,6 +25,11 @@ const config = {
                 use: {
                     loader: 'babel-loader'
                 }
+            },
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                use: ['eslint-loader']
             },
             {
                 test: /\.scss$/,
