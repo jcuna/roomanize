@@ -1,3 +1,5 @@
+import importlib
+
 from flask import Flask, url_for, render_template
 from flask_restful import Api
 from config.routes import register
@@ -27,7 +29,7 @@ class Router:
                 full_routes.append('/' + self.version + route)
 
             pack_name = 'views.' + parts[0]
-            pack = __import__(pack_name, fromlist=[parts[1]])
+            pack = importlib.import_module(pack_name, parts[1])
             mod = getattr(pack, parts[1])
             api.add_resource(mod, *full_routes, endpoint=parts[2])
             if pack_name + '.' + parts[1] not in self.noPermissions:
