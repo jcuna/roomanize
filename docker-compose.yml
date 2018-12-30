@@ -5,7 +5,7 @@ services:
   mysql:
     image: mysql:5.7.23
     env_file:
-      - .developer
+      - .develop
     volumes:
       - ./db:/docker-entrypoint-initdb.d
 
