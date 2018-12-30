@@ -110,4 +110,7 @@ package-lock.json
 
 # intellij stuff
 .idea
+
+# development files
 db/
+.develop
