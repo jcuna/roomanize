@@ -13,6 +13,7 @@ import Home from './Home';
 import Roles from './user/Roles';
 import { hasAccess } from '../utils/config';
 import Users from './user/Users';
+import NewRoom from './rooms/NewRoom';
 
 export default class Routes extends React.Component {
     render() {
@@ -30,6 +31,7 @@ export default class Routes extends React.Component {
                                     <Route path='/logout' render={ () => <Logout { ...props }/> } />
                                     <Route path='/roles' render={ () => Routes.getComponent(props, Roles) } />
                                     <Route path='/users' render={ () => Routes.getComponent(props, Users) } />
+                                    <Route path='/nueva-habitacion' render={ () => Routes.getComponent(props, NewRoom) } />
                                     <Route component={ ErrorPage } />
                                 </Switch>
                             </RequiresLogin>

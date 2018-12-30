@@ -111,8 +111,10 @@ export const fetchPermissions = () => {
                     payload: resp.data,
                 });
             }, err => {
+                console.log(err);
             });
         }, err => {
+            console.log(err);
         });
     };
 };

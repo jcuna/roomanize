@@ -27,7 +27,6 @@ export default function userReducer(state = {
         expires: '',
     },
 }, action) {
-
     switch (action.type) {
         case USER_FETCHED:
             return {

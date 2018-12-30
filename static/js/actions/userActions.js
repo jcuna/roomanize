@@ -39,7 +39,7 @@ export const login = (email, password) => {
                     type: USER_LOGIN_SUCCESS,
                     payload: resp.data
                 });
-                dispatch(clearNotifications())
+                dispatch(clearNotifications());
             } else {
                 dispatch({
                     type: USER_LOGIN_FAIL,
@@ -111,7 +111,7 @@ export const logout = () => {
                 type: USER_LOGGED_OUT,
             });
         }, err => {
-
+            console.log(err);
         });
     };
 };
@@ -131,11 +131,13 @@ export const fetchUsers = (orderBy = 'id', orderDir = 'asc', page = 1, limit = 5
                     payload: resp.data
                 });
             }, err => {
+                console.log(err);
                 dispatch({
                     type: USERS_FETCH_FAIL,
                 });
             });
         }, err => {
+            console.log(err);
             dispatch({
                 type: USERS_FETCH_FAIL,
             });
@@ -163,6 +165,7 @@ export const createUser = (user) => {
                     { type: 'success', message: 'Usuario creado satisfactoriamente' }
                 ]));
             }, err => {
+                console.log(err);
                 dispatch(hideOverlay());
                 dispatch({ type: USER_CREATE_FAIL });
                 dispatch(notifications([

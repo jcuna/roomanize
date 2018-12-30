@@ -2,8 +2,15 @@ version: '3.3'
  
 services:
 
+  mysql:
+    image: mysql:5.7.23
+    env_file:
+      - .developer
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d
+
   ngix:
-    image: nginx:latest
+    image: nginx:1.15-alpine
     restart: always
 #    ports:
 #      - "80:80"
@@ -12,8 +19,8 @@ services:
       - NGINX_HOST=martires.joncuna.com
     volumes:
       - ./static:/usr/share/nginx/html
-      - ./nginx.template:/etc/nginx/conf.d/nginx.template
-    command: /bin/bash -c "envsubst \$$NGINX_PORT < /etc/nginx/conf.d/nginx.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+      - ./nginx.template:/etc/nginx/conf.d/default.conf
+#    command: /bin/bash -c "envsubst \$$NGINX_PORT < /etc/nginx/conf.d/nginx.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
     links:
       - api:api
     depends_on:

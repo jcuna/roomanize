@@ -21,7 +21,7 @@ export const hideOverlay = () => {
 
 /**
  *
- * @param messages {[{type: string, message: string}]}
+ * @param {Object} messages - {[{type: string, message: string}]}
  * @returns {Function}
  */
 export const notifications = (messages) => {
@@ -58,10 +58,10 @@ export const clearLandingPage = () => {
 
 /**
  *
- * @param {JSX} childComponent
+ * @param {Object} childComponent
  * @param {string} title
  * @param {boolean} closeButton
- * @param {JSX} actionButton
+ * @param {Object} actionButton
  * @returns {object}
  */
 export const showOverlay = (childComponent, title, closeButton = false, actionButton = null) => {
