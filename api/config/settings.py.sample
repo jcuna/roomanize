@@ -1,0 +1,4 @@
+SECRET_KEY = '~.\xb83\x9a\xb0F\xe7\xdd(\xfb\xcc\xef)\xa8\x00\xd4X\xdel\xe4\xe8%\xb0'
+SQLALCHEMY_DATABASE_URI = 'mysql://test:test@mysql/test'
+SQLALCHEMY_TRACK_MODIFICATIONS = False
+SQLALCHEMY_POOL_RECYCLE = True

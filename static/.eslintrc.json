@@ -239,7 +239,7 @@
       "error",
       "always"
     ],
-    "no-console": 1,
+    "no-console": 0,
     "no-constant-condition": "error",
     "no-control-regex": 1,
     "no-debugger": 1,
