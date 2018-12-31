@@ -1,5 +1,5 @@
 version: '3.3'
- 
+
 services:
 
   mysql:
@@ -9,27 +9,32 @@ services:
     volumes:
       - ./db:/docker-entrypoint-initdb.d
 
+  phpmyadmin:
+    build:
+      context: .
+      dockerfile: ./db/phpmyadmin/Dockerfile
+    working_dir: /var/www/phpMyAdmin
+    volumes:
+      - phpMyAdmin:/var/www/phpMyAdmin
+
   ngix:
     image: nginx:1.15-alpine
     restart: always
-#    ports:
-#      - "80:80"
-    environment:
-      - NGINX_PORT=80
-      - NGINX_HOST=martires.joncuna.com
     volumes:
       - ./static:/usr/share/nginx/html
-      - ./nginx.template:/etc/nginx/conf.d/default.conf
-#    command: /bin/bash -c "envsubst \$$NGINX_PORT < /etc/nginx/conf.d/nginx.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+      - phpMyAdmin:/var/www/phpMyAdmin
+      - ./nginx.template:/etc/nginx/nginx.conf
+      - ./nginx.servers.template:/etc/nginx/conf.d/default.conf
     links:
       - api:api
     depends_on:
       - static
       - api
     labels:
-      - 'traefik.backend=nginx'
-      - 'traefik.port=80'
-      - 'traefik.frontend.rule=Host:martires.localhost'
+      - 'traefik.martires.port=80'
+      - 'traefik.martires.frontend.rule=Host:martires.localhost'
+      - 'traefik.phpmyadmin.port=80'
+      - 'traefik.phpmyadmin.frontend.rule=Host:phpmyadmin.localhost'
 
   static:
     build: ./static
@@ -48,10 +53,6 @@ services:
     build: ./api
     volumes:
       - ./api:/usr/src/app
-#    expose:
-#      - "5000"
-#    ports:
-#      - "5000:5000"
     environment:
       - APP_SETTINGS_PATH=/usr/src/app/config/settings.py
       - APP_ENV=develop
@@ -91,3 +92,6 @@ services:
       - '8080:8080' # Dashboard
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  phpMyAdmin:

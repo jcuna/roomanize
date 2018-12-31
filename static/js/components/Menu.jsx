@@ -16,18 +16,11 @@ export default class Menu extends React.Component {
     }
 
     render() {
-        const { user } = this.props;
-        const loggedIn = user.status === 'logged_in';
-
         return (
             <div className={ this.className }>
                 <i onClick={ this.toggleMenu } className="fas fa-times" aria-hidden="true"/>
                 <nav id="mobile-nav">
                     {this.getLinksBasedOffAccess()}
-                    <Link to={ loggedIn ? '/logout' : '/login' } onClick={ this.toggleMenu }>
-                        <span>{ loggedIn ? `${user.first_name}` : 'login' }</span>
-                        { loggedIn && <i className='user-logout fas fa-sign-out-alt'/> }
-                    </Link>
                 </nav>
             </div>
         );
@@ -49,7 +42,7 @@ export default class Menu extends React.Component {
 
         return routes.map(item => {
             if (hasAccess(item.link, 'read')) {
-                return <Link key={ item.link } to={ item.link } onClick={ this.toggleMenu }>{ item.name }</Link>;
+                return <Link key={ item.link } to={ item.link }>{ item.name }</Link>;
             }
             return null;
         });

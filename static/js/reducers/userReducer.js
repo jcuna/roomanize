@@ -21,6 +21,7 @@ export default function userReducer(state = {
             status: 'pending',
             users: [],
         },
+        pic: null
     },
     token: {
         value: '',

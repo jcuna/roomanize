@@ -17,6 +17,7 @@ html {
     left: 0;
     position: relative;
     height: 100%;
+    width: 100%;
     -webkit-transition: all 1s ease;
     -moz-transition: all 1s ease;
     -o-transition: all 1s ease;
@@ -60,10 +61,6 @@ html {
     .modal-dialog {
       margin: 60px auto;
     }
-  }
-
-  .body-container.body-displaced {
-    left: -50%;
   }
 
   .sortable {
@@ -247,4 +244,8 @@ table {
   #continuous-spinner {
     top: calc(100% - 70%);
   }
+}
+
+.body-container.body-displaced {
+  width: 80%;
 }

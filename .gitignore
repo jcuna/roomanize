@@ -112,5 +112,6 @@ package-lock.json
 .idea
 
 # development files
-db/
+db/*
+!db/phpmyadmin
 .develop

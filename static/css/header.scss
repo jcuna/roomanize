@@ -21,6 +21,60 @@
   }
 
   .inner {
+
+    ul.super-menu {
+      position: absolute;
+      top: 0;
+      right: 0;
+      list-style: none;
+      width: 10%;
+      padding: 0;
+      li {
+        display: inline-block;
+      }
+
+      .user-icon {
+        margin: 14px;
+        border-radius: 50%;
+        color: $fontMenus;
+        background-color: #FFF;
+        padding: 10px;
+        cursor: pointer;
+
+        .user-menu {
+          background-color: $blue;
+          top: $topMenu;
+          padding: 16px;
+          border: $fontMenus solid 1px;
+          color: $fontMenus;
+          position: absolute;
+          display: none;
+          a {
+            color: $fontMenus;
+            text-decoration: none;
+            &:hover {
+              color: #FFFFFF;
+            }
+          }
+
+          ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+
+          }
+        }
+        .user-menu-display {
+          display: block;
+        }
+
+      }
+
+      #navPanelToggle {
+        position: relative;
+      }
+    }
+
     position: relative;
     z-index: 99;
     background-color: $theme;
@@ -41,7 +95,7 @@
 
   #banner {
     padding-top: 95px;
-    height: 220px;
+    height: $bannerHeight;
     background-image: url("/images/workbook.jpg");
     background-size: cover;
     background-position: top;
