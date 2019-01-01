@@ -10,7 +10,7 @@ $height: 85%;
   .permissions {
     display: inline-block;
     width: 100%;
-    border: 2px solid $theme;
+    border: 2px solid $grey;
     height: $height;
     vertical-align: top;
     padding: 0 10px;
@@ -21,7 +21,7 @@ $height: 85%;
     border: 1px solid;
     position: relative;
     width: 5%;
-    background-color: $blue;
+    background-color: $grey;
     display: inline-block;
 
     i {
@@ -61,7 +61,7 @@ $height: 85%;
       height: 4px;
       left: 38%;
       top: 10px;
-      background: $blue;
+      background: $greyDark;
     }
   }
 

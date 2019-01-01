@@ -2,6 +2,8 @@
 @import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700");
 
 html {
+  -webkit-font-smoothing: antialiased;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, ".SFNSText-Regular", sans-serif;
   min-height: 100%;
   position: relative;
   body {
@@ -36,6 +38,12 @@ html {
 
     & .content-area {
       min-height: 100%;
+    }
+
+    form {
+      border: 1px solid $greyDark;
+      padding: 20px;
+      border-radius: 4px;
     }
   }
 
@@ -78,7 +86,7 @@ html {
   width: 4px;
   height: 16px;
   left: 34px;
-  background: $blue;
+  background: $greyDark;
   border-radius: 3px 0 0 3px;
   margin-top: 4px;
 }
@@ -88,8 +96,8 @@ html {
   background: none;
   width: 11px;
   height: 26px;
-  border-left: 4px solid $blue;
-  border-bottom: 4px solid $blue;
+  border-left: 4px solid $greyDark;
+  border-bottom: 4px solid $greyDark;
   border-bottom-left-radius: 10px;
   position: absolute;
   left: 24px;
@@ -100,8 +108,8 @@ html {
   content: "";
   width: 11px;
   height: 24px;
-  border-left: 4px solid $blue;
-  border-top: 4px solid $blue;
+  border-left: 4px solid $greyDark;
+  border-top: 4px solid $greyDark;
   border-top-left-radius: 8px;
   position: absolute;
   left: 24px;
@@ -115,7 +123,6 @@ html {
     content: "\F110";
     position: absolute;
     font: normal normal normal 25px Font Awesome\ 5 Free;
-    font-weight: 900;
     left: 0;
     right: 0;
     margin: auto;
@@ -143,7 +150,7 @@ html {
   height: 4px;
   left: 11px;
   top: 34px;
-  background: $blue;
+  background: $greyDark;
 }
 
 .warning-prompt {

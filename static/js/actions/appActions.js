@@ -5,6 +5,7 @@ export const LANDING_PAGE_SET = 'LANDING_PAGE_SET';
 export const LANDING_PAGE_CLEAR = 'LANDING_PAGE_CLEAR';
 export const OVERLAY_SHOW = 'OVERLAY_SHOW';
 export const OVERLAY_HIDE = 'OVERLAY_HIDE';
+export const CLICKED_CONTENT = 'CLICKED_CONTENT';
 
 export const toggleMobileMenu = (currentValue) => {
     return function (dispatch) {
@@ -53,6 +54,12 @@ export const setLandingPage = (landingPage) => {
 export const clearLandingPage = () => {
     return {
         type: LANDING_PAGE_CLEAR,
+    };
+};
+
+export const clickedContent = () => {
+    return {
+        type: CLICKED_CONTENT,
     };
 };
 

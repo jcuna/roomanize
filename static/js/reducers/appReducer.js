@@ -4,13 +4,14 @@
 
 import {
     TOGGLE_MOBILE_MENU, NOTIFICATIONS_SET, NOTIFICATIONS_CLEAR, LANDING_PAGE_SET,
-    LANDING_PAGE_CLEAR, OVERLAY_SHOW, OVERLAY_HIDE,
+    LANDING_PAGE_CLEAR, OVERLAY_SHOW, OVERLAY_HIDE, CLICKED_CONTENT,
 } from '../actions/appActions';
 
 export default function appReducer(state = {
     showMobileMenu: false,
     notifications: [],
     landingPage: '',
+    clickedContent: false,
     overlay: {
         display: false,
         component: null,
@@ -31,6 +32,8 @@ export default function appReducer(state = {
             return { ...state, landingPage: action.payload };
         case LANDING_PAGE_CLEAR:
             return { ...state, landingPage: '' };
+        case CLICKED_CONTENT:
+            return { ...state, clickedContent: !state.clickedContent };
         case OVERLAY_SHOW:
             return {
                 ...state,

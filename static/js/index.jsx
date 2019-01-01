@@ -8,13 +8,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import 'babel-polyfill';
 import { Provider } from 'react-redux';
-import Layout from './components/Layout.jsx';
+import App from './components/App.jsx';
 import store from './store';
 
 const bootstrap = () => {
     ReactDOM.render(
         <Provider store={ store }>
-            <Layout/>
+            <App/>
         </Provider>, document.querySelector('#content')
     );
 };

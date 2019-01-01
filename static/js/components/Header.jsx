@@ -8,14 +8,24 @@ import { Link } from 'react-router-dom';
 import '../../css/header.scss';
 import { toggleMobileMenu } from '../actions/appActions';
 
-export default class Header extends React.Component {
+class Header extends React.Component {
     constructor(props) {
         super(props);
         this.toggleMenu = this.toggleMenu.bind(this);
         this.toggleUserMenu = this.toggleUserMenu.bind(this);
         this.state = {
-            userNameClass: 'user-menu'
+            userNameClass: this.props.initialClass,
         };
+    }
+
+    componentDidUpdate({ clickedContent }) {
+        if (Header.userMenuIsShowing(this.state.userNameClass) && this.props.clickedContent !== clickedContent) {
+            this.hideUserMenu();
+        }
+    }
+
+    static userMenuIsShowing(userNameClass) {
+        return userNameClass.includes(Header.defaultProps.extraClass);
     }
 
     render() {
@@ -29,11 +39,12 @@ export default class Header extends React.Component {
 
                     { loggedIn &&
                         <ul className="super-menu">
+                            <li className="user-icon" onClick={ this.toggleUserMenu }>
+                                { this.getUserIcon() }
+                                { this.userMenu() }
+                            </li>
                             <li className="navPanelToggle" onClick={ this.toggleMenu }>
                                 <span className="fas fa-bars"/>
-                            </li>
-                            <li className="user-icon" onClick={ this.toggleUserMenu }>
-                                { this.getUserIcon()}
                             </li>
                         </ul>
                     }
@@ -52,13 +63,14 @@ export default class Header extends React.Component {
 
     userMenu() {
         const menu = [
+            { name: 'Perfil', link: '/profile' },
             { name: 'Logout', link: '/logout' }
         ];
 
         return (
             <div className={ this.state.userNameClass }>
                 <ul>
-                    { menu.map((a, b) => <li key={ b }><Link to={ a.link }>{ a.name }</Link></li>) }
+                    { menu.map((a, b) => <li key={ b }><Link to={ a.link }>{ a.name }</Link><hr/></li>) }
                 </ul>
             </div>
         );
@@ -70,18 +82,24 @@ export default class Header extends React.Component {
         return (
             <div
                 className="user-pic">{ user.pic && <img src={ user.pic }/> || this.getUserInitials() }
-                { this.userMenu() }
             </div>
         );
     }
 
-    toggleUserMenu() {
-        const extraClass = 'user-menu-display';
+    toggleUserMenu(e) {
+        e.stopPropagation();
+        if (Header.userMenuIsShowing(this.state.userNameClass)) {
+            this.hideUserMenu();
+        } else {
+            this.setState({
+                userNameClass: this.props.initialClass + ' ' + this.props.extraClass
+            });
+        }
+    }
 
-
+    hideUserMenu() {
         this.setState({
-            userNameClass: this.state.userNameClass.includes(extraClass) ?
-                'user-menu' : this.state.userNameClass + ' ' + extraClass
+            userNameClass: this.props.initialClass
         });
     }
 
@@ -94,6 +112,16 @@ export default class Header extends React.Component {
     static propTypes = {
         dispatch: PropTypes.func,
         showMobileMenu: PropTypes.bool,
-        user: PropTypes.object
+        user: PropTypes.object,
+        initialClass: PropTypes.string,
+        extraClass: PropTypes.string,
+        clickedContent: PropTypes.bool
     }
 }
+
+Header.defaultProps = {
+    initialClass: 'user-menu',
+    extraClass: 'user-menu-display'
+};
+
+export default Header;

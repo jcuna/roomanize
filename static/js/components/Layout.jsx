@@ -1,69 +1,44 @@
 /**
- * Created by Jon on 6/24/17.
+ * Created by Jon on 11/20/17.
  */
 
 import React from 'react';
-import Menu from './Menu.jsx';
-import Header from './Header.jsx';
-import Footer from './Footer.jsx';
-import Routes from './Routes.jsx';
-import { BrowserRouter } from 'react-router-dom';
-import { connect } from 'react-redux';
-import { fetchUser } from '../actions/userActions';
-import '../../css/app.scss';
-import '../../css/overrides.scss';
-import { token } from '../utils/token';
-import Spinner from '../utils/Spinner';
-import { fetchPermissions } from '../actions/roleActions';
+import { Route, Switch } from 'react-router-dom';
+import Login from './user/Login.jsx';
+import RequiresLogin from './user/RequiresLogin.jsx';
+import FlashMessages from '../utils/Notifications.jsx';
+import Menu from './Menu';
+import Header from './Header';
+import Footer from './Footer';
 import Overlay from '../utils/Overlay';
-import { setStateData } from '../utils/config';
 import PropTypes from 'prop-types';
+import Routes from './Routes';
 
-class Layout extends React.Component {
-    constructor(props) {
-        super(props);
-
-        if (props.user.status === 'pending') {
-            props.dispatch(fetchUser());
-        }
-        if (this.permissionsPending()) {
-            props.dispatch(fetchPermissions());
-        }
-    }
-
-    permissionsPending() {
-        return Object.keys(this.props.roles.permissions).length === 0;
-    }
-
+export default class Layout extends React.Component {
     render() {
-        const { props } = this;
-
-        if (props.token.value !== '') {
-            token.data = { ...props };
-            setStateData({ ...props });
-        }
-
-        let render;
-
-        if (props.user.status === 'pending' || this.permissionsPending() &&
-            props.user.status === 'logged_in') {
-            render = <div className="first-load-spinner"><Spinner/></div>;
-        } else {
-            render = <Routes { ...props }/>;
-        }
-
         return (
-            <BrowserRouter>
-                <div className="parent-container">
-                    <Menu { ...props }/>
-                    <div className={ this.getClassName() }>
-                        <Header { ...props }/>
-                        {render}
-                        <Footer/>
+            <Route render = { props => {
+                props = { ...this.props, ...props };
+                return (
+                    <div>
+                        <Menu { ...props }/>
+                        <div className={ this.getClassName() }>
+                            <Header { ...props }/>
+                            <div className='content-area container'>
+                                <FlashMessages { ...this.props }/>
+                                <Switch>
+                                    <Route path='/login' render={ () => <Login { ...props }/> }/>
+                                    <RequiresLogin { ...props }>
+                                        <Routes { ...props }/>
+                                    </RequiresLogin>
+                                </Switch>
+                            </div>
+                            <Footer/>
+                        </div>
+                        <Overlay { ...props }/>
                     </div>
-                    <Overlay { ...props }/>
-                </div>
-            </BrowserRouter>
+                );
+            } }/>
         );
     }
 
@@ -77,24 +52,6 @@ class Layout extends React.Component {
     }
 
     static propTypes = {
-        dispatch: PropTypes.func.isRequired,
-        showMobileMenu: PropTypes.bool,
-        user: PropTypes.object,
-        token: PropTypes.object,
-        roles: PropTypes.object
-    }
-}
-
-const getInitialState = (state) => {
-    return {
-        user: state.user.user,
-        token: state.user.token,
-        roles: state.roles.roles,
-        showMobileMenu: state.app.showMobileMenu,
-        notifications: state.app.notifications,
-        landingPage: state.app.landingPage,
-        overlay: state.app.overlay
+        showMobileMenu: PropTypes.bool
     };
-};
-
-export default connect(getInitialState)(Layout);
+}

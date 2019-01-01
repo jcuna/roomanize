@@ -42,10 +42,19 @@ export default class Menu extends React.Component {
 
         return routes.map(item => {
             if (hasAccess(item.link, 'read')) {
-                return <Link key={ item.link } to={ item.link }>{ item.name }</Link>;
+                return <Link className={ this.getMenuClass(item) } key={ item.link } to={ item.link }>{ item.name }</Link>;
             }
             return null;
         });
+    }
+
+    getMenuClass(link) {
+        let className = 'menu-item';
+
+        if (this.props.history.location.pathname === link.link) {
+            className += ' active';
+        }
+        return className;
     }
 
     toggleMenu() {
@@ -56,6 +65,7 @@ export default class Menu extends React.Component {
         user: PropTypes.object,
         roles: PropTypes.object,
         showMobileMenu: PropTypes.bool,
-        dispatch: PropTypes.func
+        dispatch: PropTypes.func,
+        history: PropTypes.object
     }
 }

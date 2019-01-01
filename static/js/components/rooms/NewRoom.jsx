@@ -9,7 +9,8 @@ export default class NewRoom extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            button: { value: 'Agregar' }
+            button: { value: 'Agregar' },
+            rent: ''
         };
         this.handleSubmit = this.handleSubmit.bind(this);
         this.validateFields = this.validateFields.bind(this);
@@ -20,7 +21,7 @@ export default class NewRoom extends Component {
             button: this.state.button,
             elements: [
                 { type: 'text', placeholder: 'Numero/Nombre de Habitación', onChange: this.validateFields, name: 'room-number' },
-                { type: 'text', placeholder: 'Precio al mes', onChange: this.validateFields, name: 'room-number' }
+                { type: 'text', placeholder: 'Precio al mes', onChange: this.validateFields, name: 'rent' }
             ],
             callback: this.handleSubmit,
             object: this
@@ -32,7 +33,17 @@ export default class NewRoom extends Component {
 
     }
 
-    validateFields() {
-
+    validateFields({ target }) {
+        if (target.name === 'rent') {
+            if (isNaN(target.value)) {
+                target.value = this.state.rent;
+            }
+            // else {
+            //     this.setState({
+            //         rent: `${this.state.rent}${target.value}`
+            //     });
+            //     target.value = this.state.rent
+            // }
+        }
     }
 }
