@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import '../../css/header.scss';
 import { toggleMobileMenu } from '../actions/appActions';
+import { STATUS } from '../constants';
 
 class Header extends React.Component {
     constructor(props) {
@@ -29,8 +30,9 @@ class Header extends React.Component {
     }
 
     render() {
-        const { user } = this.props;
-        const loggedIn = user.status === 'logged_in';
+        const { user, projects } = this.props;
+        const loggedIn = user.status === STATUS.PROCESSED;
+        const projectName = projects.selected && projects.selected.name || 'Roomanize';
 
         return (
             <header id="header">
@@ -50,7 +52,7 @@ class Header extends React.Component {
                     }
                 </div>
                 <section id="banner">
-                    <h1>Mártires</h1>
+                    <h1>{ projectName }</h1>
                     <p>Contabilidad y manejo de clientes</p>
                 </section>
             </header>
@@ -115,7 +117,8 @@ class Header extends React.Component {
         user: PropTypes.object,
         initialClass: PropTypes.string,
         extraClass: PropTypes.string,
-        clickedContent: PropTypes.bool
+        clickedContent: PropTypes.bool,
+        projects: PropTypes.object
     }
 }
 

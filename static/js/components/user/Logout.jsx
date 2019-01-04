@@ -6,13 +6,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { logout } from '../../actions/userActions';
 import Spinner from '../../utils/Spinner';
+import { STATUS } from '../../constants';
+import { toggleMobileMenu } from '../../actions/appActions';
 
 export default class Logout extends React.Component {
     constructor(props) {
         super(props);
 
-        if (props.user.status === 'logged_in') {
+        if (props.user.status === STATUS.PROCESSED) {
             props.dispatch(logout());
+            props.dispatch(toggleMobileMenu(true));
         } else {
             props.history.push('/');
         }

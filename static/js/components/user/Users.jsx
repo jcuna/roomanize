@@ -10,6 +10,7 @@ import { hideOverlay, showOverlay } from '../../actions/appActions';
 import UserManager from './UserManager';
 import { fetchRoles } from '../../actions/roleActions';
 import { hasAccess } from '../../utils/config';
+import { STATUS } from '../../constants';
 
 export default class Users extends React.Component {
     constructor(props) {
@@ -32,7 +33,7 @@ export default class Users extends React.Component {
         if (props.roles.assigned.length === 0) {
             props.dispatch(fetchRoles());
         }
-        if (props.user.list.status !== 'fetching' && props.user.list.users.length === 0) {
+        if (props.user.list.status !== STATUS.TRANSMITTING && props.user.list.users.length === 0) {
             props.dispatch(fetchUsers());
         }
     }
@@ -72,8 +73,8 @@ export default class Users extends React.Component {
                     {this.props.user.list.users.map((user, i) => {
                         i++;
                         const rolesCount = user.roles.length;
-                        const canEdit = hasAccess('/users', 'write') && user.email !== this.props.user.email;
-                        const canDelete = hasAccess('/users', 'delete') && user.email !== this.props.user.email;
+                        const canEdit = hasAccess('/usuarios', 'write') && user.email !== this.props.user.email;
+                        const canDelete = hasAccess('/usuarios', 'delete') && user.email !== this.props.user.email;
 
                         return <tr key={ i }>
                             <th scope='row'>{ i }</th>
@@ -163,7 +164,7 @@ export default class Users extends React.Component {
     }
 
     componentDidUpdate() {
-        if (this.props.user.list.status !== 'fetching' && this.props.user.list.users.length === 0) {
+        if (this.props.user.list.status !== STATUS.TRANSMITTING && this.props.user.list.users.length === 0) {
             this.props.dispatch(fetchUsers());
         }
     }

@@ -8,7 +8,7 @@ import FormGenerator from '../../utils/FromGenerator';
 import { login } from '../../actions/userActions';
 import Spinner from '../../utils/Spinner';
 import { clearLandingPage } from '../../actions/appActions';
-import { INVALID_LANDING_PAGES } from '../../constants';
+import { INVALID_LANDING_PAGES, STATUS } from '../../constants';
 
 export default class Login extends React.Component {
     constructor(props) {
@@ -24,7 +24,7 @@ export default class Login extends React.Component {
     }
 
     static getDerivedStateFromProps({ history, user, landingPage, dispatch }, state) {
-        if (user.status === 'logged_in') {
+        if (user.status === STATUS.PROCESSED) {
             if (!INVALID_LANDING_PAGES.includes(landingPage)) {
                 history.push(landingPage);
                 dispatch(clearLandingPage());
@@ -40,7 +40,7 @@ export default class Login extends React.Component {
         const email = user.email || '';
         const password = user.password || '';
 
-        if (user.status === 'logging_in' || user.status === 'logging_out') {
+        if (user.status === STATUS.TRANSMITTING || user.status === STATUS.DECOMMISSIONING) {
             return <Spinner/>;
         }
 

@@ -6,13 +6,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import '../../css/menu.scss';
-import { toggleMobileMenu } from '../actions/appActions';
+import { clearNotifications, toggleMobileMenu } from '../actions/appActions';
 import { hasAccess, routes } from '../utils/config';
 
 export default class Menu extends React.Component {
     constructor(props) {
         super(props);
         this.toggleMenu = this.toggleMenu.bind(this);
+        this.clearNotifications = this.clearNotifications.bind(this);
     }
 
     render() {
@@ -36,16 +37,28 @@ export default class Menu extends React.Component {
     }
 
     getLinksBasedOffAccess() {
-        if (Object.keys(this.props.roles.permissions).length === 0) {
+        const { roles } = this.props;
+
+        if (Object.keys(roles.permissions).length === 0) {
             return null;
         }
 
         return routes.map(item => {
             if (hasAccess(item.link, 'read')) {
-                return <Link className={ this.getMenuClass(item) } key={ item.link } to={ item.link }>{ item.name }</Link>;
+                return (
+                    <Link
+                        className={ this.getMenuClass(item) } key={ item.link } to={ item.link }
+                        onClick={ this.clearNotifications }>
+                        { item.name }
+                    </Link>
+                );
             }
             return null;
         });
+    }
+
+    clearNotifications() {
+        this.props.dispatch(clearNotifications());
     }
 
     getMenuClass(link) {

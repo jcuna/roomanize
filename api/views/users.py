@@ -1,4 +1,3 @@
-from core import c_print
 import sqlalchemy
 from flask_restful import Resource, request
 from flask import session, json
@@ -58,7 +57,7 @@ class UsersManager(Resource):
         db.session.add(user)
         db.session.commit()
 
-        return {'id': user.id}
+        return dict(id=user.id)
 
     @token_required
     @access_required

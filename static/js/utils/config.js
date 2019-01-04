@@ -1,9 +1,11 @@
+import { STATUS } from '../constants';
+
 export const routes = [
-    { link: '/nueva-habitacion', name: 'Agregar habitación', endpoint: '' },
-    { link: '/editar-habitacion', name: 'Ver/Modificar habitación', endpoint: '' },
-    { link: '/nuevo-contrato', name: 'Nuevo Inquilino', endpoint: '' },
+    { link: '/habitaciones', name: 'Habitaciones', endpoint: '' },
+    { link: '/contratos', name: 'Contratos', endpoint: '' },
     { link: '/roles', name: 'Roles', endpoint: 'roles_url' },
-    { link: '/users', name: 'Usuarios', endpoint: 'users_manager_url' }
+    { link: '/usuarios', name: 'Usuarios', endpoint: 'users_manager_url' },
+    { link: '/proyectos', name: 'Proyectos', endpoint: 'projects_url' },
 ];
 
 let state = {};
@@ -13,7 +15,7 @@ export const setStateData = (props) => {
 };
 
 export const hasAccess = (path, type) => {
-    if (typeof state.user === 'undefined' || state.user.status !== 'logged_in' ||
+    if (typeof state.user === 'undefined' || state.user.status !== STATUS.PROCESSED ||
         Object.keys(state.roles.permissions).length === 0) {
         return false;
     }

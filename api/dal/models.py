@@ -1,9 +1,13 @@
 import json
 from dal import db
+from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 import datetime
 import jwt
 from flask import current_app
+from config.routes import defaultAccess
+
+collation = 'utf8mb4_unicode_ci'
 
 user_roles = db.Table('user_roles',
                       db.Column('id', db.BigInteger, primary_key=True),
@@ -16,10 +20,10 @@ class User(db.Model):
     fillable = ['password', 'email', 'first_name', 'last_name', 'deleted']
     __tablename__ = 'users'
     id = db.Column(db.BigInteger, primary_key=True)
-    email = db.Column(db.String(50), nullable=False, unique=True)
-    password = db.Column(db.String(80), nullable=True)
-    first_name = db.Column(db.String(50), nullable=False)
-    last_name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(50, collation=collation), nullable=False, unique=True)
+    password = db.Column(db.String(80, collation=collation), nullable=True)
+    first_name = db.Column(db.String(50, collation=collation), nullable=False)
+    last_name = db.Column(db.String(50, collation=collation), nullable=False)
     deleted = db.Column(db.Boolean, nullable=False, server_default='0', index=True)
     roles = db.relationship('Role',
                             secondary=user_roles, lazy='subquery',
@@ -45,12 +49,87 @@ class User(db.Model):
 class Role(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.BigInteger, primary_key=True)
-    name = db.Column(db.String(30), index=True)
-    permissions = db.Column(db.Text)
+    name = db.Column(db.String(30, collation=collation), index=True)
+    permissions = db.Column(db.Text(collation=collation))
 
     @property
     def get_permissions(self):
-        if self.permissions:
-            return json.loads(self.permissions)
 
-        return {}
+        user_permissions = {}
+
+        if self.permissions:
+            for key, userGrants in json.loads(self.permissions).items():
+                for defaultKey, defaultGrants in defaultAccess.items():
+                    if key == defaultKey:
+                        for grant in defaultGrants:
+                            if grant not in userGrants:
+                                userGrants.append(grant)
+
+                user_permissions.update({key: userGrants})
+
+        return user_permissions
+
+
+class Project(db.Model):
+    __tablename__ = 'projects'
+    id = db.Column(db.BigInteger, primary_key=True)
+    name = db.Column(db.String(30, collation=collation), unique=True)
+    active = db.Column(db.Boolean(), index=True)
+    address = db.Column(db.Text(collation=collation))
+    contact = db.Column(db.VARCHAR(10, collation=collation))
+
+
+class TimeInterval(db.Model):
+    __tablename__ = 'time_intervals'
+    id = db.Column(db.Integer, primary_key=True)
+    interval = db.Column(db.String(15, collation=collation), primary_key=True)
+
+
+class Room(db.Model):
+    __tablename__ = 'rooms'
+    id = db.Column(db.BigInteger, primary_key=True)
+    project_id = db.Column(db.BigInteger, db.ForeignKey('projects.id'), index=True, nullable=False)
+    name = db.Column(db.String(30, collation=collation), index=True)
+    rent = db.Column(db.Integer, nullable=True)
+    time_interval_id = db.Column(db.Integer, db.ForeignKey('time_intervals.id'), nullable=True)
+    description = db.Column(db.Text(collation=collation))
+    picture = db.Column(db.String(255, collation=collation))
+
+    project = relationship(Project)
+    time_interval = relationship(TimeInterval)
+
+
+class Tenant(db.Model):
+    __tablename__ = 'tenants'
+    id = db.Column(db.BigInteger, primary_key=True)
+    first_name = db.Column(db.String(30, collation=collation), index=True, nullable=False)
+    last_name = db.Column(db.Integer, nullable=False)
+    identification_number = db.Column(db.Text(collation=collation), info='National ID. i.e. Cedula, License')
+    email = db.Column(db.String(50, collation=collation), nullable=True, unique=True)
+    phone = db.Column(db.String(10, collation=collation), nullable=True, unique=True)
+
+
+class TenantHistory(db.Model):
+    __tablename__ = 'tenant_histories'
+    id = db.Column(db.BigInteger, primary_key=True)
+    tenant_id = db.Column(db.BigInteger, db.ForeignKey('tenants.id'), index=True, nullable=False)
+    validated_on = db.Column(db.DateTime())
+    reference1_phone = db.Column(db.String(10, collation=collation), nullable=False)
+    reference2_phone = db.Column(db.String(10, collation=collation), nullable=True)
+    reference3_phone = db.Column(db.String(10, collation=collation), nullable=True)
+
+    tenant = relationship(Tenant)
+
+
+class RentalAgreement(db.Model):
+    __tablename__ = 'rental_agreements'
+    id = db.Column(db.BigInteger, primary_key=True)
+    tenant_history_id = db.Column(db.BigInteger, db.ForeignKey('tenant_histories.id'), index=True, nullable=False)
+    room_id = db.Column(db.BigInteger, db.ForeignKey('rooms.id'), index=True, nullable=False)
+    time_interval_id = db.Column(db.Integer, db.ForeignKey('time_intervals.id'), nullable=False)
+    entered_on = db.Column(db.DateTime(), nullable=False)
+    terminated_on = db.Column(db.DateTime())
+
+    tenant_history = relationship(TenantHistory)
+    room = relationship(Room)
+    interval = relationship(TimeInterval)

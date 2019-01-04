@@ -10,6 +10,7 @@ import Spinner from '../../utils/Spinner';
 import { notifications, showOverlay } from '../../actions/appActions';
 import '../../../css/roles.scss';
 import Permissions from '../Permissions';
+import { STATUS } from '../../constants';
 
 export default class Roles extends React.Component {
     constructor(props) {
@@ -24,7 +25,7 @@ export default class Roles extends React.Component {
         this.updateObject = this.updateObject.bind(this);
         this.confirmRoleDeletion = this.confirmRoleDeletion.bind(this);
 
-        if (props.roles.status === 'pending') {
+        if (props.roles.status === STATUS.PENDING) {
             props.dispatch(fetchRoles());
         }
     }
@@ -81,7 +82,7 @@ export default class Roles extends React.Component {
     }
 
     get rolesTable() {
-        if (this.props.roles.status === 'fetching') {
+        if (this.props.roles.status === STATUS.TRANSMITTING) {
             return <Spinner/>;
         }
         return <table className='table table-striped'>

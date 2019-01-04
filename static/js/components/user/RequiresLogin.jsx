@@ -5,6 +5,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { setLandingPage, notifications } from '../../actions/appActions';
+import { STATUS } from '../../constants';
 
 export default class RequiresLogin extends React.Component {
     constructor(props) {
@@ -35,9 +36,9 @@ export default class RequiresLogin extends React.Component {
 
     static get safeStatus() {
         return [
-            'logged_in',
-            'logging_in',
-            'logging_out'
+            STATUS.PROCESSED,
+            STATUS.TRANSMITTING,
+            STATUS.DECOMMISSIONING
         ];
     }
 

@@ -3,6 +3,7 @@ import {
     PERMISSIONS_FETCHED, PERMISSIONS_COMMIT, ROLE_DELETE_SUCCESS, ROLE_DELETE_FAIL, ROLE_CREATE_DISPATCHED,
     ROLE_DELETE_DISPATCHED, PERMISSIONS_COMMIT_FAIL,
 } from '../actions/roleActions';
+import { STATUS } from '../constants';
 
 const rolesCompare = function (a, b) {
     if (a.name < b.name) {
@@ -33,7 +34,7 @@ const getUpdatedRolesPermissions = function (state, payload) {
 export default function rolesReducer(state = {
     roles: {
         assigned: [],
-        status: 'pending',
+        status: STATUS.PENDING,
         permissions: {},
         processing: false,
     },
@@ -42,11 +43,11 @@ export default function rolesReducer(state = {
         case ROLES_FETCHED:
             const roles = action.payload.sort(rolesCompare);
 
-            return { ...state, roles: { ...state.roles, assigned: roles, status: 'received' }};
+            return { ...state, roles: { ...state.roles, assigned: roles, status: STATUS.PROCESSED }};
         case ROLES_FETCHING:
-            return { ...state, roles: { ...state.roles, status: 'fetching' }};
+            return { ...state, roles: { ...state.roles, status: STATUS.TRANSMITTING }};
         case ROLES_FAIL:
-            return { ...state, roles: { ...state.roles, status: 'pending' }};
+            return { ...state, roles: { ...state.roles, status: STATUS.PENDING }};
         case ROLE_CREATE_DISPATCHED:
             return { ...state, roles: { ...state.roles, processing: true }};
         case ROLE_CREATE_SUCCESS:

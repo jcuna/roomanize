@@ -6,7 +6,7 @@ if [ "$APP_ENV" = "develop" ]; then
     while true
     do
         python3 app.py
-        sleep 5
+        sleep 2
     done
 else
     gunicorn -w 1 --bind :5000 wsgi:app --log-level=debug --log-file=-

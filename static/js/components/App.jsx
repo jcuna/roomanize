@@ -12,19 +12,34 @@ import '../../css/overrides.scss';
 import { token } from '../utils/token';
 import Spinner from '../utils/Spinner';
 import { fetchPermissions } from '../actions/roleActions';
-import { clickedContent } from '../actions/appActions';
+import { clickedContent, notifications } from '../actions/appActions';
 import { setStateData } from '../utils/config';
 import PropTypes from 'prop-types';
+import { STATUS } from '../constants';
+import { fetchProjects } from '../actions/projectActions';
 
 class App extends React.Component {
     constructor(props) {
         super(props);
 
-        if (props.user.status === 'pending') {
-            props.dispatch(fetchUser());
+        const { dispatch, user, projects } = this.props;
+
+        if (user.status === STATUS.PENDING) {
+            dispatch(fetchUser());
         }
         if (this.permissionsPending()) {
-            props.dispatch(fetchPermissions());
+            dispatch(fetchPermissions());
+        }
+
+        if (projects.status === STATUS.PENDING) {
+            dispatch(fetchProjects(
+                () => {
+                    dispatch(notifications([{
+                        type: 'danger',
+                        message: 'Sucedio un error inesperado',
+                    }]));
+                }
+            ));
         }
 
         this.clickedContent = this.clickedContent.bind(this);
@@ -44,8 +59,12 @@ class App extends React.Component {
 
         let render;
 
-        if (props.user.status === 'pending' || this.permissionsPending() &&
-            props.user.status === 'logged_in') {
+        /**
+         * we show first load spinner while fetching initial data and only stop it after we have processed the user
+         * weather the user is logged in or not.
+         */
+        if (props.user.status === STATUS.PENDING || this.permissionsPending() &&
+             props.user.status === STATUS.PROCESSED) {
             render = <div className="first-load-spinner"><Spinner/></div>;
         } else {
             render = <Layout { ...props }/>;
@@ -70,7 +89,8 @@ class App extends React.Component {
         user: PropTypes.object,
         token: PropTypes.object,
         roles: PropTypes.object,
-        clickedContent: PropTypes.bool
+        clickedContent: PropTypes.bool,
+        projects: PropTypes.object
     };
 }
 
@@ -83,7 +103,8 @@ const getInitialState = (state) => {
         notifications: state.app.notifications,
         landingPage: state.app.landingPage,
         overlay: state.app.overlay,
-        clickedContent: state.app.clickedContent
+        clickedContent: state.app.clickedContent,
+        projects: state.projects
     };
 };
 

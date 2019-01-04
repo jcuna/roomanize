@@ -8,10 +8,12 @@ import Home from './Home';
 import Logout from './user/Logout';
 import Roles from './user/Roles';
 import Users from './user/Users';
-import NewRoom from './rooms/NewRoom';
+import Room from './rooms/Room';
 import ErrorPage from './ErrorPage';
 import { hasAccess } from '../utils/config';
 import PropTypes from 'prop-types';
+import RequiresProject from './projects/RequiresProject';
+import Project from './projects/Project';
 
 export default class Routes extends React.Component {
     render() {
@@ -20,8 +22,10 @@ export default class Routes extends React.Component {
                 <Route exact path='/' render={ () => <Home { ...this.props } /> }/>
                 <Route path='/logout' render={ () => <Logout { ...this.props }/> }/>
                 <Route path='/roles' render={ () => this.getComponent(Roles) }/>
-                <Route path='/users' render={ () => this.getComponent(Users) }/>
-                <Route path='/nueva-habitacion' render={ () => this.getComponent(NewRoom) }/>
+                <Route path='/usuarios' render={ () => this.getComponent(Users) }/>
+                <Route path='/contratos' render={ () => (<h1>contratos</h1>) }/>
+                <RequiresProject path='/habitaciones' component={ Room } { ...this.props }/>
+                <Route exact path='/proyectos' render={ () => this.getComponent(Project) }/>
                 <Route component={ ErrorPage }/>
             </Switch>
         );

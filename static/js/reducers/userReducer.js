@@ -12,13 +12,14 @@ import {
     USER_LOGGING_OUT,
     USER_LOGGED_OUT, USERS_FETCHED, USER_CREATED, USERS_FETCHING, USER_DELETE_SUCCESS, USER_UPDATE_SUCCESS,
 } from '../actions/userActions';
+import { STATUS } from '../constants';
 
 export default function userReducer(state = {
     user: {
-        status: 'pending',
+        status: STATUS.PENDING,
         roles: [],
         list: {
-            status: 'pending',
+            status: STATUS.PENDING,
             users: [],
         },
         pic: null
@@ -32,17 +33,17 @@ export default function userReducer(state = {
         case USER_FETCHED:
             return {
                 ...state,
-                user: { ...state.user, ...action.payload.user, status: 'logged_in' },
+                user: { ...state.user, ...action.payload.user, status: STATUS.PROCESSED },
                 token: action.payload.token,
             };
         case USER_MUST_LOGIN:
-            return { ...state, user: { ...state.user, status: 'logged_out' }};
+            return { ...state, user: { ...state.user, status: STATUS.UNPROCESSED }};
         case USER_LOGGING_IN:
-            return { ...state, user: { ...state.user, status: 'logging_in' }};
+            return { ...state, user: { ...state.user, status: STATUS.TRANSMITTING }};
         case USER_LOGIN_SUCCESS:
             return {
                 ...state,
-                user: { ...state.user, ...action.payload.user, status: 'logged_in' },
+                user: { ...state.user, ...action.payload.user, status: STATUS.PROCESSED },
                 token: action.payload.token,
             };
         case USER_LOGIN_FAIL:
@@ -50,7 +51,7 @@ export default function userReducer(state = {
                 ...state,
                 user: {
                     ...state.user,
-                    status: 'failed',
+                    status: STATUS.FAILED,
                     email: action.payload.email,
                     password: action.payload.password,
                 },
@@ -60,7 +61,7 @@ export default function userReducer(state = {
                 ...state,
                 user: {
                     ...state.user,
-                    status: 'error',
+                    status: STATUS.ERROR,
                     email: action.payload.email,
                     password: action.payload.password,
                 },
@@ -68,20 +69,20 @@ export default function userReducer(state = {
         case USER_LOGGING_OUT:
             return {
                 ...state,
-                user: { ...state.user, status: 'logging_out' },
+                user: { ...state.user, status: STATUS.DECOMMISSIONING },
             };
         case USER_LOGGED_OUT:
-            return { ...state, user: { status: 'logged_out', roles: [] }, token: { value: '', expires: '' }};
+            return { ...state, user: { status: STATUS.DECOMMISSIONED, roles: [] }, token: { value: '', expires: '' }};
 
         case USERS_FETCHING:
-            return { ...state, user: { ...state.user, list: { status: 'fetching', users: [] }}};
+            return { ...state, user: { ...state.user, list: { status: STATUS.TRANSMITTING, users: [] }}};
         case USERS_FETCHED:
-            return { ...state, user: { ...state.user, list: { status: 'fetched', users: action.payload }}};
+            return { ...state, user: { ...state.user, list: { status: STATUS.COMPLETE, users: action.payload }}};
 
         case USER_CREATED:
         case USER_DELETE_SUCCESS:
         case USER_UPDATE_SUCCESS:
-            return { ...state, user: { ...state.user, list: { status: 'pending', users: [] }}};
+            return { ...state, user: { ...state.user, list: { status: STATUS.PENDING, users: [] }}};
 
         default:
             return state;
