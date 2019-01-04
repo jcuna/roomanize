@@ -151,7 +151,7 @@ export default class Roles extends React.Component {
 
         this.props.dispatch(showOverlay(
             <div className='panel'>Estas seguro que quieres elimiar el rol seleccionado?</div>,
-            <div className='warning-prompt'><i className='fas fa-exclamation-triangle'/>Cuidado...</div>,
+            <div className='warning-prompt'><i className='fas fa-exclamation-triangle'/>Advertencia...</div>,
             true,
             button)
         );

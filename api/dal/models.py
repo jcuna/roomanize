@@ -77,6 +77,7 @@ class Project(db.Model):
     active = db.Column(db.Boolean(), index=True)
     address = db.Column(db.Text(collation=collation))
     contact = db.Column(db.VARCHAR(10, collation=collation))
+    deleted = db.Column(db.DateTime(), nullable=True, index=True)
 
 
 class TimeInterval(db.Model):

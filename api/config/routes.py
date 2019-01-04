@@ -5,12 +5,12 @@ def register():
         returns: dict
     """
     return {
-        'users.Users@users_url': '/user',
+        'users.Users@users_url': '/user|/user/',
         'users.UsersManager@users_manager_url': '/users|/users/<int:user_id>',
-        'users.Session@login_url': '/login',
-        'users.Roles@roles_url': '/roles',
-        'users.Permissions@permissions_url': '/permissions',
-        'projects.Projects@projects_url': '/projects'
+        'users.Session@login_url': '/login|/login/',
+        'users.Roles@roles_url': '/roles|/roles/',
+        'users.Permissions@permissions_url': '/permissions|/permissions/',
+        'projects.Projects@projects_url': '/projects|/projects/|/projects/<int:project_id>'
     }
 
 

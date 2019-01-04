@@ -41,19 +41,17 @@ export const createProject = (data, success) =>
             }));
     };
 
-export const selectProject = (id, success) =>
+export const updateProject = (data, success) =>
     (dispatch) => {
         dispatch({ type: PROJECT_SELECTING });
         token.through().then(header =>
             api({
-                url: `/projects/${id}`,
+                url: `/projects/${data.id}`,
                 method: 'PUT',
                 headers: header
-            }).then((resp) => {
+            }, data).then((resp) => {
                 success();
                 dispatch({ type: PROJECT_SELECTED, payload: { id: resp.id }});
-            }));
+            })
+        );
     };
-
-export const toggleRequiredProject = () =>
-    (dispatch) => dispatch({ type: PROJECT_REQUIRED });

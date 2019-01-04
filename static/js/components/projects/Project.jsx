@@ -6,18 +6,25 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Checkbox from '../../utils/Checkbox';
 import FormGenerator from '../../utils/FromGenerator';
-import { createProject, fetchProjects } from '../../actions/projectActions';
+import { createProject, fetchProjects, updateProject } from '../../actions/projectActions';
 import Link from 'react-router-dom/es/Link';
 import { hasAccess } from '../../utils/config';
+import { hideOverlay, showOverlay } from '../../actions/appActions';
 
 export default class Project extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             button: { value: 'Agregar', disabled: true },
-            newProject: {}
+            project: {
+                name: '',
+                contact: '',
+                address: '',
+                active: false,
+            },
         };
 
+        this.selectCheckBox = this.selectCheckBox.bind(this);
         this.validateFields = this.validateFields.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
@@ -35,23 +42,25 @@ export default class Project extends React.Component {
     }
 
     getForm() {
+        const { project } = this.state;
         return <div><hr/><h5>Crear Proyecto nuevo</h5><FormGenerator { ...{
-            formName: 'new-project',
+            formName: 'project',
             button: this.state.button,
             elements: [
-                { type: 'text', placeholder: 'Nombre Del Proyecto', onChange: this.validateFields, name: 'name' },
-                { type: 'tel', placeholder: 'Telefono', onChange: this.validateFields, name: 'phone' },
-                { type: 'text', placeholder: 'Direccion', onChange: this.validateFields, name: 'address' },
-                { type: 'checkbox', placeholder: 'Activar', onChange: this.validateFields, id: 'status', name: 'status', label: 'Activar' },
+                { type: 'text', placeholder: 'Nombre Del Proyecto', onChange: this.validateFields, name: 'name', defaultValue: project.name },
+                { type: 'tel', placeholder: 'Telefono', onChange: this.validateFields, name: 'phone', defaultValue: project.contact },
+                { type: 'text', placeholder: 'Direccion', onChange: this.validateFields, name: 'address', defaultValue: project.address },
+                { type: 'checkbox', placeholder: 'Activar', onChange: this.validateFields, id: 'active', name: 'active', label: 'Activar' },
             ],
             callback: this.handleSubmit,
             object: this
-            // initialRefs: this.initialRefs
         } }/></div>;
     }
 
     getProjects() {
         const { projects } = this.props;
+
+        const canEdit = hasAccess('/proyectos', 'write');
 
         if (projects.projects.length === 0) {
             return <div className="alert alert-warning">Aun no se ha creado ningun proyecto</div>;
@@ -77,8 +86,14 @@ export default class Project extends React.Component {
                             <td>{ project.name }</td>
                             <td>{ project.contact }</td>
                             <td>{ project.address }</td>
-                            <td><Link to={ `proyectos/${project.id}` }><i className='fa fa-edit'/></Link></td>
-                            <td>{ this.getCheckbox(project) }</td>
+                            <td>
+                                { canEdit && <span onClick={ (project) => {
+                                    this.props.dispatch(showOverlay());
+                                }
+                                }><i className='fa fa-edit'/></span> ||
+                                <i className='fas fa-ban'/> }
+                            </td>
+                            <td>{ this.getCheckbox(project, canEdit) }</td>
                         </tr>
                     )}
                 </tbody>
@@ -86,27 +101,54 @@ export default class Project extends React.Component {
         );
     }
 
-    getCheckbox(item) {
-        const label = item.active ? 'Desactivar' : 'Activar';
+    getCheckbox(item, canEdit) {
+        if (canEdit) {
+            const label = item.active ? 'Desactivar' : 'Activar';
 
-        return <Checkbox
-            name={ 'toggle-active' }
-            id={ item.id }
-            label={ label }
-            checked={ item.active }
-            onChange={ this.selectCheckBox }
-        />;
+            return <Checkbox
+                name={ item.name }
+                id={ item.id }
+                label={ label }
+                checked={ item.active }
+                onChange={ this.selectCheckBox }
+            />;
+        }
+        return <div><span>{ item.active && 'Activado' || 'Desactivado' }</span></div>;
     }
 
-    selectCheckBox() {
+    selectCheckBox(checkbox) {
+        const label = !checkbox.checked ? 'desactivar' : 'activar';
 
+        const button = <button
+            type='button' onClick={ () => {
+                this.updateProjectStatus(checkbox);
+            } } className='btn btn-warning'>OK</button>;
+
+        this.props.dispatch(
+            showOverlay(
+                <div className='panel'>{`Estas seguro que quieres ${label} ${checkbox.name}`}?</div>,
+                <div className='warning-prompt'><i className='fas fa-exclamation-triangle'/>Advertencia...</div>,
+                true,
+                button
+            )
+        );
+    }
+
+    updateProjectStatus(checkbox) {
+        this.props.dispatch(updateProject({
+            id: checkbox.id,
+            active: checkbox.checked
+        }, () => {
+            this.props.dispatch(hideOverlay());
+            this.props.dispatch(fetchProjects());
+        }));
     }
 
     validateFields() {
         const project = {
             name: '',
             phone: '',
-            status: false,
+            active: false,
             address: ''
         };
 
@@ -121,7 +163,7 @@ export default class Project extends React.Component {
         if (project.name !== '' && project.phone !== '') {
             this.setState({
                 button: { value: 'Agregar', disabled: false },
-                newProject: project
+                project
             });
         } else {
             this.setState({
@@ -132,11 +174,11 @@ export default class Project extends React.Component {
 
     handleSubmit(e) {
         e.preventDefault();
-        this.props.dispatch(createProject(this.state.newProject, () => {
+        this.props.dispatch(createProject(this.state.project, () => {
             this.props.dispatch(fetchProjects());
             this.setState({
                 button: { value: 'Agregar', disabled: true },
-                newProject: {}
+                project: {}
             });
 
             Object.keys(this.refs).forEach((el) => {
