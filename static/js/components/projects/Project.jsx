@@ -69,10 +69,10 @@ export default class Project extends React.Component {
 
         return (
             <section className="project-wrapper">
-                <Breadcrumbs { ...this.props }/>
+                <Breadcrumbs { ...this.props } title={ this.props.projects.editing.name }/>
                 <h3>Proyectos</h3>
-                {typeof (this.props.match.params.project_id) === 'undefined' && this.getProjects()}
-                {this.props.projects.projects.length < 10 && canCreate && this.getForm(this.props)}
+                { typeof (this.props.match.params.project_id) === 'undefined' && this.getProjects() }
+                { this.props.projects.projects.length < 10 && canCreate && this.getForm(this.props) }
             </section>
         );
     }
