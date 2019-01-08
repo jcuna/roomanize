@@ -42,7 +42,9 @@ export default class FormGenerator extends React.Component {
      * @returns {*}
      */
     generateForm(elements, formName, button) {
-        return React.createElement('form', { className: formName, onSubmit: this.props.callback },
+        return React.createElement(
+            'form',
+            { className: formName, onSubmit: this.props.callback },
             elements.map((b, k) => {
                 if (React.isValidElement(b)) {
                     return b;
@@ -51,27 +53,31 @@ export default class FormGenerator extends React.Component {
                 const formElement = typeof b.formElement === 'undefined' ? 'input' : b.formElement;
                 const reference = FormGenerator.getReference(b);
 
-                return React.createElement('div', { className: this.getParentClassName(b), key: k },
+                return React.createElement(
+                    'div',
+                    { className: FormGenerator.getParentClassName(b), key: k },
                     React.createElement(formElement, {
                         type: b.type,
                         name: b.name,
                         id: b.id,
                         htmlFor: b.for,
                         placeholder: b.placeholder,
-                        className: this.getClassName(b),
+                        className: FormGenerator.getClassName(b),
                         onChange: b.onChange,
                         ref: reference,
                         value: b.value,
                         defaultValue: b.defaultValue,
+                        defaultChecked: b.checked,
                         disabled: b.disabled || false,
                         readOnly: b.readOnly || false
-                    }, this.getSecondParam(b)),
-
+                    },
+                    this.getSecondParam(b)),
                     b.label && React.createElement('label', { htmlFor: b.id }, b.label)
                 );
             }),
-            typeof button !== 'undefined' &&
-            React.createElement('div', { className: 'form-group' },
+            typeof button !== 'undefined' && React.createElement(
+                'div',
+                { className: 'form-group' },
                 React.createElement(
                     'button', { ...button, className: `btn btn-${button.type || 'primary'}` },
                     button.value || 'Submit'
@@ -80,14 +86,14 @@ export default class FormGenerator extends React.Component {
         );
     }
 
-    getParentClassName(element) {
+    static getParentClassName(element) {
         if (element.type === 'checkbox' || element.type === 'radio') {
             return 'form-check';
         }
         return 'form-group';
     }
 
-    getClassName(element) {
+    static getClassName(element) {
         let className = '';
 
         if (element.type === 'checkbox' || element.type === 'radio') {

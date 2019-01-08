@@ -15,7 +15,8 @@ def get_fillable(model: db.Model, **kwargs):
     fillable = {}
     for attribute_name in model.fillable:
         if attribute_name in kwargs:
-            fillable[attribute_name] = kwargs[attribute_name]
+            fillable[attribute_name] = kwargs[attribute_name][0] if isinstance(kwargs[attribute_name], list) else\
+                kwargs[attribute_name]
 
     return fillable
 

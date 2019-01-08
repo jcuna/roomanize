@@ -9,6 +9,8 @@ export const PROJECTS_FETCHING = 'PROJECTS_FETCHING';
 export const PROJECTS_FETCHED = 'PROJECTS_FETCHED';
 export const PROJECTS_FETCHED_FAIL = 'PROJECTS_FETCHED_FAIL';
 export const PROJECT_REQUIRED = 'PROJECT_REQUIRED';
+export const PROJECT_EDITING = 'PROJECT_EDITING';
+export const PROJECT_EDITING_CLEAR = 'PROJECT_EDITING_CLEAR';
 
 export const fetchProjects = (fail) =>
     (dispatch) => {
@@ -54,4 +56,14 @@ export const updateProject = (data, success) =>
                 dispatch({ type: PROJECT_SELECTED, payload: { id: resp.id }});
             })
         );
+    };
+
+export const editProject = (project) =>
+    (dispatch) => {
+        dispatch({ type: PROJECT_EDITING, payload: project });
+    };
+
+export const clearProjectEditing = () =>
+    (dispatch) => {
+        dispatch({ type: PROJECT_EDITING_CLEAR });
     };

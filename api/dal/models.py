@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import datetime
 import jwt
 from flask import current_app
-from config.routes import defaultAccess
+from config.routes import default_access
 
 collation = 'utf8mb4_unicode_ci'
 
@@ -33,7 +33,7 @@ class User(db.Model):
                             )
 
     def hash_password(self):
-        self.password = generate_password_hash(self.password, method='sha256')
+        self.password = generate_password_hash(str(self.password).encode("ascii"), method='sha256')
 
     def password_correct(self, plain_password):
         return check_password_hash(self.password, plain_password)
@@ -55,19 +55,19 @@ class Role(db.Model):
     @property
     def get_permissions(self):
 
-        user_permissions = {}
+        combined_permissions = default_access.copy()
 
         if self.permissions:
             for key, userGrants in json.loads(self.permissions).items():
-                for defaultKey, defaultGrants in defaultAccess.items():
+                for defaultKey, defaultGrants in default_access.items():
                     if key == defaultKey:
                         for grant in defaultGrants:
                             if grant not in userGrants:
                                 userGrants.append(grant)
 
-                user_permissions.update({key: userGrants})
+                combined_permissions.update({key: userGrants})
 
-        return user_permissions
+        return combined_permissions
 
 
 class Project(db.Model):

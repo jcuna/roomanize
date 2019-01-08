@@ -1,9 +1,17 @@
 import importlib
+import sys
+from pprint import pprint
 
-from flask import Flask, url_for, render_template
-from flask_restful import Api
-from config.routes import register, noPermissions
+from flask import Flask, url_for, render_template, redirect
+from flask_restful import Api, request
+from flask_restful.representations import json
+
+from config.routes import register, no_permissions
 import re
+
+from dal import db
+from dal.models import User, Role
+from dal.shared import get_fillable
 
 permissions = {}
 
@@ -27,7 +35,7 @@ class Router:
             pack = importlib.import_module(pack_name, parts[1])
             mod = getattr(pack, parts[1])
             api.add_resource(mod, *full_routes, endpoint=parts[2])
-            if pack_name + '.' + parts[1] not in noPermissions:
+            if pack_name + '.' + parts[1] not in no_permissions:
                 permissions.update({parts[2]: pack_name + '.' + parts[1]})
 
             with app.test_request_context():
@@ -37,6 +45,36 @@ class Router:
         def routes():
             return render_template('routes.html', routes=self.routes)
 
-        @app.route('/install')
+        @app.route('/install', methods=['GET', 'POST'])
         def install():
-            return render_template('routes.html', routes=self.routes)
+
+            user_count = User.query.count()
+            if user_count > 0:
+                return redirect('/')
+
+            if request.method == 'POST':
+                data = request.form
+                if 'first_name' in data and data['first_name'] and 'last_name' in data and data['last_name']\
+                        and 'email' in data and data['email'] and 'password' in data and data['password']:
+                    user_data = get_fillable(User, **data)
+                    user = User(**user_data)
+                    user.hash_password()
+
+                    admin_perms = {}
+
+                    for endpoint, permission in permissions.items():
+                        admin_perms.update({permission: ['read', 'write', 'delete']})
+
+                    role = Role(name='Admin', permissions=json.dumps(admin_perms))
+                    db.session.add(role)
+
+                    user.roles.append(role)
+                    db.session.add(user)
+
+                    db.session.commit()
+
+                    return redirect('/')
+
+            return render_template('install.html', dep={
+                'db': db,
+            })

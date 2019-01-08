@@ -1,4 +1,5 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -10,8 +11,12 @@
     <title>Roomanize</title>
 </head>
 <body>
-<noscript>Please enable javascript to use this web app</noscript>
-    <div id="content"></div>
-    <script src="/dist/bundle.js" type="text/javascript"></script>
+
+<div class="container">
+
+    {% block content %}{% endblock %}
+
+</div>
+
 </body>
 </html>

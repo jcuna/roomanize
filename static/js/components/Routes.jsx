@@ -19,21 +19,23 @@ export default class Routes extends React.Component {
     render() {
         return (
             <Switch>
-                <Route exact path='/' render={ () => <Home { ...this.props } /> }/>
-                <Route path='/logout' render={ () => <Logout { ...this.props }/> }/>
-                <Route path='/roles' render={ () => this.getComponent(Roles) }/>
-                <Route path='/usuarios' render={ () => this.getComponent(Users) }/>
-                <Route path='/contratos' render={ () => (<h1>contratos</h1>) }/>
+                <Route exact path='/' render={ (props) => <Home { ...props } /> }/>
+                <Route exact path='/logout' render={ (props) => <Logout { ...props }/> }/>
+                <Route exact path='/roles' render={ (props) => this.getComponent(Roles, props) }/>
+                <Route exact path='/usuarios' render={ (props) => this.getComponent(Users, props) }/>
+                <Route exact path='/contratos' render={ () => (<h1>contratos</h1>) }/>
                 <RequiresProject path='/habitaciones' component={ Room } { ...this.props }/>
-                <Route exact path='/proyectos' render={ () => this.getComponent(Project) }/>
+                <Route exact path='/proyectos/:project_id?' render={ (props) => this.getComponent(Project, props) }/>
                 <Route component={ ErrorPage }/>
             </Switch>
         );
     }
 
-    getComponent(Component) {
+    getComponent(Component, props) {
         if (hasAccess(this.props.history.location.pathname)) {
-            return <Component { ...this.props }/>;
+            const finalProps = { ...this.props, ...props };
+
+            return <Component { ...finalProps }/>;
         }
         return <ErrorPage type={ 403 }/>;
     }

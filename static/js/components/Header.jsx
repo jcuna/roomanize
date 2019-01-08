@@ -37,7 +37,7 @@ class Header extends React.Component {
         return (
             <header id="header">
                 <div className="inner">
-                    <Link to="/" className="logo"><img src="../images/building.png"/></Link>
+                    <Link to="/" className="logo"><img src="/images/building.png"/></Link>
 
                     { loggedIn &&
                         <ul className="super-menu">

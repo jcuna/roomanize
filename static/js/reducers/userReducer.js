@@ -43,7 +43,7 @@ export default function userReducer(state = {
         case USER_LOGIN_SUCCESS:
             return {
                 ...state,
-                user: { ...state.user, ...action.payload.user, status: STATUS.PROCESSED },
+                user: { ...state.user, ...action.payload.user, list: state.user.list, status: STATUS.PROCESSED },
                 token: action.payload.token,
             };
         case USER_LOGIN_FAIL:
@@ -61,6 +61,7 @@ export default function userReducer(state = {
                 ...state,
                 user: {
                     ...state.user,
+                    list: state.user.list,
                     status: STATUS.ERROR,
                     email: action.payload.email,
                     password: action.payload.password,

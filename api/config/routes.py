@@ -14,12 +14,12 @@ def register():
     }
 
 
-noPermissions = [
+no_permissions = [
     'views.users.Session',
     'views.users.Users',
     'views.users.Permissions'
 ]
 
-defaultAccess = {
+default_access = {
     'views.projects.Projects': ['read']
 }
