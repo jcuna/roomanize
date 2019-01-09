@@ -3,9 +3,14 @@ from dal.models import collation
 
 app = init_app()
 
-with app.app_context():
 
-    connection = db.engine.raw_connection()
-    connection.cursor().execute("SET NAMES 'utf8mb4' COLLATE '" + collation + "'")
+def generate():
+    with app.app_context():
 
-    db.create_all()
+        connection = db.engine.raw_connection()
+        connection.cursor().execute("SET NAMES 'utf8mb4' COLLATE '" + collation + "'")
+
+        db.create_all()
+
+
+generate()

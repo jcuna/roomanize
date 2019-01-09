@@ -1,4 +1,5 @@
 import importlib
+import sqlalchemy
 import sys
 from pprint import pprint
 
@@ -48,9 +49,13 @@ class Router:
         @app.route('/install', methods=['GET', 'POST'])
         def install():
 
-            user_count = User.query.count()
-            if user_count > 0:
-                return redirect('/')
+            try:
+                user_count = User.query.count()
+                if user_count > 0:
+                    return redirect('/')
+            except sqlalchemy.exc.ProgrammingError:
+                from migrate import generate
+                generate()
 
             if request.method == 'POST':
                 data = request.form
@@ -75,6 +80,4 @@ class Router:
 
                     return redirect('/')
 
-            return render_template('install.html', dep={
-                'db': db,
-            })
+            return render_template('install.html')
