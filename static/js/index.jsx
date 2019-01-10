@@ -12,6 +12,10 @@ import App from './components/App.jsx';
 import store from './store';
 
 const bootstrap = () => {
+    if (typeof module === 'object' && module.hot) {
+        module.hot.accept();
+    }
+
     ReactDOM.render(
         <Provider store={ store }>
             <App/>
