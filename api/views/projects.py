@@ -1,6 +1,5 @@
 from flask import request
 from flask_restful import Resource
-from sqlalchemy import update
 
 from dal.models import Project
 from dal.shared import token_required, access_required, db
@@ -77,3 +76,22 @@ class Projects(Resource):
             return {'error': 'Unexpected Error'}, 404
 
         return {'message': 'success'}
+
+
+class Rooms(Resource):
+
+    @token_required
+    @access_required
+    def get(self):
+        pass
+
+    @token_required
+    @access_required
+    def post(self):
+        pass
+
+    @token_required
+    @access_required
+    def put(self):
+        pass
+

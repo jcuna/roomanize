@@ -10,7 +10,10 @@ def register():
         'users.Session@login_url': '/login|/login/',
         'users.Roles@roles_url': '/roles|/roles/',
         'users.Permissions@permissions_url': '/permissions|/permissions/',
-        'projects.Projects@projects_url': '/projects|/projects/|/projects/<int:project_id>'
+        'projects.Projects@projects_url': '/projects|/projects/|/projects/<int:project_id>',
+        'projects.Rooms@rooms_url': '/rooms|/rooms/|/rooms/<int:room_id>',
+        'agreements.Agreements@agreements_url': '/agreements|/agreements/|/agreements/<int:agreement_id>',
+        'tenants.Tenants@tenants_url': '/tenants|/tenants/|/tenants/<int:tenants_id>',
     }
 
 

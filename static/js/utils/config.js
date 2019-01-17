@@ -1,11 +1,12 @@
 import { STATUS } from '../constants';
 
 export const routes = [
-    { link: '/habitaciones', name: 'Habitaciones', endpoint: '' },
-    { link: '/contratos', name: 'Contratos', endpoint: '' },
-    { link: '/roles', name: 'Roles', endpoint: 'roles_url' },
-    { link: '/usuarios', name: 'Usuarios', endpoint: 'users_manager_url' },
-    { link: '/proyectos', name: 'Proyectos', endpoint: 'projects_url' },
+    { icon: 'fas fa-bed', link: '/habitaciones', name: 'Habitaciones', endpoint: 'rooms_url' },
+    { icon: 'fas fa-file-contract', link: '/contratos', name: 'Contratos', endpoint: 'agreements_url' },
+    { icon: 'fas fa-people-carry', link: '/inquilinos', name: 'Inquilinos', endpoint: 'tenants_url' },
+    { icon: 'fas fa-lock', link: '/roles', name: 'Roles', endpoint: 'roles_url' },
+    { icon: 'fas fa-users', link: '/usuarios', name: 'Usuarios', endpoint: 'users_manager_url' },
+    { icon: 'fas fa-chart-line', link: '/proyectos', name: 'Proyectos', endpoint: 'projects_url' },
 ];
 
 let state = {};

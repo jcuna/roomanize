@@ -85,12 +85,12 @@ export default class Users extends React.Component {
                             <td>
                                 <i className={ canEdit ? 'text-info fas fa-user-edit' : 'fas fa-ban' }
                                     aria-hidden='true'
-                                    onClick={ canEdit ? () => this.openUserManager({ ...user, roles: user.roles.slice() }) : undefined}/>
+                                    onClick={ canEdit ? () => this.openUserManager({ ...user, roles: user.roles.slice() }) : null }/>
                             </td>
                             <td>
                                 <i className={ canDelete ? 'text-danger fas fa-trash' : 'fas fa-ban' }
                                     aria-hidden='true'
-                                    onClick={ canDelete ? () => this.deleteUser(user.id) : undefined }/>
+                                    onClick={ canDelete ? () => this.deleteUser(user.id) : null }/>
                             </td>
                         </tr>;
                     })}

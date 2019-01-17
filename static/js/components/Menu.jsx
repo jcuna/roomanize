@@ -49,7 +49,8 @@ export default class Menu extends React.Component {
                     <Link
                         className={ this.getMenuClass(item) } key={ item.link } to={ item.link }
                         onClick={ this.clearNotifications }>
-                        { item.name }
+                        <i className={ item.icon }/>
+                        <span>{ item.name }</span>
                     </Link>
                 );
             }

@@ -7,7 +7,6 @@ import PropTypes from 'prop-types';
 import Checkbox from '../utils/Checkbox';
 
 export default class Permissions extends React.Component {
-
     constructor(props) {
         super(props);
         let role = '';
@@ -90,7 +89,7 @@ export default class Permissions extends React.Component {
                     methods = this.state.selectedPermissions[name].slice();
                 }
                 methods.push(type);
-                newState = { selectedPermissions: { ...this.state.selectedPermissions, [name]: methods } };
+                newState = { selectedPermissions: { ...this.state.selectedPermissions, [name]: methods }};
             }
         } else {
             if (type === '*') {

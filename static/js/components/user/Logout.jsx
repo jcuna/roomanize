@@ -30,4 +30,4 @@ export default class Logout extends React.Component {
         dispatch: PropTypes.func,
         history: PropTypes.object,
     };
-};
+}

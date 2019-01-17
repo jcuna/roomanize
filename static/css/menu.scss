@@ -16,16 +16,37 @@
   transition: all 1s ease;
   a {
     color: #fff;
-  }
-  .fas {
-    cursor: pointer;
-    float: right;
-    padding: 20px;
-    font-size: 40px;
+    text-decoration: none;
     &:hover {
       opacity: 0.5;
     }
   }
+  > .fas {
+    float: right;
+    padding: 20px;
+    font-size: 40px;
+  }
+
+  .fas {
+    cursor: pointer;
+  }
+
+  .menu-item {
+    i {
+      margin-right: 15px;
+    }
+
+    @media screen and (max-width: 1040px) {
+      text-align: center;
+      span {
+        display: none;
+      }
+      .fas {
+        font-size: 40px;
+      }
+    }
+  }
+
   #mobile-nav {
     text-align: left;
     clear: both;
@@ -37,7 +58,6 @@
 
     .active {
       background-color: $darkBlue;
-      text-decoration: underline;
     }
   }
 }
