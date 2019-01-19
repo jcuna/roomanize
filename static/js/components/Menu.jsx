@@ -20,6 +20,7 @@ export default class Menu extends React.Component {
         return (
             <div className={ this.className }>
                 <i onClick={ this.toggleMenu } className="fas fa-times" aria-hidden="true"/>
+                <h2 className='app-logo'><span>Room</span>anize</h2>
                 <nav id="mobile-nav">
                     {this.getLinksBasedOffAccess()}
                 </nav>

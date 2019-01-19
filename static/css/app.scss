@@ -69,6 +69,12 @@ html {
     .modal-dialog {
       margin: 60px auto;
     }
+
+    @media screen and (max-width: 1280px) {
+      .menu-short {
+        width: 80%;
+      }
+    }
   }
 
   .sortable {

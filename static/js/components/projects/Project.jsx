@@ -66,13 +66,16 @@ export default class Project extends React.Component {
 
     render() {
         const canCreate = hasAccess('/proyectos', 'write');
+        const { projects, match } = this.props;
+        const notEditing = typeof match.params.project_id === 'undefined';
+        const editing = !notEditing;
 
         return (
             <section className="project-wrapper">
                 <Breadcrumbs { ...this.props } title={ this.props.projects.editing.name }/>
                 <h3>Proyectos</h3>
-                { typeof (this.props.match.params.project_id) === 'undefined' && this.getProjects() }
-                { this.props.projects.projects.length < 10 && canCreate && this.getForm(this.props) }
+                { notEditing && this.getProjects() }
+                { (projects.projects.length < 10 && canCreate || editing) && this.getForm(this.props) }
             </section>
         );
     }
@@ -154,7 +157,7 @@ export default class Project extends React.Component {
                 <tbody>
                     {projects.projects.map((project, i) =>
                         <tr key={ i }>
-                            <th scope='row'>{ i }</th>
+                            <th scope='row'>{ i + 1 }</th>
                             <td>{ project.name }</td>
                             <td>{ project.contact }</td>
                             <td>{ project.address }</td>

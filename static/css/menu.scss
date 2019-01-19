@@ -44,6 +44,16 @@
       .fas {
         font-size: 40px;
       }
+
+      h2.app-logo {
+        display: none;
+      }
+    }
+  }
+
+  @media screen and (max-width: 1040px) {
+    h2.app-logo {
+      display: none;
     }
   }
 
@@ -58,6 +68,24 @@
 
     .active {
       background-color: $darkBlue;
+    }
+  }
+
+  h2.app-logo {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    font-family: 'Libre Barcode 128 Text', cursive;
+    padding-top: 10px;
+    text-align: center;
+    color: #d4e0ef;
+    font-size: 70px;
+    text-transform: uppercase;
+    span {
+      color: $theme;
     }
   }
 }

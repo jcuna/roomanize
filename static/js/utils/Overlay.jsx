@@ -38,7 +38,7 @@ export default class Overlay extends React.Component {
                     tabIndex="-1" role="dialog"
                     aria-hidden="true">
                     <div className="modal-dialog" role="document">
-                        <div className="modal-content">
+                        <div className={ `modal-content${this.getContentExtraClass()}` }>
                             <div className="modal-header">
                                 <h5 className="modal-title">{this.props.overlay.title}</h5>
                                 <button type="button" className="close" aria-label="Close" onClick={ this.hideOverlay }>
@@ -65,6 +65,15 @@ export default class Overlay extends React.Component {
         return null;
     }
 
+    getContentExtraClass() {
+        let menuShort = '';
+
+        if (this.props.showMobileMenu) {
+            menuShort = ' menu-short';
+        }
+        return menuShort;
+    }
+
     hideOverlay() {
         window.removeEventListener('keyup', this.hideOverlay);
         if (typeof this.props.overlay.afterClose !== 'undefined') {
@@ -76,5 +85,6 @@ export default class Overlay extends React.Component {
     static propTypes = {
         dispatch: PropTypes.func,
         overlay: PropTypes.object,
+        showMobileMenu: PropTypes.bool
     };
 }
