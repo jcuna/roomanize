@@ -1,5 +1,4 @@
-import sys
-from flask_sqlalchemy import SQLAlchemy, request
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import joinedload
 from functools import wraps
 import jwt

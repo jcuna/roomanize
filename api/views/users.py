@@ -1,10 +1,11 @@
 import sqlalchemy
 from flask_restful import Resource, request
-from flask import session, json
+from flask import session, json, current_app
 from sqlalchemy.orm import joinedload
 from core.router import permissions
 from dal.shared import get_fillable, token_required, access_required
 from dal.models import User, db, Role
+from flask_mail import Message
 
 
 class Users(Resource):
@@ -56,6 +57,11 @@ class UsersManager(Resource):
 
         db.session.add(user)
         db.session.commit()
+
+        if not user.password:
+            msg = Message('Verifica Tu Cuenta', recipients=[user.email])
+            msg.html = '<h2>Welcome</h2>'
+            current_app.mail(msg)
 
         return dict(id=user.id)
 

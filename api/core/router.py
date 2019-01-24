@@ -1,15 +1,10 @@
 import importlib
 import sqlalchemy
-import sys
-from pprint import pprint
-
 from flask import Flask, url_for, render_template, redirect
 from flask_restful import Api, request
 from flask_restful.representations import json
-
 from config.routes import register, no_permissions
 import re
-
 from dal import db
 from dal.models import User, Role
 from dal.shared import get_fillable

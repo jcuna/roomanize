@@ -3,3 +3,20 @@ SQLALCHEMY_DATABASE_URI = 'mysql://test:test@mysql/test?charset=utf8mb4'
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 SQLALCHEMY_POOL_RECYCLE = True
 APP_ENV = 'develop'
+
+# for dev, we use sendmail so use config like
+MAIL_MAILER = '/usr/sbin/ssmtp'
+MAIL_MAILER_FLAGS = '-t'
+
+# for prod we use smtp:
+MAIL_SERVER = 'localhost'
+MAIL_PORT = 25
+MAIL_USE_TLS = True
+MAIL_USE_SSL = False
+MAIL_USERNAME = 'username'
+MAIL_PASSWORD = 'password'
+MAIL_MAX_EMAILS = None
+MAIL_ASCII_ATTACHMENTS = False
+
+# this is needed for both configs
+MAIL_DEFAULT_SENDER = 'bot@roomanize.com'
