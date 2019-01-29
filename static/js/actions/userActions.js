@@ -216,7 +216,7 @@ export const editUser = (data, success, fail) =>
 
 export const validateUserToken = (userToken) =>
     (dispatch) => api({
-        url: `/user-token/${userToken}`,
+        url: `/user-tokens/${userToken}`,
         method: 'GET'
     }).then(resp => dispatch({ type: USER_TOKEN_FETCHED, payload: resp.data }));
 

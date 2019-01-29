@@ -15,12 +15,15 @@ def register():
         'projects.TimeIntervals@time_intervals_url': '/time-intervals|/time-intervals/',
         'agreements.Agreements@agreements_url': '/agreements|/agreements/|/agreements/<int:agreement_id>',
         'tenants.Tenants@tenants_url': '/tenants|/tenants/|/tenants/<int:tenants_id>',
+
+        'users.UserTokens@user_tokens_url': '/user-tokens|/user-tokens/<user_token>',
     }
 
 
 no_permissions = [
     'views.users.Session',
     'views.users.Users',
+    'views.users.UserTokens',
     'views.users.Permissions',
     'views.projects.TimeIntervals',
 ]

@@ -3,6 +3,10 @@ from flask import Flask
 from flask_mail import Mail
 from email.mime.text import MIMEText
 import sys
+import hashlib
+import uuid
+from datetime import datetime
+from random import random
 
 
 def debug():
@@ -72,3 +76,8 @@ class Sendmail:
             return msg_str.encode(message.charset or 'utf-8')
         else:
             return msg_str
+
+
+def random_token(more_entropy=random() * random()):
+    s = str(datetime.utcnow().timestamp()) + str(uuid.uuid4().hex[:32] + str(more_entropy))
+    return hashlib.sha256(s.encode('utf8')).hexdigest()

@@ -106,7 +106,7 @@ export default function userReducer(state = {
         case USER_TOKEN_FETCHED:
             return { ...state, user: { ...state.user, userToken: {
                 status: STATUS.COMPLETE,
-                isValid: action.payload
+                isValid: action.payload.isValid
             }}};
 
         default:

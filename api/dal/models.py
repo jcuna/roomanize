@@ -1,4 +1,6 @@
 import json
+
+from config import random_token
 from dal import db
 from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -59,6 +61,7 @@ class User(db.Model):
 
 
 class UserToken(db.Model):
+
     __tablename__ = 'user_tokens'
     id = db.Column(db.BigInteger, primary_key=True)
     user_id = db.Column(db.BigInteger, db.ForeignKey('users.id'), index=True)
@@ -71,6 +74,16 @@ class UserToken(db.Model):
     )
 
     user = relationship(User, back_populates='tokens')
+
+    def new_token(self, email):
+        while not self.token:
+            temp_token = random_token(email)
+            so = self.query.filter_by(token=temp_token).count()
+
+            if not so:
+                self.token = temp_token
+
+        self.expires = datetime.datetime.utcnow() + datetime.timedelta(hours=4)
 
 
 class Role(db.Model):

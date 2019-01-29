@@ -4,8 +4,6 @@ import sqlalchemy
 from flask_restful import Resource, request
 from flask import session, json, current_app, render_template
 from sqlalchemy.orm import joinedload
-
-from core import random_token
 from core.router import permissions
 from dal.shared import get_fillable, token_required, access_required
 from dal.models import User, db, Role, UserToken
@@ -63,16 +61,16 @@ class UsersManager(Resource):
         db.session.commit()
 
         if not user.password:
-            token = random_token(user.email)
-            exp = datetime.datetime.utcnow() + datetime.timedelta(hours=4)
-            user.tokens.append(UserToken(expires=exp, token=token, target=request.url + '/activate-pass'))
+            ut = UserToken(target=request.url + '/activate-pass')
+            ut.new_token(user.email)
+            user.tokens.append(ut)
             db.session.commit()
             msg = Message('Verifica Tu Cuenta', recipients=[user.email])
             msg.html = render_template(
                 'email/account_activate.html',
                 name=user.first_name,
                 url=request.host_url,
-                token='account/activate/' + token
+                token='account/activate/' + ut.token
             )
             current_app.mail(msg)
 
@@ -204,6 +202,19 @@ class Permissions(Resource):
     @token_required
     def get(self):
         return permissions
+
+
+class UserTokens(Resource):
+
+    def get(self, user_token):
+        re = UserToken.query.filter_by(token=user_token).first()
+
+        time = datetime.datetime.utcnow()
+
+        if re and re.expires > time:
+            return {'isValid': True}
+
+        return {'isValid': False}
 
 
 def user_to_dict(user: User) -> dict:
