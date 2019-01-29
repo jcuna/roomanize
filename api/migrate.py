@@ -1,7 +1,20 @@
+from flask_sqlalchemy import SQLAlchemy
 from app import db, init_app
-from dal.models import collation
+from dal.models import collation, TimeInterval
+
 
 app = init_app()
+
+
+def seed_time_intervals(db: SQLAlchemy):
+    time_intervals = [
+        TimeInterval(id=100, interval="Semanal"),
+        TimeInterval(id=200, interval="Quincenal"),
+        TimeInterval(id=400, interval="Mensual")
+    ]
+
+    db.session.bulk_save_objects(time_intervals)
+    db.session.commit()
 
 
 def generate():
@@ -12,5 +25,4 @@ def generate():
 
         db.create_all()
 
-
-generate()
+        seed_time_intervals(db)

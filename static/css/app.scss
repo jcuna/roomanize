@@ -44,6 +44,10 @@ html {
       border: 1px solid $greyDark;
       padding: 20px;
       border-radius: 4px;
+
+      .row-item {
+        margin-bottom: 1rem;
+      }
     }
   }
 

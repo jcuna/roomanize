@@ -11,6 +11,7 @@ export const PROJECTS_FETCHED_FAIL = 'PROJECTS_FETCHED_FAIL';
 export const PROJECT_REQUIRED = 'PROJECT_REQUIRED';
 export const PROJECT_EDITING = 'PROJECT_EDITING';
 export const PROJECT_EDITING_CLEAR = 'PROJECT_EDITING_CLEAR';
+export const TIME_INTERVALS_FETCHED = 'TIME_INTERVALS_FETCHED';
 
 export const fetchProjects = (fail) =>
     (dispatch) => {
@@ -66,4 +67,15 @@ export const editProject = (project) =>
 export const clearProjectEditing = () =>
     (dispatch) => {
         dispatch({ type: PROJECT_EDITING_CLEAR });
+    };
+
+export const fetchTimeIntervals = () =>
+    (dispatch) => {
+        token.through().then(header => {
+            return api({
+                url: '/time-intervals',
+                method: 'GET',
+                headers: header,
+            }).then(resp => dispatch({ type: TIME_INTERVALS_FETCHED, payload: resp.data }));
+        });
     };

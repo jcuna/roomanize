@@ -65,8 +65,8 @@ class Header extends React.Component {
 
     userMenu() {
         const menu = [
-            { name: 'Perfil', link: '/profile' },
-            { name: 'Logout', link: '/logout' }
+            { name: 'Perfil', link: '/account/profile' },
+            { name: 'Logout', link: '/account/logout' }
         ];
 
         return (

@@ -1,4 +1,10 @@
-import { PROJECT_EDITING, PROJECT_EDITING_CLEAR, PROJECT_REQUIRED, PROJECTS_FETCHED } from '../actions/projectActions';
+import {
+    PROJECT_EDITING,
+    PROJECT_EDITING_CLEAR,
+    PROJECT_REQUIRED,
+    PROJECTS_FETCHED,
+    TIME_INTERVALS_FETCHED,
+} from '../actions/projectActions';
 import { STATUS } from '../constants';
 
 const editingInitState = {
@@ -6,7 +12,7 @@ const editingInitState = {
     contact: '',
     address: '',
     active: false,
-    id: ''
+    id: '',
 };
 
 export default function projectReducer(state = {
@@ -14,7 +20,8 @@ export default function projectReducer(state = {
     selected: null,
     editing: editingInitState,
     projects: [],
-    requiresProject: false
+    requiresProject: false,
+    timeIntervals: []
 }, action) {
     switch (action.type) {
         case PROJECTS_FETCHED:
@@ -35,6 +42,9 @@ export default function projectReducer(state = {
             return {
                 ...state, editing: editingInitState
             };
+
+        case TIME_INTERVALS_FETCHED:
+            return { ...state, timeIntervals: action.payload };
 
         default:
             return state;

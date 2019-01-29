@@ -1,7 +1,7 @@
 export const INVALID_LANDING_PAGES = [
     '',
-    '/logout',
-    '/login'
+    '/account/logout',
+    '/account/login'
 ];
 
 export const STATUS = {

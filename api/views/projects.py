@@ -1,7 +1,7 @@
 from flask import request
 from flask_restful import Resource
 
-from dal.models import Project
+from dal.models import Project, TimeInterval, row2dict
 from dal.shared import token_required, access_required, db
 
 
@@ -15,13 +15,7 @@ class Projects(Resource):
             if projects else []
 
         return {
-            'projects': list(map(lambda r: {
-                'id': r.id,
-                'name': r.name,
-                'contact': r.contact,
-                'address': r.address,
-                'active': r.active
-            }, projects)),
+            'projects': list(map(lambda r: row2dict(r), projects)),
             'selected': active_project.pop() if active_project else None
         }
 
@@ -95,3 +89,14 @@ class Rooms(Resource):
     def put(self):
         pass
 
+
+class TimeIntervals(Resource):
+
+    @token_required
+    def get(self):
+
+        result = []
+        for interval in TimeInterval.query.all():
+            result.append(row2dict(interval))
+
+        return result

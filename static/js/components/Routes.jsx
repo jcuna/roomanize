@@ -19,20 +19,20 @@ export default class Routes extends React.Component {
     render() {
         return (
             <Switch>
-                <Route exact path='/' render={ (props) => <Home { ...props } /> }/>
-                <Route exact path='/logout' render={ (props) => <Logout { ...props }/> }/>
-                <Route exact path='/roles' render={ (props) => this.getComponent(Roles, props) }/>
-                <Route exact path='/usuarios' render={ (props) => this.getComponent(Users, props) }/>
+                <Route exact path='/' render={ (props) => this.getComponent(Home, props, true) }/>
+                <Route exact path='/account/logout' render={ props => this.getComponent(Logout, props, true) }/>
+                <Route exact path='/roles' render={ props => this.getComponent(Roles, props) }/>
+                <Route exact path='/usuarios' render={ props => this.getComponent(Users, props) }/>
                 <Route exact path='/contratos' render={ () => (<h1>contratos</h1>) }/>
                 <RequiresProject path='/habitaciones' component={ Room } { ...this.props }/>
-                <Route exact path='/proyectos/:project_id?' render={ (props) => this.getComponent(Project, props) }/>
+                <Route exact path='/proyectos/:project_id?' render={ props => this.getComponent(Project, props) }/>
                 <Route component={ ErrorPage }/>
             </Switch>
         );
     }
 
-    getComponent(Component, props) {
-        if (hasAccess(this.props.history.location.pathname)) {
+    getComponent(Component, { history, ...props }, access = false) {
+        if (access || hasAccess(history.location.pathname)) {
             const finalProps = { ...this.props, ...props };
 
             return <Component { ...finalProps }/>;

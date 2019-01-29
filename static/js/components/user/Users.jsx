@@ -40,6 +40,7 @@ export default class Users extends React.Component {
 
     render() {
         const dir = this.state.orderDir === 'asc' ? 'down' : 'up';
+        const { user } = this.props;
 
         return <div>
             <h2>Usuarios</h2>
@@ -48,7 +49,9 @@ export default class Users extends React.Component {
                     placeholder='Buscar'
                     onChange={ () => {} }
                     className='form-control'
-                    style={ { width: '160px', marginRight: '10px', display: 'inline', top: '2px', position: 'relative' } }
+                    style={
+                        { width: '160px', marginRight: '10px', display: 'inline', top: '2px', position: 'relative' }
+                    }
                 />
                 <button
                     disabled={ this.props.roles.assigned.length === 0 }
@@ -61,42 +64,64 @@ export default class Users extends React.Component {
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>id <i className={ `text-info fas fa-sort-numeric-${dir}` } onClick={ () => this.orderBy('id') }/></th>
-                        <th>Nombre <i className={ `text-info fas fa-sort-alpha-${dir }` } onClick={ () => this.orderBy('last_name') }/></th>
-                        <th>Email <i className={ `text-info fas fa-sort-alpha-${dir}` } onClick={ () => this.orderBy('email') }/></th>
-                        <th>Roles</th>
-                        <th>Editar</th>
-                        <th>Borrar</th>
+                        <th>
+                            id <i className={ `text-info fas fa-sort-numeric-${dir}` }
+                                onClick={ () => this.orderBy('id') }/>
+                        </th>
+                        <th>
+                            Nombre <i className={ `text-info fas fa-sort-alpha-${dir }` }
+                                onClick={ () => this.orderBy('last_name') }/></th>
+                        <th>
+                            Email <i className={ `text-info fas fa-sort-alpha-${dir}` }
+                                onClick={ () => this.orderBy('email') }/></th>
+                        <th>
+                            Roles
+                        </th>
+                        <th>
+                            Editar
+                        </th>
+                        <th>
+                            Borrar
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
-                    {this.props.user.list.users.map((user, i) => {
+                    {user.list.users.map((userFromList, i) => {
                         i++;
-                        const rolesCount = user.roles.length;
-                        const canEdit = hasAccess('/usuarios', 'write') && user.email !== this.props.user.email;
-                        const canDelete = hasAccess('/usuarios', 'delete') && user.email !== this.props.user.email;
+                        const rolesCount = userFromList.roles.length;
+                        const canEdit = hasAccess('/usuarios', 'write') &&
+                            userFromList.email !== user.email;
+                        const canDelete = hasAccess('/usuarios', 'delete') &&
+                            userFromList.email !== user.email;
 
                         return <tr key={ i }>
                             <th scope='row'>{ i }</th>
-                            <td>{user.id}</td>
-                            <td>{user.name}</td>
-                            <td>{user.email}</td>
-                            <td>{user.roles.map((obj, r) => r < rolesCount - 1 ? `${obj.name}, ` : obj.name)}</td>
+                            <td>{userFromList.id}</td>
+                            <td>{userFromList.name}</td>
+                            <td>{userFromList.email}</td>
+                            <td>
+                                {userFromList.roles.map((obj, r) => r < rolesCount - 1 ? `${obj.name}, ` : obj.name)}
+                            </td>
                             <td>
                                 <i className={ canEdit ? 'text-info fas fa-user-edit' : 'fas fa-ban' }
                                     aria-hidden='true'
-                                    onClick={ canEdit ? () => this.openUserManager({ ...user, roles: user.roles.slice() }) : null }/>
+                                    onClick={ canEdit ? () => {
+                                        this.openUserManager({
+                                            ...userFromList,
+                                            roles: userFromList.roles.slice()
+                                        });
+                                    } : null }/>
                             </td>
                             <td>
                                 <i className={ canDelete ? 'text-danger fas fa-trash' : 'fas fa-ban' }
                                     aria-hidden='true'
-                                    onClick={ canDelete ? () => this.deleteUser(user.id) : null }/>
+                                    onClick={ canDelete ? () => this.deleteUser(userFromList.id) : null }/>
                             </td>
                         </tr>;
                     })}
                 </tbody>
             </table>
-            { this.props.user.list.users.length === 0 &&
+            { user.list.users.length === 0 &&
             <div style={ { position: 'absolute', left: '50%' } }><Spinner/></div> }
         </div>;
     }
@@ -106,9 +131,11 @@ export default class Users extends React.Component {
 
         this.props.dispatch(
             showOverlay(
-                <UserManager { ...this.props } onDataChanged={ this.updateNewUserData } editingUser={ user } onSubmit={ onSubmit }/>,
+                <UserManager { ...this.props } onDataChanged={ this.updateNewUserData } editingUser={ user }
+                    onSubmit={ onSubmit }/>,
                 'Administracion de Usuarios'
-            ));
+            )
+        );
     }
 
     editUser(e) {

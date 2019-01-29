@@ -27,7 +27,7 @@ export default class Layout extends React.Component {
                             <div className='content-area container'>
                                 <FlashMessages { ...this.props }/>
                                 <Switch>
-                                    <Route path='/login' render={ () => <Login { ...props }/> }/>
+                                    <Route path='/account/login' render={ () => <Login { ...props }/> }/>
                                     <RequiresLogin { ...props }>
                                         <Routes { ...props }/>
                                     </RequiresLogin>

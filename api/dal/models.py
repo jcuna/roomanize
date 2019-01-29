@@ -9,6 +9,15 @@ from config.routes import default_access
 
 collation = 'utf8mb4_unicode_ci'
 
+
+def row2dict(row):
+    d = {}
+    for column in row.__table__.columns:
+        d[column.name] = getattr(row, column.name)
+
+    return d
+
+
 user_roles = db.Table('user_roles',
                       db.Column('id', db.BigInteger, primary_key=True),
                       db.Column('user_id', db.BigInteger, db.ForeignKey('users.id'), index=True),
@@ -24,6 +33,7 @@ class User(db.Model):
     password = db.Column(db.String(80, collation=collation), nullable=True)
     first_name = db.Column(db.String(50, collation=collation), nullable=False)
     last_name = db.Column(db.String(50, collation=collation), nullable=False)
+    created_at = db.Column(db.DateTime(), nullable=False, default=datetime.datetime.utcnow())
     deleted = db.Column(db.Boolean, nullable=False, server_default='0', index=True)
     roles = db.relationship('Role',
                             secondary=user_roles, lazy='subquery',
@@ -44,6 +54,16 @@ class User(db.Model):
             'value': jwt.encode({'email': self.email, 'exp': exp}, current_app.config['SECRET_KEY']).decode('utf-8'),
             'expires': round(exp.timestamp())
         }
+
+
+class UserToken(db.Model):
+    __tablename__ = 'user_tokens'
+    id = db.Column(db.BigInteger, primary_key=True)
+    user_id = db.Column(db.BigInteger, db.ForeignKey('users.id'), index=True)
+    token = db.Column(db.VARCHAR(64, collation=collation,), unique=True, nullable=False)
+    expires = db.Column(db.DateTime(), nullable=False)
+
+    user = relationship(User)
 
 
 class Role(db.Model):

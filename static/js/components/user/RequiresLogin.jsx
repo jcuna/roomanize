@@ -26,7 +26,7 @@ export default class RequiresLogin extends React.Component {
                 { type: 'warning', message: 'Tienes que iniciar sessión' }
             ]));
             props.dispatch(setLandingPage(props.history.location.pathname));
-            props.history.push('/login');
+            props.history.push('/account/login');
         }
     }
 

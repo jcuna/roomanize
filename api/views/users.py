@@ -1,7 +1,9 @@
 import sqlalchemy
 from flask_restful import Resource, request
-from flask import session, json, current_app
+from flask import session, json, current_app, render_template
 from sqlalchemy.orm import joinedload
+
+from core import random_token
 from core.router import permissions
 from dal.shared import get_fillable, token_required, access_required
 from dal.models import User, db, Role
@@ -59,8 +61,14 @@ class UsersManager(Resource):
         db.session.commit()
 
         if not user.password:
+            token = random_token(user.email)
             msg = Message('Verifica Tu Cuenta', recipients=[user.email])
-            msg.html = '<h2>Welcome</h2>'
+            msg.html = render_template(
+                'email/account_activate.html',
+                name=user.first_name,
+                url=request.host_url,
+                token='account/activate/' + token
+            )
             current_app.mail(msg)
 
         return dict(id=user.id)
