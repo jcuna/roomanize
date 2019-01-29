@@ -21,8 +21,8 @@ def register():
 no_permissions = [
     'views.users.Session',
     'views.users.Users',
-    'views.users.Permissions'
-    'views.projects.TimeIntervals'
+    'views.users.Permissions',
+    'views.projects.TimeIntervals',
 ]
 
 default_access = {

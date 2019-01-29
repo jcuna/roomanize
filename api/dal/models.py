@@ -35,12 +35,14 @@ class User(db.Model):
     last_name = db.Column(db.String(50, collation=collation), nullable=False)
     created_at = db.Column(db.DateTime(), nullable=False, default=datetime.datetime.utcnow())
     deleted = db.Column(db.Boolean, nullable=False, server_default='0', index=True)
-    roles = db.relationship('Role',
-                            secondary=user_roles, lazy='subquery',
-                            backref=db.backref('users', lazy='dynamic'),
-                            # cascade="all, delete-orphan",
-                            # single_parent=True
-                            )
+    roles = relationship('Role',
+                         secondary=user_roles, lazy='subquery',
+                         backref=db.backref('users', lazy='dynamic'),
+                         # cascade="all, delete-orphan",
+                         # single_parent=True
+                         )
+
+    tokens = relationship('UserToken', back_populates='user')
 
     def hash_password(self):
         self.password = generate_password_hash(str(self.password).encode("ascii"), method='sha256')
@@ -62,8 +64,13 @@ class UserToken(db.Model):
     user_id = db.Column(db.BigInteger, db.ForeignKey('users.id'), index=True)
     token = db.Column(db.VARCHAR(64, collation=collation,), unique=True, nullable=False)
     expires = db.Column(db.DateTime(), nullable=False)
+    target = db.Column(
+        db.String(250, collation=collation),
+        comment='Target api url where token will be validated',
+        nullable=False
+    )
 
-    user = relationship(User)
+    user = relationship(User, back_populates='tokens')
 
 
 class Role(db.Model):
@@ -99,6 +106,8 @@ class Project(db.Model):
     contact = db.Column(db.VARCHAR(10, collation=collation))
     deleted = db.Column(db.DateTime(), nullable=True, index=True)
 
+    rooms = relationship('Room', back_populates='project')
+
 
 class TimeInterval(db.Model):
     __tablename__ = 'time_intervals'
@@ -116,7 +125,7 @@ class Room(db.Model):
     description = db.Column(db.Text(collation=collation))
     picture = db.Column(db.String(255, collation=collation))
 
-    project = relationship(Project)
+    project = relationship(Project, back_populates='rooms')
     time_interval = relationship(TimeInterval)
 
 
@@ -125,9 +134,11 @@ class Tenant(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     first_name = db.Column(db.String(30, collation=collation), index=True, nullable=False)
     last_name = db.Column(db.Integer, nullable=False)
-    identification_number = db.Column(db.Text(collation=collation), info='National ID. i.e. Cedula, License')
+    identification_number = db.Column(db.Text(collation=collation), comment='National ID. i.e. Cedula, License')
     email = db.Column(db.String(50, collation=collation), nullable=True, unique=True)
     phone = db.Column(db.String(10, collation=collation), nullable=True, unique=True)
+
+    history = relationship('TenantHistory', back_populates='tenant')
 
 
 class TenantHistory(db.Model):
@@ -139,7 +150,7 @@ class TenantHistory(db.Model):
     reference2_phone = db.Column(db.String(10, collation=collation), nullable=True)
     reference3_phone = db.Column(db.String(10, collation=collation), nullable=True)
 
-    tenant = relationship(Tenant)
+    tenant = relationship(Tenant, back_populates='history')
 
 
 class RentalAgreement(db.Model):
