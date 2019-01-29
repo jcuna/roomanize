@@ -23,6 +23,8 @@ export const USER_DELETE_FAIL = 'USER_DELETE_FAIL';
 export const USER_UPDATE_DISPATCHED = 'USER_UPDATE_DISPATCHED';
 export const USER_UPDATE_SUCCESS = 'USER_UPDATE_SUCCESS';
 export const USER_UPDATE_FAIL = 'USER_UPDATE_FAIL';
+export const USER_TOKEN_FETCHED = 'USER_TOKEN_FETCHED';
+export const USER_TOKEN_CLEAR = 'USER_TOKEN_CLEAR';
 
 export const login = (email, password) => {
     return (dispatch) => {
@@ -211,3 +213,12 @@ export const editUser = (data, success, fail) =>
             })
         );
     };
+
+export const validateUserToken = (userToken) =>
+    (dispatch) => api({
+        url: `/user-token/${userToken}`,
+        method: 'GET'
+    }).then(resp => dispatch({ type: USER_TOKEN_FETCHED, payload: resp.data }));
+
+export const clearUserToken = () =>
+    (dispatch) => dispatch({ type: USER_TOKEN_CLEAR });

@@ -14,6 +14,7 @@ import { hasAccess } from '../utils/config';
 import PropTypes from 'prop-types';
 import RequiresProject from './projects/RequiresProject';
 import Project from './projects/Project';
+import Account from './user/Account';
 
 export default class Routes extends React.Component {
     render() {
@@ -26,16 +27,19 @@ export default class Routes extends React.Component {
                 <Route exact path='/contratos' render={ () => (<h1>contratos</h1>) }/>
                 <RequiresProject path='/habitaciones' component={ Room } { ...this.props }/>
                 <Route exact path='/proyectos/:project_id?' render={ props => this.getComponent(Project, props) }/>
+                <Route exact path='/account/profile' render={ props => this.getComponent(Account, props) }/>
                 <Route component={ ErrorPage }/>
             </Switch>
         );
     }
 
+    static combineProps(props1, props2) {
+        return { ...props1, ...props2 };
+    }
+
     getComponent(Component, { history, ...props }, access = false) {
         if (access || hasAccess(history.location.pathname)) {
-            const finalProps = { ...this.props, ...props };
-
-            return <Component { ...finalProps }/>;
+            return <Component { ...Routes.combineProps(this.props, props) }/>;
         }
         return <ErrorPage type={ 403 }/>;
     }

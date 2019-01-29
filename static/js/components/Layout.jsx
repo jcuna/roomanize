@@ -4,7 +4,6 @@
 
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
-import Login from './user/Login.jsx';
 import RequiresLogin from './user/RequiresLogin.jsx';
 import FlashMessages from '../utils/Notifications.jsx';
 import Menu from './Menu';
@@ -13,6 +12,8 @@ import Footer from './Footer';
 import Overlay from '../utils/Overlay';
 import PropTypes from 'prop-types';
 import Routes from './Routes';
+import Account from './user/Account';
+import Login from './user/Login';
 
 export default class Layout extends React.Component {
     render() {
@@ -27,7 +28,12 @@ export default class Layout extends React.Component {
                             <div className='content-area container'>
                                 <FlashMessages { ...this.props }/>
                                 <Switch>
-                                    <Route path='/account/login' render={ () => <Login { ...props }/> }/>
+                                    <Route path='/account/login' render={ (props2) =>
+                                        <Login { ...Routes.combineProps(this.props, props2) }/> }
+                                    />
+                                    <Route exact path='/account/activate/:user_token' render={ (props2) =>
+                                        <Account { ...Routes.combineProps(this.props, props2) }/> }
+                                    />
                                     <RequiresLogin { ...props }>
                                         <Routes { ...props }/>
                                     </RequiresLogin>

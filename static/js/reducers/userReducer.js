@@ -10,7 +10,13 @@ import {
     USER_LOGIN_FAIL,
     USER_LOGIN_ERROR,
     USER_LOGGING_OUT,
-    USER_LOGGED_OUT, USERS_FETCHED, USER_CREATED, USERS_FETCHING, USER_DELETE_SUCCESS, USER_UPDATE_SUCCESS,
+    USER_LOGGED_OUT,
+    USERS_FETCHED,
+    USER_CREATED,
+    USERS_FETCHING,
+    USER_DELETE_SUCCESS,
+    USER_UPDATE_SUCCESS,
+    USER_TOKEN_CLEAR, USER_TOKEN_FETCHED,
 } from '../actions/userActions';
 import { STATUS } from '../constants';
 
@@ -22,8 +28,14 @@ export default function userReducer(state = {
             status: STATUS.PENDING,
             users: [],
         },
-        pic: null
+        pic: null,
+        // a user token used to validate or verify a multi factor request
+        userToken: {
+            status: STATUS.PENDING,
+            isValid: false
+        }
     },
+    // jwt session token, expires regularly
     token: {
         value: '',
         expires: '',
@@ -84,6 +96,18 @@ export default function userReducer(state = {
         case USER_DELETE_SUCCESS:
         case USER_UPDATE_SUCCESS:
             return { ...state, user: { ...state.user, list: { status: STATUS.PENDING, users: [] }}};
+
+        case USER_TOKEN_CLEAR:
+            return { ...state, user: { ...state.user, userToken: {
+                status: STATUS.PENDING,
+                isValid: false
+            }}};
+
+        case USER_TOKEN_FETCHED:
+            return { ...state, user: { ...state.user, userToken: {
+                status: STATUS.COMPLETE,
+                isValid: action.payload
+            }}};
 
         default:
             return state;
