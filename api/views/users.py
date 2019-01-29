@@ -1,3 +1,5 @@
+import datetime
+
 import sqlalchemy
 from flask_restful import Resource, request
 from flask import session, json, current_app, render_template
@@ -6,7 +8,7 @@ from sqlalchemy.orm import joinedload
 from core import random_token
 from core.router import permissions
 from dal.shared import get_fillable, token_required, access_required
-from dal.models import User, db, Role
+from dal.models import User, db, Role, UserToken
 from flask_mail import Message
 
 
@@ -62,6 +64,9 @@ class UsersManager(Resource):
 
         if not user.password:
             token = random_token(user.email)
+            exp = datetime.datetime.utcnow() + datetime.timedelta(hours=4)
+            user.tokens.append(UserToken(expires=exp, token=token, target=request.url + '/activate-pass'))
+            db.session.commit()
             msg = Message('Verifica Tu Cuenta', recipients=[user.email])
             msg.html = render_template(
                 'email/account_activate.html',
