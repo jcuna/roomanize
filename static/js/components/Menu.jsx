@@ -44,9 +44,11 @@ export default class Menu extends React.Component {
             return null;
         }
 
-        return routes.map(item => {
+        const items = [];
+
+        routes.forEach(item => {
             if (hasAccess(item.link, 'read')) {
-                return (
+                items.push(
                     <Link
                         className={ this.getMenuClass(item) } key={ item.link } to={ item.link }
                         onClick={ this.clearNotifications }>
@@ -55,8 +57,9 @@ export default class Menu extends React.Component {
                     </Link>
                 );
             }
-            return null;
         });
+
+        return items.length > 0 ? items : [<span className='menu-item' key={ 0 }>No Tienes ningun Accesso</span>];
     }
 
     clearNotifications() {

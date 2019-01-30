@@ -1,5 +1,5 @@
 from flask import Flask
-
+from flask_socketio import SocketIO
 from config import get_mail
 from dal.shared import db
 import core
@@ -25,4 +25,5 @@ def init_app() -> Flask:
 
 if __name__ == '__main__':
     app = init_app()
-    app.run(host='0.0.0.0', port=5000)
+    socketio = SocketIO(app)
+    socketio.run(app, host='0.0.0.0', port=5000)

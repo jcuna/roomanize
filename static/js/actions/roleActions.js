@@ -1,6 +1,8 @@
 import api from '../utils/api';
 import { token } from '../utils/token';
 import { notifications } from './appActions';
+import ws from '../utils/ws';
+import { fetchUser } from './userActions';
 
 export const ROLES_FETCHING = 'ROLES_FETCHING';
 export const ROLES_FETCHED = 'ROLES_FETCHED';
@@ -11,6 +13,7 @@ export const ROLE_DELETE_DISPATCHED = 'ROLE_DELETE_DISPATCHED';
 export const ROLE_DELETE_FAIL = 'ROLE_DELETE_FAIL';
 export const ROLE_CREATE_DISPATCHED = 'ROLE_CREATE_DISPATCHED';
 export const ROLE_CREATE_FAIL = 'ROLE_CREATE_FAIL';
+export const ROLE_WS_CHANGED = 'ROLE_WS_CHANGED';
 export const PERMISSIONS_FETCHING = 'PERMISSIONS_FETCHING';
 export const PERMISSIONS_FETCHED = 'PERMISSIONS_FETCHED';
 export const PERMISSIONS_COMMIT = 'PERMISSIONS_COMMIT';
@@ -152,3 +155,14 @@ export const commitPermissions = (permissions) => {
         }));
     };
 };
+
+export const listenRoleChanges = options =>
+    (dispatch) =>
+        options.roles.forEach(roleName => {
+            ws(ROLE_WS_CHANGED, `/${roleName}`, () => {
+                if (options.shouldFetch) {
+                    dispatch(fetchRoles());
+                }
+                dispatch(fetchUser());
+            });
+        });

@@ -31,7 +31,7 @@ export default class RequiresProject extends React.Component {
             return <Spinner/>;
         } else if (projects.selected === null) {
             return <Redirect to="/proyectos"/>;
-        } else if (hasAccess(history.location.pathname)) {
+        } else if (hasAccess(history.location.pathname, 'read')) {
             return <Route render={ () => <this.props.component { ...this.props }/> }/>;
         }
         return <ErrorPage type={ 403 }/>;

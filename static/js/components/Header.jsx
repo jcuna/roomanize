@@ -8,6 +8,8 @@ import { Link } from 'react-router-dom';
 import '../../css/header.scss';
 import { toggleMobileMenu } from '../actions/appActions';
 import { STATUS } from '../constants';
+import { listenRoleChanges } from '../actions/roleActions';
+import { listenUserChanges } from '../actions/userActions';
 
 class Header extends React.Component {
     constructor(props) {
@@ -16,6 +18,8 @@ class Header extends React.Component {
         this.toggleUserMenu = this.toggleUserMenu.bind(this);
         this.state = {
             userNameClass: this.props.initialClass,
+            dispatchedRolesWS: false,
+            dispatchedUserWS: false
         };
     }
 
@@ -23,6 +27,40 @@ class Header extends React.Component {
         if (Header.userMenuIsShowing(this.state.userNameClass) && this.props.clickedContent !== clickedContent) {
             this.hideUserMenu();
         }
+        const { user, dispatch } = this.props;
+
+        if (user.status === STATUS.PROCESSED) {
+            if (!this.state.dispatchedRolesWS && user.roles.length > 0) {
+                this.setState({
+                    dispatchedRolesWS: true,
+                });
+                dispatch(listenRoleChanges(this.getFetchRolesOptions(user)));
+            }
+
+            if (!this.state.dispatchedUserWS) {
+                this.setState({
+                    dispatchedUserWS: true,
+                });
+                dispatch(listenUserChanges(user.id));
+            }
+        }
+    }
+
+    getFetchRolesOptions(user) {
+        const options = {
+            shouldFetch: false,
+            roles: []
+        };
+
+        user.roles.forEach(r => {
+            options.roles.push(r.name);
+            if (typeof r.permissions['views.users.Roles'] !== 'undefined' &&
+                r.permissions['views.users.Roles'].includes('read')) {
+                options.shouldFetch = true;
+            }
+        });
+
+        return options;
     }
 
     static userMenuIsShowing(userNameClass) {

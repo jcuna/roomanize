@@ -1,6 +1,7 @@
 import api from '../utils/api';
 import { token } from '../utils/token';
 import { clearNotifications, hideOverlay, notifications } from './appActions';
+import ws from '../utils/ws';
 
 export const USER_LOGGING_IN = 'USER_LOGGING_IN';
 export const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS';
@@ -25,6 +26,7 @@ export const USER_UPDATE_SUCCESS = 'USER_UPDATE_SUCCESS';
 export const USER_UPDATE_FAIL = 'USER_UPDATE_FAIL';
 export const USER_TOKEN_FETCHED = 'USER_TOKEN_FETCHED';
 export const USER_TOKEN_CLEAR = 'USER_TOKEN_CLEAR';
+export const USER_WS_CHANGED = 'USER_WS_CHANGED';
 
 export const login = (email, password) => {
     return (dispatch) => {
@@ -222,3 +224,9 @@ export const validateUserToken = (userToken) =>
 
 export const clearUserToken = () =>
     (dispatch) => dispatch({ type: USER_TOKEN_CLEAR });
+
+export const listenUserChanges = (userId) =>
+    (dispatch) =>
+        ws(USER_WS_CHANGED, `/${userId}`, () => {
+            dispatch(fetchUser());
+        });

@@ -1,5 +1,4 @@
 import json
-
 from config import random_token
 from dal import db
 from sqlalchemy.orm import relationship
@@ -38,13 +37,13 @@ class User(db.Model):
     created_at = db.Column(db.DateTime(), nullable=False, default=datetime.datetime.utcnow())
     deleted = db.Column(db.Boolean, nullable=False, server_default='0', index=True)
     roles = relationship('Role',
-                         secondary=user_roles, lazy='subquery',
+                         secondary=user_roles, lazy='joined',
                          backref=db.backref('users', lazy='dynamic'),
                          # cascade="all, delete-orphan",
                          # single_parent=True
                          )
-
     tokens = relationship('UserToken', back_populates='user')
+    attributes = relationship('UserAttributes', back_populates='user', lazy='joined')
 
     def hash_password(self):
         self.password = generate_password_hash(str(self.password).encode("ascii"), method='sha256')
@@ -58,6 +57,16 @@ class User(db.Model):
             'value': jwt.encode({'email': self.email, 'exp': exp}, current_app.config['SECRET_KEY']).decode('utf-8'),
             'expires': round(exp.timestamp())
         }
+
+
+class UserAttributes(db.Model):
+    __tablename__ = 'user_attributes'
+    id = db.Column(db.BigInteger, primary_key=True)
+    user_id = db.Column(db.BigInteger, db.ForeignKey('users.id'), index=True)
+    user_access = db.Column(db.Text(collation=collation), comment='A JSON schema of table/rows access')
+    user_preferences = db.Column(db.Text(collation=collation), comment='A JSON schema user preferences')
+
+    user = relationship(User, back_populates='attributes')
 
 
 class UserToken(db.Model):
@@ -155,7 +164,7 @@ class Tenant(db.Model):
 
 
 class TenantHistory(db.Model):
-    __tablename__ = 'tenant_histories'
+    __tablename__ = 'tenant_history'
     id = db.Column(db.BigInteger, primary_key=True)
     tenant_id = db.Column(db.BigInteger, db.ForeignKey('tenants.id'), index=True, nullable=False)
     validated_on = db.Column(db.DateTime())
@@ -169,7 +178,7 @@ class TenantHistory(db.Model):
 class RentalAgreement(db.Model):
     __tablename__ = 'rental_agreements'
     id = db.Column(db.BigInteger, primary_key=True)
-    tenant_history_id = db.Column(db.BigInteger, db.ForeignKey('tenant_histories.id'), index=True, nullable=False)
+    tenant_history_id = db.Column(db.BigInteger, db.ForeignKey('tenant_history.id'), index=True, nullable=False)
     room_id = db.Column(db.BigInteger, db.ForeignKey('rooms.id'), index=True, nullable=False)
     time_interval_id = db.Column(db.Integer, db.ForeignKey('time_intervals.id'), nullable=False)
     entered_on = db.Column(db.DateTime(), nullable=False)

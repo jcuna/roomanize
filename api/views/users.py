@@ -1,5 +1,5 @@
 import datetime
-
+from flask_socketio import emit
 import sqlalchemy
 from flask_restful import Resource, request
 from flask import session, json, current_app, render_template
@@ -81,6 +81,10 @@ class UsersManager(Resource):
     def put(self, user_id):
         raw_data = request.get_json()
         user = User.query.options(joinedload('roles')).filter_by(id=user_id).first()
+
+        if not user:
+            return {'error': 'User does not exist'}
+
         user.first_name = raw_data['first_name']
         user.last_name = raw_data['last_name']
         user.roles = []
@@ -93,6 +97,7 @@ class UsersManager(Resource):
                 user.roles.append(role)
 
         db.session.commit()
+        emit('USER_WS_CHANGED', {'data': user.id}, namespace='/' + str(user.id), broadcast=True)
 
         return {'message': 'success'}
 
@@ -183,6 +188,7 @@ class Roles(Resource):
         role = Role.query.filter_by(id=data['id']).first()
         role.permissions = json.dumps(data['permissions'])
         db.session.commit()
+        emit('ROLE_WS_CHANGED', {'data': role.name}, namespace='/' + role.name, broadcast=True)
         return {'message': 'success'}, 201
 
     @token_required
@@ -221,6 +227,7 @@ def user_to_dict(user: User) -> dict:
     return {
         'user': {
             'email': user.email,
+            'id': user.id,
             'first_name': user.first_name,
             'last_name': user.last_name,
             'roles':
@@ -228,7 +235,8 @@ def user_to_dict(user: User) -> dict:
                     'name': r.name,
                     'id': r.id,
                     'permissions': r.get_permissions
-                }, user.roles))
+                }, user.roles)),
+            'attributes': user.attributes
         },
         'token': user.get_token()
     }

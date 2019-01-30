@@ -27,16 +27,20 @@ export default class Account extends React.Component {
     }
 
     render() {
-        const { user } = this.props;
+        const { user, match } = this.props;
 
-        if (user.userToken.status === STATUS.PENDING) {
-            return <Spinner/>;
-        } else if (user.userToken.status === STATUS.COMPLETE) {
-            if (user.status === STATUS.UNPROCESSED && user.userToken.isValid) {
-                return this.getForm();
+        if (typeof match.params.user_token !== 'undefined') {
+            if (user.userToken.status === STATUS.PENDING) {
+                return <Spinner/>;
+            } else if (user.userToken.status === STATUS.COMPLETE) {
+                if (user.status === STATUS.UNPROCESSED && user.userToken.isValid) {
+                    return this.getForm();
+                }
             }
+            return <Redirect to="/"/>;
         }
-        return <Redirect to="/"/>;
+
+        return <h2>{ user.first_name }</h2>;
     }
 
     componentWillUnmount() {

@@ -19,7 +19,6 @@ export default function appReducer(state = {
         closeButton: false,
         actionButton: null,
     },
-    checkedBoxes: {},
 }, action) {
     switch (action.type) {
         case TOGGLE_MOBILE_MENU:

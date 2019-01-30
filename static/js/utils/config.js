@@ -31,6 +31,7 @@ export const hasAccess = (path, type) => {
         const item = routes[i];
 
         if (typeof item.endpoint !== 'undefined' && item.endpoint !== '' && item.link === path) {
+            access = false;
             for (let j = 0; j < state.user.roles.length; j++) {
                 const role = state.user.roles[j];
                 const perm = state.roles.permissions[item.endpoint];
@@ -38,8 +39,8 @@ export const hasAccess = (path, type) => {
                 if (typeof role.permissions[perm] === 'undefined') {
                     access = false;
                     break;
-                } else if (typeof type !== 'undefined') {
-                    access = role.permissions[perm].includes(type);
+                } else if (role.permissions[perm].includes(type)) {
+                    access = true;
                     break;
                 }
             }

@@ -38,7 +38,7 @@ export default class Routes extends React.Component {
     }
 
     getComponent(Component, { history, ...props }, access = false) {
-        if (access || hasAccess(history.location.pathname)) {
+        if (access || hasAccess(history.location.pathname, 'read')) {
             return <Component { ...Routes.combineProps(this.props, props) }/>;
         }
         return <ErrorPage type={ 403 }/>;
