@@ -20,7 +20,7 @@ import {
 } from '../actions/userActions';
 import { STATUS } from '../constants';
 
-export default function userReducer(state = {
+const initialData = {
     user: {
         status: STATUS.PENDING,
         roles: [],
@@ -43,8 +43,10 @@ export default function userReducer(state = {
     token: {
         value: '',
         expires: '',
-    },
-}, action) {
+    }
+};
+
+export default function userReducer(state = initialData, action) {
     switch (action.type) {
         case USER_FETCHED:
             return {
@@ -89,7 +91,7 @@ export default function userReducer(state = {
                 user: { ...state.user, status: STATUS.DECOMMISSIONING },
             };
         case USER_LOGGED_OUT:
-            return { ...state, user: { status: STATUS.DECOMMISSIONED, roles: [] }, token: { value: '', expires: '' }};
+            return { ...state, ...initialData, user: { ...initialData.user, status: STATUS.DECOMMISSIONED }};
 
         case USERS_FETCHING:
             return { ...state, user: { ...state.user, list: { status: STATUS.TRANSMITTING, users: [] }}};
