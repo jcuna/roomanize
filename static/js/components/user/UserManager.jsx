@@ -10,42 +10,44 @@ import { hideOverlay } from '../../actions/appActions';
 
 export default class UserManager extends React.Component {
     constructor(props) {
-        super();
+        super(props);
 
-        const checkboxes = {};
+        const rolesCheckboxes = {};
+        const projectsCheckboxes = {};
         let roles = [];
+        const projects = [];
 
         if (typeof props.editingUser !== 'undefined') {
             props.editingUser.roles.forEach(role => {
-                checkboxes[role.name] = true;
+                rolesCheckboxes[role.name] = true;
             });
             roles = props.editingUser.roles;
+
+            props.projects.projects.forEach(project => {
+                if (props.editingUser.attributes.access.projects.includes(project.id)) {
+                    projectsCheckboxes[project.name] = true;
+                    projects.push(project.id);
+                }
+            });
         }
 
         this.state = {
             deleteButtonClass: 'btn btn-danger',
             actionButtonDisabled: true,
-            checkboxes,
-            roles
+            rolesCheckboxes,
+            projectsCheckboxes,
+            roles,
+            attributes: {
+                access: {
+                    projects
+                }
+            }
         };
 
         this.updateUserData = this.updateUserData.bind(this);
         this.updateUserDataRoles = this.updateUserDataRoles.bind(this);
+        this.updateUserDataAccess = this.updateUserDataAccess.bind(this);
     }
-
-    static propTypes = {
-        editingUser: PropTypes.shape({
-            id: PropTypes.number.isRequired,
-            first_name: PropTypes.string.isRequired,
-            last_name: PropTypes.string.isRequired,
-            email: PropTypes.string.isRequired,
-            roles: PropTypes.array.isRequired
-        }),
-        roles: PropTypes.object,
-        onDataChanged: PropTypes.func,
-        onSubmit: PropTypes.func,
-        dispatch: PropTypes.func,
-    };
 
     render() {
         return <div><FormGenerator { ...{
@@ -53,27 +55,10 @@ export default class UserManager extends React.Component {
             object: this,
             elements: this.formElements
         } }/>
-        <h5>Aplicar los siguientes roles al usuario</h5>
+        { this.rolesSection }
         <hr/>
-        <ul style={ {
-            listStyle: 'none',
-            columnCount: 2,
-            columnGap: '20px',
-            marginTop: '10px'
-        } }>
-            { this.props.roles.assigned.map(role => {
-                const checked = this.state.checkboxes[role.name] === true;
-
-                return <li key={ role.id }><Checkbox
-                    checked={ checked }
-                    onChange={ (this.updateUserDataRoles) }
-                    name={ role.name }
-                    value={ role.id }
-                    label={ role.name }/></li>;
-            })}
-        </ul>
+        { this.projectsSection }
         <div style={ { textAlign: 'right' } }>
-            <hr/>
             <button className='btn btn-secondary'
                 style={ { marginRight: '10px' } }
                 onClick={ () => this.props.dispatch(hideOverlay()) }>Cerrar
@@ -87,12 +72,56 @@ export default class UserManager extends React.Component {
         </div>;
     }
 
-    recordCheckboxValues(checkbox) {
-        const checkboxState = this.state.checkboxes;
+    get projectsSection() {
+        const { projects } = this.props.projects;
+
+        return (
+            <div>
+                <h5>Dar accesso a los siguientes proyectos:</h5>
+                <hr/>
+                { this.itemList(projects, this.updateUserDataAccess, 'projectsCheckboxes') }
+            </div>
+        );
+    }
+
+    get rolesSection() {
+        return (
+            <div>
+                <h5>Aplicar los siguientes roles al usuario:</h5>
+                <hr/>
+                { this.itemList(this.props.roles.assigned, this.updateUserDataRoles, 'rolesCheckboxes') }
+            </div>
+        );
+    }
+
+    itemList(items, callback, stateValue) {
+        return (
+            <ul style={ {
+                listStyle: 'none',
+                columnCount: 2,
+                columnGap: '20px',
+                marginTop: '10px'
+            } }>
+                { items.map(item => {
+                    const checked = this.state[stateValue][item.name] === true;
+
+                    return <li key={ item.id }><Checkbox
+                        checked={ checked }
+                        onChange={ callback }
+                        name={ item.name }
+                        value={ item.id }
+                        label={ item.name }/></li>;
+                })}
+            </ul>
+        );
+    }
+
+    recordCheckboxValues(checkbox, stateValue) {
+        const checkboxState = this.state[stateValue];
 
         checkboxState[checkbox.name] = checkbox.checked;
         this.setState({
-            checkboxes: checkboxState
+            [stateValue]: checkboxState
         });
     }
 
@@ -101,7 +130,8 @@ export default class UserManager extends React.Component {
             first_name: this.refs.first_name.value,
             last_name: this.refs.last_name.value,
             email: this.refs.email.value,
-            roles: this.state.roles
+            roles: this.state.roles,
+            attributes: this.state.attributes
         };
 
         if (typeof this.props.editingUser !== 'undefined') {
@@ -112,7 +142,7 @@ export default class UserManager extends React.Component {
     }
 
     updateUserDataRoles(checkbox) {
-        this.recordCheckboxValues(checkbox);
+        this.recordCheckboxValues(checkbox, 'rolesCheckboxes');
         const newRole = {
             name: checkbox.name,
             id: checkbox.value,
@@ -135,22 +165,31 @@ export default class UserManager extends React.Component {
             roles.push(newRole);
         }
 
-        const user = {
-            first_name: this.refs.first_name.value,
-            last_name: this.refs.last_name.value,
-            email: this.refs.email.value,
-            roles
-        };
-
-        if (typeof this.props.editingUser !== 'undefined') {
-            user.id = this.props.editingUser.id;
-        }
         this.setState({
             roles,
         });
 
-        this.props.onDataChanged(user);
-        this.userIsValid(user);
+        this.updateUserData();
+    }
+
+    updateUserDataAccess(checkbox) {
+        this.recordCheckboxValues(checkbox, 'projectsCheckboxes');
+
+        const projects = [];
+
+        this.props.projects.projects.forEach(item => {
+            if (this.state.projectsCheckboxes[item.name]) {
+                projects.push(item.id);
+            }
+        });
+
+        this.setState({
+            attributes: {
+                access: {
+                    projects
+                }
+            }
+        });
     }
 
     userIsValid(user) {
@@ -178,4 +217,26 @@ export default class UserManager extends React.Component {
         }
         return elements;
     }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (prevState.attributes.access.projects.length !== this.state.attributes.access.projects.length) {
+            this.updateUserData();
+        }
+    }
+
+    static propTypes = {
+        editingUser: PropTypes.shape({
+            id: PropTypes.number.isRequired,
+            first_name: PropTypes.string.isRequired,
+            last_name: PropTypes.string.isRequired,
+            email: PropTypes.string.isRequired,
+            roles: PropTypes.array.isRequired,
+            attributes: PropTypes.object,
+        }),
+        roles: PropTypes.object,
+        onDataChanged: PropTypes.func,
+        onSubmit: PropTypes.func,
+        dispatch: PropTypes.func,
+        projects: PropTypes.object,
+    };
 }

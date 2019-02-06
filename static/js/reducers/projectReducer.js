@@ -17,7 +17,6 @@ const editingInitState = {
 
 export default function projectReducer(state = {
     status: STATUS.PENDING,
-    selected: null,
     editing: editingInitState,
     projects: [],
     requiresProject: false,
@@ -26,7 +25,7 @@ export default function projectReducer(state = {
     switch (action.type) {
         case PROJECTS_FETCHED:
             return {
-                ...state, status: STATUS.COMPLETE, selected: action.payload.selected, projects: action.payload.projects
+                ...state, status: STATUS.COMPLETE, projects: action.payload.projects
             };
         case PROJECT_REQUIRED:
             return {

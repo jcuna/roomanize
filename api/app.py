@@ -13,6 +13,8 @@ def init_app() -> Flask:
     this_app.debug = this_app.config['APP_ENV'] == 'develop'
     this_app.env = this_app.config['APP_ENV']
 
+    core.error_handler(this_app)
+
     core.Router(this_app)
     db.init_app(this_app)
 

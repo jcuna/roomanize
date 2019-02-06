@@ -19,6 +19,8 @@ import { hideOverlay, showOverlay } from '../../actions/appActions';
 import { STATUS } from '../../constants';
 import Spinner from '../../utils/Spinner';
 import Breadcrumbs from '../../utils/Breadcrumbs';
+import { fetchUser } from '../../actions/userActions';
+import RequiresProject from './RequiresProject';
 
 export default class Project extends React.Component {
     constructor(props) {
@@ -133,59 +135,66 @@ export default class Project extends React.Component {
     }
 
     getProjects() {
-        const { projects } = this.props;
+        const { projects, user } = this.props;
+        let warn = null;
 
         const canEdit = hasAccess('/proyectos', 'write');
 
         if (projects.projects && projects.projects.length === 0) {
-            return <div className="alert alert-warning">Aun no se ha creado ningun proyecto</div>;
-        } else if (projects.projects.selected === null) {
-            return <div className="alert alert-warning">No hay ningun proyecto activo, active uno de la lista</div>;
+            return <div className="alert alert-warning">Aun no se ha creado ningun proyecto.</div>;
+        }
+        if (!RequiresProject.hasSelectedProject(user)) {
+            warn = <div className="alert alert-warning">No hay ningun proyecto activo, active uno de la lista.</div>;
         }
         return (
-            <table className='table table-striped'>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Nombre</th>
-                        <th>Contacto</th>
-                        <th>Direccion</th>
-                        <th>Editar</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {projects.projects.map((project, i) =>
-                        <tr key={ i }>
-                            <th scope='row'>{ i + 1 }</th>
-                            <td>{ project.name }</td>
-                            <td>{ project.contact }</td>
-                            <td>{ project.address }</td>
-                            <td>
-                                { canEdit && <Link to={ `/proyectos/${project.id}` }><i className='fa fa-edit'/></Link> ||
-                                <i className='fas fa-ban'/> }
-                            </td>
-                            <td>{ this.getCheckbox(project, canEdit) }</td>
+            <div>
+                { warn }
+                <table className='table table-striped'>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nombre</th>
+                            <th>Contacto</th>
+                            <th>Direccion</th>
+                            <th>Editar</th>
+                            <th>Status</th>
                         </tr>
-                    )}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {projects.projects.map((project, i) =>
+                            <tr key={ i }>
+                                <th scope='row'>{ i + 1 }</th>
+                                <td>{ project.name }</td>
+                                <td>{ project.contact }</td>
+                                <td>{ project.address }</td>
+                                <td>
+                                    { canEdit && <Link to={ `/proyectos/${project.id}` }><i className='fa fa-edit'/></Link> ||
+                                    <i className='fas fa-ban'/> }
+                                </td>
+                                <td>{ this.getCheckbox(project, canEdit, this.props.user) }</td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
         );
     }
 
-    getCheckbox(item, canEdit) {
+    getCheckbox(item, canEdit, { attributes }) {
+        const active = attributes.preferences.default_project === item.id;
+
         if (canEdit) {
-            const label = item.active ? 'Desactivar' : 'Activar';
+            const label = active ? 'Desactivar' : 'Activar';
 
             return <Checkbox
                 name={ item.name }
                 id={ item.id }
                 label={ label }
-                checked={ item.active }
+                checked={ active }
                 onChange={ this.selectCheckBox }
             />;
         }
-        return <div><span>{ item.active && 'Activado' || 'Desactivado' }</span></div>;
+        return <div><span>{ active && 'Activado' || 'Desactivado' }</span></div>;
     }
 
     selectCheckBox(checkbox) {
@@ -212,7 +221,7 @@ export default class Project extends React.Component {
             active: checkbox.checked
         }, () => {
             this.props.dispatch(hideOverlay());
-            this.props.dispatch(fetchProjects());
+            this.props.dispatch(fetchUser());
         }));
     }
 
@@ -264,6 +273,7 @@ export default class Project extends React.Component {
                 this.props.history.push('/proyectos');
             }
             this.props.dispatch(fetchProjects());
+            this.props.dispatch(fetchUser());
             this.setState({
                 button: { value: 'Agregar', disabled: true },
                 project: {}
@@ -285,5 +295,6 @@ export default class Project extends React.Component {
         match: PropTypes.object,
         params: PropTypes.object,
         history: PropTypes.object,
+        user: PropTypes.object,
     };
 }

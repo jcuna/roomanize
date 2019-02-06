@@ -6,7 +6,7 @@ from flask_restful.representations import json
 from config.routes import register, no_permissions
 import re
 from dal import db
-from dal.models import User, Role
+from dal.models import User, Role, UserAttributes, admin_access, admin_preferences
 from dal.shared import get_fillable
 
 permissions = {}
@@ -59,6 +59,11 @@ class Router:
                     user_data = get_fillable(User, **data)
                     user = User(**user_data)
                     user.hash_password()
+
+                    user.attributes = UserAttributes(
+                        user_access=json.dumps(admin_access),
+                        user_preferences=json.dumps(admin_preferences)
+                    )
 
                     admin_perms = {}
 

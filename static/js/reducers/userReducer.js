@@ -33,6 +33,10 @@ export default function userReducer(state = {
         userToken: {
             status: STATUS.PENDING,
             isValid: false
+        },
+        attributes: {
+            preferences: {},
+            access: {}
         }
     },
     // jwt session token, expires regularly

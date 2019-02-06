@@ -6,7 +6,7 @@ from flask import session, json, current_app, render_template
 from sqlalchemy.orm import joinedload
 from core.router import permissions
 from dal.shared import get_fillable, token_required, access_required
-from dal.models import User, db, Role, UserToken
+from dal.models import User, db, Role, UserToken, row2dict, UserAttributes
 from flask_mail import Message
 
 
@@ -14,7 +14,7 @@ class Users(Resource):
     def get(self):
 
         if 'logged_in' in session:
-            user = User.query.options(joinedload('roles')).filter_by(email=session['user_email']).first()
+            user = User.query.filter_by(email=session['user_email']).first()
             if user:
                 return user_to_dict(user)
 
@@ -30,7 +30,7 @@ class UsersManager(Resource):
         order_by = getattr(User, request.args.get('orderBy'))
         order_dir = getattr(order_by, request.args.get('orderDir'))
 
-        users = User.query.options(joinedload('roles')).order_by(order_dir()).limit(limit)
+        users = User.query.order_by(order_dir()).limit(limit)
 
         return list(map(lambda user: {
             'first_name': user.first_name,
@@ -38,6 +38,7 @@ class UsersManager(Resource):
             'name': user.first_name + ' ' + user.last_name,
             'id': user.id,
             'email': user.email,
+            'attributes': get_user_attr(user),
             'roles': list(map(lambda r: {
                 'name': r.name,
                 'id': r.id
@@ -56,6 +57,13 @@ class UsersManager(Resource):
         if raw_data['roles']:
             for role in Role.query.filter(Role.id.in_(raw_data['roles'])):
                 user.roles.append(role)
+
+        user.attributes = UserAttributes()
+        if raw_data['attributes'] and 'access' in raw_data['attributes']:
+            user.attributes.user_access = json.dumps(raw_data['attributes']['access'])
+
+        if raw_data['attributes'] and 'preferences' in raw_data['attributes']:
+            user.attributes.user_preferences = json.dumps(raw_data['attributes']['preferences'])
 
         db.session.add(user)
         db.session.commit()
@@ -88,6 +96,13 @@ class UsersManager(Resource):
         user.first_name = raw_data['first_name']
         user.last_name = raw_data['last_name']
         user.roles = []
+
+        if raw_data['attributes']:
+            if raw_data['attributes'] and 'access' in raw_data['attributes']:
+                user.attributes.user_access = json.dumps(raw_data['attributes']['access'])
+
+            if raw_data['attributes'] and 'preferences' in raw_data['attributes']:
+                user.attributes.user_preferences = json.dumps(raw_data['attributes']['preferences'])
 
         if raw_data['roles']:
             for role in Role.query.filter(Role.id.in_(
@@ -223,7 +238,19 @@ class UserTokens(Resource):
         return {'isValid': False}
 
 
+def get_user_attr(user: User):
+    return {
+        'preferences': json.loads(
+            user.attributes.user_preferences
+        ) if hasattr(user.attributes, 'user_preferences') else {},
+        'access': json.loads(
+            user.attributes.user_access
+        ) if hasattr(user.attributes, 'user_access') else {}
+    }
+
+
 def user_to_dict(user: User) -> dict:
+
     return {
         'user': {
             'email': user.email,
@@ -236,7 +263,8 @@ def user_to_dict(user: User) -> dict:
                     'id': r.id,
                     'permissions': r.get_permissions
                 }, user.roles)),
-            'attributes': user.attributes
+            'attributes': get_user_attr(user)
+
         },
         'token': user.get_token()
     }

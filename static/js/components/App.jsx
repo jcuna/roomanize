@@ -41,7 +41,6 @@ class App extends React.Component {
                 }
             ));
         }
-
         this.clickedContent = this.clickedContent.bind(this);
     }
 

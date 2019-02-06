@@ -10,6 +10,13 @@ from config.routes import default_access
 
 collation = 'utf8mb4_unicode_ci'
 
+admin_access = {
+    'projects': '*'
+}
+
+admin_preferences = {
+}
+
 
 def row2dict(row):
     d = {}
@@ -43,7 +50,7 @@ class User(db.Model):
                          # single_parent=True
                          )
     tokens = relationship('UserToken', back_populates='user')
-    attributes = relationship('UserAttributes', back_populates='user', lazy='joined')
+    attributes = relationship('UserAttributes', back_populates='user', lazy='joined', uselist=False)
 
     def hash_password(self):
         self.password = generate_password_hash(str(self.password).encode("ascii"), method='sha256')
@@ -61,12 +68,22 @@ class User(db.Model):
 
 class UserAttributes(db.Model):
     __tablename__ = 'user_attributes'
-    id = db.Column(db.BigInteger, primary_key=True)
+    ua_id = db.Column(db.BigInteger, primary_key=True)
     user_id = db.Column(db.BigInteger, db.ForeignKey('users.id'), index=True)
-    user_access = db.Column(db.Text(collation=collation), comment='A JSON schema of table/rows access')
-    user_preferences = db.Column(db.Text(collation=collation), comment='A JSON schema user preferences')
+    user_access = db.Column(
+        db.Text(collation=collation),
+        comment='A JSON schema of table/rows access',
+        nullable=False,
+        default='{}'
+    )
+    user_preferences = db.Column(
+        db.Text(collation=collation),
+        comment='A JSON schema user preferences',
+        nullable=False,
+        default='{}'
+    )
 
-    user = relationship(User, back_populates='attributes')
+    user = relationship(User, back_populates='attributes', uselist=False)
 
 
 class UserToken(db.Model):
@@ -123,7 +140,6 @@ class Project(db.Model):
     __tablename__ = 'projects'
     id = db.Column(db.BigInteger, primary_key=True)
     name = db.Column(db.String(30, collation=collation), unique=True)
-    active = db.Column(db.Boolean(), index=True)
     address = db.Column(db.Text(collation=collation))
     contact = db.Column(db.VARCHAR(10, collation=collation))
     deleted = db.Column(db.DateTime(), nullable=True, index=True)

@@ -67,10 +67,23 @@ class Header extends React.Component {
         return userNameClass.includes(Header.defaultProps.extraClass);
     }
 
+    getSelectedProject({ projects }, { attributes }) {
+        let name = 'Roomanize';
+
+        if (typeof attributes.preferences.default_project !== 'undefined') {
+            projects.forEach(item => {
+                if (item.id === attributes.preferences.default_project) {
+                    name = item.name;
+                }
+            });
+        }
+        return name;
+    }
+
     render() {
         const { user, projects } = this.props;
         const loggedIn = user.status === STATUS.PROCESSED;
-        const projectName = projects.selected && projects.selected.name || 'Roomanize';
+        const projectName = this.getSelectedProject(projects, user);
 
         return (
             <header id="header">
