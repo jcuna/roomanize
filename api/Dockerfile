@@ -1,4 +1,4 @@
-FROM python:3.6.3
+FROM python:3.7.2
 MAINTAINER Jon Cuna <jcuna@joncuna.com>
 
 COPY . /usr/src/app

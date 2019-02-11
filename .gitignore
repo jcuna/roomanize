@@ -106,7 +106,6 @@ settings.py
 
 # node stuff
 node_modules/
-package-lock.json
 
 # intellij stuff
 .idea

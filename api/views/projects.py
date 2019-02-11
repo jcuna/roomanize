@@ -38,10 +38,7 @@ class Projects(Resource):
         if not data:
             return {'error': 'project object is required'}, 400
 
-        if data['active']:
-            db.session.query(Project).filter(Project.active.is_(True)).update({'active': False})
-
-        project = Project(name=data['name'], active=data['active'], contact=data['phone'])
+        project = Project(name=data['name'], contact=data['phone'])
 
         if data['address']:
             project.address = data['address']

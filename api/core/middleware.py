@@ -1,4 +1,5 @@
 import logging
+import sys
 import traceback
 
 from flask import Flask, jsonify
@@ -21,10 +22,10 @@ def error_handler(app: Flask):
     status_code = 500
 
     def handle_error_response(error: Exception):
-        raise error
+        _, _, tb = sys.exc_info()
         json_output = {
             'error': str(error),
-            'traceback': traceback.format_stack()
+            'traceback': traceback.format_list(traceback.extract_tb(tb))
         }
 
         response = jsonify(json_output)
