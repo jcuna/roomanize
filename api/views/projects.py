@@ -65,16 +65,11 @@ class Projects(Resource):
         updated_data = {}
 
         if 'active' in data:
-            updated_data.update({'active': data['active']})
-
             user = User.query.options().filter_by(email=session['user_email']).first()
 
             attr = {}
             if user.attributes.user_preferences:
                 attr = json.loads(user.attributes.user_preferences)
-
-            if data['active']:
-                db.session.query(Project).filter(Project.active.is_(True)).update({'active': False})
 
             attr['default_project'] = project_id if data['active'] else None
             user.attributes.user_preferences = json.dumps(attr)
@@ -88,11 +83,8 @@ class Projects(Resource):
         if 'deleted' in data:
             updated_data.update({'deleted': datetime.utcnow()})
 
-        try:
-            db.session.query(Project).filter_by(id=project_id).update(updated_data)
-            db.session.commit()
-        except any:
-            return {'error': 'Unexpected Error'}, 404
+        db.session.query(Project).filter_by(id=project_id).update(updated_data)
+        db.session.commit()
 
         return {'message': 'success'}
 

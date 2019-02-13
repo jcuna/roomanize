@@ -56,3 +56,11 @@ def error_handler(app: Flask):
         app.register_error_handler(Exception, handle_error_response)
     else:
         app.register_error_handler(Exception, handle_error_response_prod)
+
+
+class HttpException(Exception):
+    def __init__(self, message, status_code=400):
+
+        super(HttpException, self).__init__(message)
+
+        self.status_code = status_code
