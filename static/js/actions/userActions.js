@@ -230,3 +230,9 @@ export const listenUserChanges = (userId) =>
         ws(USER_WS_CHANGED, `/${userId}`, () => {
             dispatch(fetchUser());
         });
+
+export const updatePassword = (passwordObj, success, failed) =>
+    () => api({
+        url: '/account/activate-pass',
+        method: 'POST'
+    }, passwordObj).then(success, failed);

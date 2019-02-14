@@ -33,16 +33,11 @@ const normalFetch = (url, method, data, crossDomain, headers = {}) => {
 
             status = response.status;
             if (contentType && contentType.indexOf('application/json') !== -1) {
-                return response.json().then(resp => {
-                    resolve({ data: resp, status });
-                }, (error) => {
-                    reject({ error, status, });
-                });
+                return response.json().then(resp =>
+                    resolve({ data: resp, status }), (error) => reject({ error, status, }));
             }
             return reject('invalid contentType');
-        }, (error) => {
-            reject(error);
-        });
+        }, (error) => reject(error));
     });
 };
 

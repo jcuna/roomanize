@@ -17,6 +17,7 @@ def register():
         'tenants.Tenants@tenants_url': '/tenants|/tenants/|/tenants/<int:tenants_id>',
 
         'users.UserTokens@user_tokens_url': '/user-tokens|/user-tokens/<user_token>',
+        'users.Activate@user_activate_url': '/account/activate-pass',
     }
 
 

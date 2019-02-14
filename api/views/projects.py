@@ -21,9 +21,9 @@ class Projects(Resource):
             if 'projects' in access:
                 pl = access['projects']
                 if pl == '*':
-                    q.limit(10)
+                    q = q.limit(10)
                 else:
-                    q.filter(Project.id.in_(pl))
+                    q = q.filter(Project.id.in_(pl))
 
         return {
             'projects': list(map(lambda r: row2dict(r), q.all()))
@@ -51,7 +51,8 @@ class Projects(Resource):
         if user.attributes.user_preferences:
             attr = json.loads(user.attributes.user_preferences)
 
-        attr['default_project'] = project.id if data['active'] else None
+        if data['active']:
+            attr['default_project'] = project.id
         user.attributes.user_preferences = json.dumps(attr)
         db.session.commit()
 
@@ -83,7 +84,8 @@ class Projects(Resource):
         if 'deleted' in data:
             updated_data.update({'deleted': datetime.utcnow()})
 
-        db.session.query(Project).filter_by(id=project_id).update(updated_data)
+        if updated_data:
+            db.session.query(Project).filter_by(id=project_id).update(updated_data)
         db.session.commit()
 
         return {'message': 'success'}

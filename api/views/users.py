@@ -1,9 +1,13 @@
 import datetime
+import re
+
 from flask_socketio import emit
 import sqlalchemy
 from flask_restful import Resource, request
-from flask import session, json, current_app, render_template
+from flask import session, json, current_app, render_template, url_for
 from sqlalchemy.orm import joinedload
+
+from core.middleware import HttpException
 from core.router import permissions
 from dal.shared import get_fillable, token_required, access_required
 from dal.models import User, db, Role, UserToken, row2dict, UserAttributes
@@ -69,7 +73,7 @@ class UsersManager(Resource):
         db.session.commit()
 
         if not user.password:
-            ut = UserToken(target=request.url + '/activate-pass')
+            ut = UserToken(target=request.host_url.rstrip('/') + url_for('user_activate_url'))
             ut.new_token(user.email)
             user.tokens.append(ut)
             db.session.commit()
@@ -238,6 +242,32 @@ class UserTokens(Resource):
         return {'isValid': False}
 
 
+class Activate(Resource):
+
+    def post(self):
+        data = request.get_json()
+        ut = UserToken.query.filter_by(token=data['token']).first()
+
+        if not ut or ut.expires <= datetime.datetime.utcnow():
+            raise HttpException('Invalid token')
+
+        if ut.target != request.base_url:
+            raise HttpException('Invalid target')
+
+        parsed = r'^(?=.*\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&*(),.?":{}|<>])'
+
+        if len(data['pw']) < 6 or not re.match(parsed, data['pw']) or data['pw'] != data['pw2']:
+            raise HttpException('Invalid password')
+
+        user = ut.user
+        user.password = data['pw']
+        user.hash_password()
+        ut.expires = datetime.datetime.utcnow()
+        db.session.commit()
+
+        return {'message': 'success'}
+
+
 def get_user_attr(user: User):
     return {
         'preferences': json.loads(
@@ -250,7 +280,6 @@ def get_user_attr(user: User):
 
 
 def user_to_dict(user: User) -> dict:
-
     return {
         'user': {
             'email': user.email,
