@@ -6,6 +6,7 @@ export const LANDING_PAGE_CLEAR = 'LANDING_PAGE_CLEAR';
 export const OVERLAY_SHOW = 'OVERLAY_SHOW';
 export const OVERLAY_HIDE = 'OVERLAY_HIDE';
 export const CLICKED_CONTENT = 'CLICKED_CONTENT';
+export const ONLINE_STATUS = 'ONLINE_STATUS';
 
 export const toggleMobileMenu = (currentValue) => {
     return function (dispatch) {
@@ -81,3 +82,6 @@ export const showOverlay = (childComponent, title, closeButton = false, actionBu
         },
     };
 };
+
+export const updateOnlineStatus = (isOffline) =>
+    ({ type: ONLINE_STATUS, payload: isOffline });

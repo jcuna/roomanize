@@ -2,6 +2,7 @@ import api from '../utils/api';
 import { token } from '../utils/token';
 import { clearNotifications, hideOverlay, notifications } from './appActions';
 import ws from '../utils/ws';
+import { ALERTS } from '../constants';
 
 export const USER_LOGGING_IN = 'USER_LOGGING_IN';
 export const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS';
@@ -54,7 +55,7 @@ export const login = (email, password) => {
                     }
                 });
                 dispatch(notifications([
-                    { type: 'danger', message: 'Nombre de usuario o contraseña no son válidos' }
+                    { type: ALERTS.DANGER, message: 'Nombre de usuario o contraseña no son válidos' }
                 ]));
             }
         }, err => {
@@ -67,7 +68,7 @@ export const login = (email, password) => {
                 }
             });
             dispatch(notifications([
-                { type: 'danger', message: 'Ha ocurrido un error inesperado.' }
+                { type: ALERTS.DANGER, message: 'Ha ocurrido un error inesperado.' }
             ]));
         });
     };
@@ -96,7 +97,7 @@ export const fetchUser = () => {
                 }
             });
             dispatch(notifications([
-                { type: 'danger', message: 'Ha ocurrido un error inesperado.' }
+                { type: ALERTS.DANGER, message: 'Ha ocurrido un error inesperado.' }
             ]));
         });
     };
@@ -166,14 +167,14 @@ export const createUser = (user) => {
                 });
                 dispatch(hideOverlay());
                 dispatch(notifications([
-                    { type: 'success', message: 'Usuario creado satisfactoriamente' }
+                    { type: ALERTS.SUCCESS, message: 'Usuario creado satisfactoriamente' }
                 ]));
             }, err => {
                 console.log(err);
                 dispatch(hideOverlay());
                 dispatch({ type: USER_CREATE_FAIL });
                 dispatch(notifications([
-                    { type: 'danger', message: 'Hubo un error creando el usuario' }
+                    { type: ALERTS.DANGER, message: 'Hubo un error creando el usuario' }
                 ]));
             });
         });

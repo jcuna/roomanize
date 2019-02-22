@@ -5,6 +5,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { clearNotifications } from '../actions/appActions';
+import { ALERTS } from '../constants';
 
 export default class Notifications extends React.Component {
     render() {
@@ -34,11 +35,6 @@ export default class Notifications extends React.Component {
     };
 
     static get alertTypes() {
-        return [
-            'success',
-            'info',
-            'warning',
-            'danger'
-        ];
+        return Object.values(ALERTS);
     }
 }

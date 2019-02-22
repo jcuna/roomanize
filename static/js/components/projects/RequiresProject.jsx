@@ -4,7 +4,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { STATUS } from '../../constants';
+import { ACCESS_TYPES, ALERTS, ENDPOINTS, STATUS } from '../../constants';
 import Spinner from '../../utils/Spinner';
 import { notifications } from '../../actions/appActions';
 import Route from 'react-router-dom/es/Route';
@@ -18,20 +18,20 @@ export default class RequiresProject extends React.Component {
 
         if (!RequiresProject.hasSelectedProject(user) && projects.status !== STATUS.PENDING) {
             dispatch(notifications({
-                type: 'warning',
+                type: ALERTS.WARNING,
                 message: 'Debe seleccionar un projecto antes de continuar'
             }));
         }
     }
 
     render() {
-        const { history, projects, user } = this.props;
+        const { projects, user, accessType, uri } = this.props;
 
         if (projects.status !== STATUS.COMPLETE) {
             return <Spinner/>;
         } else if (!RequiresProject.hasSelectedProject(user)) {
-            return <Redirect to="/proyectos"/>;
-        } else if (hasAccess(history.location.pathname, 'read')) {
+            return <Redirect to={ ENDPOINTS.PROJECTS_URL }/>;
+        } else if (hasAccess(uri, accessType)) {
             return <Route render={ () => <this.props.component { ...this.props }/> }/>;
         }
         return <ErrorPage type={ 403 }/>;
@@ -47,5 +47,11 @@ export default class RequiresProject extends React.Component {
         dispatch: PropTypes.func,
         history: PropTypes.object,
         user: PropTypes.object,
+        accessType: PropTypes.string,
+        uri: PropTypes.string.isRequired,
     };
+
+    static defaultProps = {
+        accessType: ACCESS_TYPES.READ
+    }
 }

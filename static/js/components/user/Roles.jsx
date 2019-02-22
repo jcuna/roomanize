@@ -10,7 +10,7 @@ import Spinner from '../../utils/Spinner';
 import { notifications, showOverlay } from '../../actions/appActions';
 import '../../../css/roles.scss';
 import Permissions from '../Permissions';
-import { STATUS } from '../../constants';
+import { ALERTS, STATUS } from '../../constants';
 
 export default class Roles extends React.Component {
     constructor(props) {
@@ -71,7 +71,7 @@ export default class Roles extends React.Component {
 
         if (exists) {
             this.props.dispatch(notifications([
-                { type: 'danger', message: 'Role con mismo nombre ya existe' }
+                { type: ALERTS.DANGER, message: 'Role con mismo nombre ya existe' }
             ]));
             this.refs.role.value = '';
             this.toggleButtonDisabled();

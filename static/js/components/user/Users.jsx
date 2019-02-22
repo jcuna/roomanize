@@ -10,7 +10,7 @@ import { hideOverlay, showOverlay } from '../../actions/appActions';
 import UserManager from './UserManager';
 import { fetchRoles } from '../../actions/roleActions';
 import { hasAccess } from '../../utils/config';
-import { STATUS } from '../../constants';
+import { ACCESS_TYPES, ENDPOINTS, STATUS } from '../../constants';
 
 export default class Users extends React.Component {
     constructor(props) {
@@ -89,9 +89,9 @@ export default class Users extends React.Component {
                     {user.list.users.map((userFromList, i) => {
                         i++;
                         const rolesCount = userFromList.roles.length;
-                        const canEdit = hasAccess('/usuarios', 'write') &&
+                        const canEdit = hasAccess(ENDPOINTS.USERS_MANAGER_URL, ACCESS_TYPES.WRITE) &&
                             userFromList.email !== user.email;
-                        const canDelete = hasAccess('/usuarios', 'delete') &&
+                        const canDelete = hasAccess(ENDPOINTS.USERS_MANAGER_URL, ACCESS_TYPES.DELETE) &&
                             userFromList.email !== user.email;
 
                         return <tr key={ i }>

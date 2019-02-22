@@ -7,7 +7,8 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import '../../css/menu.scss';
 import { clearNotifications, toggleMobileMenu } from '../actions/appActions';
-import { hasAccess, routes } from '../utils/config';
+import { hasAccess, menuItems } from '../utils/config';
+import { ACCESS_TYPES } from '../constants';
 
 export default class Menu extends React.Component {
     constructor(props) {
@@ -46,8 +47,8 @@ export default class Menu extends React.Component {
 
         const items = [];
 
-        routes.forEach(item => {
-            if (hasAccess(item.link, 'read')) {
+        menuItems.forEach(item => {
+            if (hasAccess(item.link, ACCESS_TYPES.READ)) {
                 items.push(
                     <Link
                         className={ this.getMenuClass(item) } key={ item.link } to={ item.link }
@@ -69,7 +70,7 @@ export default class Menu extends React.Component {
     getMenuClass(link) {
         let className = 'menu-item';
 
-        if (this.props.history.location.pathname === link.link) {
+        if (this.props.history.location.pathname.indexOf(link.link) > -1) {
             className += ' active';
         }
         return className;

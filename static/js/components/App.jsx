@@ -15,7 +15,7 @@ import { fetchPermissions } from '../actions/roleActions';
 import { clickedContent, notifications } from '../actions/appActions';
 import { setStateData } from '../utils/config';
 import PropTypes from 'prop-types';
-import { STATUS } from '../constants';
+import { ALERTS, STATUS } from '../constants';
 import { fetchProjects } from '../actions/projectActions';
 
 class App extends React.Component {
@@ -35,7 +35,7 @@ class App extends React.Component {
             dispatch(fetchProjects(
                 () => {
                     dispatch(notifications([{
-                        type: 'danger',
+                        type: ALERTS.DANGER,
                         message: 'Sucedio un error inesperado',
                     }]));
                 }
@@ -62,9 +62,11 @@ class App extends React.Component {
          * we show first load spinner while fetching initial data and only stop it after we have processed the user
          * weather the user is logged in or not.
          */
-        if (props.user.status === STATUS.PENDING || this.permissionsPending() &&
-             props.user.status === STATUS.PROCESSED) {
-            render = <div className="first-load-spinner"><Spinner/></div>;
+        if (this.showFullScreenSpinner(props)) {
+            render = <div className="first-load-spinner">
+                { props.isOffline && <h3>Parece que no tienes conexión.</h3>}
+                <Spinner/>
+            </div>;
         } else {
             render = <Layout { ...props }/>;
         }
@@ -78,11 +80,17 @@ class App extends React.Component {
         );
     }
 
+    showFullScreenSpinner({ user, isOffline }) {
+        return (user.status === STATUS.PENDING || this.permissionsPending() &&
+            user.status === STATUS.PROCESSED) || isOffline;
+    }
+
     clickedContent() {
         this.props.dispatch(clickedContent());
     }
 
     static propTypes = {
+        isOffline: PropTypes.bool,
         dispatch: PropTypes.func.isRequired,
         showMobileMenu: PropTypes.bool,
         user: PropTypes.object,
@@ -95,15 +103,17 @@ class App extends React.Component {
 
 const getInitialState = (state) => {
     return {
-        user: state.user.user,
-        token: state.user.token,
-        roles: state.roles.roles,
+        isOffline: state.app.isOffline,
         showMobileMenu: state.app.showMobileMenu,
         notifications: state.app.notifications,
         landingPage: state.app.landingPage,
         overlay: state.app.overlay,
         clickedContent: state.app.clickedContent,
-        projects: state.projects
+        user: state.user.user,
+        token: state.user.token,
+        roles: state.roles.roles,
+        projects: state.projects,
+        rooms: state.rooms
     };
 };
 

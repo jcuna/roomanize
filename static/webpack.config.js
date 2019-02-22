@@ -48,7 +48,12 @@ module.exports = env => {
                 filename: "style.css",
                 chunkFilename: "[id].css"
             }),
-            new webpack.HotModuleReplacementPlugin()
+            new webpack.HotModuleReplacementPlugin(),
+            new webpack.DefinePlugin({
+                'process.env': {
+                    NODE_ENV: JSON.stringify(env.NODE_ENV)
+                }
+            }),
         ],
         devServer: {
             contentBase: path.resolve(__dirname),

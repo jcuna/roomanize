@@ -3,11 +3,19 @@
  */
 
 import {
-    TOGGLE_MOBILE_MENU, NOTIFICATIONS_SET, NOTIFICATIONS_CLEAR, LANDING_PAGE_SET,
-    LANDING_PAGE_CLEAR, OVERLAY_SHOW, OVERLAY_HIDE, CLICKED_CONTENT,
+    TOGGLE_MOBILE_MENU,
+    NOTIFICATIONS_SET,
+    NOTIFICATIONS_CLEAR,
+    LANDING_PAGE_SET,
+    LANDING_PAGE_CLEAR,
+    OVERLAY_SHOW,
+    OVERLAY_HIDE,
+    CLICKED_CONTENT,
+    ONLINE_STATUS,
 } from '../actions/appActions';
 
 export default function appReducer(state = {
+    isOffline: false,
     showMobileMenu: false,
     notifications: [],
     landingPage: '',
@@ -33,6 +41,8 @@ export default function appReducer(state = {
             return { ...state, landingPage: '' };
         case CLICKED_CONTENT:
             return { ...state, clickedContent: !state.clickedContent };
+        case ONLINE_STATUS:
+            return { ...state, isOffline: action.payload };
         case OVERLAY_SHOW:
             return {
                 ...state,

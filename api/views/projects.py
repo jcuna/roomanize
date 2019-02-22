@@ -1,9 +1,10 @@
 import json
+import sqlalchemy
 from datetime import datetime
 from flask import request, session
 from flask_restful import Resource
-from dal.models import Project, TimeInterval, row2dict, User
-from dal.shared import token_required, access_required, db
+from dal.models import Project, TimeInterval, row2dict, User, Room
+from dal.shared import token_required, access_required, db, get_fillable
 
 
 class Projects(Resource):
@@ -49,7 +50,7 @@ class Projects(Resource):
         user = User.query.options().filter_by(email=session['user_email']).first()
         attr = {}
         if user.attributes.user_preferences:
-            attr = json.loads(user.attributes.user_preferences)
+            attr = user.attributes.preferences
 
         if data['active']:
             attr['default_project'] = project.id
@@ -66,11 +67,11 @@ class Projects(Resource):
         updated_data = {}
 
         if 'active' in data:
-            user = User.query.options().filter_by(email=session['user_email']).first()
+            user = User.query.filter_by(email=session['user_email']).first()
 
             attr = {}
             if user.attributes.user_preferences:
-                attr = json.loads(user.attributes.user_preferences)
+                attr = user.attributes.preferences
 
             attr['default_project'] = project_id if data['active'] else None
             user.attributes.user_preferences = json.dumps(attr)
@@ -95,13 +96,33 @@ class Rooms(Resource):
 
     @token_required
     @access_required
-    def get(self):
-        pass
+    def get(self, page_id):
+        result = []
+        rooms = Room.query.filter_by(project_id=request.user.attributes.preferences['default_project']).all()
+
+        if rooms:
+            for room in rooms:
+                result.append(row2dict(room))
+
+        return {'list': result, 'page_id': page_id}
 
     @token_required
     @access_required
     def post(self):
-        pass
+        data = request.get_json()
+        if 'time_interval_id' in data and int(data['time_interval_id']) == 0:
+            del data['time_interval_id']
+
+        room_data = get_fillable(Room, **data)
+        room = Room(**room_data)
+        db.session.add(room)
+
+        try:
+            db.session.commit()
+        except sqlalchemy.exc.IntegrityError:
+            return {'message': 'Nombre ya ha sido utilizado'}, 400
+
+        return dict(id=room.id)
 
     @token_required
     @access_required

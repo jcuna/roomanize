@@ -1,7 +1,7 @@
 
 def register():
     """
-        declare routes as follows: 'module.PluralNameClass@endpoint': 'route'
+        declare menuItems as follows: 'module.PluralNameClass@endpoint': 'route'
         returns: dict
     """
     return {
@@ -11,7 +11,7 @@ def register():
         'users.Roles@roles_url': '/roles|/roles/',
         'users.Permissions@permissions_url': '/permissions|/permissions/',
         'projects.Projects@projects_url': '/projects|/projects/|/projects/<int:project_id>',
-        'projects.Rooms@rooms_url': '/rooms|/rooms/|/rooms/<int:room_id>',
+        'projects.Rooms@rooms_url': '/rooms|/rooms/|/rooms/<int:page_id>',
         'projects.TimeIntervals@time_intervals_url': '/time-intervals|/time-intervals/',
         'agreements.Agreements@agreements_url': '/agreements|/agreements/|/agreements/<int:agreement_id>',
         'tenants.Tenants@tenants_url': '/tenants|/tenants/|/tenants/<int:tenants_id>',
@@ -26,6 +26,7 @@ no_permissions = [
     'views.users.Users',
     'views.users.UserTokens',
     'views.users.Permissions',
+    'views.users.Activate',
     'views.projects.TimeIntervals',
 ]
 

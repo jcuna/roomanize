@@ -3,6 +3,7 @@ import { token } from '../utils/token';
 import { notifications } from './appActions';
 import ws from '../utils/ws';
 import { fetchUser } from './userActions';
+import { ALERTS } from '../constants';
 
 export const ROLES_FETCHING = 'ROLES_FETCHING';
 export const ROLES_FETCHED = 'ROLES_FETCHED';
@@ -19,8 +20,8 @@ export const PERMISSIONS_FETCHED = 'PERMISSIONS_FETCHED';
 export const PERMISSIONS_COMMIT = 'PERMISSIONS_COMMIT';
 export const PERMISSIONS_COMMIT_FAIL = 'PERMISSIONS_COMMIT_FAIL';
 
-export const createRole = (name) => {
-    return (dispatch) => {
+export const createRole = (name) =>
+    (dispatch) => {
         dispatch({ type: ROLE_CREATE_DISPATCHED });
         token.through().then(header => {
             api({
@@ -40,10 +41,9 @@ export const createRole = (name) => {
             });
         });
     };
-};
 
-export const deleteRole = (id) => {
-    return (dispatch) => {
+export const deleteRole = (id) =>
+    (dispatch) => {
         dispatch({ type: ROLE_DELETE_DISPATCHED });
         token.through().then(auth => api({
             url: '/roles',
@@ -56,7 +56,7 @@ export const deleteRole = (id) => {
                     payload: id,
                 });
                 dispatch(notifications([{
-                    type: 'info',
+                    type: ALERTS.INFO,
                     message: 'Role borrado correctamente.',
                 }]));
             } else {
@@ -68,22 +68,21 @@ export const deleteRole = (id) => {
                 }
                 dispatch({ type: ROLE_DELETE_FAIL });
                 dispatch(notifications([{
-                    type: 'warning',
+                    type: ALERTS.WARNING,
                     message,
                 }]));
             }
         }, () => {
             dispatch({ type: ROLE_DELETE_FAIL });
             dispatch(notifications([{
-                type: 'warning',
+                type: ALERTS.WARNING,
                 message: 'Error inesperado',
             }]));
         }));
     };
-};
 
-export const fetchRoles = () => {
-    return (dispatch) => {
+export const fetchRoles = () =>
+    (dispatch) => {
         dispatch({ type: ROLES_FETCHING });
         token.through().then(header => api({
             url: '/roles',
@@ -98,10 +97,9 @@ export const fetchRoles = () => {
             dispatch({ type: ROLES_FAIL, payload: err });
         }), err => dispatch({ type: ROLES_FAIL, payload: err }));
     };
-};
 
-export const fetchPermissions = () => {
-    return (dispatch) => {
+export const fetchPermissions = () =>
+    (dispatch) => {
         dispatch({ type: PERMISSIONS_FETCHING });
         token.through().then(header => {
             api({
@@ -120,10 +118,9 @@ export const fetchPermissions = () => {
             console.log(err);
         });
     };
-};
 
-export const commitPermissions = (permissions) => {
-    return (dispatch) => {
+export const commitPermissions = (permissions) =>
+    (dispatch) => {
         dispatch({ type: ROLE_CREATE_DISPATCHED });
         token.through().then(header => api({
             url: 'roles',
@@ -136,25 +133,24 @@ export const commitPermissions = (permissions) => {
                     payload: permissions,
                 });
                 dispatch(notifications([{
-                    type: 'success',
+                    type: ALERTS.SUCCESS,
                     message: 'Acceso actualizado correctamente',
                 }]));
             } else {
                 dispatch({ type: PERMISSIONS_COMMIT_FAIL });
                 dispatch(notifications([{
-                    type: 'warning',
+                    type: ALERTS.WARNING,
                     message: 'No se pudo actualizar los accesos',
                 }]));
             }
         }, () => {
             dispatch({ type: PERMISSIONS_COMMIT_FAIL });
             dispatch(notifications([{
-                type: 'warning',
+                type: ALERTS.WARNING,
                 message: 'No se pudo actualizar los accesos',
             }]));
         }));
     };
-};
 
 export const listenRoleChanges = options =>
     (dispatch) =>

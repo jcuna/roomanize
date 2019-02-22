@@ -1,8 +1,28 @@
 /**
  * Created by jgarcia on 10/7/16.
  */
-
+import store from '../store';
 import io from 'socket.io-client';
+import {
+    updateOnlineStatus,
+} from '../actions/appActions';
+
+let connectionInitiated = false;
+
+const connectionMonitor = (socket) => {
+    //TODO: use an actual env variable
+    if (location.host.indexOf('localhost') > -1) {
+        return;
+    }
+
+    socket.on('connect', () => {
+        store.dispatch(updateOnlineStatus(false));
+    });
+
+    socket.on('disconnect', () => {
+        store.dispatch(updateOnlineStatus(true));
+    });
+};
 
 /**
  *
@@ -19,9 +39,12 @@ const ws = (message, namespace = '/', callback) => {
         path: '/ws'
     });
 
-    socket.on(message, data => {
-        callback(data);
-    });
+    socket.on(message, data => callback(data));
+
+    if (!connectionInitiated) {
+        connectionInitiated = true;
+        connectionMonitor(socket);
+    }
 };
 
 export default ws;

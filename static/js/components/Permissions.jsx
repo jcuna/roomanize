@@ -5,6 +5,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Checkbox from '../utils/Checkbox';
+import { ACCESS_TYPES } from '../constants';
 
 export default class Permissions extends React.Component {
     constructor(props) {
@@ -59,9 +60,9 @@ export default class Permissions extends React.Component {
 
     static get methods() {
         return [
-            { name: 'read', nombre: 'Leer', className: 'chart down' },
-            { name: 'write', nombre: 'Escribir', className: 'chart line' },
-            { name: 'delete', nombre: 'Borrar', className: 'chart up' }
+            { name: ACCESS_TYPES.READ, nombre: 'Leer', className: 'chart down' },
+            { name: ACCESS_TYPES.WRITE, nombre: 'Escribir', className: 'chart line' },
+            { name: ACCESS_TYPES.DELETE, nombre: 'Borrar', className: 'chart up' }
         ];
     }
 

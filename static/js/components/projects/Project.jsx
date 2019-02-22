@@ -16,7 +16,7 @@ import {
 import Link from 'react-router-dom/es/Link';
 import { hasAccess } from '../../utils/config';
 import { hideOverlay, showOverlay } from '../../actions/appActions';
-import { STATUS } from '../../constants';
+import { ACCESS_TYPES, ENDPOINTS, STATUS } from '../../constants';
 import Spinner from '../../utils/Spinner';
 import Breadcrumbs from '../../utils/Breadcrumbs';
 import { fetchUser } from '../../actions/userActions';
@@ -67,7 +67,7 @@ export default class Project extends React.Component {
     }
 
     render() {
-        const canCreate = hasAccess('/proyectos', 'write');
+        const canCreate = hasAccess(ENDPOINTS.PROJECTS_URL, ACCESS_TYPES.WRITE);
         const { projects, match } = this.props;
         const notEditing = typeof match.params.project_id === 'undefined';
         const editing = !notEditing;
@@ -138,7 +138,7 @@ export default class Project extends React.Component {
         const { projects, user } = this.props;
         let warn = null;
 
-        const canEdit = hasAccess('/proyectos', 'write');
+        const canEdit = hasAccess(ENDPOINTS.PROJECTS_URL, ACCESS_TYPES.WRITE);
 
         if (projects.projects && projects.projects.length === 0) {
             return <div className="alert alert-warning">Aun no se ha creado ningun proyecto.</div>;
@@ -168,7 +168,8 @@ export default class Project extends React.Component {
                                 <td>{ project.contact }</td>
                                 <td>{ project.address }</td>
                                 <td>
-                                    { canEdit && <Link to={ `/proyectos/${project.id}` }><i className='fa fa-edit'/></Link> ||
+                                    { canEdit && <Link to={ `${ENDPOINTS.PROJECTS_URL}/${project.id}` }>
+                                        <i className='fa fa-edit'/></Link> ||
                                     <i className='fas fa-ban'/> }
                                 </td>
                                 <td>{ this.getCheckbox(project, canEdit, this.props.user) }</td>
@@ -270,7 +271,7 @@ export default class Project extends React.Component {
 
         this.props.dispatch(action(data, () => {
             if (editMode) {
-                this.props.history.push('/proyectos');
+                this.props.history.push(ENDPOINTS.PROJECTS_URL);
             }
             this.props.dispatch(fetchProjects());
             this.props.dispatch(fetchUser());

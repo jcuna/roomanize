@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import '../../css/header.scss';
 import { toggleMobileMenu } from '../actions/appActions';
-import { STATUS } from '../constants';
+import { ENDPOINTS, STATUS } from '../constants';
 import { listenRoleChanges } from '../actions/roleActions';
 import { listenUserChanges } from '../actions/userActions';
 
@@ -116,8 +116,8 @@ class Header extends React.Component {
 
     userMenu() {
         const menu = [
-            { name: 'Perfil', link: '/account/profile' },
-            { name: 'Logout', link: '/account/logout' }
+            { name: 'Perfil', link: ENDPOINTS.ACCOUNT_PROFILE },
+            { name: 'Logout', link: ENDPOINTS.ACCOUNT_LOGOUT }
         ];
 
         return (

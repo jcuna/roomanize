@@ -85,6 +85,14 @@ class UserAttributes(db.Model):
 
     user = relationship(User, back_populates='attributes', uselist=False)
 
+    @property
+    def preferences(self):
+        return json.loads(self.user_preferences)
+
+    @property
+    def access(self):
+        return json.loads(self.user_access)
+
 
 class UserToken(db.Model):
 
@@ -155,9 +163,11 @@ class TimeInterval(db.Model):
 
 class Room(db.Model):
     __tablename__ = 'rooms'
+    fillable = ['project_id', 'name', 'rent', 'time_interval_id', 'description', 'picture']
+
     id = db.Column(db.BigInteger, primary_key=True)
     project_id = db.Column(db.BigInteger, db.ForeignKey('projects.id'), index=True, nullable=False)
-    name = db.Column(db.String(30, collation=collation), index=True)
+    name = db.Column(db.String(30, collation=collation), unique=True)
     rent = db.Column(db.Integer, nullable=True)
     time_interval_id = db.Column(db.Integer, db.ForeignKey('time_intervals.id'), nullable=True)
     description = db.Column(db.Text(collation=collation))

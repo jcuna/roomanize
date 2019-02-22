@@ -258,6 +258,13 @@ table {
   left: 0;
   background: $theme;
 
+  h3 {
+    text-align: center;
+    top: 22%;
+    position: relative;
+    color: $semiWhite;
+  }
+
   #continuous-spinner {
     top: calc(100% - 70%);
   }

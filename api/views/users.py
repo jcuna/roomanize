@@ -1,16 +1,14 @@
 import datetime
 import re
-
 from flask_socketio import emit
 import sqlalchemy
 from flask_restful import Resource, request
 from flask import session, json, current_app, render_template, url_for
 from sqlalchemy.orm import joinedload
-
 from core.middleware import HttpException
 from core.router import permissions
 from dal.shared import get_fillable, token_required, access_required
-from dal.models import User, db, Role, UserToken, row2dict, UserAttributes
+from dal.models import User, db, Role, UserToken, UserAttributes
 from flask_mail import Message
 
 

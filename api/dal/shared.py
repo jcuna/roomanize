@@ -38,7 +38,7 @@ def token_required(f):
         try:
             data = jwt.decode(token, current_app.config['SECRET_KEY'])
             current_user = User.query.options(joinedload('roles')).filter_by(email=data['email']).first()
-        except any:
+        except Exception:
             return {'message': 'Token is invalid!'}, 401
 
         request.user = current_user

@@ -14,6 +14,7 @@ import PropTypes from 'prop-types';
 import Routes from './Routes';
 import Account from './user/Account';
 import Login from './user/Login';
+import { ENDPOINTS } from '../constants';
 
 export default class Layout extends React.Component {
     render() {
@@ -28,11 +29,11 @@ export default class Layout extends React.Component {
                             <div className='content-area container'>
                                 <FlashMessages { ...this.props }/>
                                 <Switch>
-                                    <Route path='/account/login' render={ (props2) =>
-                                        <Login { ...Routes.combineProps(this.props, props2) }/> }
+                                    <Route path={ ENDPOINTS.ACCOUNT_LOGIN } render={ (props2) =>
+                                        <Login { ...this.props } { ...props2 }/> }
                                     />
                                     <Route exact path='/account/activate/:user_token' render={ (props2) =>
-                                        <Account { ...Routes.combineProps(this.props, props2) }/> }
+                                        <Account { ...this.props } { ...props2 }/> }
                                     />
                                     <RequiresLogin { ...props }>
                                         <Routes { ...props }/>

@@ -5,7 +5,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { clearUserToken, updatePassword, validateUserToken } from '../../actions/userActions';
-import { STATUS } from '../../constants';
+import { ALERTS, ENDPOINTS, STATUS } from '../../constants';
 import Spinner from '../../utils/Spinner';
 import Redirect from 'react-router-dom/es/Redirect';
 import { notifications } from '../../actions/appActions';
@@ -54,7 +54,7 @@ export default class Account extends React.Component {
         if (this.props.user.userToken.status === STATUS.COMPLETE &&
             !this.props.user.userToken.isValid) {
             this.props.dispatch(notifications({
-                type: 'warning', message: 'El token no es valido o ha expirado'
+                type: ALERTS.WARNING, message: 'El token no es valido o ha expirado'
             }));
         }
     }
@@ -135,9 +135,9 @@ export default class Account extends React.Component {
             },
             (resp) => {
                 if (resp.status < 300) {
-                    this.props.history.push('/account/login');
+                    this.props.history.push(ENDPOINTS.ACCOUNT_LOGIN);
                     this.props.dispatch(notifications(
-                        { type: 'success', message: 'Cuenta ha sido activada.' })
+                        { type: ALERTS.SUCCESS, message: 'Cuenta ha sido activada.' })
                     );
                 } else {
                     this.props.dispatch(notifications(this.props.updatePasswordError));
@@ -159,6 +159,6 @@ export default class Account extends React.Component {
     };
 
     static defaultProps = {
-        updatePasswordError: { type: 'danger', message: 'No se pudo guardar el password, trate mas tarde' }
+        updatePasswordError: { type: ALERTS.DANGER, message: 'No se pudo guardar el password, trate mas tarde' }
     }
 }
