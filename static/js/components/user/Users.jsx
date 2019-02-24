@@ -11,6 +11,7 @@ import UserManager from './UserManager';
 import { fetchRoles } from '../../actions/roleActions';
 import { hasAccess } from '../../utils/config';
 import { ACCESS_TYPES, ENDPOINTS, STATUS } from '../../constants';
+import { searchArray } from '../../utils/helpder';
 
 export default class Users extends React.Component {
     constructor(props) {
@@ -28,7 +29,8 @@ export default class Users extends React.Component {
             orderDir: 'asc',
             orderBy: 'id',
             page: 1,
-            searching: -1
+            searching: false,
+            found: []
         };
         if (props.roles.assigned.length === 0) {
             props.dispatch(fetchRoles());
@@ -36,22 +38,39 @@ export default class Users extends React.Component {
         if (props.user.list.status !== STATUS.TRANSMITTING && props.user.list.users.length === 0) {
             props.dispatch(fetchUsers());
         }
+
+        this.search = this.search.bind(this);
+    }
+
+    search({ target }) {
+        if (target.value !== '') {
+            const found = searchArray(this.props.user.list.users, target.value, 'name', 'email');
+
+            this.setState({
+                found,
+                searching: true
+            });
+        } else {
+            this.setState({
+                found: [],
+                searching: false
+            });
+        }
     }
 
     render() {
         const dir = this.state.orderDir === 'asc' ? 'down' : 'up';
         const { user } = this.props;
 
+        const displayData = this.state.searching ? this.state.found : user.list.users;
+
         return <div>
             <h2>Usuarios</h2>
-            <div style={ { textAlign: 'right', width: '100%', padding: '10px' } }>
+            <div className='table-actions'>
                 <input
                     placeholder='Buscar'
-                    onChange={ () => {} }
+                    onChange={ this.search }
                     className='form-control'
-                    style={
-                        { width: '160px', marginRight: '10px', display: 'inline', top: '2px', position: 'relative' }
-                    }
                 />
                 <button
                     disabled={ this.props.roles.assigned.length === 0 }
@@ -86,7 +105,7 @@ export default class Users extends React.Component {
                     </tr>
                 </thead>
                 <tbody>
-                    {user.list.users.map((userFromList, i) => {
+                    {displayData.map((userFromList, i) => {
                         i++;
                         const rolesCount = userFromList.roles.length;
                         const canEdit = hasAccess(ENDPOINTS.USERS_MANAGER_URL, ACCESS_TYPES.WRITE) &&

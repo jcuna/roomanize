@@ -10,13 +10,20 @@ import { ACCESS_TYPES, ALERTS, ENDPOINTS, STATUS } from '../../constants';
 import { hasAccess } from '../../utils/config';
 import Spinner from '../../utils/Spinner';
 import Link from 'react-router-dom/es/Link';
+import { searchArray } from '../../utils/helpder';
 
 export default class Room extends Component {
     constructor(props) {
         super(props);
 
+        this.state = {
+            found: [],
+            searching: false,
+            page: 1
+        };
+
         if (this.props.rooms.status === STATUS.PENDING) {
-            this.props.dispatch(fetchRooms(1, () => {
+            this.props.dispatch(fetchRooms(this.state.page, () => {
                 this.props.dispatch(notifications({
                     type: ALERTS.DANGER, message: 'No se pudo obtener lista de habitaciones.'
                 }));
@@ -24,23 +31,46 @@ export default class Room extends Component {
         }
 
         this.props.dispatch(selectRoom({}));
-
         this.selectRoom = this.selectRoom.bind(this);
+        this.search = this.search.bind(this);
     }
 
     render() {
         return (
             <section>
                 { hasAccess(this.props.history.location.pathname, ACCESS_TYPES.WRITE) &&
-                <button
-                    onClick={ () => this.props.history.push(`${ENDPOINTS.ROOMS_URL}/nuevo`) }
-                    className='btn btn-success'>
-                    Nueva Habitación
-                </button>
+                <div className='table-actions'>
+                    <input
+                        placeholder='Buscar'
+                        onChange={ this.search }
+                        className='form-control'
+                    />
+                    <button
+                        onClick={ () => this.props.history.push(`${ENDPOINTS.ROOMS_URL}/nuevo`) }
+                        className='btn btn-success'>
+                        Nueva Habitación
+                    </button>
+                </div>
                 }
                 { this.getList() }
             </section>
         );
+    }
+
+    search({ target }) {
+        if (target.value !== '') {
+            const found = searchArray(this.props.rooms.data.list, target.value, 'name');
+
+            this.setState({
+                found,
+                searching: true
+            });
+        } else {
+            this.setState({
+                found: [],
+                searching: false
+            });
+        }
     }
 
     getList() {
@@ -48,6 +78,7 @@ export default class Room extends Component {
             return <Spinner/>;
         }
         const canEdit = hasAccess(ENDPOINTS.ROOMS_URL, ACCESS_TYPES.WRITE);
+        const displayData = this.state.searching ? this.state.found : this.props.rooms.data.list;
 
         return <table className='table table-striped'>
             <thead>
@@ -60,7 +91,7 @@ export default class Room extends Component {
                 </tr>
             </thead>
             <tbody>
-                { this.props.rooms.data.list.map((item, i) => {
+                { displayData.map((item, i) => {
                     i++;
                     return <tr key={ i }>
                         <th scope='row'>{ i }</th>

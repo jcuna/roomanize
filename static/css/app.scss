@@ -273,3 +273,17 @@ table {
 .body-container.body-displaced {
   width: 80%;
 }
+
+.table-actions {
+  text-align: right;
+  width: 100%;
+  padding: 10px;
+
+  input {
+    width: 160px;
+    margin-right: 10px;
+    display: inline;
+    top: 2px;
+    position: relative;
+  }
+}
