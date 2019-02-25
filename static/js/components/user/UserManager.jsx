@@ -14,6 +14,7 @@ export default class UserManager extends React.Component {
 
         const rolesCheckboxes = {};
         const projectsCheckboxes = {};
+
         let roles = [];
         const projects = [];
 
@@ -148,6 +149,7 @@ export default class UserManager extends React.Component {
             id: checkbox.value,
         };
         const roles = this.state.roles;
+
         let roleInserted = false;
 
         roles.forEach((role, i) => {

@@ -6,8 +6,6 @@ const path = require('path');
 module.exports = env => {
     return {
         entry: [
-            'react-hot-loader/patch',
-            // 'webpack/hot/dev-server',
             '@babel/polyfill',
             path.resolve(__dirname, 'js/index.jsx')
         ],

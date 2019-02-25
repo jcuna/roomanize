@@ -136,6 +136,7 @@ export default class Project extends React.Component {
 
     getProjects() {
         const { projects, user } = this.props;
+
         let warn = null;
 
         const canEdit = hasAccess(ENDPOINTS.PROJECTS_URL, ACCESS_TYPES.WRITE);
@@ -258,7 +259,9 @@ export default class Project extends React.Component {
         e.preventDefault();
 
         let action;
+
         let data;
+
         const editMode = typeof this.props.match.params.project_id !== 'undefined';
 
         if (editMode) {

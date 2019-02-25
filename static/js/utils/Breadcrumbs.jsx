@@ -10,10 +10,12 @@ export default class Breadcrumbs extends React.Component {
     render() {
         const { title, match } = this.props;
 
-        let urlBuild = '/';
         const parts = match.path.split('/');
-        let itemsLast = -1;
         const items = [];
+
+        let urlBuild = '/';
+
+        let itemsLast = -1;
 
         parts.forEach((item, k) => {
             const cleanItem = item.replace(/[:?]/g, '');

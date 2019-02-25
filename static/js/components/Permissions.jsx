@@ -10,7 +10,9 @@ import { ACCESS_TYPES } from '../constants';
 export default class Permissions extends React.Component {
     constructor(props) {
         super(props);
+
         let role = '';
+
         let selectedPermissions = [];
 
         props.roles.assigned.forEach(item => {
@@ -30,29 +32,32 @@ export default class Permissions extends React.Component {
 
     render() {
         return <div className="permissions-container">
-            <h3>{this.role.name}</h3>
+            <h3>{ this.role.name }</h3>
             <div className="permissions right">
                 <ul>
-                    {Object.values(this.props.roles.permissions).map((item, i) => {
+                    { Object.values(this.props.roles.permissions).map((item, i) => {
                         const hasStuff = typeof this.state.selectedPermissions[item] !== 'undefined';
                         const allChecked = hasStuff && this.state.selectedPermissions[item].length === 3;
 
                         return (
                             <li key={ i } className="endpoint">
                                 <div className="half name">
-                                    <Checkbox name={ item } label={ item.split('.')[2] } checked={ allChecked } onChange={ this.selectCheckBox }/>
+                                    <Checkbox name={ item } label={ item.split('.')[2] } checked={ allChecked }
+                                        onChange={ this.selectCheckBox }/>
                                 </div>
                                 <div className="half">
                                     <ul className="grant">
                                         { Permissions.methods.map((obj, g) => <li className={ obj.className } key={ g }>
-                                            <Checkbox name={ item } id={ obj.name } label={ obj.nombre } checked={ allChecked || hasStuff &&
-                                            this.state.selectedPermissions[item].includes(obj.name) } onChange={ this.selectCheckBox }/>
+                                            <Checkbox name={ item } id={ obj.name } label={ obj.nombre }
+                                                checked={ allChecked || hasStuff &&
+                                                this.state.selectedPermissions[item].includes(obj.name) }
+                                                onChange={ this.selectCheckBox }/>
                                         </li>) }
                                     </ul>
                                 </div>
                             </li>
                         );
-                    })}
+                    }) }
                 </ul>
             </div>
         </div>;
@@ -62,13 +67,14 @@ export default class Permissions extends React.Component {
         return [
             { name: ACCESS_TYPES.READ, nombre: 'Leer', className: 'chart down' },
             { name: ACCESS_TYPES.WRITE, nombre: 'Escribir', className: 'chart line' },
-            { name: ACCESS_TYPES.DELETE, nombre: 'Borrar', className: 'chart up' }
+            { name: ACCESS_TYPES.DELETE, nombre: 'Borrar', className: 'chart up' },
         ];
     }
 
     selectCheckBox(checkbox) {
         const type = checkbox.id || '*';
         const { checked, name } = checkbox;
+
         let newState = {};
 
         if (typeof this.state.selectedPermissions[name] === 'undefined') {
@@ -114,6 +120,6 @@ export default class Permissions extends React.Component {
     static propTypes = {
         onUpdate: PropTypes.func,
         roles: PropTypes.object,
-        id: PropTypes.number
+        id: PropTypes.number,
     };
 }
