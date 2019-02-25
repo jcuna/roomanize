@@ -100,7 +100,7 @@ export default class Room extends Component {
                         <td>{ item.description }</td>
                         <td>
                             { canEdit &&
-                            <Link to={ `${ENDPOINTS.ROOMS_URL}/${item.id}` } onClick={ this.selectRoom }>
+                            <Link to={ `${ENDPOINTS.ROOMS_URL}/editar/${item.id}` } onClick={ this.selectRoom }>
                                 <i className='fa fa-edit' data-id={ item.id }/>
                             </Link> ||
                             <i className='fas fa-ban'/> }

@@ -10,7 +10,7 @@ export default class Breadcrumbs extends React.Component {
     render() {
         const { title, match } = this.props;
 
-        const parts = match.path.split('/');
+        const parts = match.url.split('/');
         const items = [];
 
         let urlBuild = '/';
@@ -18,13 +18,19 @@ export default class Breadcrumbs extends React.Component {
         let itemsLast = -1;
 
         parts.forEach((item, k) => {
-            const cleanItem = item.replace(/[:?]/g, '');
+            let isParam = false;
 
-            if (item !== '' && !(cleanItem in match.params)) {
+            Object.values(match.params).forEach(param => {
+                if (param === item) {
+                    isParam = true;
+                }
+            });
+
+            if (item !== '' && !isParam) {
                 urlBuild += item;
                 itemsLast++;
                 items.push({ name: item.charAt(0).toUpperCase() + item.slice(1), link: urlBuild, key: k });
-            } else if (cleanItem in match.params && typeof match.params[cleanItem] !== 'undefined') {
+            } else {
                 itemsLast++;
             }
         });

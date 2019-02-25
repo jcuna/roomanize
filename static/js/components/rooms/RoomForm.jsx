@@ -10,6 +10,7 @@ import { createRoom } from '../../actions/roomActions';
 import { notifications } from '../../actions/appActions';
 import { ALERTS, ENDPOINTS } from '../../constants';
 import Breadcrumbs from '../../utils/Breadcrumbs';
+import { Redirect } from 'react-router-dom';
 
 export default class RoomForm extends Component {
     constructor(props) {
@@ -33,6 +34,10 @@ export default class RoomForm extends Component {
     }
 
     render() {
+        if (typeof this.props.match.params.room_id !== 'undefined' && this.state.id === 0) {
+            return <Redirect to={ ENDPOINTS.ROOMS_URL }/>;
+        }
+
         const creating = typeof this.props.rooms.selectedRoom.id === 'undefined';
 
         return <section>

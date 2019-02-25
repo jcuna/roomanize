@@ -25,21 +25,21 @@ export default class Routes extends React.Component {
         return (
             <Switch>
                 <Route
-                    exact path={ ep.ROOMS_URL }
-                    render={ (props) => this.getMiddleware(RequiresProject, Room, ep.ROOMS_URL, props) }
-                />
-                <Route
-                    exact path={ `${ ep.ROOMS_URL }/:page` }
+                    exact path={ `${ ep.ROOMS_URL }/:action(nuevo|editar)/:room_id([0-9]+)?` }
                     render={ (props) => this.getMiddleware(
                         RequiresProject, RoomForm, ep.ROOMS_URL, props, ACCESS_TYPES.WRITE,
                     ) }
+                />
+                <Route
+                    exact path={ `${ep.ROOMS_URL}/:page_id([0-9]+)?` }
+                    render={ (props) => this.getMiddleware(RequiresProject, Room, ep.ROOMS_URL, props) }
                 />
                 <Route exact path='/' render={ (props) => this.getComponent(Home, props, true) }/>
                 <Route exact path={ ep.ACCOUNT_LOGOUT } render={ props => this.getComponent(Logout, props, true) }/>
                 <Route exact path={ ep.ROLES_URL } render={ props => this.getComponent(Roles, props) }/>
                 <Route exact path={ ep.USERS_MANAGER_URL } render={ props => this.getComponent(Users, props) }/>
                 <Route exact path={ ep.AGREEMENTS_URL } render={ () => (<h1>contratos</h1>) }/>
-                <Route exact path={ `${ ep.PROJECTS_URL }/:project_id?` } render={ props => this.getComponent(
+                <Route exact path={ `${ ep.PROJECTS_URL }/:project_id([0-9]+)?` } render={ props => this.getComponent(
                     Project, props, false, ep.PROJECTS_URL,
                 ) }/>
                 <Route exact path={ ep.ACCOUNT_PROFILE } render={ props => this.getComponent(Account, props, true) }/>
