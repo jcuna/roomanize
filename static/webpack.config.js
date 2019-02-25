@@ -6,18 +6,19 @@ const path = require('path');
 module.exports = env => {
     return {
         entry: [
-            'webpack/hot/dev-server',
+            'react-hot-loader/patch',
+            // 'webpack/hot/dev-server',
+            '@babel/polyfill',
             path.resolve(__dirname, 'js/index.jsx')
         ],
         output: {
             path: path.resolve(__dirname, '/dist'),
             filename: 'bundle.js',
-            publicPath: '/dist/'
+            publicPath: '/dist'
         },
         resolve: {
             extensions: ['.js', '.jsx', '.css']
         },
-
         module: {
             rules: [
                 {
@@ -27,11 +28,6 @@ module.exports = env => {
                         'babel-loader',
                         'eslint-loader',
                     ]
-                },
-                {
-                    test: /\.js$/,
-                    exclude: /node_modules/,
-                    use: ['eslint-loader']
                 },
                 {
                     test: /\.scss$/,
@@ -48,12 +44,12 @@ module.exports = env => {
                 filename: "style.css",
                 chunkFilename: "[id].css"
             }),
-            new webpack.HotModuleReplacementPlugin(),
             new webpack.DefinePlugin({
                 'process.env': {
                     NODE_ENV: JSON.stringify(env.NODE_ENV)
                 }
             }),
+            new webpack.HotModuleReplacementPlugin(),
         ],
         devServer: {
             contentBase: path.resolve(__dirname),
