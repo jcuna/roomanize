@@ -1,4 +1,7 @@
 import json
+
+from sqlalchemy import UniqueConstraint
+
 from config import random_token
 from dal import db
 from sqlalchemy.orm import relationship
@@ -158,7 +161,7 @@ class Room(db.Model):
 
     id = db.Column(db.BigInteger, primary_key=True)
     project_id = db.Column(db.BigInteger, db.ForeignKey('projects.id'), index=True, nullable=False)
-    name = db.Column(db.String(30, collation=collation), unique=True)
+    name = db.Column(db.String(30, collation=collation))
     rent = db.Column(db.Integer, nullable=True)
     time_interval_id = db.Column(db.Integer, db.ForeignKey('time_intervals.id'), nullable=True)
     description = db.Column(db.Text(collation=collation))
@@ -166,6 +169,10 @@ class Room(db.Model):
 
     project = relationship(Project, back_populates='rooms')
     time_interval = relationship(TimeInterval)
+
+    __table_args__ = (
+        UniqueConstraint('project_id', 'name', name='project_id_name_uc'),
+    )
 
 
 class Tenant(db.Model):

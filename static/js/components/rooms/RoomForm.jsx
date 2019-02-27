@@ -6,7 +6,7 @@ import React, { Component } from 'react';
 import FormGenerator from '../../utils/FromGenerator';
 import { fetchTimeIntervals } from '../../actions/projectActions';
 import PropTypes from 'prop-types';
-import { createRoom } from '../../actions/roomActions';
+import { createRoom, fetchRooms, selectRoom } from '../../actions/roomActions';
 import { notifications } from '../../actions/appActions';
 import { ALERTS, ENDPOINTS } from '../../constants';
 import Breadcrumbs from '../../utils/Breadcrumbs';
@@ -99,22 +99,26 @@ export default class RoomForm extends Component {
     handleSubmit(event) {
         event.preventDefault();
 
-        this.props.dispatch(createRoom(
-            {
-                project_id: this.props.user.attributes.preferences.default_project,
-                name: this.refs.room_name.value,
-                rent: this.refs.rent.value,
-                time_interval_id: this.refs.interval.value,
-                description: this.refs.notes.value,
-                picture: '',
+        const room = {
+            project_id: this.props.user.attributes.preferences.default_project,
+            name: this.refs.room_name.value,
+            rent: this.refs.rent.value,
+            time_interval_id: this.refs.interval.value,
+            description: this.refs.notes.value,
+            picture: '',
+        };
 
-            },
+        this.props.dispatch(createRoom(
+            room,
             (resp) => {
                 this.props.dispatch(notifications({
                     type: ALERTS.SUCCESS,
                     message: 'Habitacion agregada correctamente.',
                 }));
-                this.props.history.push(`${ENDPOINTS.ROOMS_URL}/${resp.id}`);
+                room.id = resp.id;
+                this.props.dispatch(selectRoom(room));
+                this.setState(room);
+                this.props.dispatch(fetchRooms(this.props.rooms.data.page));
             },
             (error) => {
                 this.props.dispatch(notifications({
@@ -123,6 +127,13 @@ export default class RoomForm extends Component {
                 }));
             }),
         );
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (this.props.location.pathname === `${ENDPOINTS.ROOMS_URL}/nuevo` &&
+            prevState.id !== this.state.id) {
+            this.props.history.push(`${ENDPOINTS.ROOMS_URL}/editar/${this.props.rooms.selectedRoom.id}`);
+        }
     }
 
     validateFields({ target }) {
@@ -154,6 +165,7 @@ export default class RoomForm extends Component {
         user: PropTypes.object,
         history: PropTypes.object,
         match: PropTypes.object,
+        location: PropTypes.object,
         rooms: PropTypes.object,
     };
 }
