@@ -166,7 +166,7 @@ export default class Users extends React.Component {
             { user.list.users.length === 0 || user.list.searching &&
             <div style={ { position: 'absolute', left: '50%' } }><Spinner/></div> }
 
-            { user.list.total_pages > 1 &&
+            { user.list.total_pages > 1 && !this.state.searching &&
             <Paginate
                 total_pages={ user.list.total_pages }
                 onPageChange={ this.switchPage }

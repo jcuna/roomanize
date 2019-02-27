@@ -64,7 +64,7 @@ export default class Room extends Component {
                 </div>
                 }
                 { this.getList() }
-                { rooms.data.total_pages > 1 &&
+                { rooms.data.total_pages > 1 && !this.state.searching &&
                 <Paginate
                     total_pages={ rooms.data.total_pages }
                     onPageChange={ this.switchPage }

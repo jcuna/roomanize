@@ -1,6 +1,6 @@
 import api from '../utils/api';
 import { token } from '../utils/token';
-import { clearNotifications, hideOverlay, notifications } from './appActions';
+import { clearNotifications, hideOverlay, notifications, toggleMobileMenu } from './appActions';
 import ws from '../utils/ws';
 import { ALERTS } from '../constants';
 
@@ -42,6 +42,9 @@ export const login = (email, password) => {
 
         api(request).then(resp => {
             if (resp.status < 300) {
+                //the first time we load, we want to make sure we keep current preferences.
+                resp.data.user.attributes.preferences.showMobileMenu &&
+                dispatch(toggleMobileMenu(resp.data.user.attributes.preferences.showMobileMenu));
                 dispatch({
                     type: USER_LOGIN_SUCCESS,
                     payload: resp.data
