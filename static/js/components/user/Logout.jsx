@@ -15,7 +15,7 @@ export default class Logout extends React.Component {
 
         if (props.user.status === STATUS.PROCESSED) {
             props.dispatch(logout());
-            props.dispatch(toggleMobileMenu(true));
+            props.dispatch(toggleMobileMenu(false));
         } else {
             props.history.push('/');
         }

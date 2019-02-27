@@ -4,14 +4,15 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { createUser, deleteUser, editUser, fetchUsers } from '../../actions/userActions';
+import { createUser, deleteUser, editUser, fetchUsers, searchUsers, USERS_SEARCHING } from '../../actions/userActions';
 import Spinner from '../../utils/Spinner';
 import { hideOverlay, showOverlay } from '../../actions/appActions';
 import UserManager from './UserManager';
 import { fetchRoles } from '../../actions/roleActions';
 import { hasAccess } from '../../utils/config';
 import { ACCESS_TYPES, ENDPOINTS, STATUS } from '../../constants';
-import { searchArray } from '../../utils/helpder';
+import { afterPause, searchArray } from '../../utils/helpers';
+import Paginate from '../../utils/Paginate';
 
 export default class Users extends React.Component {
     constructor(props) {
@@ -28,7 +29,7 @@ export default class Users extends React.Component {
             newUser: {},
             orderDir: 'asc',
             orderBy: 'id',
-            page: 1,
+            page: props.match.params.page || 1,
             searching: false,
             found: []
         };
@@ -36,15 +37,37 @@ export default class Users extends React.Component {
             props.dispatch(fetchRoles());
         }
         if (props.user.list.status !== STATUS.TRANSMITTING && props.user.list.users.length === 0) {
-            props.dispatch(fetchUsers());
+            props.dispatch(fetchUsers(this.state.page));
+        } else {
+            this.state.page = props.user.list.page;
+            this.props.history.push(`${ENDPOINTS.USERS_MANAGER_URL}/${this.state.page}`);
         }
 
         this.search = this.search.bind(this);
+        this.switchPage = this.switchPage.bind(this);
     }
 
     search({ target }) {
         if (target.value !== '') {
             const found = searchArray(this.props.user.list.users, target.value, 'name', 'email');
+
+            if (found.length === 0) {
+                this.props.dispatch({ type: USERS_SEARCHING });
+                afterPause(() => {
+                    this.props.dispatch(searchUsers(target.value,
+                        (data) => {
+                            this.setState({
+                                found: data.list,
+                                searching: true
+                            });
+                        },
+                        (err) => {
+                            //TODO: handle err
+                            console.warn(err);
+                        })
+                    );
+                });
+            }
 
             this.setState({
                 found,
@@ -140,9 +163,25 @@ export default class Users extends React.Component {
                     })}
                 </tbody>
             </table>
-            { user.list.users.length === 0 &&
+            { user.list.users.length === 0 || user.list.searching &&
             <div style={ { position: 'absolute', left: '50%' } }><Spinner/></div> }
+
+            { user.list.total_pages > 1 &&
+            <Paginate
+                total_pages={ user.list.total_pages }
+                onPageChange={ this.switchPage }
+                initialPage={ this.state.page }
+            />
+            }
+
         </div>;
+    }
+
+    switchPage(number) {
+        this.props.history.push(`${ENDPOINTS.USERS_MANAGER_URL}/${number}`);
+        this.setState({
+            page: number
+        });
     }
 
     openUserManager(user) {
@@ -206,12 +245,15 @@ export default class Users extends React.Component {
             orderDir = orderDir === 'asc' ? 'desc' : 'asc';
         }
         this.setState({ orderBy: column, orderDir });
-        this.props.dispatch(fetchUsers(column, orderDir));
+        this.props.dispatch(fetchUsers(this.state.page, column, orderDir));
     }
 
-    componentDidUpdate() {
-        if (this.props.user.list.status !== STATUS.TRANSMITTING && this.props.user.list.users.length === 0) {
-            this.props.dispatch(fetchUsers());
+    componentDidUpdate(prevProps, prevState) {
+        const { dispatch, user } = this.props;
+
+        if (user.list.status !== STATUS.TRANSMITTING && user.list.users.length === 0 ||
+        prevState.page !== this.state.page) {
+            dispatch(fetchUsers(this.state.page));
         }
     }
 
@@ -219,5 +261,7 @@ export default class Users extends React.Component {
         dispatch: PropTypes.func,
         roles: PropTypes.object,
         user: PropTypes.object,
+        match: PropTypes.object,
+        history: PropTypes.object,
     }
 }

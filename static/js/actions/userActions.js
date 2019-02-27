@@ -15,6 +15,8 @@ export const USER_LOGGING_OUT = 'USER_LOGGING_OUT';
 export const USER_LOGGED_OUT = 'USER_LOGGED_OUT';
 export const USERS_FETCHING = 'USERS_FETCHING';
 export const USERS_FETCHED = 'USERS_FETCHED';
+export const USERS_SEARCHING = 'USERS_SEARCHING';
+export const USERS_SEARCHED = 'USERS_SEARCHED';
 export const USERS_FETCH_FAIL = 'USERS_FETCH_FAIL';
 export const USER_CREATING = 'USER_CREATING';
 export const USER_CREATED = 'USER_CREATED';
@@ -74,11 +76,12 @@ export const login = (email, password) => {
     };
 };
 
-export const fetchUser = () => {
+export const fetchUser = (success) => {
     return (dispatch) => {
         dispatch({ type: USER_FETCHING });
         api({ url: '/user' }).then(resp => {
             if (resp.status < 300) {
+                success && success(resp.data);
                 dispatch({
                     type: USER_FETCHED,
                     payload: resp.data
@@ -121,13 +124,13 @@ export const logout = () => {
     };
 };
 
-export const fetchUsers = (orderBy = 'id', orderDir = 'asc', page = 1, limit = 50) => {
+export const fetchUsers = (page = 1, orderBy = 'id', orderDir = 'asc') => {
     return (dispatch) => {
         dispatch({ type: USERS_FETCHING });
 
         token.through().then(header => {
             api({
-                url: `/users?limit=${limit}&page=${page}&orderBy=${orderBy}&orderDir=${orderDir}`,
+                url: `/users?page=${page}&orderBy=${orderBy}&orderDir=${orderDir}`,
                 method: 'GET',
                 headers: header
             }).then((resp) => {
@@ -237,3 +240,36 @@ export const updatePassword = (passwordObj, success, failed) =>
         url: '/account/activate-pass',
         method: 'POST'
     }, passwordObj).then(success, failed);
+
+export const searchUsers = (q, resolve, reject) =>
+    (dispatch) => {
+        dispatch({ type: USERS_SEARCHING });
+        token.through().then(header => api({
+            url: `users?query=${q}`,
+            method: 'GET',
+            headers: header,
+        }).then(resp => {
+            if (resp.status < 300) {
+                resolve(resp.data);
+                dispatch({ type: USERS_SEARCHED });
+            } else {
+                dispatch({ type: USERS_SEARCHED });
+                reject(resp);
+            }
+        }, reject), reject);
+    };
+
+/**
+ * No need to dispatch anything since web socket listeners have been activated
+ *
+ * @param {object} data
+ * @param {function=} success
+ * @param {function=} failed
+ * @returns {function(): Promise<any | never>}
+ */
+export const updateMyUser = (data, success, failed) =>
+    () => token.through().then(header => api({
+        url: '/user',
+        method: 'PUT',
+        headers: header,
+    }, data).then(success, failed), failed);

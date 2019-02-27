@@ -16,7 +16,7 @@ import {
     USERS_FETCHING,
     USER_DELETE_SUCCESS,
     USER_UPDATE_SUCCESS,
-    USER_TOKEN_CLEAR, USER_TOKEN_FETCHED,
+    USER_TOKEN_CLEAR, USER_TOKEN_FETCHED, USERS_SEARCHING, USERS_SEARCHED,
 } from '../actions/userActions';
 import { STATUS } from '../constants';
 
@@ -26,7 +26,10 @@ const initialData = {
         roles: [],
         list: {
             status: STATUS.PENDING,
+            page: 1,
             users: [],
+            total_pages: 1,
+            searching: false,
         },
         pic: null,
         // a user token used to validate or verify a multi factor request
@@ -94,14 +97,20 @@ export default function userReducer(state = initialData, action) {
             return { ...state, ...initialData, user: { ...initialData.user, status: STATUS.DECOMMISSIONED }};
 
         case USERS_FETCHING:
-            return { ...state, user: { ...state.user, list: { status: STATUS.TRANSMITTING, users: [] }}};
+            return { ...state, user: { ...state.user, list: { ...state.user.list, status: STATUS.TRANSMITTING }}};
         case USERS_FETCHED:
-            return { ...state, user: { ...state.user, list: { status: STATUS.COMPLETE, users: action.payload }}};
+            return { ...state, user: { ...state.user, list: {
+                ...state.user.list,
+                status: STATUS.COMPLETE,
+                users: action.payload.list,
+                page: action.payload.page,
+                total_pages: action.payload.total_pages,
+            }}};
 
         case USER_CREATED:
         case USER_DELETE_SUCCESS:
         case USER_UPDATE_SUCCESS:
-            return { ...state, user: { ...state.user, list: { status: STATUS.PENDING, users: [] }}};
+            return { ...state, user: { ...state.user, list: { ...state.user.list, status: STATUS.PENDING }}};
 
         case USER_TOKEN_CLEAR:
             return { ...state, user: { ...state.user, userToken: {
@@ -115,6 +124,10 @@ export default function userReducer(state = initialData, action) {
                 isValid: action.payload.isValid
             }}};
 
+        case USERS_SEARCHING:
+            return { ...state, user: { ...state.user, list: { ...state.user.list, searching: true }}};
+        case USERS_SEARCHED:
+            return { ...state, user: { ...state.user, list: { ...state.user.list, searching: false }}};
         default:
             return state;
     }

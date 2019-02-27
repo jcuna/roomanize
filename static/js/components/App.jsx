@@ -12,7 +12,7 @@ import '../../css/overrides.scss';
 import { token } from '../utils/token';
 import Spinner from '../utils/Spinner';
 import { fetchPermissions } from '../actions/roleActions';
-import { clickedContent, notifications } from '../actions/appActions';
+import { clickedContent, notifications, toggleMobileMenu } from '../actions/appActions';
 import { setStateData } from '../utils/config';
 import PropTypes from 'prop-types';
 import { ALERTS, STATUS } from '../constants';
@@ -25,7 +25,11 @@ class App extends React.Component {
         const { dispatch, user, projects } = this.props;
 
         if (user.status === STATUS.PENDING) {
-            dispatch(fetchUser());
+            dispatch(fetchUser(data => {
+                //the first time we load, we want to make sure we keep current preferences.
+                data.user.attributes.preferences.showMobileMenu &&
+                this.props.dispatch(toggleMobileMenu(data.user.attributes.preferences.showMobileMenu));
+            }));
         }
         if (this.permissionsPending()) {
             dispatch(fetchPermissions());

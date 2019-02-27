@@ -4,13 +4,14 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { fetchRooms, selectRoom } from '../../actions/roomActions';
+import { fetchRooms, ROOMS_SEARCHING, searchRooms, selectRoom } from '../../actions/roomActions';
 import { notifications } from '../../actions/appActions';
 import { ACCESS_TYPES, ALERTS, ENDPOINTS, STATUS } from '../../constants';
 import { hasAccess } from '../../utils/config';
 import Spinner from '../../utils/Spinner';
 import Link from 'react-router-dom/es/Link';
-import { searchArray } from '../../utils/helpder';
+import { afterPause, searchArray } from '../../utils/helpers';
+import Paginate from '../../utils/Paginate';
 
 export default class Room extends Component {
     constructor(props) {
@@ -19,26 +20,36 @@ export default class Room extends Component {
         this.state = {
             found: [],
             searching: false,
-            page: 1
+            page: props.match.params.page || 1,
         };
 
-        if (this.props.rooms.status === STATUS.PENDING) {
-            this.props.dispatch(fetchRooms(this.state.page, () => {
-                this.props.dispatch(notifications({
-                    type: ALERTS.DANGER, message: 'No se pudo obtener lista de habitaciones.'
-                }));
-            }));
+        if (props.rooms.status === STATUS.PENDING) {
+            this.paginateRooms();
+        } else {
+            this.state.page = props.rooms.data.page;
+            this.props.history.push(`${ENDPOINTS.ROOMS_URL}/${this.state.page}`);
         }
 
-        this.props.dispatch(selectRoom({}));
+        props.dispatch(selectRoom({}));
         this.selectRoom = this.selectRoom.bind(this);
         this.search = this.search.bind(this);
+        this.switchPage = this.switchPage.bind(this);
+    }
+
+    paginateRooms() {
+        this.props.dispatch(fetchRooms(this.state.page, () => {
+            this.props.dispatch(notifications({
+                type: ALERTS.DANGER, message: 'No se pudo obtener lista de habitaciones.'
+            }));
+        }));
     }
 
     render() {
+        const { history, rooms } = this.props;
+
         return (
             <section>
-                { hasAccess(this.props.history.location.pathname, ACCESS_TYPES.WRITE) &&
+                { hasAccess(history.location.pathname, ACCESS_TYPES.WRITE) &&
                 <div className='table-actions'>
                     <input
                         placeholder='Buscar'
@@ -46,20 +57,58 @@ export default class Room extends Component {
                         className='form-control'
                     />
                     <button
-                        onClick={ () => this.props.history.push(`${ENDPOINTS.ROOMS_URL}/nuevo`) }
+                        onClick={ () => history.push(`${ENDPOINTS.ROOMS_URL}/nuevo`) }
                         className='btn btn-success'>
                         Nueva Habitación
                     </button>
                 </div>
                 }
                 { this.getList() }
+                { rooms.data.total_pages > 1 &&
+                <Paginate
+                    total_pages={ rooms.data.total_pages }
+                    onPageChange={ this.switchPage }
+                    initialPage={ this.state.page }
+                />
+                }
             </section>
         );
+    }
+
+    switchPage(number) {
+        this.props.history.push(`${ENDPOINTS.ROOMS_URL}/${number}`);
+        this.setState({
+            page: number
+        });
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (prevState.page !== this.state.page) {
+            this.paginateRooms();
+        }
     }
 
     search({ target }) {
         if (target.value !== '') {
             const found = searchArray(this.props.rooms.data.list, target.value, 'name');
+
+            if (found.length === 0) {
+                this.props.dispatch({ type: ROOMS_SEARCHING });
+                afterPause(() => {
+                    this.props.dispatch(searchRooms(target.value,
+                        (data) => {
+                            this.setState({
+                                found: data.list,
+                                searching: true
+                            });
+                        },
+                        (err) => {
+                            //TODO: handle err
+                            console.warn(err);
+                        })
+                    );
+                });
+            }
 
             this.setState({
                 found,
@@ -74,7 +123,7 @@ export default class Room extends Component {
     }
 
     getList() {
-        if (this.props.rooms.status === STATUS.PENDING) {
+        if (this.props.rooms.status === STATUS.PENDING || this.props.rooms.searchingBackEnd) {
             return <Spinner/>;
         }
         const canEdit = hasAccess(ENDPOINTS.ROOMS_URL, ACCESS_TYPES.WRITE);
@@ -126,5 +175,6 @@ export default class Room extends Component {
         user: PropTypes.object,
         history: PropTypes.object,
         rooms: PropTypes.object,
+        match: PropTypes.object,
     };
 }

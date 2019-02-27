@@ -1,7 +1,7 @@
 @import "vars";
 .mobile-menu {
   margin-right: -20%;
-  position: absolute;
+  position: fixed;
   background: $blue;
   height: 100%;
   width: 20%;

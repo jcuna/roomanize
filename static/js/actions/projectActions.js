@@ -1,8 +1,8 @@
 import api from '../utils/api';
 import { token } from '../utils/token';
 
-export const PROJECT_SELECTING = 'PROJECT_SELECTING';
-export const PROJECT_SELECTED = 'PROJECT_SELECTED';
+export const PROJECT_UPDATING = 'PROJECT_SELECTING';
+export const PROJECT_UPDATED = 'PROJECT_SELECTED';
 export const PROJECT_CREATING = 'PROJECT_CREATING';
 export const PROJECT_CREATED = 'PROJECT_CREATED';
 export const PROJECTS_FETCHING = 'PROJECTS_FETCHING';
@@ -46,7 +46,7 @@ export const createProject = (data, success) =>
 
 export const updateProject = (data, success) =>
     (dispatch) => {
-        dispatch({ type: PROJECT_SELECTING });
+        dispatch({ type: PROJECT_UPDATING });
         token.through().then(header =>
             api({
                 url: `/projects/${data.id}`,
@@ -54,7 +54,7 @@ export const updateProject = (data, success) =>
                 headers: header
             }, data).then((resp) => {
                 success();
-                dispatch({ type: PROJECT_SELECTED, payload: { id: resp.id }});
+                dispatch({ type: PROJECT_UPDATED, payload: { id: resp.id }});
             })
         );
     };

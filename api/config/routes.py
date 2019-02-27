@@ -11,7 +11,7 @@ def register():
         'users.Roles@roles_url': '/roles|/roles/',
         'users.Permissions@permissions_url': '/permissions|/permissions/',
         'projects.Projects@projects_url': '/projects|/projects/|/projects/<int:project_id>',
-        'projects.Rooms@rooms_url': '/rooms|/rooms/|/rooms/<int:page_id>',
+        'projects.Rooms@rooms_url': '/rooms|/rooms/',
         'projects.TimeIntervals@time_intervals_url': '/time-intervals|/time-intervals/',
         'agreements.Agreements@agreements_url': '/agreements|/agreements/|/agreements/<int:agreement_id>',
         'tenants.Tenants@tenants_url': '/tenants|/tenants/|/tenants/<int:tenants_id>',

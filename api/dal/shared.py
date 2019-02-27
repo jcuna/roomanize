@@ -1,9 +1,18 @@
-from flask_sqlalchemy import SQLAlchemy
+from math import ceil
+from flask_sqlalchemy import SQLAlchemy, BaseQuery
 from sqlalchemy.orm import joinedload
 from functools import wraps
 import jwt
 
 db = SQLAlchemy()
+
+
+def row2dict(row):
+    d = {}
+    for column in row.__table__.columns:
+        d[column.name] = getattr(row, column.name)
+
+    return d
 
 
 def get_fillable(model: db.Model, **kwargs):
@@ -83,3 +92,33 @@ def access_map():
         'POST': 'write',
         'DELETE': 'delete'
     }
+
+
+class Paginator:
+
+    per_page = 20
+    total = 0
+    offset = 0
+    total_pages = 0
+    query = None
+    page = 1
+
+    def __init__(self, query: BaseQuery, page: int = 1, order_by: str = None, order_dir: str = None):
+
+        self.total = query.count()
+        self.offset = (page * self.per_page) - self.per_page
+        self.total_pages = ceil(self.total/self.per_page)
+        self.query = query
+        self.page = page
+
+        if order_by:
+            order_by = getattr(self.query.column_descriptions[0]['type'], order_by)
+            order_dir = getattr(order_by, order_dir) if order_dir else 'ASC'
+            self.query = self.query.order_by(order_dir())
+
+    def get_items(self) -> list:
+        items = self.get_result()
+        return list(map(lambda row: row2dict(row), items))
+
+    def get_result(self):
+        return self.query.offset(self.offset).limit(self.per_page)

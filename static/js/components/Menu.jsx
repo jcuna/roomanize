@@ -9,6 +9,7 @@ import '../../css/menu.scss';
 import { clearNotifications, toggleMobileMenu } from '../actions/appActions';
 import { hasAccess, menuItems } from '../utils/config';
 import { ACCESS_TYPES } from '../constants';
+import { updateMyUser } from '../actions/userActions';
 
 export default class Menu extends React.Component {
     constructor(props) {
@@ -77,7 +78,12 @@ export default class Menu extends React.Component {
     }
 
     toggleMenu() {
-        this.props.dispatch(toggleMobileMenu(this.props.showMobileMenu));
+        this.props.dispatch(toggleMobileMenu(!this.props.showMobileMenu));
+        this.props.dispatch(updateMyUser({
+            attributes: {
+                preferences: { showMobileMenu: !this.props.showMobileMenu }
+            }
+        }));
     }
 
     static propTypes = {

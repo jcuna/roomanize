@@ -3,8 +3,8 @@ import sqlalchemy
 from datetime import datetime
 from flask import request, session
 from flask_restful import Resource
-from dal.models import Project, TimeInterval, row2dict, User, Room
-from dal.shared import token_required, access_required, db, get_fillable
+from dal.models import Project, TimeInterval, User, Room
+from dal.shared import token_required, access_required, db, get_fillable, row2dict, Paginator
 
 
 class Projects(Resource):
@@ -96,15 +96,29 @@ class Rooms(Resource):
 
     @token_required
     @access_required
-    def get(self, page_id):
+    def get(self):
+
         result = []
-        rooms = Room.query.filter_by(project_id=request.user.attributes.preferences['default_project']).all()
+        project_id = request.user.attributes.preferences['default_project']
+
+        page = request.args.get('page') if 'page' in request.args else 1
+        total_pages = 1
+
+        if 'query' in request.args:
+            q = request.args['query']
+            rooms = Room.query.filter((Room.name.like('%' + q + '%'))).filter_by(project_id=project_id).all()
+
+        else:
+            sql_query = Room.query.filter_by(project_id=project_id)
+            paginator = Paginator(sql_query, int(page), request.args.get('orderBy'), request.args.get('orderDir'))
+            total_pages = paginator.total_pages
+            rooms = paginator.get_result()
 
         if rooms:
             for room in rooms:
                 result.append(row2dict(room))
 
-        return {'list': result, 'page_id': page_id}
+        return {'list': result, 'page': page, 'total_pages': total_pages}
 
     @token_required
     @access_required

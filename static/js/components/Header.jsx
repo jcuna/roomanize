@@ -9,7 +9,7 @@ import '../../css/header.scss';
 import { toggleMobileMenu } from '../actions/appActions';
 import { ENDPOINTS, STATUS } from '../constants';
 import { listenRoleChanges } from '../actions/roleActions';
-import { listenUserChanges } from '../actions/userActions';
+import { listenUserChanges, updateMyUser } from '../actions/userActions';
 
 class Header extends React.Component {
     constructor(props) {
@@ -111,7 +111,12 @@ class Header extends React.Component {
     }
 
     toggleMenu() {
-        this.props.dispatch(toggleMobileMenu(this.props.showMobileMenu));
+        this.props.dispatch(toggleMobileMenu(!this.props.showMobileMenu));
+        this.props.dispatch(updateMyUser({
+            attributes: {
+                preferences: { showMobileMenu: !this.props.showMobileMenu }
+            }
+        }));
     }
 
     userMenu() {

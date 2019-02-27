@@ -8,11 +8,11 @@ export const OVERLAY_HIDE = 'OVERLAY_HIDE';
 export const CLICKED_CONTENT = 'CLICKED_CONTENT';
 export const ONLINE_STATUS = 'ONLINE_STATUS';
 
-export const toggleMobileMenu = (currentValue) => {
+export const toggleMobileMenu = (updatedValue) => {
     return function (dispatch) {
         return dispatch({
             type: TOGGLE_MOBILE_MENU,
-            payload: !currentValue,
+            payload: updatedValue,
         });
     };
 };

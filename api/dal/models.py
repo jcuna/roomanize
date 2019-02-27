@@ -17,15 +17,6 @@ admin_access = {
 admin_preferences = {
 }
 
-
-def row2dict(row):
-    d = {}
-    for column in row.__table__.columns:
-        d[column.name] = getattr(row, column.name)
-
-    return d
-
-
 user_roles = db.Table('user_roles',
                       db.Column('id', db.BigInteger, primary_key=True),
                       db.Column('user_id', db.BigInteger, db.ForeignKey('users.id'), index=True),

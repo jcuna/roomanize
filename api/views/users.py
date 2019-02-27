@@ -7,12 +7,13 @@ from flask import session, json, current_app, render_template, url_for
 from sqlalchemy.orm import joinedload
 from core.middleware import HttpException
 from core.router import permissions
-from dal.shared import get_fillable, token_required, access_required
+from dal.shared import get_fillable, token_required, access_required, Paginator
 from dal.models import User, db, Role, UserToken, UserAttributes
 from flask_mail import Message
 
 
 class Users(Resource):
+
     def get(self):
 
         if 'logged_in' in session:
@@ -22,19 +23,53 @@ class Users(Resource):
 
         return {'message': 'no session'}, 403
 
+    @token_required
+    def put(self):
+        user = request.user
+        raw_data = request.get_json()
+
+        if 'first_name' in raw_data:
+            user.first_name = raw_data['first_name']
+
+        if 'last_name' in raw_data:
+            user.last_name = raw_data['last_name']
+
+        access = user.attributes.access
+        preferences = user.attributes.preferences
+
+        if raw_data['attributes']:
+            if 'access' in raw_data['attributes']:
+                user.attributes.user_access = json.dumps({**access, **raw_data['attributes']['access']})
+
+            if 'preferences' in raw_data['attributes']:
+                user.attributes.user_preferences = json.dumps({**preferences, **raw_data['attributes']['preferences']})
+
+        db.session.commit()
+        emit('USER_WS_CHANGED', {'data': user.id}, namespace='/' + str(user.id), broadcast=True)
+        return {'message': 'success'}
+
 
 class UsersManager(Resource):
+
     @token_required
     @access_required
     def get(self):
 
-        limit = request.args.get('limit')
-        order_by = getattr(User, request.args.get('orderBy'))
-        order_dir = getattr(order_by, request.args.get('orderDir'))
+        page = request.args.get('page') if 'page' in request.args else 1
+        total_pages = 1
+        q = request.args.get('query')
+        if q:
+            users = User.query.filter(
+                (User.first_name.like('%' + q + '%')) |
+                (User.last_name.like('%' + q + '%')) |
+                (User.email.like('%' + q + '%'))
+            ).all()
+        else:
+            paginator = Paginator(User.query, int(page), request.args.get('orderBy'), request.args.get('orderDir'))
+            total_pages = paginator.total_pages
+            users = paginator.get_result()
 
-        users = User.query.order_by(order_dir()).limit(limit)
-
-        return list(map(lambda user: {
+        user_list = list(map(lambda user: {
             'first_name': user.first_name,
             'last_name': user.last_name,
             'name': user.first_name + ' ' + user.last_name,
@@ -46,6 +81,12 @@ class UsersManager(Resource):
                 'id': r.id
             }, user.roles))
         }, users))
+
+        return {
+            'page': page,
+            'total_pages': total_pages,
+            'list': user_list
+        }
 
     @token_required
     @access_required

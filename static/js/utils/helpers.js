@@ -10,3 +10,16 @@ export const searchArray = (array, value, key1, key2) => {
     });
     return result;
 };
+
+let timeout = 0;
+
+export const afterPause = (resolve) => {
+    if (timeout) {
+        clearTimeout(timeout);
+    }
+
+    timeout = setTimeout(() => {
+        resolve();
+        timeout = 0;
+    }, 1000);
+};
