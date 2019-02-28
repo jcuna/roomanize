@@ -134,7 +134,7 @@ class Rooms(Resource):
         try:
             db.session.commit()
         except sqlalchemy.exc.IntegrityError:
-            return {'message': 'Nombre ya ha sido utilizado'}, 400
+            return {'error': 'Nombre ya ha sido utilizado'}, 400
 
         return dict(id=room.id)
 

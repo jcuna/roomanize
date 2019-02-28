@@ -42,13 +42,13 @@ def token_required(f):
             token = request.headers['x-access-token']
 
         if not token:
-            return {'message': 'Token is missing!'}, 401
+            return {'error': 'Token is missing!'}, 401
 
         try:
             data = jwt.decode(token, current_app.config['SECRET_KEY'])
             current_user = User.query.options(joinedload('roles')).filter_by(email=data['email']).first()
         except Exception:
-            return {'message': 'Token is invalid!'}, 401
+            return {'error': 'Token is invalid!'}, 401
 
         request.user = current_user
         return f(*args, **kwargs)
@@ -65,7 +65,7 @@ def access_required(f):
     def access_decorator(*args, **kwargs):
 
         if not request.user:
-            return {'message': 'Invalid user'}
+            return {'error': 'Invalid user'}, 401
 
         has_access = False
 
@@ -78,7 +78,7 @@ def access_required(f):
                             break
 
         if not has_access:
-            return {'message': 'Access denied'}, 403
+            return {'error': 'Access denied'}, 403
 
         return f(*args, **kwargs)
 

@@ -37,7 +37,7 @@ class Token {
                             reject(Error('No active session'));
                             this._data.dispatch({
                                 type: USER_MUST_LOGIN,
-                                payload: resp.message
+                                payload: resp.error
                             });
                         }
                     }, err => {

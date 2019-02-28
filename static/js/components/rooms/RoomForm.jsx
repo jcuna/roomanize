@@ -123,7 +123,7 @@ export default class RoomForm extends Component {
             (error) => {
                 this.props.dispatch(notifications({
                     type: ALERTS.DANGER,
-                    message: error.data.message,
+                    message: error.data.error,
                 }));
             }),
         );

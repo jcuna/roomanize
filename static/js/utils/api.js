@@ -3,6 +3,7 @@
  */
 
 import 'whatwg-fetch';
+import { API_PREFIX, API_VERSION } from '../constants';
 const fetchJsonp = require('fetch-jsonp');
 const urlEncode = require('query-string');
 
@@ -64,7 +65,6 @@ const jsonpFetch = function (url, data) {
  * @returns {Promise}
  */
 const api = (request, data, jsonp = false) => {
-    const URL_PREFIX = '/api/v1.0';
 
     let url = request.url;
     const crossDomain = url.indexOf('http') === 0;
@@ -73,7 +73,7 @@ const api = (request, data, jsonp = false) => {
     if (url.indexOf('/') !== 0 && !crossDomain) {
         url = '/' + url;
     }
-    url = URL_PREFIX + url;
+    url = API_PREFIX + API_VERSION + url;
 
     if (jsonp) {
         return jsonpFetch(url, data);

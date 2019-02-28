@@ -5,6 +5,7 @@ import sqlalchemy
 from flask_restful import Resource, request
 from flask import session, json, current_app, render_template, url_for
 from sqlalchemy.orm import joinedload
+from core import Cache
 from core.middleware import HttpException
 from core.router import permissions
 from dal.shared import get_fillable, token_required, access_required, Paginator
@@ -17,11 +18,27 @@ class Users(Resource):
     def get(self):
 
         if 'logged_in' in session:
-            user = User.query.filter_by(email=session['user_email']).first()
+            try:
+                user = User.query.filter_by(email=session['user_email']).first()
+            except Exception as ex:
+                if '1146' in ex.args[0]:
+                    return {'error': 'install'}, 501
+                else:
+                    raise ex
             if user:
                 return user_to_dict(user)
 
-        return {'message': 'no session'}, 403
+        else:
+            try:
+                # the second param is a function that would raise exception
+                # if table not exist we cache it to avoid multiple
+                # executions when a user is just logged out.
+                Cache.remember('users.count', User.query.count, 24*60*60)
+            except Exception as ex:
+                if '1146' in ex.args[0]:
+                    return {'error': 'install'}, 501
+
+        return {'error': 'no session'}, 403
 
     @token_required
     def put(self):
@@ -257,7 +274,7 @@ class Roles(Resource):
             Role.query.filter_by(id=role_id).delete()
             db.session.commit()
         except sqlalchemy.exc.IntegrityError as e:
-            return {'message': 'integrity constraint'}, 409
+            return {'error': 'integrity constraint'}, 409
 
         return {'message': 'success'}
 

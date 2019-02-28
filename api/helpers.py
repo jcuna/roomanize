@@ -17,7 +17,7 @@ def seed_time_intervals(db: SQLAlchemy):
     db.session.commit()
 
 
-def generate():
+def run_migration():
     with app.app_context():
 
         connection = db.engine.raw_connection()
@@ -26,3 +26,8 @@ def generate():
         db.create_all()
 
         seed_time_intervals(db)
+
+
+def clear_cache():
+    from app import cache
+    cache.clear()

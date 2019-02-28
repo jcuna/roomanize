@@ -41,3 +41,6 @@ export const INVALID_LANDING_PAGES = [
     ENDPOINTS.ACCOUNT_LOGOUT,
     ENDPOINTS.ACCOUNT_LOGOUT,
 ];
+
+export const API_PREFIX = '/api/';
+export const API_VERSION = 'v1.0';

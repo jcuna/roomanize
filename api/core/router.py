@@ -49,8 +49,8 @@ class Router:
                 if user_count > 0:
                     return redirect('/')
             except sqlalchemy.exc.ProgrammingError:
-                from migrate import generate
-                generate()
+                from helpers import run_migration
+                run_migration()
 
             if request.method == 'POST':
                 data = request.form

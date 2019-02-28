@@ -1,6 +1,6 @@
 import api from '../utils/api';
 import { token } from '../utils/token';
-import { clearNotifications, hideOverlay, notifications, toggleMobileMenu } from './appActions';
+import { clearNotifications, hideOverlay, needInstall, notifications, toggleMobileMenu } from './appActions';
 import ws from '../utils/ws';
 import { ALERTS } from '../constants';
 
@@ -54,7 +54,7 @@ export const login = (email, password) => {
                 dispatch({
                     type: USER_LOGIN_FAIL,
                     payload: {
-                        message: resp.message,
+                        message: resp.error,
                         email,
                         password
                     }
@@ -79,8 +79,20 @@ export const login = (email, password) => {
     };
 };
 
-export const fetchUser = (success) => {
-    return (dispatch) => {
+const unexpectedFetchUserError = (dispatch, err) => {
+    dispatch({
+        type: USER_LOGIN_ERROR,
+        payload: {
+            error: err,
+        }
+    });
+    dispatch(notifications([
+        { type: ALERTS.DANGER, message: 'Ha ocurrido un error inesperado.' }
+    ]));
+};
+
+export const fetchUser = (success) =>
+    (dispatch) => {
         dispatch({ type: USER_FETCHING });
         api({ url: '/user' }).then(resp => {
             if (resp.status < 300) {
@@ -89,25 +101,19 @@ export const fetchUser = (success) => {
                     type: USER_FETCHED,
                     payload: resp.data
                 });
-            } else {
+            } else if (resp.status < 500) {
                 dispatch({
                     type: USER_MUST_LOGIN,
-                    payload: resp.message
+                    payload: resp.error
                 });
-            }
-        }, err => {
-            dispatch({
-                type: USER_LOGIN_ERROR,
-                payload: {
-                    error: err,
+            } else {
+                unexpectedFetchUserError(dispatch, resp);
+                if (resp.status === 501) {
+                    dispatch(needInstall());
                 }
-            });
-            dispatch(notifications([
-                { type: ALERTS.DANGER, message: 'Ha ocurrido un error inesperado.' }
-            ]));
-        });
+            }
+        }, err => unexpectedFetchUserError(dispatch, err));
     };
-};
 
 /**
  *
@@ -122,7 +128,7 @@ export const logout = () => {
                 type: USER_LOGGED_OUT,
             });
         }, err => {
-            console.log(err);
+            console.warn(err);
         });
     };
 };
@@ -142,13 +148,13 @@ export const fetchUsers = (page = 1, orderBy = 'id', orderDir = 'asc') => {
                     payload: resp.data
                 });
             }, err => {
-                console.log(err);
+                console.warn(err);
                 dispatch({
                     type: USERS_FETCH_FAIL,
                 });
             });
         }, err => {
-            console.log(err);
+            console.warn(err);
             dispatch({
                 type: USERS_FETCH_FAIL,
             });

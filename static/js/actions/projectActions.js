@@ -1,8 +1,8 @@
 import api from '../utils/api';
 import { token } from '../utils/token';
 
-export const PROJECT_UPDATING = 'PROJECT_SELECTING';
-export const PROJECT_UPDATED = 'PROJECT_SELECTED';
+export const PROJECT_UPDATING = 'PROJECT_UPDATING';
+export const PROJECT_UPDATED = 'PROJECT_UPDATED';
 export const PROJECT_CREATING = 'PROJECT_CREATING';
 export const PROJECT_CREATED = 'PROJECT_CREATED';
 export const PROJECTS_FETCHING = 'PROJECTS_FETCHING';

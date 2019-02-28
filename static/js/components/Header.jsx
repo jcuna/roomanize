@@ -7,13 +7,18 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import '../../css/header.scss';
 import { toggleMobileMenu } from '../actions/appActions';
-import { ENDPOINTS, STATUS } from '../constants';
+import { API_PREFIX, ENDPOINTS, STATUS } from '../constants';
 import { listenRoleChanges } from '../actions/roleActions';
 import { listenUserChanges, updateMyUser } from '../actions/userActions';
 
 class Header extends React.Component {
     constructor(props) {
         super(props);
+
+        if (props.appState === 0) {
+            window.location.href = `${API_PREFIX}install`;
+        }
+
         this.toggleMenu = this.toggleMenu.bind(this);
         this.toggleUserMenu = this.toggleUserMenu.bind(this);
         this.state = {
@@ -174,7 +179,9 @@ class Header extends React.Component {
         initialClass: PropTypes.string,
         extraClass: PropTypes.string,
         clickedContent: PropTypes.bool,
-        projects: PropTypes.object
+        projects: PropTypes.object,
+        history: PropTypes.object,
+        appState: PropTypes.number,
     }
 }
 

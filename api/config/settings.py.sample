@@ -20,3 +20,10 @@ MAIL_ASCII_ATTACHMENTS = False
 
 # this is needed for both configs
 MAIL_DEFAULT_SENDER = 'bot@roomanize.com'
+
+# requires a caching config
+# config options @https://flask-caching.readthedocs.io/en/latest/
+CACHE_CONFIG = {
+    'CACHE_TYPE': 'simple',
+    'CACHE_KEY_PREFIX': 'local_dev',
+}

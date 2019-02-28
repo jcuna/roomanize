@@ -11,10 +11,11 @@ import {
     OVERLAY_SHOW,
     OVERLAY_HIDE,
     CLICKED_CONTENT,
-    ONLINE_STATUS,
+    ONLINE_STATUS, APP_NEED_INSTALL,
 } from '../actions/appActions';
 
 export default function appReducer(state = {
+    appState: 1,
     isOffline: false,
     showMobileMenu: false,
     notifications: [],
@@ -29,6 +30,8 @@ export default function appReducer(state = {
     },
 }, action) {
     switch (action.type) {
+        case APP_NEED_INSTALL:
+            return { ...state, appState: 0 };
         case TOGGLE_MOBILE_MENU:
             return { ...state, showMobileMenu: action.payload };
         case NOTIFICATIONS_SET:

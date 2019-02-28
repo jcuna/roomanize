@@ -211,3 +211,14 @@ class RentalAgreement(db.Model):
     tenant_history = relationship(TenantHistory)
     room = relationship(Room)
     interval = relationship(TimeInterval)
+
+
+class Contract(db.Model):
+    __tablename__ = 'contracts'
+    id = db.Column(db.BigInteger, primary_key=True)
+    title = db.Column(db.String(30, collation=collation), index=True, nullable=False)
+    text = db.Column(db.Text(collation=collation))
+    start_ttv = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime.utcnow())
+    end_ttv = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime(
+        9999, 12, 31, 23, 59, 59, 999999)
+    )

@@ -108,6 +108,7 @@ class App extends React.Component {
 const getInitialState = (state) => {
     return {
         isOffline: state.app.isOffline,
+        appState: state.app.appState,
         showMobileMenu: state.app.showMobileMenu,
         notifications: state.app.notifications,
         landingPage: state.app.landingPage,
