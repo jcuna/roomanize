@@ -1,8 +1,8 @@
 import api from '../utils/api';
 import { token } from '../utils/token';
-import { clearNotifications, hideOverlay, needInstall, notifications, toggleMobileMenu } from './appActions';
+import { clearNotifications, needInstall, notifications, toggleMobileMenu } from './appActions';
 import ws from '../utils/ws';
-import { ALERTS } from '../constants';
+import { ALERTS, GENERIC_ERROR } from '../constants';
 
 export const USER_LOGGING_IN = 'USER_LOGGING_IN';
 export const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS';
@@ -41,20 +41,20 @@ export const login = (email, password) => {
         };
 
         api(request).then(resp => {
-            if (resp.status < 300) {
-                //the first time we load, we want to make sure we keep current preferences.
-                resp.data.user.attributes.preferences.showMobileMenu &&
-                dispatch(toggleMobileMenu(resp.data.user.attributes.preferences.showMobileMenu));
-                dispatch({
-                    type: USER_LOGIN_SUCCESS,
-                    payload: resp.data
-                });
-                dispatch(clearNotifications());
-            } else {
+            //the first time we load, we want to make sure we keep current preferences.
+            resp.data.user.attributes.preferences.showMobileMenu &&
+            dispatch(toggleMobileMenu(resp.data.user.attributes.preferences.showMobileMenu));
+            dispatch({
+                type: USER_LOGIN_SUCCESS,
+                payload: resp.data
+            });
+            dispatch(clearNotifications());
+        }, err => {
+            if (err.status < 500) {
                 dispatch({
                     type: USER_LOGIN_FAIL,
                     payload: {
-                        message: resp.error,
+                        message: err.error,
                         email,
                         password
                     }
@@ -62,57 +62,56 @@ export const login = (email, password) => {
                 dispatch(notifications([
                     { type: ALERTS.DANGER, message: 'Nombre de usuario o contraseña no son válidos' }
                 ]));
+            } else {
+                dispatch({
+                    type: USER_LOGIN_ERROR,
+                    payload: {
+                        error: err,
+                        email,
+                        password,
+                    }
+                });
+                dispatch(notifications([
+                    { type: ALERTS.DANGER, message: GENERIC_ERROR }
+                ]));
             }
-        }, err => {
-            dispatch({
-                type: USER_LOGIN_ERROR,
-                payload: {
-                    error: err,
-                    email,
-                    password,
-                }
-            });
-            dispatch(notifications([
-                { type: ALERTS.DANGER, message: 'Ha ocurrido un error inesperado.' }
-            ]));
         });
     };
-};
-
-const unexpectedFetchUserError = (dispatch, err) => {
-    dispatch({
-        type: USER_LOGIN_ERROR,
-        payload: {
-            error: err,
-        }
-    });
-    dispatch(notifications([
-        { type: ALERTS.DANGER, message: 'Ha ocurrido un error inesperado.' }
-    ]));
 };
 
 export const fetchUser = (success) =>
     (dispatch) => {
         dispatch({ type: USER_FETCHING });
         api({ url: '/user' }).then(resp => {
-            if (resp.status < 300) {
-                success && success(resp.data);
-                dispatch({
-                    type: USER_FETCHED,
-                    payload: resp.data
-                });
-            } else if (resp.status < 500) {
+            success && success(resp.data);
+            dispatch({
+                type: USER_FETCHED,
+                payload: resp.data
+            });
+        }, err => {
+            if (err.status === 501) {
                 dispatch({
                     type: USER_MUST_LOGIN,
-                    payload: resp.error
+                    payload: err
+                });
+                dispatch(needInstall());
+            } else if (err.status < 500) {
+                dispatch({
+                    type: USER_MUST_LOGIN,
+                    payload: err
                 });
             } else {
-                unexpectedFetchUserError(dispatch, resp);
-                if (resp.status === 501) {
-                    dispatch(needInstall());
-                }
+                dispatch({
+                    type: USER_LOGIN_ERROR,
+                    payload: {
+                        error: err,
+                    }
+                });
+                dispatch(notifications([
+                    { type: ALERTS.DANGER, message: GENERIC_ERROR }
+                ]));
             }
-        }, err => unexpectedFetchUserError(dispatch, err));
+        });
     };
 
 /**
@@ -162,7 +161,7 @@ export const fetchUsers = (page = 1, orderBy = 'id', orderDir = 'asc') => {
     };
 };
 
-export const createUser = (user) => {
+export const createUser = (user, success, failed) => {
     user = { ...user, roles: user.roles.map(role => role.id) };
 
     return (dispatch) => {
@@ -173,21 +172,14 @@ export const createUser = (user) => {
                 method: 'POST',
                 headers: header,
             }, user).then(resp => {
+                success();
                 dispatch({
                     type: USER_CREATED,
                     payload: resp.data
                 });
-                dispatch(hideOverlay());
-                dispatch(notifications([
-                    { type: ALERTS.SUCCESS, message: 'Usuario creado satisfactoriamente' }
-                ]));
             }, err => {
-                console.log(err);
-                dispatch(hideOverlay());
+                failed(err);
                 dispatch({ type: USER_CREATE_FAIL });
-                dispatch(notifications([
-                    { type: ALERTS.DANGER, message: 'Hubo un error creando el usuario' }
-                ]));
             });
         });
     };
@@ -258,14 +250,12 @@ export const searchUsers = (q, resolve, reject) =>
             method: 'GET',
             headers: header,
         }).then(resp => {
-            if (resp.status < 300) {
-                resolve(resp.data);
-                dispatch({ type: USERS_SEARCHED });
-            } else {
-                dispatch({ type: USERS_SEARCHED });
-                reject(resp);
-            }
-        }, reject), reject);
+            resolve(resp.data);
+            dispatch({ type: USERS_SEARCHED });
+        }, (err) => {
+            reject(err);
+            dispatch({ type: USERS_SEARCHED });
+        }), reject);
     };
 
 /**

@@ -34,8 +34,13 @@ const normalFetch = (url, method, data, crossDomain, headers = {}) => {
 
             status = response.status;
             if (contentType && contentType.indexOf('application/json') !== -1) {
-                return response.json().then(resp =>
-                    resolve({ data: resp, status }), (error) => reject({ error, status, }));
+                return response.json().then(resp => {
+                    if (status < 300) {
+                        resolve({ data: resp, status });
+                    } else {
+                        reject({ resp, status, });
+                    }
+                }, (error) => reject({ error, status, }));
             }
             return reject('invalid contentType');
         }, (error) => reject(error));
@@ -65,7 +70,6 @@ const jsonpFetch = function (url, data) {
  * @returns {Promise}
  */
 const api = (request, data, jsonp = false) => {
-
     let url = request.url;
     const crossDomain = url.indexOf('http') === 0;
     const method = typeof request.method === 'undefined' ? 'GET' : request.method;

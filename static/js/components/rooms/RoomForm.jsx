@@ -6,9 +6,9 @@ import React, { Component } from 'react';
 import FormGenerator from '../../utils/FromGenerator';
 import { fetchTimeIntervals } from '../../actions/projectActions';
 import PropTypes from 'prop-types';
-import { createRoom, fetchRooms, selectRoom } from '../../actions/roomActions';
+import { createRoom, editRoom, fetchRooms, selectRoom } from '../../actions/roomActions';
 import { notifications } from '../../actions/appActions';
-import { ALERTS, ENDPOINTS } from '../../constants';
+import { ALERTS, ENDPOINTS, GENERIC_ERROR } from '../../constants';
 import Breadcrumbs from '../../utils/Breadcrumbs';
 import { Redirect } from 'react-router-dom';
 
@@ -108,7 +108,14 @@ export default class RoomForm extends Component {
             picture: '',
         };
 
-        this.props.dispatch(createRoom(
+        let action = createRoom;
+
+        if (this.state.id !== 0) {
+            room.id = this.state.id;
+            action = editRoom;
+        }
+
+        this.props.dispatch(action(
             room,
             (resp) => {
                 this.props.dispatch(notifications({
@@ -119,11 +126,10 @@ export default class RoomForm extends Component {
                 this.props.dispatch(selectRoom(room));
                 this.setState(room);
                 this.props.dispatch(fetchRooms(this.props.rooms.data.page));
-            },
-            (error) => {
+            }, (error) => {
                 this.props.dispatch(notifications({
                     type: ALERTS.DANGER,
-                    message: error.data.error,
+                    message: error.status === 400 ? error.resp.error : GENERIC_ERROR,
                 }));
             }),
         );

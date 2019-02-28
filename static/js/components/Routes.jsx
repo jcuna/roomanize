@@ -17,6 +17,8 @@ import Project from './projects/Project';
 import Account from './user/Account';
 import RoomForm from './rooms/RoomForm';
 import { ACCESS_TYPES, ENDPOINTS } from '../constants';
+import Contracts from './contracts/Contracts';
+import Tenants from './tenants/Tenants';
 
 export default class Routes extends React.Component {
     render() {
@@ -30,19 +32,36 @@ export default class Routes extends React.Component {
                         RequiresProject, RoomForm, ep.ROOMS_URL, props, ACCESS_TYPES.WRITE,
                     ) }
                 />
+
                 <Route
                     exact path={ `${ep.ROOMS_URL}/:page([0-9]+)?` }
                     render={ (props) => this.getMiddleware(RequiresProject, Room, ep.ROOMS_URL, props) }
                 />
+
                 <Route exact path='/' render={ (props) => this.getComponent(Home, props, true) }/>
-                <Route exact path={ ep.ACCOUNT_LOGOUT } render={ props => this.getComponent(Logout, props, true) }/>
+
+                <Route exact path={ ep.ACCOUNT_LOGOUT } render={ props =>
+                    this.getComponent(Logout, props, true) }
+                />
+
                 <Route exact path={ ep.ROLES_URL } render={ props => this.getComponent(Roles, props) }/>
-                <Route exact path={ `${ep.USERS_MANAGER_URL}/:page([0-9]+)?` } render={ props => this.getComponent(Users, props) }/>
-                <Route exact path={ ep.AGREEMENTS_URL } render={ () => (<h1>contratos</h1>) }/>
+
+                <Route exact path={ `${ep.USERS_MANAGER_URL}/:page([0-9]+)?` } render={ props =>
+                    this.getComponent(Users, props) }
+                />
+
+                <Route exact path={ ep.AGREEMENTS_URL } render={ props => this.getComponent(Contracts, props) }/>
+
+                <Route exact path={ ep.TENANTS_URL } render={ props => this.getComponent(Tenants, props) }/>
+
                 <Route exact path={ `${ ep.PROJECTS_URL }/:project_id([0-9]+)?` } render={ props => this.getComponent(
                     Project, props, false, ep.PROJECTS_URL,
                 ) }/>
-                <Route exact path={ ep.ACCOUNT_PROFILE } render={ props => this.getComponent(Account, props, true) }/>
+
+                <Route exact path={ ep.ACCOUNT_PROFILE } render={ props =>
+                    this.getComponent(Account, props, true) }
+                />
+
                 <Route component={ ErrorPage }/>
             </Switch>
         );

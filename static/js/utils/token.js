@@ -27,21 +27,17 @@ class Token {
             this.expired(Token.timestamp).then(didExpire => {
                 if (didExpire) {
                     api({ url: '/user' }).then(resp => {
-                        if (resp.status < 300) {
-                            this._data.dispatch({
-                                type: USER_FETCHED,
-                                payload: resp.data
-                            });
-                            resolve(this.authHeaders);
-                        } else {
-                            reject(Error('No active session'));
-                            this._data.dispatch({
-                                type: USER_MUST_LOGIN,
-                                payload: resp.error
-                            });
-                        }
+                        this._data.dispatch({
+                            type: USER_FETCHED,
+                            payload: resp.data
+                        });
+                        resolve(this.authHeaders);
                     }, err => {
-                        reject(err);
+                        reject(Error('No active session'));
+                        this._data.dispatch({
+                            type: USER_MUST_LOGIN,
+                            payload: err.error
+                        });
                     });
                 } else if (this._data.token.value !== '') {
                     resolve(this.authHeaders);

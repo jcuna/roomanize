@@ -15,7 +15,7 @@ import { fetchPermissions } from '../actions/roleActions';
 import { clickedContent, notifications, toggleMobileMenu } from '../actions/appActions';
 import { setStateData } from '../utils/config';
 import PropTypes from 'prop-types';
-import { ALERTS, STATUS } from '../constants';
+import { ALERTS, GENERIC_ERROR, STATUS } from '../constants';
 import { fetchProjects } from '../actions/projectActions';
 
 class App extends React.Component {
@@ -40,7 +40,7 @@ class App extends React.Component {
                 () => {
                     dispatch(notifications([{
                         type: ALERTS.DANGER,
-                        message: 'Sucedio un error inesperado',
+                        message: GENERIC_ERROR,
                     }]));
                 }
             ));

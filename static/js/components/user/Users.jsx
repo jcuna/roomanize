@@ -6,11 +6,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { createUser, deleteUser, editUser, fetchUsers, searchUsers, USERS_SEARCHING } from '../../actions/userActions';
 import Spinner from '../../utils/Spinner';
-import { hideOverlay, showOverlay } from '../../actions/appActions';
+import { hideOverlay, notifications, showOverlay } from '../../actions/appActions';
 import UserManager from './UserManager';
 import { fetchRoles } from '../../actions/roleActions';
 import { hasAccess } from '../../utils/config';
-import { ACCESS_TYPES, ENDPOINTS, STATUS } from '../../constants';
+import { ACCESS_TYPES, ALERTS, ENDPOINTS, STATUS } from '../../constants';
 import { afterPause, searchArray } from '../../utils/helpers';
 import Paginate from '../../utils/Paginate';
 
@@ -200,7 +200,8 @@ export default class Users extends React.Component {
         e.preventDefault();
         e.target.className += ' loading-button';
         this.props.dispatch(editUser(this.state.newUser, () => {
-            // show notification
+            // hide notification
+            this.props.dispatch(fetchUsers(this.state.page));
             this.props.dispatch(hideOverlay());
         }, () => {
             // show notification
@@ -212,14 +213,27 @@ export default class Users extends React.Component {
         e.preventDefault();
         e.target.disabled = true;
         e.target.className += ' loading-button';
-        this.props.dispatch(createUser(this.state.newUser));
+        this.props.dispatch(createUser(this.state.newUser, () => {
+            this.props.dispatch(fetchUsers(this.state.page));
+            this.props.dispatch(hideOverlay());
+            this.props.dispatch(notifications([
+                { type: ALERTS.SUCCESS, message: 'Usuario creado satisfactoriamente' }
+            ]));
+        }, () =>
+            this.props.dispatch(notifications([
+                { type: ALERTS.DANGER, message: 'Hubo un error creando el usuario' }
+            ]))
+        ));
     }
 
     deleteUser(id) {
         const button = <button
             type='button' onClick={ ({ target }) => {
                 target.className += ' loading-button';
-                this.props.dispatch(deleteUser(id, () => this.props.dispatch(hideOverlay())));
+                this.props.dispatch(deleteUser(id, () => {
+                    this.props.dispatch(hideOverlay());
+                    this.props.dispatch(fetchUsers(this.state.page));
+                }));
             } } className='btn btn-danger'>Confirmar</button>;
 
         this.props.dispatch(showOverlay(

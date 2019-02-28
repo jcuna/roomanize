@@ -33,8 +33,8 @@ class User(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     email = db.Column(db.String(50, collation=collation), nullable=False, unique=True)
     password = db.Column(db.String(80, collation=collation), nullable=True)
-    first_name = db.Column(db.String(50, collation=collation), nullable=False)
-    last_name = db.Column(db.String(50, collation=collation), nullable=False)
+    first_name = db.Column(db.String(50, collation=collation), nullable=False, index=True)
+    last_name = db.Column(db.String(50, collation=collation), nullable=False, index=True)
     created_at = db.Column(db.DateTime(), nullable=False, default=datetime.datetime.utcnow())
     deleted = db.Column(db.Boolean, nullable=False, server_default='0', index=True)
     roles = relationship('Role',
@@ -93,7 +93,7 @@ class UserToken(db.Model):
     __tablename__ = 'user_tokens'
     id = db.Column(db.BigInteger, primary_key=True)
     user_id = db.Column(db.BigInteger, db.ForeignKey('users.id'), index=True)
-    token = db.Column(db.VARCHAR(64, collation=collation,), unique=True, nullable=False)
+    token = db.Column(db.String(64, collation=collation,), unique=True, nullable=False)
     expires = db.Column(db.DateTime(), nullable=False)
     target = db.Column(
         db.String(250, collation=collation),
@@ -143,7 +143,7 @@ class Project(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     name = db.Column(db.String(30, collation=collation), unique=True)
     address = db.Column(db.Text(collation=collation))
-    contact = db.Column(db.VARCHAR(10, collation=collation))
+    contact = db.Column(db.String(10, collation=collation))
     deleted = db.Column(db.DateTime(), nullable=True, index=True)
 
     rooms = relationship('Room', back_populates='project')
@@ -178,11 +178,15 @@ class Room(db.Model):
 class Tenant(db.Model):
     __tablename__ = 'tenants'
     id = db.Column(db.BigInteger, primary_key=True)
-    first_name = db.Column(db.String(30, collation=collation), index=True, nullable=False)
-    last_name = db.Column(db.Integer, nullable=False)
-    identification_number = db.Column(db.Text(collation=collation), comment='National ID. i.e. Cedula, License')
+    first_name = db.Column(db.String(30, collation=collation), nullable=False)
+    last_name = db.Column(db.String(30, collation=collation), nullable=False, index=True)
     email = db.Column(db.String(50, collation=collation), nullable=True, unique=True)
     phone = db.Column(db.String(10, collation=collation), nullable=True, unique=True)
+    identification_number = db.Column(
+        db.String(25, collation=collation),
+        comment='National ID. i.e. Cedula, License',
+        unique=True
+    )
 
     history = relationship('TenantHistory', back_populates='tenant')
 
@@ -213,8 +217,8 @@ class RentalAgreement(db.Model):
     interval = relationship(TimeInterval)
 
 
-class Contract(db.Model):
-    __tablename__ = 'contracts'
+class Policy(db.Model):
+    __tablename__ = 'policies'
     id = db.Column(db.BigInteger, primary_key=True)
     title = db.Column(db.String(30, collation=collation), index=True, nullable=False)
     text = db.Column(db.Text(collation=collation))

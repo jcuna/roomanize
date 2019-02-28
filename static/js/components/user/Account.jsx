@@ -133,15 +133,11 @@ export default class Account extends React.Component {
                 pw: this.state.pw,
                 pw2: this.state.pw2
             },
-            (resp) => {
-                if (resp.status < 300) {
-                    this.props.history.push(ENDPOINTS.ACCOUNT_LOGIN);
-                    this.props.dispatch(notifications(
-                        { type: ALERTS.SUCCESS, message: 'Cuenta ha sido activada.' })
-                    );
-                } else {
-                    this.props.dispatch(notifications(this.props.updatePasswordError));
-                }
+            () => {
+                this.props.history.push(ENDPOINTS.ACCOUNT_LOGIN);
+                this.props.dispatch(notifications(
+                    { type: ALERTS.SUCCESS, message: 'Cuenta ha sido activada.' })
+                );
             },
             () => {
                 this.props.dispatch(notifications(this.props.updatePasswordError),

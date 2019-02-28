@@ -15,10 +15,6 @@ class Header extends React.Component {
     constructor(props) {
         super(props);
 
-        if (props.appState === 0) {
-            window.location.href = `${API_PREFIX}install`;
-        }
-
         this.toggleMenu = this.toggleMenu.bind(this);
         this.toggleUserMenu = this.toggleUserMenu.bind(this);
         this.state = {
@@ -28,7 +24,7 @@ class Header extends React.Component {
         };
     }
 
-    componentDidUpdate({ clickedContent }) {
+    componentDidUpdate({ clickedContent, appState }) {
         if (Header.userMenuIsShowing(this.state.userNameClass) && this.props.clickedContent !== clickedContent) {
             this.hideUserMenu();
         }
@@ -48,6 +44,9 @@ class Header extends React.Component {
                 });
                 dispatch(listenUserChanges(user.id));
             }
+        }
+        if (appState === 1 && this.props.appState === 0) {
+            window.location.href = `${API_PREFIX}install`;
         }
     }
 

@@ -15,12 +15,20 @@ export const createRoom = (data, resolve, reject) =>
             method: 'POST',
             headers: header,
         }, data).then(resp => {
-            if (resp.status < 300) {
-                dispatch({ type: ROOM_CREATED, payload: resp });
-                resolve(resp.data);
-            } else {
-                reject(resp);
-            }
+            dispatch({ type: ROOM_CREATED, payload: resp });
+            resolve(resp.data);
+        }, reject), reject);
+
+export const editRoom = (data, resolve, reject) =>
+    (dispatch) =>
+        token.through().then(header => api({
+            url: `rooms/${data.id}`,
+            method: 'PUT',
+            headers: header,
+        }, data).then(resp => {
+            console.log(resp);
+            dispatch({ type: ROOM_CREATED, payload: resp });
+            resolve(resp.data);
         }, reject), reject);
 
 export const fetchRooms = (page, reject) =>
@@ -31,11 +39,7 @@ export const fetchRooms = (page, reject) =>
             method: 'GET',
             headers: header,
         }).then(resp => {
-            if (resp.status < 300) {
-                dispatch({ type: ROOMS_FETCHED, payload: resp.data });
-            } else {
-                reject(resp);
-            }
+            dispatch({ type: ROOMS_FETCHED, payload: resp.data });
         }, reject), reject);
     };
 
@@ -51,12 +55,10 @@ export const searchRooms = (q, resolve, reject) =>
             method: 'GET',
             headers: header,
         }).then(resp => {
-            if (resp.status < 300) {
-                resolve(resp.data);
-                dispatch({ type: ROOMS_SEARCHED });
-            } else {
-                dispatch({ type: ROOMS_SEARCHED });
-                reject(resp);
-            }
-        }, reject), reject);
+            resolve(resp.data);
+            dispatch({ type: ROOMS_SEARCHED });
+        }, (err) => {
+            dispatch({ type: ROOMS_SEARCHED });
+            reject(err);
+        }), reject);
     };

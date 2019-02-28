@@ -36,12 +36,12 @@ RUN sed -i 's@access.log = /proc/self/fd/2@access.log = /var/log/fpm/fpm-access.
 
 WORKDIR /var/www/phpMyAdmin
 
-RUN wget https://files.phpmyadmin.net/phpMyAdmin/4.8.2/phpMyAdmin-4.8.2-english.tar.gz \
-    && CHECKSUM="e4173e61b8906e425d40c24ca78cc69740262150626b96d03532911d03cc86a4  phpMyAdmin-4.8.2-english.tar.gz" \
-    && sha256sum phpMyAdmin-4.8.2-english.tar.gz | grep "$CHECKSUM" > /dev/null \
-    && tar xzpf phpMyAdmin-4.8.2-english.tar.gz \
-    && mv ./phpMyAdmin-4.8.2-english/* . \
-    && rm -R phpMyAdmin-4.8.2-english* \
+RUN wget https://files.phpmyadmin.net/phpMyAdmin/4.8.5/phpMyAdmin-4.8.5-english.tar.gz \
+    && CHECKSUM="45595d55d2ee343da7d0786927021ea8f54d0d4c2e3a13289038ef65241f63df  phpMyAdmin-4.8.5-english.tar.gz" \
+    && sha256sum phpMyAdmin-4.8.5-english.tar.gz | grep "$CHECKSUM" > /dev/null \
+    && tar xzpf phpMyAdmin-4.8.5-english.tar.gz \
+    && mv ./phpMyAdmin-4.8.5-english/* . \
+    && rm -R phpMyAdmin-4.8.5-english* \
     && mkdir tmp && chown www-data:www-data tmp \
     && cp config.sample.inc.php config.inc.php \
     && sed -i "s@\$cfg\['blowfish_secret'\] \= ''@\$cfg\['blowfish_secret'\] \= '"$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)"'@" config.inc.php \

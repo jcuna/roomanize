@@ -3,7 +3,7 @@ import { token } from '../utils/token';
 import { notifications } from './appActions';
 import ws from '../utils/ws';
 import { fetchUser } from './userActions';
-import { ALERTS } from '../constants';
+import { ALERTS, GENERIC_ERROR } from '../constants';
 
 export const ROLES_FETCHING = 'ROLES_FETCHING';
 export const ROLES_FETCHED = 'ROLES_FETCHED';
@@ -49,35 +49,29 @@ export const deleteRole = (id) =>
             url: '/roles',
             method: 'DELETE',
             headers: auth,
-        }, id).then(resp => {
-            if (resp.status < 300) {
-                dispatch({
-                    type: ROLE_DELETE_SUCCESS,
-                    payload: id,
-                });
-                dispatch(notifications([{
-                    type: ALERTS.INFO,
-                    message: 'Role borrado correctamente.',
-                }]));
-            } else {
+        }, id).then(() => {
+            dispatch({
+                type: ROLE_DELETE_SUCCESS,
+                payload: id,
+            });
+            dispatch(notifications([{
+                type: ALERTS.INFO,
+                message: 'Role borrado correctamente.',
+            }]));
+        }, (err) => {
+            if (err.status < 500) {
                 let message = 'No tienes accesso a borrar roles';
 
-                if (resp.status === 409) {
+                if (err.status === 409) {
                     message = 'No puedes borrar un rol que ha sido asignado a un usuario, ' +
                         'primero quitale el rol al usuario.';
                 }
                 dispatch({ type: ROLE_DELETE_FAIL });
-                dispatch(notifications([{
-                    type: ALERTS.WARNING,
-                    message,
-                }]));
+                dispatch(notifications({ type: ALERTS.WARNING, message, }));
+            } else {
+                dispatch({ type: ROLE_DELETE_FAIL });
+                dispatch(notifications({ type: ALERTS.WARNING, message: GENERIC_ERROR }));
             }
-        }, () => {
-            dispatch({ type: ROLE_DELETE_FAIL });
-            dispatch(notifications([{
-                type: ALERTS.WARNING,
-                message: 'Error inesperado',
-            }]));
         }));
     };
 
@@ -126,28 +120,20 @@ export const commitPermissions = (permissions) =>
             url: 'roles',
             method: 'PUT',
             headers: header,
-        }, permissions).then(resp => {
-            if (resp.status < 300) {
-                dispatch({
-                    type: PERMISSIONS_COMMIT,
-                    payload: permissions,
-                });
-                dispatch(notifications([{
-                    type: ALERTS.SUCCESS,
-                    message: 'Acceso actualizado correctamente',
-                }]));
-            } else {
-                dispatch({ type: PERMISSIONS_COMMIT_FAIL });
-                dispatch(notifications([{
-                    type: ALERTS.WARNING,
-                    message: 'No se pudo actualizar los accesos',
-                }]));
-            }
+        }, permissions).then(() => {
+            dispatch({
+                type: PERMISSIONS_COMMIT,
+                payload: permissions,
+            });
+            dispatch(notifications([{
+                type: ALERTS.SUCCESS,
+                message: 'Acceso actualizado correctamente.',
+            }]));
         }, () => {
             dispatch({ type: PERMISSIONS_COMMIT_FAIL });
             dispatch(notifications([{
                 type: ALERTS.WARNING,
-                message: 'No se pudo actualizar los accesos',
+                message: 'No se pudo aplicar el cambio.',
             }]));
         }));
     };
