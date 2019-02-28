@@ -10,7 +10,7 @@ export default class Contracts extends React.Component {
         return <h1>Contracts</h1>;
     }
 
-    static PropTypes = {
+    static propTypes = {
         dispatch: PropTypes.func
     };
 }

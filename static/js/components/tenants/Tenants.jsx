@@ -10,7 +10,7 @@ export default class Tenants extends React.Component {
         return <h1>Tenants</h1>;
     }
 
-    static PropTypes = {
+    static propTypes = {
         dispatch: PropTypes.func
     };
 }
