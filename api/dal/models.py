@@ -226,3 +226,12 @@ class Policy(db.Model):
     end_ttv = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime(
         9999, 12, 31, 23, 59, 59, 999999)
     )
+
+
+class Receipt(db.Model):
+    __tablename__ = 'receipts'
+    id = db.Column(db.BigInteger, primary_key=True)
+    date = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime.utcnow())
+    agreement_id = db.Column(db.BigInteger, index=True)
+    amount = db.Column(db.DECIMAL(10, 2), nullable=False)
+    balance = db.Column(db.DECIMAL(10, 2), nullable=False)
