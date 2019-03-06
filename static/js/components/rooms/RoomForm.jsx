@@ -8,7 +8,7 @@ import { fetchTimeIntervals } from '../../actions/projectActions';
 import PropTypes from 'prop-types';
 import { createRoom, editRoom, fetchRooms, selectRoom } from '../../actions/roomActions';
 import { notifications } from '../../actions/appActions';
-import { ALERTS, ENDPOINTS, GENERIC_ERROR } from '../../constants';
+import { ALERTS, ENDPOINTS, FORM_VALIDATION, GENERIC_ERROR } from '../../constants';
 import Breadcrumbs from '../../utils/Breadcrumbs';
 import { Redirect } from 'react-router-dom';
 
@@ -16,7 +16,7 @@ export default class RoomForm extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            button: { value: 'Agregar', disabled: true },
+            button: { value: 'Agregar', disabled: false },
             rent: this.props.rooms.selectedRoom.rent || '',
             name: this.props.rooms.selectedRoom.name || '',
             description: this.props.rooms.selectedRoom.description || '',
@@ -27,7 +27,7 @@ export default class RoomForm extends Component {
             errors: true,
         };
         this.handleSubmit = this.handleSubmit.bind(this);
-        this.validateFields = this.validateFields.bind(this);
+        // this.validateFields = this.validateFields.bind(this);
         if (props.projects.timeIntervals.length === 0) {
             props.dispatch(fetchTimeIntervals());
         }
@@ -54,6 +54,7 @@ export default class RoomForm extends Component {
                         onChange: this.validateFields,
                         name: 'room-name',
                         defaultValue: this.state.name,
+                        validate: FORM_VALIDATION.NUMBER
                     },
                     {
                         className: 'col-6',
@@ -99,40 +100,42 @@ export default class RoomForm extends Component {
     handleSubmit(event) {
         event.preventDefault();
 
-        const room = {
-            project_id: this.props.user.attributes.preferences.default_project,
-            name: this.refs.room_name.value,
-            rent: this.refs.rent.value,
-            time_interval_id: this.refs.interval.value,
-            description: this.refs.notes.value,
-            picture: '',
-        };
+        console.log(this.refs)
 
-        let action = createRoom;
-
-        if (this.state.id !== 0) {
-            room.id = this.state.id;
-            action = editRoom;
-        }
-
-        this.props.dispatch(action(
-            room,
-            (resp) => {
-                this.props.dispatch(notifications({
-                    type: ALERTS.SUCCESS,
-                    message: 'Habitacion agregada correctamente.',
-                }));
-                room.id = resp.id;
-                this.props.dispatch(selectRoom(room));
-                this.setState(room);
-                this.props.dispatch(fetchRooms(this.props.rooms.data.page));
-            }, (error) => {
-                this.props.dispatch(notifications({
-                    type: ALERTS.DANGER,
-                    message: error.status === 400 ? error.resp.error : GENERIC_ERROR,
-                }));
-            }),
-        );
+        // const room = {
+        //     project_id: this.props.user.attributes.preferences.default_project,
+        //     name: this.refs.room_name.value,
+        //     rent: this.refs.rent.value,
+        //     time_interval_id: this.refs.interval.value,
+        //     description: this.refs.notes.value,
+        //     picture: '',
+        // };
+        //
+        // let action = createRoom;
+        //
+        // if (this.state.id !== 0) {
+        //     room.id = this.state.id;
+        //     action = editRoom;
+        // }
+        //
+        // this.props.dispatch(action(
+        //     room,
+        //     (resp) => {
+        //         this.props.dispatch(notifications({
+        //             type: ALERTS.SUCCESS,
+        //             message: 'Habitacion agregada correctamente.',
+        //         }));
+        //         room.id = resp.id;
+        //         this.props.dispatch(selectRoom(room));
+        //         this.setState(room);
+        //         this.props.dispatch(fetchRooms(this.props.rooms.data.page));
+        //     }, (error) => {
+        //         this.props.dispatch(notifications({
+        //             type: ALERTS.DANGER,
+        //             message: error.status === 400 ? error.resp.error : GENERIC_ERROR,
+        //         }));
+        //     }),
+        // );
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -142,21 +145,21 @@ export default class RoomForm extends Component {
         }
     }
 
-    validateFields({ target }) {
-        if (target.name === 'rent') {
-            if (isNaN(target.value) && target.value !== '') {
-                if (!target.classList.contains('is-invalid')) {
-                    target.classList.add('is-invalid');
-                    this.formIsValid(false);
-                }
-            } else {
-                this.formIsValid(true);
-                if (target.classList.contains('is-invalid')) {
-                    target.classList.remove('is-invalid');
-                }
-            }
-        }
-    }
+    // validateFields({ target }) {
+    //     if (target.name === 'rent') {
+    //         if (isNaN(target.value) && target.value !== '') {
+    //             if (!target.classList.contains('is-invalid')) {
+    //                 target.classList.add('is-invalid');
+    //                 this.formIsValid(false);
+    //             }
+    //         } else {
+    //             this.formIsValid(true);
+    //             if (target.classList.contains('is-invalid')) {
+    //                 target.classList.remove('is-invalid');
+    //             }
+    //         }
+    //     }
+    // }
 
     formIsValid(isIt) {
         this.setState({

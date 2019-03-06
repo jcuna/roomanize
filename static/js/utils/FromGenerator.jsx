@@ -4,8 +4,23 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FORM_VALIDATION } from '../constants';
 
-export default class FormGenerator extends React.Component {
+class FormGenerator extends React.Component {
+    constructor(props) {
+        super(props);
+
+        const references = {};
+
+        props.elements.forEach(element => {
+            references[element.name] = {
+                isValid: true,
+                value: ''
+            };
+        });
+        this.state = references;
+    }
+
     /**
      *
      * @returns {*}
@@ -82,7 +97,7 @@ export default class FormGenerator extends React.Component {
                     htmlFor: element.for,
                     placeholder: element.placeholder,
                     className: FormGenerator.getClassName(element, isMultiCol),
-                    onChange: element.onChange,
+                    onChange: this.bindValidate(element, reference),
                     ref: reference,
                     value: element.value,
                     defaultValue: element.defaultValue,
@@ -94,6 +109,68 @@ export default class FormGenerator extends React.Component {
             ),
             element.label && React.createElement('label', { htmlFor: element.id }, element.label)
         );
+    }
+
+    setValidationObject(element, reference) {
+        // if (typeof element.validate === 'object' && element.validate.indexOf(FORM_VALIDATION.REQUIRED > -1)) {
+        //     this.setState({
+        //         [reference]: false
+        //     });
+        // } else if (typeof element.validate === 'string') {
+        //     this.setState({
+        //         [reference]: element.validate !== FORM_VALIDATION.REQUIRED
+        //     });
+        // }
+    }
+
+    bindValidate(element, reference) {
+        this.setValidationObject(element, reference);
+
+        return (event) => {
+            if (typeof element.validate === 'function') {
+                FormGenerator.updateElementValidate(event, element.validate(event));
+            } else if (typeof element.validate === 'object') {
+                element.validate.forEach(strFunction => {
+                    FormGenerator.runValidateFunction(strFunction, event, element);
+                });
+            } else if (typeof element.validate === 'string') {
+                FormGenerator.runValidateFunction(element.validate, event, element);
+            }
+            element.onChange && element.onChange(event, this.state);
+        };
+    }
+
+    static runValidateFunction(strFunction, event, element) {
+        if (typeof FormGenerator[strFunction] === 'function') {
+            FormGenerator.updateElementValidate(event, FormGenerator[strFunction](event, element));
+        } else {
+            throw new Error(`Invalid validate function: ${strFunction}`);
+        }
+    }
+
+    static updateElementValidate(event, isValid) {
+        if (typeof isValid !== 'boolean') {
+            throw new Error(
+                'Invalid type returned by validation function. Must return a boolean indicating validity.'
+            );
+        }
+        if (isValid) {
+            FormGenerator.removeErrorClass(event);
+        } else {
+            FormGenerator.addErrorClass(event);
+        }
+    }
+
+    static addErrorClass({ target }) {
+        if (!target.classList.contains('is-invalid')) {
+            target.classList.add('is-invalid');
+        }
+    }
+
+    static removeErrorClass({ target }) {
+        if (target.classList.contains('is-invalid')) {
+            target.classList.remove('is-invalid');
+        }
     }
 
     static getParentClassName(element, isMultiCol) {
@@ -126,15 +203,7 @@ export default class FormGenerator extends React.Component {
     }
 
     static getReference(key) {
-        let reference = null;
-
-        if (typeof key.name !== 'undefined') {
-            reference = key.name.replace(/[^\w]/g, '_').toLowerCase();
-        } else if (typeof key.placeholder !== 'undefined') {
-            reference = key.placeholder.replace(/[^\w]/g, '_').toLowerCase();
-        }
-
-        return reference;
+        return key.name.replace(/[^\w]/g, '_').toLowerCase();
     }
 
     getSecondParam(element) {
@@ -150,6 +219,7 @@ export default class FormGenerator extends React.Component {
         callback: PropTypes.func,
         object: PropTypes.object,
         elements: PropTypes.arrayOf(PropTypes.shape({
+            name: PropTypes.string.required,
             formElement: PropTypes.string,
             type: PropTypes.string,
             placeholder: PropTypes.string,
@@ -161,9 +231,67 @@ export default class FormGenerator extends React.Component {
             defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
             disabled: PropTypes.bool,
             readOnly: PropTypes.bool,
+            validate: PropTypes.oneOfType([
+                PropTypes.string,
+                PropTypes.func,
+                PropTypes.arrayOf(PropTypes.string),
+            ]),
         })),
         initialRefs: PropTypes.func,
         button: PropTypes.object,
         className: PropTypes.string,
     }
 }
+
+FormGenerator[FORM_VALIDATION.NUMBER] = ({ target }) => {
+    if (target.value.replace(' ', '') !== '') {
+        return !isNaN(target.value);
+    }
+    return true;
+};
+
+FormGenerator[FORM_VALIDATION.REQUIRED] = ({ target }) => {
+    return target.value.replace(' ', '') !== '';
+};
+
+FormGenerator[FORM_VALIDATION.ALPHA_NUM] = ({ target }) => {
+    // TODO: implement;
+    if (target.value.replace(' ', '') !== '') {
+        return false;
+    }
+    return true;
+};
+
+FormGenerator[FORM_VALIDATION.EMAIL] = ({ target }) => {
+    // TODO: implement;
+    if (target.value.replace(' ', '') !== '') {
+        return false;
+    }
+    return true;
+};
+
+FormGenerator[FORM_VALIDATION.NO_SPACE] = ({ target }) => {
+    // TODO: implement;
+    if (target.value.replace(' ', '') !== '') {
+        return false;
+    }
+    return true;
+};
+
+FormGenerator[FORM_VALIDATION.PHONE] = ({ target }) => {
+    // TODO: implement;
+    if (target.value.replace(' ', '') !== '') {
+        return false;
+    }
+    return true;
+};
+
+FormGenerator[FORM_VALIDATION.REGEX] = ({ target }) => {
+    // TODO: implement;
+    if (target.value.replace(' ', '') !== '') {
+        return false;
+    }
+    return true;
+};
+
+export default FormGenerator;

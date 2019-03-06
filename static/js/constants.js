@@ -46,3 +46,13 @@ export const API_PREFIX = '/api/';
 export const API_VERSION = 'v1.0';
 
 export const GENERIC_ERROR = 'Ha ocurrido un error inesperado.';
+
+export const FORM_VALIDATION = {
+    NUMBER: 'number',
+    EMAIL: 'email',
+    PHONE: 'phone',
+    REGEX: 'regex',
+    ALPHA_NUM: 'alpha_num',
+    REQUIRED: 'required',
+    NO_SPACE: 'no_space',
+};
