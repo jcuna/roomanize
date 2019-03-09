@@ -16,7 +16,7 @@ export default class RoomForm extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            button: { value: 'Agregar', disabled: false },
+            button: { value: this.props.rooms.selectedRoom.id ? 'Editar' : 'Agregar', disabled: false },
             rent: this.props.rooms.selectedRoom.rent || '',
             name: this.props.rooms.selectedRoom.name || '',
             description: this.props.rooms.selectedRoom.description || '',
@@ -97,43 +97,43 @@ export default class RoomForm extends Component {
         return options;
     }
 
-    handleSubmit(event) {
+    handleSubmit(event, validation) {
         event.preventDefault();
 
-        // const room = {
-        //     project_id: this.props.user.attributes.preferences.default_project,
-        //     name: this.refs.room_name.value,
-        //     rent: this.refs.rent.value,
-        //     time_interval_id: this.refs.interval.value,
-        //     description: this.refs.notes.value,
-        //     picture: '',
-        // };
-        //
-        // let action = createRoom;
-        //
-        // if (this.state.id !== 0) {
-        //     room.id = this.state.id;
-        //     action = editRoom;
-        // }
-        //
-        // this.props.dispatch(action(
-        //     room,
-        //     (resp) => {
-        //         this.props.dispatch(notifications({
-        //             type: ALERTS.SUCCESS,
-        //             message: 'Habitacion agregada correctamente.',
-        //         }));
-        //         room.id = resp.id;
-        //         this.props.dispatch(selectRoom(room));
-        //         this.setState(room);
-        //         this.props.dispatch(fetchRooms(this.props.rooms.data.page));
-        //     }, (error) => {
-        //         this.props.dispatch(notifications({
-        //             type: ALERTS.DANGER,
-        //             message: error.status === 400 ? error.resp.error : GENERIC_ERROR,
-        //         }));
-        //     }),
-        // );
+        const room = {
+            project_id: this.props.user.attributes.preferences.default_project,
+            name: validation['room-name'].value,
+            rent: validation.rent.value,
+            time_interval_id: validation.interval.value,
+            description: validation.notes.value,
+            picture: '',
+        };
+
+        let action = createRoom;
+
+        if (this.state.id !== 0) {
+            room.id = this.state.id;
+            action = editRoom;
+        }
+
+        this.props.dispatch(action(
+            room,
+            (resp) => {
+                this.props.dispatch(notifications({
+                    type: ALERTS.SUCCESS,
+                    message: 'Habitacion agregada correctamente.',
+                }));
+                room.id = resp.id;
+                this.props.dispatch(selectRoom(room));
+                this.setState(room);
+                this.props.dispatch(fetchRooms(this.props.rooms.data.page));
+            }, (error) => {
+                this.props.dispatch(notifications({
+                    type: ALERTS.DANGER,
+                    message: error.status === 400 ? error.resp.error : GENERIC_ERROR,
+                }));
+            }),
+        );
     }
 
     componentDidUpdate(prevProps, prevState) {

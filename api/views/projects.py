@@ -140,7 +140,7 @@ class Rooms(Resource):
 
     @token_required
     @access_required
-    def put(self):
+    def put(self, room_id):
         pass
 
 

@@ -14,7 +14,7 @@ def register():
         'users.Activate@user_activate_url': '/account/activate-pass',
 
         'projects.Projects@projects_url': '/projects|/projects/|/projects/<int:project_id>',
-        'projects.Rooms@rooms_url': '/rooms|/rooms/',
+        'projects.Rooms@rooms_url': '/rooms|/rooms/|/rooms/<int:room_id>',
         'projects.TimeIntervals@time_intervals_url': '/time-intervals|/time-intervals/',
 
         'agreements.Agreements@agreements_url': '/agreements|/agreements/|/agreements/<int:agreement_id>',
