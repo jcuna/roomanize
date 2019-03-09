@@ -296,7 +296,7 @@ class FormGenerator extends React.Component {
             validate: PropTypes.oneOfType([
                 PropTypes.string,
                 PropTypes.func,
-                PropTypes.arrayOf(PropTypes.string), //TODO: validate with actual values from constants
+                PropTypes.arrayOf(PropTypes.string),
             ]),
         })),
         initialRefs: PropTypes.func,
