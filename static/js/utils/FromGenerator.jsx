@@ -359,7 +359,6 @@ FormGenerator[FORM_VALIDATION.REGEX + VALIDATE_FUNC_SUFFIX] = ({ target }, regex
  * @return {boolean}
  */
 FormGenerator[FORM_VALIDATION.LENGTH + VALIDATE_FUNC_SUFFIX] = ({ target }, args) => {
-
     if (target.value.replace(' ', '') !== '') {
         if (target.length < Number(args[0])) {
             return false;
