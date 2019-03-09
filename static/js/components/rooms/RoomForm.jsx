@@ -8,7 +8,7 @@ import { fetchTimeIntervals } from '../../actions/projectActions';
 import PropTypes from 'prop-types';
 import { createRoom, editRoom, fetchRooms, selectRoom } from '../../actions/roomActions';
 import { notifications } from '../../actions/appActions';
-import { ALERTS, ENDPOINTS, FORM_VALIDATION, GENERIC_ERROR } from '../../constants';
+import { ALERTS, ENDPOINTS, GENERIC_ERROR } from '../../constants';
 import Breadcrumbs from '../../utils/Breadcrumbs';
 import { Redirect } from 'react-router-dom';
 
@@ -27,7 +27,7 @@ export default class RoomForm extends Component {
             errors: true,
         };
         this.handleSubmit = this.handleSubmit.bind(this);
-        // this.validateFields = this.validateFields.bind(this);
+        this.onInputChange = this.onInputChange.bind(this);
         if (props.projects.timeIntervals.length === 0) {
             props.dispatch(fetchTimeIntervals());
         }
@@ -51,23 +51,24 @@ export default class RoomForm extends Component {
                         className: 'col-6',
                         type: 'text',
                         placeholder: 'Numero/Nombre de Habitación',
-                        onChange: this.validateFields,
+                        onChange: this.onInputChange,
                         name: 'room-name',
                         defaultValue: this.state.name,
-                        validate: FORM_VALIDATION.NUMBER
+                        validate: 'required',
                     },
                     {
                         className: 'col-6',
                         type: 'text',
                         placeholder: 'Precio al mes',
-                        onChange: this.validateFields,
+                        onChange: this.onInputChange,
                         name: 'rent',
                         defaultValue: this.state.rent,
+                        validate: ['required', 'number'],
                     },
                     {
                         formElement: 'select',
                         className: 'col-6',
-                        onChange: this.validateFields,
+                        onChange: this.onInputChange,
                         name: 'interval',
                         options: this.getTimeIntervalOptions(),
                         defaultValue: this.state.time_interval_id,
@@ -76,13 +77,12 @@ export default class RoomForm extends Component {
                         className: 'col-6',
                         type: 'text',
                         placeholder: 'Notas',
-                        onChange: this.validateFields,
+                        onChange: this.onInputChange,
                         name: 'notes',
                         defaultValue: this.state.description,
                     },
                 ],
                 callback: this.handleSubmit,
-                object: this,
             } }/>
         </section>;
     }
@@ -99,8 +99,6 @@ export default class RoomForm extends Component {
 
     handleSubmit(event) {
         event.preventDefault();
-
-        console.log(this.refs)
 
         // const room = {
         //     project_id: this.props.user.attributes.preferences.default_project,
@@ -145,21 +143,23 @@ export default class RoomForm extends Component {
         }
     }
 
-    // validateFields({ target }) {
-    //     if (target.name === 'rent') {
-    //         if (isNaN(target.value) && target.value !== '') {
-    //             if (!target.classList.contains('is-invalid')) {
-    //                 target.classList.add('is-invalid');
-    //                 this.formIsValid(false);
-    //             }
-    //         } else {
-    //             this.formIsValid(true);
-    //             if (target.classList.contains('is-invalid')) {
-    //                 target.classList.remove('is-invalid');
-    //             }
-    //         }
-    //     }
-    // }
+    onInputChange({ target }, validation) {
+        console.log(target, validation);
+
+        // if (target.name === 'rent') {
+        //     if (isNaN(target.value) && target.value !== '') {
+        //         if (!target.classList.contains('is-invalid')) {
+        //             target.classList.add('is-invalid');
+        //             this.formIsValid(false);
+        //         }
+        //     } else {
+        //         this.formIsValid(true);
+        //         if (target.classList.contains('is-invalid')) {
+        //             target.classList.remove('is-invalid');
+        //         }
+        //     }
+        // }
+    }
 
     formIsValid(isIt) {
         this.setState({

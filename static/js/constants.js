@@ -55,4 +55,7 @@ export const FORM_VALIDATION = {
     ALPHA_NUM: 'alpha_num',
     REQUIRED: 'required',
     NO_SPACE: 'no_space',
+    LENGTH: 'length',
 };
+
+export const VALIDATE_FUNC_SUFFIX = 'Func';

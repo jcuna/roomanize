@@ -15,12 +15,11 @@ export default class Login extends React.Component {
         super(props);
 
         this.state = {
-            button: { value: 'Login' }
+            button: { value: 'Login', disabled: true }
         };
 
         this.handleSubmit = this.handleSubmit.bind(this);
         this.validateFields = this.validateFields.bind(this);
-        this.initialRefs = this.initialRefs.bind(this);
     }
 
     static getDerivedStateFromProps({ history, user, landingPage, dispatch }, state) {
@@ -48,38 +47,42 @@ export default class Login extends React.Component {
             formName: 'login-form',
             button: this.state.button,
             elements: [
-                { type: 'text', placeholder: 'Email', onChange: this.validateFields, name: 'email', defaultValue: email },
-                { type: 'password', placeholder: 'Contraseña', onChange: this.validateFields, name: 'password', defaultValue: password }
+                {
+                    type: 'text',
+                    placeholder: 'Email',
+                    onChange: this.validateFields,
+                    name: 'email',
+                    defaultValue: email,
+                    validate: ['required', 'email']
+                },
+                {
+                    type: 'password',
+                    placeholder: 'Contraseña',
+                    onChange: this.validateFields,
+                    name: 'password',
+                    defaultValue: password,
+                    validate: 'required',
+                }
             ],
             callback: this.handleSubmit,
-            object: this,
-            initialRefs: this.initialRefs
         } }/>;
     }
 
-    validateFields() {
-        if (this.refs.email.value !== '' && this.refs.password.value !== '') {
+    validateFields(event, validation) {
+        if (validation.email.isValid && validation.password.isValid) {
             this.setState({
                 button: { value: 'Login' }
             });
-        } else if (typeof this.state.button.disabled === 'undefined') {
+        } else {
             this.setState({
                 button: { value: 'Login', disabled: 'disabled' }
             });
         }
     }
 
-    handleSubmit(e) {
+    handleSubmit(e, validation) {
         e.preventDefault();
-        this.props.dispatch(login(this.refs.email.value, this.refs.password.value));
-    }
-
-    initialRefs(refs) {
-        if (refs.email.value === '' || refs.password.value === '') {
-            this.setState({
-                button: { value: 'Login', disabled: 'disabled' }
-            });
-        }
+        this.props.dispatch(login(validation.email.value, validation.password.value));
     }
 
     static propTypes = {

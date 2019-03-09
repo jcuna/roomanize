@@ -4,21 +4,27 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FORM_VALIDATION } from '../constants';
+import { FORM_VALIDATION, VALIDATE_FUNC_SUFFIX } from '../constants';
 
 class FormGenerator extends React.Component {
     constructor(props) {
         super(props);
 
         const references = {};
+        const onChangeCall = {};
 
         props.elements.forEach(element => {
             references[element.name] = {
-                isValid: true,
-                value: ''
+                isValid: FormGenerator.getInitialValidationValue(element),
+                value: '',
             };
+            onChangeCall[element.name] = element.onChange;
         });
-        this.state = references;
+        this.state = {
+            references,
+            onChangeCall,
+            currentEvent: null,
+        };
     }
 
     /**
@@ -26,14 +32,12 @@ class FormGenerator extends React.Component {
      * @returns {*}
      */
     render() {
-        const form = this.generateForm(
+        return this.generateForm(
             this.props.elements,
             this.props.formName,
             this.props.button,
             this.props.className || 'form-section'
         );
-
-        return (<div>{form}</div>);
     }
 
     /**
@@ -48,6 +52,15 @@ class FormGenerator extends React.Component {
         }
     }
 
+    componentDidUpdate(prevProps, prevState) {
+        Object.keys(this.state.references).forEach(key => {
+            if (this.state.references[key].value !== prevState.references[key].value) {
+                this.state.onChangeCall[[key]] &&
+                this.state.onChangeCall[key](this.state.currentEvent, this.state.references);
+            }
+        });
+    }
+
     /**
      * @private
      *
@@ -60,7 +73,7 @@ class FormGenerator extends React.Component {
     generateForm(elements, formName, button, sectionClass) {
         return React.createElement(
             'form',
-            { className: formName, onSubmit: this.props.callback },
+            { className: formName, onSubmit: event => this.props.callback(event, this.state.references) },
 
             React.createElement('section', { className: sectionClass },
                 elements.map((b, k) => {
@@ -111,41 +124,90 @@ class FormGenerator extends React.Component {
         );
     }
 
-    setValidationObject(element, reference) {
-        // if (typeof element.validate === 'object' && element.validate.indexOf(FORM_VALIDATION.REQUIRED > -1)) {
-        //     this.setState({
-        //         [reference]: false
-        //     });
-        // } else if (typeof element.validate === 'string') {
-        //     this.setState({
-        //         [reference]: element.validate !== FORM_VALIDATION.REQUIRED
-        //     });
-        // }
+    static getInitialValidationValue(element) {
+        let isValid = true;
+
+        if (typeof element.validate === 'object' && element.validate.indexOf(FORM_VALIDATION.REQUIRED > -1) ||
+            typeof element.validate === 'string' && element.validate === FORM_VALIDATION.REQUIRED) {
+            isValid = false;
+        }
+        return isValid;
     }
 
-    bindValidate(element, reference) {
-        this.setValidationObject(element, reference);
+    setElementState(key, isValid, event) {
+        const currentReferences = { ...this.state.references, [key]: {
+            isValid,
+            value: event.target.value
+        }};
 
+        event.persist();
+
+        this.setState({
+            references: currentReferences,
+            currentEvent: event,
+        });
+    }
+
+    bindValidate(element) {
         return (event) => {
             if (typeof element.validate === 'function') {
-                FormGenerator.updateElementValidate(event, element.validate(event));
+                const isValid = element.validate(event);
+
+                this.setElementState(element.name, isValid, event);
+                FormGenerator.updateElementValidate(event, isValid);
             } else if (typeof element.validate === 'object') {
+                /**
+                 |_____________________________________________________________________________
+                 | when we have many validation methods to run, we want to run required        |
+                 | last since other methods will not validate if empty                         |
+                 | @type {boolean}                                                             |
+                 |_____________________________________________________________________________|
+                 */
+                let hasRequiredFunc = false;
+
+                let isValid = true;
+
                 element.validate.forEach(strFunction => {
-                    FormGenerator.runValidateFunction(strFunction, event, element);
+                    if (strFunction === FORM_VALIDATION.REQUIRED) {
+                        hasRequiredFunc = true;
+                    } else {
+                        isValid = this.runValidateFunction(strFunction, event, element);
+
+                        if (!isValid) {
+                            return;
+                        }
+                    }
                 });
+                if (hasRequiredFunc && isValid) {
+                    this.runValidateFunction(FORM_VALIDATION.REQUIRED, event, element);
+                }
             } else if (typeof element.validate === 'string') {
-                FormGenerator.runValidateFunction(element.validate, event, element);
+                this.runValidateFunction(element.validate, event, element);
+            } else {
+                this.setElementState(element.name, true, event);
             }
-            element.onChange && element.onChange(event, this.state);
         };
     }
 
-    static runValidateFunction(strFunction, event, element) {
-        if (typeof FormGenerator[strFunction] === 'function') {
-            FormGenerator.updateElementValidate(event, FormGenerator[strFunction](event, element));
-        } else {
-            throw new Error(`Invalid validate function: ${strFunction}`);
+    runValidateFunction(strFunction, event, element) {
+        let extraArgs = [];
+
+        if (strFunction.indexOf(':') > -1) {
+            const parts = strFunction.split(':');
+
+            strFunction = parts.shift();
+            extraArgs = parts;
         }
+
+        if (typeof FormGenerator[strFunction + VALIDATE_FUNC_SUFFIX] === 'function') {
+            const isValid = FormGenerator[strFunction + VALIDATE_FUNC_SUFFIX](event, extraArgs);
+
+            this.setElementState(element.name, isValid, event);
+            FormGenerator.updateElementValidate(event, isValid);
+            return isValid;
+        }
+
+        throw new Error(`Invalid validate function: ${strFunction}`);
     }
 
     static updateElementValidate(event, isValid) {
@@ -195,7 +257,7 @@ class FormGenerator extends React.Component {
             className = 'form-control';
         }
 
-        if (!multiForm) {
+        if (!multiForm && element.className) {
             className += ' ' + element.className;
         }
 
@@ -234,7 +296,7 @@ class FormGenerator extends React.Component {
             validate: PropTypes.oneOfType([
                 PropTypes.string,
                 PropTypes.func,
-                PropTypes.arrayOf(PropTypes.string),
+                PropTypes.arrayOf(PropTypes.string), //TODO: validate with actual values from constants
             ]),
         })),
         initialRefs: PropTypes.func,
@@ -243,53 +305,68 @@ class FormGenerator extends React.Component {
     }
 }
 
-FormGenerator[FORM_VALIDATION.NUMBER] = ({ target }) => {
+FormGenerator[FORM_VALIDATION.NUMBER + VALIDATE_FUNC_SUFFIX] = ({ target }) => {
     if (target.value.replace(' ', '') !== '') {
         return !isNaN(target.value);
     }
     return true;
 };
 
-FormGenerator[FORM_VALIDATION.REQUIRED] = ({ target }) => {
+FormGenerator[FORM_VALIDATION.REQUIRED + VALIDATE_FUNC_SUFFIX] = ({ target }) => {
     return target.value.replace(' ', '') !== '';
 };
 
-FormGenerator[FORM_VALIDATION.ALPHA_NUM] = ({ target }) => {
+FormGenerator[FORM_VALIDATION.ALPHA_NUM + VALIDATE_FUNC_SUFFIX] = ({ target }) => {
     // TODO: implement;
     if (target.value.replace(' ', '') !== '') {
-        return false;
+        return true;
     }
     return true;
 };
 
-FormGenerator[FORM_VALIDATION.EMAIL] = ({ target }) => {
+FormGenerator[FORM_VALIDATION.EMAIL + VALIDATE_FUNC_SUFFIX] = ({ target }) => {
     // TODO: implement;
     if (target.value.replace(' ', '') !== '') {
-        return false;
+        return true;
     }
     return true;
 };
 
-FormGenerator[FORM_VALIDATION.NO_SPACE] = ({ target }) => {
+FormGenerator[FORM_VALIDATION.NO_SPACE + VALIDATE_FUNC_SUFFIX] = ({ target }) => {
+    return target.value.indexOf(' ') === -1;
+};
+
+FormGenerator[FORM_VALIDATION.PHONE + VALIDATE_FUNC_SUFFIX] = ({ target }) => {
     // TODO: implement;
     if (target.value.replace(' ', '') !== '') {
-        return false;
+        return true;
     }
     return true;
 };
 
-FormGenerator[FORM_VALIDATION.PHONE] = ({ target }) => {
-    // TODO: implement;
+FormGenerator[FORM_VALIDATION.REGEX + VALIDATE_FUNC_SUFFIX] = ({ target }, regex) => {
     if (target.value.replace(' ', '') !== '') {
-        return false;
+        return new RegExp(regex.pop()).test(target.value);
     }
     return true;
 };
 
-FormGenerator[FORM_VALIDATION.REGEX] = ({ target }) => {
-    // TODO: implement;
+/**
+ * Call like: validate: 'required:min:max', i.e. required:4:10 - the second arg is optional.
+ *
+ * @param {object} target
+ * @param {array} args
+ * @return {boolean}
+ */
+FormGenerator[FORM_VALIDATION.LENGTH + VALIDATE_FUNC_SUFFIX] = ({ target }, args) => {
+
     if (target.value.replace(' ', '') !== '') {
-        return false;
+        if (target.length < Number(args[0])) {
+            return false;
+        }
+        if (args[1] && target.length > Number(args[1])) {
+            return false;
+        }
     }
     return true;
 };

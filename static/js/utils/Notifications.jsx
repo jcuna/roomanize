@@ -28,13 +28,9 @@ export default class Notifications extends React.Component {
         dispatch: PropTypes.func,
         notifications: PropTypes.arrayOf(
             PropTypes.shape({
-                type: PropTypes.oneOf(Notifications.alertTypes),
+                type: PropTypes.oneOf(ALERTS),
                 message: PropTypes.string
             })
         )
     };
-
-    static get alertTypes() {
-        return Object.values(ALERTS);
-    }
 }
