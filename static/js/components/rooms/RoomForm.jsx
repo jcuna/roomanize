@@ -143,22 +143,12 @@ export default class RoomForm extends Component {
         }
     }
 
-    onInputChange({ target }, validation) {
-        console.log(target, validation);
-
-        // if (target.name === 'rent') {
-        //     if (isNaN(target.value) && target.value !== '') {
-        //         if (!target.classList.contains('is-invalid')) {
-        //             target.classList.add('is-invalid');
-        //             this.formIsValid(false);
-        //         }
-        //     } else {
-        //         this.formIsValid(true);
-        //         if (target.classList.contains('is-invalid')) {
-        //             target.classList.remove('is-invalid');
-        //         }
-        //     }
-        // }
+    onInputChange(e, validation) {
+        if (validation.rent.isValid && validation['room-name'].isValid) {
+            this.formIsValid(true);
+        } else {
+            this.formIsValid(false);
+        }
     }
 
     formIsValid(isIt) {
