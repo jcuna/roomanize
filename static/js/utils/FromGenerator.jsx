@@ -317,17 +317,17 @@ FormGenerator[FORM_VALIDATION.REQUIRED + VALIDATE_FUNC_SUFFIX] = ({ target }) =>
 };
 
 FormGenerator[FORM_VALIDATION.ALPHA_NUM + VALIDATE_FUNC_SUFFIX] = ({ target }) => {
-    // TODO: implement;
     if (target.value.replace(' ', '') !== '') {
-        return true;
+        return new RegExp('^[a-zA-Z0-9_]*$').test(target.value);
     }
     return true;
 };
 
 FormGenerator[FORM_VALIDATION.EMAIL + VALIDATE_FUNC_SUFFIX] = ({ target }) => {
-    // TODO: implement;
     if (target.value.replace(' ', '') !== '') {
-        return true;
+        const regex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@(([[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+        return regex.test(String(target.value).toLowerCase());
     }
     return true;
 };
@@ -337,9 +337,14 @@ FormGenerator[FORM_VALIDATION.NO_SPACE + VALIDATE_FUNC_SUFFIX] = ({ target }) =>
 };
 
 FormGenerator[FORM_VALIDATION.PHONE + VALIDATE_FUNC_SUFFIX] = ({ target }) => {
-    // TODO: implement;
     if (target.value.replace(' ', '') !== '') {
-        return true;
+        const phoneRegex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+
+        if (phoneRegex.test(target.value)) {
+            target.value = target.value.replace(phoneRegex, '($1) $2-$3');
+            return true;
+        }
+        return false;
     }
     return true;
 };

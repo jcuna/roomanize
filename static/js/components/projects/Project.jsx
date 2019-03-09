@@ -103,21 +103,24 @@ export default class Project extends React.Component {
                     placeholder: 'Nombre Del Proyecto',
                     onChange: this.validateFields,
                     name: 'name',
-                    defaultValue: projects.editing.name
+                    defaultValue: projects.editing.name,
+                    validate: 'required',
                 },
                 {
                     type: 'tel',
                     placeholder: 'Telefono',
                     onChange: this.validateFields,
                     name: 'phone',
-                    defaultValue: projects.editing.contact
+                    defaultValue: projects.editing.contact,
+                    validate: ['required', 'phone'],
                 },
                 {
                     type: 'text',
                     placeholder: 'Direccion',
                     onChange: this.validateFields,
                     name: 'address',
-                    defaultValue: projects.editing.address
+                    defaultValue: projects.editing.address,
+                    validate: 'required',
                 },
                 {
                     type: 'checkbox',
