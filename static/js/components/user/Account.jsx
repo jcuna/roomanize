@@ -81,7 +81,7 @@ export default class Account extends React.Component {
                             disabled: this.state.disabledPW2
                         }
                     ],
-                    callback: this.handleSubmit,
+                    onSubmit: this.handleSubmit,
                     object: this,
                     initialRefs: this.initialRefs
                 } }/>
@@ -126,7 +126,6 @@ export default class Account extends React.Component {
     }
 
     handleSubmit(e) {
-        e.preventDefault();
         this.props.dispatch(updatePassword(
             {
                 token: this.props.match.params.user_token,

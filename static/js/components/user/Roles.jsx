@@ -37,7 +37,7 @@ export default class Roles extends React.Component {
                 <FormGenerator { ...{
                     formName: 'roles-form',
                     button: this.state.button,
-                    callback: this.submit.bind(this),
+                    onSubmit: this.submit.bind(this),
                     object: this,
                     elements: [
                         { type: 'input', placeholder: 'Role', onChange: this.toggleButtonDisabled.bind(this), name: 'role' }
@@ -59,8 +59,7 @@ export default class Roles extends React.Component {
         }
     }
 
-    submit(e) {
-        e.preventDefault();
+    submit() {
         let exists = false;
 
         this.props.roles.assigned.forEach((item) => {

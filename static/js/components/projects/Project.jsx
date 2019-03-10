@@ -132,8 +132,7 @@ export default class Project extends React.Component {
                     checked: projects.editing.active
                 },
             ],
-            callback: this.handleSubmit,
-            object: this
+            onSubmit: this.handleSubmit,
         } }/></div>;
     }
 
@@ -230,7 +229,7 @@ export default class Project extends React.Component {
         }));
     }
 
-    validateFields() {
+    validateFields(event, validation) {
         const project = {
             name: '',
             phone: '',
@@ -238,29 +237,22 @@ export default class Project extends React.Component {
             address: ''
         };
 
+        let formIsValid = true;
+
         Object.keys(project).forEach((el) => {
-            if (this.refs[el].type === 'checkbox') {
-                project[el] = this.refs[el].checked;
-            } else {
-                project[el] = this.refs[el].value;
+            if (!validation[el].isValid) {
+                formIsValid = false;
             }
+            project[el] = validation[el].value;
         });
 
-        if (project.name !== '' && project.phone !== '') {
-            this.setState({
-                button: { value: 'Agregar', disabled: false },
-                project
-            });
-        } else {
-            this.setState({
-                button: { value: 'Agregar', disabled: true }
-            });
-        }
+        this.setState({
+            button: { value: 'Agregar', disabled: !formIsValid },
+            project
+        });
     }
 
-    handleSubmit(e) {
-        e.preventDefault();
-
+    handleSubmit() {
         let action;
 
         let data;
@@ -275,7 +267,7 @@ export default class Project extends React.Component {
             data = { ...this.state.project };
         }
 
-        this.props.dispatch(action(data, () => {
+        this.props.dispatch(action(data, (resp) => {
             if (editMode) {
                 this.props.history.push(ENDPOINTS.PROJECTS_URL);
             }
@@ -285,14 +277,7 @@ export default class Project extends React.Component {
                 button: { value: 'Agregar', disabled: true },
                 project: {}
             });
-
-            Object.keys(this.refs).forEach((el) => {
-                if (this.refs[el].type === 'checkbox') {
-                    this.refs[el].checked = false;
-                } else {
-                    this.refs[el].value = '';
-                }
-            });
+            this.props.history.push(`${ENDPOINTS.PROJECTS_URL}/${resp.data.id}`);
         }));
     }
 

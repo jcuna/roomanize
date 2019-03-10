@@ -197,7 +197,6 @@ export default class Users extends React.Component {
     }
 
     editUser(e) {
-        e.preventDefault();
         e.target.className += ' loading-button';
         this.props.dispatch(editUser(this.state.newUser, () => {
             // hide notification
@@ -210,7 +209,6 @@ export default class Users extends React.Component {
     }
 
     createUser(e) {
-        e.preventDefault();
         e.target.disabled = true;
         e.target.className += ' loading-button';
         this.props.dispatch(createUser(this.state.newUser, () => {

@@ -64,7 +64,7 @@ export default class Login extends React.Component {
                     validate: 'required',
                 }
             ],
-            callback: this.handleSubmit,
+            onSubmit: this.handleSubmit,
         } }/>;
     }
 
@@ -81,7 +81,6 @@ export default class Login extends React.Component {
     }
 
     handleSubmit(e, validation) {
-        e.preventDefault();
         this.props.dispatch(login(validation.email.value, validation.password.value));
     }
 

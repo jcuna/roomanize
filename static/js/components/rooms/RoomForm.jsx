@@ -82,7 +82,7 @@ export default class RoomForm extends Component {
                         defaultValue: this.state.description,
                     },
                 ],
-                callback: this.handleSubmit,
+                onSubmit: this.handleSubmit,
             } }/>
         </section>;
     }
@@ -98,8 +98,6 @@ export default class RoomForm extends Component {
     }
 
     handleSubmit(event, validation) {
-        event.preventDefault();
-
         const room = {
             project_id: this.props.user.attributes.preferences.default_project,
             name: validation['room-name'].value,

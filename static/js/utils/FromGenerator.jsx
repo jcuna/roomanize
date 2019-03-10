@@ -12,15 +12,25 @@ class FormGenerator extends React.Component {
 
         const references = {};
         const onChangeCall = {};
+        const transformable = {};
 
         props.elements.forEach(element => {
+            let isTransformable = false;
+
+            if (typeof element.validate === 'object') {
+                isTransformable = element.validate.includes(FORM_VALIDATION.PHONE);
+            } else if (typeof element.validate === 'string') {
+                isTransformable = element.validate === FORM_VALIDATION.PHONE;
+            }
+            transformable[element.name] = isTransformable;
             references[element.name] = {
-                isValid: FormGenerator.getInitialValidationValue(element),
+                isValid: FormGenerator.getInitialValidationValue(element, isTransformable),
                 value: '',
             };
             onChangeCall[element.name] = element.onChange;
         });
         this.state = {
+            transformable,
             references,
             onChangeCall,
             currentEvent: null,
@@ -73,7 +83,13 @@ class FormGenerator extends React.Component {
     generateForm(elements, formName, button, sectionClass) {
         return React.createElement(
             'form',
-            { className: formName, onSubmit: event => this.props.callback(event, this.state.references) },
+            {
+                className: formName,
+                onSubmit: event => {
+                    event.preventDefault();
+                    this.props.onSubmit(event, this.state.references);
+                }
+            },
 
             React.createElement('section', { className: sectionClass },
                 elements.map((b, k) => {
@@ -124,20 +140,34 @@ class FormGenerator extends React.Component {
         );
     }
 
-    static getInitialValidationValue(element) {
+    static getInitialValidationValue(element, isTransformable) {
         let isValid = true;
 
         if (typeof element.validate === 'object' && element.validate.indexOf(FORM_VALIDATION.REQUIRED > -1) ||
             typeof element.validate === 'string' && element.validate === FORM_VALIDATION.REQUIRED) {
             isValid = false;
         }
+        if (isTransformable) {
+
+        }
         return isValid;
     }
 
     setElementState(key, isValid, event) {
+        let value = '';
+
+        if (event.target.type === 'radio' || event.target.type === 'checkbox') {
+            value = event.target.checked;
+        } else {
+            value = event.target.value;
+        }
+
+        if (this.state.transformable[key]) {
+            value = value.replace(/\D/g, '');
+        }
         const currentReferences = { ...this.state.references, [key]: {
             isValid,
-            value: event.target.value
+            value,
         }};
 
         event.persist();
@@ -278,7 +308,7 @@ class FormGenerator extends React.Component {
 
     static propTypes = {
         formName: PropTypes.string.isRequired,
-        callback: PropTypes.func,
+        onSubmit: PropTypes.func,
         object: PropTypes.object,
         elements: PropTypes.arrayOf(PropTypes.shape({
             name: PropTypes.string.required,

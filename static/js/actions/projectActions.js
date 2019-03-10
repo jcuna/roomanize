@@ -39,7 +39,7 @@ export const createProject = (data, success) =>
                 method: 'POST',
                 headers: header
             }, data).then((resp) => {
-                success();
+                success(resp);
                 dispatch({ type: PROJECT_CREATED, payload: { ...data, id: resp.id }});
             }));
     };
@@ -53,7 +53,7 @@ export const updateProject = (data, success) =>
                 method: 'PUT',
                 headers: header
             }, data).then((resp) => {
-                success();
+                success(resp);
                 dispatch({ type: PROJECT_UPDATED, payload: { id: resp.id }});
             })
         );
