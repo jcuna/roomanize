@@ -80,8 +80,8 @@ class Projects(Resource):
             updated_data.update({'name': data['name']})
         if 'address' in data:
             updated_data.update({'address': data['address']})
-        if 'contact' in data:
-            updated_data.update({'contact': data['contact']})
+        if 'phone' in data:
+            updated_data.update({'contact': data['phone']})
         if 'deleted' in data:
             updated_data.update({'deleted': datetime.utcnow()})
 

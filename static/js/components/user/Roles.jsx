@@ -24,6 +24,8 @@ export default class Roles extends React.Component {
         this.confirmChanges = this.confirmChanges.bind(this);
         this.updateObject = this.updateObject.bind(this);
         this.confirmRoleDeletion = this.confirmRoleDeletion.bind(this);
+        this.submit = this.submit.bind(this);
+        this.toggleButtonDisabled = this.toggleButtonDisabled.bind(this);
 
         if (props.roles.status === STATUS.PENDING) {
             props.dispatch(fetchRoles());
@@ -37,33 +39,38 @@ export default class Roles extends React.Component {
                 <FormGenerator { ...{
                     formName: 'roles-form',
                     button: this.state.button,
-                    onSubmit: this.submit.bind(this),
-                    object: this,
+                    onSubmit: this.submit,
                     elements: [
-                        { type: 'input', placeholder: 'Role', onChange: this.toggleButtonDisabled.bind(this), name: 'role' }
+                        {
+                            type: 'input',
+                            placeholder: 'Role',
+                            onChange: this.toggleButtonDisabled,
+                            name: 'role',
+                            validate: 'required',
+                        }
                     ]
                 } }/>
             </div>
         );
     }
 
-    toggleButtonDisabled() {
-        if (this.refs.role.value !== '' && typeof this.state.button.disabled !== 'undefined') {
+    toggleButtonDisabled(event, validation) {
+        if (validation.role.isValid) {
             this.setState({
                 button: { value: 'Agregar role' }
             });
-        } else if (this.refs.role.value === '' && typeof this.state.button.disabled === 'undefined') {
+        } else {
             this.setState({
                 button: { value: 'Agregar role', disabled: 'disabled' }
             });
         }
     }
 
-    submit() {
+    submit(event, validation) {
         let exists = false;
 
         this.props.roles.assigned.forEach((item) => {
-            if (item.name.toLowerCase() === this.refs.role.value.toLowerCase()) {
+            if (item.name.toLowerCase() === validation.role.value.toLowerCase()) {
                 exists = true;
             }
         });
@@ -72,12 +79,11 @@ export default class Roles extends React.Component {
             this.props.dispatch(notifications([
                 { type: ALERTS.DANGER, message: 'Role con mismo nombre ya existe' }
             ]));
-            this.refs.role.value = '';
-            this.toggleButtonDisabled();
+            this.toggleButtonDisabled(event, validation);
         } else {
-            this.props.dispatch(createRole(this.refs.role.value));
-            this.refs.role.value = '';
+            this.props.dispatch(createRole(validation.role.value));
         }
+        event.target.value = '';
     }
 
     get rolesTable() {

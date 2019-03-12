@@ -29,13 +29,12 @@ export default class Project extends React.Component {
         this.state = { button: { value: 'Agregar', disabled: true }, project: {}};
 
         if (typeof props.match.params.project_id !== 'undefined' && props.projects.status === STATUS.COMPLETE) {
-            const project = this.getEditingProject(props);
+            const project = this.getEditingProject(props, );
 
             if (project) {
                 props.dispatch(editProject(project));
             }
         }
-
         this.selectCheckBox = this.selectCheckBox.bind(this);
         this.validateFields = this.validateFields.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -48,8 +47,10 @@ export default class Project extends React.Component {
                 button: { value: 'Agregar', disabled: true }
             });
             dispatch(clearProjectEditing());
-        } else if (typeof this.props.match.params.project_id !== 'undefined' && projects.status === STATUS.COMPLETE &&
-            Number(projects.editing.id) !== Number(this.props.match.params.project_id)) {
+        } else if ((typeof this.props.match.params.project_id !== 'undefined' && projects.status === STATUS.COMPLETE &&
+            Number(projects.editing.id) !== Number(this.props.match.params.project_id)) ||
+            (typeof this.props.match.params.project_id !== 'undefined' && projects.status === STATUS.PENDING &&
+            this.props.projects.status === STATUS.COMPLETE)) {
             const project = this.getEditingProject(this.props);
 
             if (project) {
@@ -70,14 +71,13 @@ export default class Project extends React.Component {
         const canCreate = hasAccess(ENDPOINTS.PROJECTS_URL, ACCESS_TYPES.WRITE);
         const { projects, match } = this.props;
         const notEditing = typeof match.params.project_id === 'undefined';
-        const editing = !notEditing;
 
         return (
             <section className="project-wrapper">
                 <Breadcrumbs { ...this.props } title={ this.props.projects.editing.name }/>
                 <h3>Proyectos</h3>
                 { notEditing && this.getProjects() }
-                { (projects.projects.length < 10 && canCreate || editing) && this.getForm(this.props) }
+                { (projects.projects.length < 10 && canCreate || !notEditing) && this.getForm(this.props) }
             </section>
         );
     }
@@ -86,7 +86,7 @@ export default class Project extends React.Component {
         return projects.projects.find(a => Number(a.id) === Number(match.params.project_id));
     }
 
-    getForm({ projects, match }) {
+    getForm({ projects, match, user }) {
         const editMode = typeof match.params.project_id !== 'undefined';
         const title = editMode ? 'Editar' : 'Crear';
 
@@ -129,7 +129,7 @@ export default class Project extends React.Component {
                     id: 'active',
                     name: 'active',
                     label: 'Activar',
-                    checked: projects.editing.active
+                    checked: projects.editing.id === user.attributes.preferences.default_project
                 },
             ],
             onSubmit: this.handleSubmit,
@@ -268,8 +268,11 @@ export default class Project extends React.Component {
         }
 
         this.props.dispatch(action(data, (resp) => {
+            let id = resp.data.id;
+
             if (editMode) {
-                this.props.history.push(ENDPOINTS.PROJECTS_URL);
+                id = data.id;
+                this.props.dispatch(editProject(data));
             }
             this.props.dispatch(fetchProjects());
             this.props.dispatch(fetchUser());
@@ -277,7 +280,7 @@ export default class Project extends React.Component {
                 button: { value: 'Agregar', disabled: true },
                 project: {}
             });
-            this.props.history.push(`${ENDPOINTS.PROJECTS_URL}/${resp.data.id}`);
+            this.props.history.push(`${ENDPOINTS.PROJECTS_URL}/${id}`);
         }));
     }
 

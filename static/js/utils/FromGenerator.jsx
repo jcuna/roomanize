@@ -4,7 +4,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FORM_VALIDATION, VALIDATE_FUNC_SUFFIX } from '../constants';
+import { FORM_VALIDATION, VALIDATE_FUNC_SUFFIX, VALIDATE_TRANSFORM_FUNC } from '../constants';
 
 class FormGenerator extends React.Component {
     constructor(props) {
@@ -23,10 +23,7 @@ class FormGenerator extends React.Component {
                 isTransformable = element.validate === FORM_VALIDATION.PHONE;
             }
             transformable[element.name] = isTransformable;
-            references[element.name] = {
-                isValid: FormGenerator.getInitialValidationValue(element, isTransformable),
-                value: '',
-            };
+            references[element.name] = FormGenerator.getInitialValidationValue(element, isTransformable);
             onChangeCall[element.name] = element.onChange;
         });
         this.state = {
@@ -65,10 +62,24 @@ class FormGenerator extends React.Component {
     componentDidUpdate(prevProps, prevState) {
         Object.keys(this.state.references).forEach(key => {
             if (this.state.references[key].value !== prevState.references[key].value) {
+                const references = { ...this.state.references };
+
+                if (this.state.transformable[key]) {
+                    references[key].value = FormGenerator.transformValue(references[key]);
+                }
+
                 this.state.onChangeCall[[key]] &&
-                this.state.onChangeCall[key](this.state.currentEvent, this.state.references);
+                this.state.onChangeCall[key](this.state.currentEvent, references);
             }
         });
+    }
+
+    static transformValue(reference) {
+        /**
+         * for now there's only one transformable
+         */
+
+        return reference.value.replace(/\D/g, '');
     }
 
     /**
@@ -129,7 +140,7 @@ class FormGenerator extends React.Component {
                     onChange: this.bindValidate(element, reference),
                     ref: reference,
                     value: element.value,
-                    defaultValue: element.defaultValue,
+                    defaultValue: this.state.references[element.name].value,
                     defaultChecked: element.checked,
                     disabled: element.disabled || false,
                     readOnly: element.readOnly || false
@@ -142,15 +153,31 @@ class FormGenerator extends React.Component {
 
     static getInitialValidationValue(element, isTransformable) {
         let isValid = true;
+        const isArray = typeof element.validate === 'object';
 
-        if (typeof element.validate === 'object' && element.validate.indexOf(FORM_VALIDATION.REQUIRED > -1) ||
-            typeof element.validate === 'string' && element.validate === FORM_VALIDATION.REQUIRED) {
+        let value = typeof element.defaultValue === 'undefined' ? '' : element.defaultValue;
+        const isString = typeof element.validate === 'string';
+
+        if ((isArray && element.validate.indexOf(FORM_VALIDATION.REQUIRED > -1) || isString &&
+            element.validate === FORM_VALIDATION.REQUIRED) &&
+            typeof element.defaultValue === 'undefined' || element.defaultValue === '') {
             isValid = false;
         }
-        if (isTransformable) {
-
+        if (isTransformable && (typeof element.defaultValue !== 'undefined' || element.defaultValue !== '')) {
+            if (isArray) {
+                element.validate.forEach(method => {
+                    if (typeof FormGenerator[method + VALIDATE_TRANSFORM_FUNC] === 'function') {
+                        value = FormGenerator[method + VALIDATE_TRANSFORM_FUNC](value);
+                    }
+                });
+            } else if (isString) {
+                value = FormGenerator[element.validate + VALIDATE_TRANSFORM_FUNC](value);
+            }
         }
-        return isValid;
+        return {
+            isValid,
+            value,
+        };
     }
 
     setElementState(key, isValid, event) {
@@ -162,9 +189,6 @@ class FormGenerator extends React.Component {
             value = event.target.value;
         }
 
-        if (this.state.transformable[key]) {
-            value = value.replace(/\D/g, '');
-        }
         const currentReferences = { ...this.state.references, [key]: {
             isValid,
             value,
@@ -333,6 +357,18 @@ class FormGenerator extends React.Component {
         button: PropTypes.object,
         className: PropTypes.string,
     }
+
+    static get alpha_num_re() {
+        return '^[a-zA-Z0-9_]*$';
+    }
+
+    static get email_re() {
+        return /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@(([[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    }
+
+    static get phone_re() {
+        return /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+    }
 }
 
 FormGenerator[FORM_VALIDATION.NUMBER + VALIDATE_FUNC_SUFFIX] = ({ target }) => {
@@ -348,16 +384,14 @@ FormGenerator[FORM_VALIDATION.REQUIRED + VALIDATE_FUNC_SUFFIX] = ({ target }) =>
 
 FormGenerator[FORM_VALIDATION.ALPHA_NUM + VALIDATE_FUNC_SUFFIX] = ({ target }) => {
     if (target.value.replace(' ', '') !== '') {
-        return new RegExp('^[a-zA-Z0-9_]*$').test(target.value);
+        return new RegExp(FormGenerator.alpha_num_re).test(target.value);
     }
     return true;
 };
 
 FormGenerator[FORM_VALIDATION.EMAIL + VALIDATE_FUNC_SUFFIX] = ({ target }) => {
     if (target.value.replace(' ', '') !== '') {
-        const regex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@(([[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-        return regex.test(String(target.value).toLowerCase());
+        return FormGenerator.email_re.test(String(target.value).toLowerCase());
     }
     return true;
 };
@@ -368,15 +402,17 @@ FormGenerator[FORM_VALIDATION.NO_SPACE + VALIDATE_FUNC_SUFFIX] = ({ target }) =>
 
 FormGenerator[FORM_VALIDATION.PHONE + VALIDATE_FUNC_SUFFIX] = ({ target }) => {
     if (target.value.replace(' ', '') !== '') {
-        const phoneRegex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
-
-        if (phoneRegex.test(target.value)) {
-            target.value = target.value.replace(phoneRegex, '($1) $2-$3');
+        if (FormGenerator.phone_re.test(target.value)) {
+            target.value = FormGenerator[FORM_VALIDATION.PHONE + VALIDATE_TRANSFORM_FUNC](target.value);
             return true;
         }
         return false;
     }
     return true;
+};
+
+FormGenerator[FORM_VALIDATION.PHONE + VALIDATE_TRANSFORM_FUNC] = (value) => {
+    return value.replace(FormGenerator.phone_re, '($1) $2-$3');
 };
 
 FormGenerator[FORM_VALIDATION.REGEX + VALIDATE_FUNC_SUFFIX] = ({ target }, regex) => {

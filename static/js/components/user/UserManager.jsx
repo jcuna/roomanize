@@ -43,7 +43,7 @@ export default class UserManager extends React.Component {
                 access: {
                     projects
                 }
-            }
+            },
         };
 
         this.updateUserData = this.updateUserData.bind(this);
@@ -54,7 +54,6 @@ export default class UserManager extends React.Component {
     render() {
         return <div><FormGenerator { ...{
             formName: 'create-user-form',
-            object: this,
             elements: this.formElements
         } }/>
         { this.rolesSection }
@@ -127,20 +126,36 @@ export default class UserManager extends React.Component {
         });
     }
 
-    updateUserData() {
-        const user = {
-            first_name: this.refs.first_name.value,
-            last_name: this.refs.last_name.value,
-            email: this.refs.email.value,
-            roles: this.state.roles,
-            attributes: this.state.attributes
-        };
+    updateUserData(event, validation) {
+        let user = {};
+
+        if (event && validation) {
+            user = {
+                first_name: validation['first-name'].value,
+                last_name: validation['last-name'].value,
+                email: validation.email.value,
+                roles: this.state.roles,
+                attributes: this.state.attributes
+            };
+            if (validation['first-name'].isValid && validation['last-name'].isValid && validation.email.isValid) {
+                this.setState({ actionButtonDisabled: false });
+            } else {
+                this.setState({ actionButtonDisabled: true });
+            }
+        } else {
+            user = {
+                first_name: validation['first-name'].value,
+                last_name: validation['last-name'].value,
+                email: validation.email.value,
+                roles: this.state.roles,
+                attributes: this.state.attributes
+            };
+        }
 
         if (typeof this.props.editingUser !== 'undefined') {
             user.id = this.props.editingUser.id;
         }
         this.props.onDataChanged(user);
-        this.userIsValid(user);
     }
 
     updateUserDataRoles(checkbox) {
@@ -195,19 +210,29 @@ export default class UserManager extends React.Component {
         });
     }
 
-    userIsValid(user) {
-        if (user.first_name !== '' && user.last_name !== '' && user.email !== '') {
-            this.setState({ actionButtonDisabled: false });
-        } else {
-            this.setState({ actionButtonDisabled: true });
-        }
-    }
-
     get formElements() {
         const elements = [
-            { type: 'input', placeholder: 'Nombre', onChange: this.updateUserData, name: 'first-name' },
-            { type: 'input', placeholder: 'Apellidos', onChange: this.updateUserData, name: 'last-name' },
-            { type: 'input', placeholder: 'Email', onChange: this.updateUserData, name: 'email' }
+            {
+                type: 'input',
+                placeholder: 'Nombre',
+                onChange: this.updateUserData,
+                name: 'first-name',
+                validate: 'required',
+            },
+            {
+                type: 'input',
+                placeholder: 'Apellidos',
+                onChange: this.updateUserData,
+                name: 'last-name',
+                validate: 'required',
+            },
+            {
+                type: 'input',
+                placeholder: 'Email',
+                onChange: this.updateUserData,
+                name: 'email',
+                validate: ['required', 'email'],
+            }
         ];
 
         if (typeof this.props.editingUser !== 'undefined') {
