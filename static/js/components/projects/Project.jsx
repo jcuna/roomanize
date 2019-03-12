@@ -29,7 +29,7 @@ export default class Project extends React.Component {
         this.state = { button: { value: 'Agregar', disabled: true }, project: {}};
 
         if (typeof props.match.params.project_id !== 'undefined' && props.projects.status === STATUS.COMPLETE) {
-            const project = this.getEditingProject(props, );
+            const project = this.getEditingProject(props);
 
             if (project) {
                 props.dispatch(editProject(project));

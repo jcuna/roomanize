@@ -110,7 +110,8 @@ class Rooms(Resource):
 
         else:
             sql_query = Room.query.filter_by(project_id=project_id)
-            paginator = Paginator(sql_query, int(page), request.args.get('orderBy'), request.args.get('orderDir'))
+            order_by = request.args.get('orderBy') if 'orderBy' in request.args else 'id'
+            paginator = Paginator(sql_query, int(page), order_by, request.args.get('orderDir'))
             total_pages = paginator.total_pages
             rooms = paginator.get_result()
 

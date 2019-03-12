@@ -113,7 +113,7 @@ class Paginator:
 
         if order_by:
             order_by = getattr(self.query.column_descriptions[0]['type'], order_by)
-            order_dir = getattr(order_by, order_dir) if order_dir else 'ASC'
+            order_dir = getattr(order_by, order_dir if order_dir else 'asc')
             self.query = self.query.order_by(order_dir())
 
     def get_items(self) -> list:

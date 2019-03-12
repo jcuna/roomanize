@@ -72,60 +72,48 @@ export default class Account extends React.Component {
                     formName: 'pw-reset-form',
                     button: { value: 'Cambiar', disabled: this.state.errors },
                     elements: [
-                        { type: 'password', placeholder: 'Contraseña', onChange: this.validateFields, name: 'password' },
+                        {
+                            type: 'password',
+                            placeholder: 'Contraseña',
+                            onChange: this.validateFields,
+                            name: 'password',
+                            validate: [
+                                'required',
+                                'length:6',
+                                'regex:^(?=.*\\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&*(),.?":{}|<>])'
+                            ],
+                        },
                         { type: 'password',
                             placeholder:
                                 'Repetir Contraseña',
                             onChange: this.validateFields,
                             name: 'password-repeat',
-                            disabled: this.state.disabledPW2
+                            disabled: this.state.disabledPW2,
+                            validate: [
+                                'required',
+                                'length:6',
+                                'regex:^(?=.*\\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&*(),.?":{}|<>])'
+                            ],
                         }
                     ],
                     onSubmit: this.handleSubmit,
-                    object: this,
-                    initialRefs: this.initialRefs
                 } }/>
             </div>
         );
     }
 
-    validateFields({ target }) {
-        if (target.name === 'password') {
-            this.refs.password_repeat.value = '';
-            this.setState({ pw2: '', errors: true });
-            if (Account.passIsValid(target.value)) {
-                this.setState({ pw: target.value, disabledPW2: false });
-                if (target.classList.contains('is-invalid')) {
-                    target.classList.remove('is-invalid');
-                }
-            } else {
-                this.setState({ pw: '', disabledPW2: true });
-                if (!target.classList.contains('is-invalid')) {
-                    target.classList.add('is-invalid');
-                }
-            }
+    validateFields(event, validation) {
+        if (validation.password.isValid) {
+            this.setState({ pw: validation.password.value, disabledPW2: false });
         }
 
-        if (target.name === 'password-repeat') {
-            if (target.value === this.state.pw) {
-                this.setState({ pw2: target.value, errors: false });
-                if (target.classList.contains('is-invalid')) {
-                    target.classList.remove('is-invalid');
-                }
-            } else {
-                this.setState({ errors: true, pw2: '' });
-                if (!target.classList.contains('is-invalid')) {
-                    target.classList.add('is-invalid');
-                }
-            }
+        if (validation['password-repeat'].isValid &&
+            validation['password-repeat'].value === validation.password.value) {
+            this.setState({ pw2: validation['password-repeat'].value, errors: false });
         }
     }
 
-    static passIsValid(password) {
-        return password.length > 5 && password.match(/^(?=.*\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&*(),.?":{}|<>])/) !== null;
-    }
-
-    handleSubmit(e) {
+    handleSubmit() {
         this.props.dispatch(updatePassword(
             {
                 token: this.props.match.params.user_token,

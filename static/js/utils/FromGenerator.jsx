@@ -47,18 +47,6 @@ class FormGenerator extends React.Component {
         );
     }
 
-    /**
-     * pass refs down to callee
-     */
-    componentDidMount() {
-        if (typeof this.props.object !== 'undefined') {
-            this.props.object.refs = { ...this.refs };
-        }
-        if (typeof this.props.initialRefs !== 'undefined') {
-            this.props.initialRefs(this.refs);
-        }
-    }
-
     componentDidUpdate(prevProps, prevState) {
         Object.keys(this.state.references).forEach(key => {
             if (this.state.references[key].value !== prevState.references[key].value) {
@@ -221,17 +209,17 @@ class FormGenerator extends React.Component {
 
                 let isValid = true;
 
-                element.validate.forEach(strFunction => {
+                for (const strFunction of element.validate) {
                     if (strFunction === FORM_VALIDATION.REQUIRED) {
                         hasRequiredFunc = true;
                     } else {
                         isValid = this.runValidateFunction(strFunction, event, element);
 
                         if (!isValid) {
-                            return;
+                            break;
                         }
                     }
-                });
+                }
                 if (hasRequiredFunc && isValid) {
                     this.runValidateFunction(FORM_VALIDATION.REQUIRED, event, element);
                 }
@@ -243,14 +231,16 @@ class FormGenerator extends React.Component {
         };
     }
 
-    runValidateFunction(strFunction, event, element) {
+    runValidateFunction(inputFunc, event, element) {
         let extraArgs = [];
 
-        if (strFunction.indexOf(':') > -1) {
-            const parts = strFunction.split(':');
+        let strFunction = inputFunc;
+
+        if (inputFunc.indexOf(':') > -1) {
+            const parts = inputFunc.split(':');
 
             strFunction = parts.shift();
-            extraArgs = parts;
+            extraArgs = inputFunc.split(`${strFunction}:`).filter(el => el !== '');
         }
 
         if (typeof FormGenerator[strFunction + VALIDATE_FUNC_SUFFIX] === 'function') {
@@ -415,9 +405,12 @@ FormGenerator[FORM_VALIDATION.PHONE + VALIDATE_TRANSFORM_FUNC] = (value) => {
     return value.replace(FormGenerator.phone_re, '($1) $2-$3');
 };
 
-FormGenerator[FORM_VALIDATION.REGEX + VALIDATE_FUNC_SUFFIX] = ({ target }, regex) => {
+FormGenerator[FORM_VALIDATION.REGEX + VALIDATE_FUNC_SUFFIX] = ({ target }, regexArr) => {
+    if (regexArr.length === 0) {
+        throw new Error('No regex passed to regex function, use regex:exp');
+    }
     if (target.value.replace(' ', '') !== '') {
-        return new RegExp(regex.pop()).test(target.value);
+        return new RegExp(regexArr[0]).test(target.value);
     }
     return true;
 };
@@ -431,10 +424,10 @@ FormGenerator[FORM_VALIDATION.REGEX + VALIDATE_FUNC_SUFFIX] = ({ target }, regex
  */
 FormGenerator[FORM_VALIDATION.LENGTH + VALIDATE_FUNC_SUFFIX] = ({ target }, args) => {
     if (target.value.replace(' ', '') !== '') {
-        if (target.length < Number(args[0])) {
+        if (target.value.length < Number(args[0])) {
             return false;
         }
-        if (args[1] && target.length > Number(args[1])) {
+        if (args[1] && target.value.length > Number(args[1])) {
             return false;
         }
     }

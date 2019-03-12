@@ -44,6 +44,9 @@ export default class UserManager extends React.Component {
                     projects
                 }
             },
+            first_name: props.editingUser.first_name,
+            last_name: props.editingUser.last_name,
+            email: props.editingUser.email,
         };
 
         this.updateUserData = this.updateUserData.bind(this);
@@ -129,7 +132,7 @@ export default class UserManager extends React.Component {
     updateUserData(event, validation) {
         let user = {};
 
-        if (event && validation) {
+        if (typeof event !== 'undefined' && typeof validation !== 'undefined') {
             user = {
                 first_name: validation['first-name'].value,
                 last_name: validation['last-name'].value,
@@ -137,19 +140,29 @@ export default class UserManager extends React.Component {
                 roles: this.state.roles,
                 attributes: this.state.attributes
             };
-            if (validation['first-name'].isValid && validation['last-name'].isValid && validation.email.isValid) {
-                this.setState({ actionButtonDisabled: false });
-            } else {
-                this.setState({ actionButtonDisabled: true });
-            }
+            const stateUser = {
+                first_name: validation['first-name'].value,
+                last_name: validation['last-name'].value,
+                email: validation.email.value,
+            };
+
+            stateUser.actionButtonDisabled = !(
+                validation['first-name'].isValid && validation['last-name'].isValid && validation.email.isValid
+            );
+            this.setState(stateUser);
         } else {
             user = {
-                first_name: validation['first-name'].value,
-                last_name: validation['last-name'].value,
-                email: validation.email.value,
+                first_name: this.state.first_name,
+                last_name: this.state.last_name,
+                email: this.state.email,
                 roles: this.state.roles,
                 attributes: this.state.attributes
             };
+            if (user.first_name !== '' && user.last_name !== '' && user.email !== '') {
+                this.setState({
+                    actionButtonDisabled: false,
+                });
+            }
         }
 
         if (typeof this.props.editingUser !== 'undefined') {
