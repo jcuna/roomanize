@@ -144,6 +144,10 @@ class Rooms(Resource):
     def put(self, room_id):
         pass
 
+        room = Room.query.filter_by(id=room_id).first()
+        data = get_fillable(Room, **request.get_json())
+
+
 
 class TimeIntervals(Resource):
 

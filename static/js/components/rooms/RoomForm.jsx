@@ -109,7 +109,10 @@ export default class RoomForm extends Component {
 
         let action = createRoom;
 
+        let msg = 'agregada';
+
         if (this.state.id !== 0) {
+            msg = 'actualizada';
             room.id = this.state.id;
             action = editRoom;
         }
@@ -119,7 +122,7 @@ export default class RoomForm extends Component {
             (resp) => {
                 this.props.dispatch(notifications({
                     type: ALERTS.SUCCESS,
-                    message: 'Habitacion agregada correctamente.',
+                    message: 'Habitacion '+ msg + ' correctamente.',
                 }));
                 room.id = resp.id;
                 this.props.dispatch(selectRoom(room));
