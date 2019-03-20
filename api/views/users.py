@@ -33,7 +33,7 @@ class Users(Resource):
                 # the second param is a function that would raise exception
                 # if table not exist we cache it to avoid multiple
                 # executions when a user is just logged out.
-                Cache.remember('users.count', User.query.count, 24*60*60)
+                Cache.remember('users.count', User.query.count, 24 * 60 * 60)
             except Exception as ex:
                 if '1146' in ex.args[0]:
                     return {'error': 'install'}, 501

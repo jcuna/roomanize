@@ -1,7 +1,5 @@
 import json
-
 from sqlalchemy import UniqueConstraint
-
 from config import random_token
 from dal import db
 from sqlalchemy.orm import relationship
@@ -89,11 +87,10 @@ class UserAttributes(db.Model):
 
 
 class UserToken(db.Model):
-
     __tablename__ = 'user_tokens'
     id = db.Column(db.BigInteger, primary_key=True)
     user_id = db.Column(db.BigInteger, db.ForeignKey('users.id'), index=True)
-    token = db.Column(db.String(64, collation=collation,), unique=True, nullable=False)
+    token = db.Column(db.String(64, collation=collation, ), unique=True, nullable=False)
     expires = db.Column(db.DateTime(), nullable=False)
     target = db.Column(
         db.String(250, collation=collation),
@@ -225,7 +222,7 @@ class Policy(db.Model):
     start_ttv = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime.utcnow())
     end_ttv = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime(
         9999, 12, 31, 23, 59, 59, 999999)
-    )
+                        )
 
 
 class Receipt(db.Model):

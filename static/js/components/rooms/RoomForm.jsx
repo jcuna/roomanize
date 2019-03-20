@@ -122,9 +122,9 @@ export default class RoomForm extends Component {
             (resp) => {
                 this.props.dispatch(notifications({
                     type: ALERTS.SUCCESS,
-                    message: 'Habitacion '+ msg + ' correctamente.',
+                    message: 'Habitacion ' + msg + ' correctamente.',
                 }));
-                room.id = resp.id;
+                room.id = resp.id || room.id;
                 this.props.dispatch(selectRoom(room));
                 this.setState(room);
                 this.props.dispatch(fetchRooms(this.props.rooms.data.page));

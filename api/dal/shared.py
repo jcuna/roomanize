@@ -15,22 +15,24 @@ def row2dict(row):
     return d
 
 
-def get_fillable(model: db.Model, **kwargs):
-
+def get_fillable(model: db.Model, get_attr_object=False, **kwargs):
     if not hasattr(model, 'fillable') and any(kwargs):
         raise Exception('Must declare a fillable on class ' + model.__name__)
 
     fillable = {}
     for attribute_name in model.fillable:
         if attribute_name in kwargs:
-            fillable[attribute_name] = kwargs[attribute_name][0] if isinstance(kwargs[attribute_name], list) else\
+            if get_attr_object:
+                key = getattr(model, attribute_name)
+            else:
+                key = attribute_name
+            fillable[key] = kwargs[attribute_name][0] if isinstance(kwargs[attribute_name], list) else \
                 kwargs[attribute_name]
 
     return fillable
 
 
 def token_required(f):
-
     from dal.models import User
     from flask import current_app, request
 
@@ -57,7 +59,6 @@ def token_required(f):
 
 
 def access_required(f):
-
     from flask import request
     from core.router import permissions
 
@@ -95,7 +96,6 @@ def access_map():
 
 
 class Paginator:
-
     per_page = 20
     total = 0
     offset = 0
@@ -104,10 +104,9 @@ class Paginator:
     page = 1
 
     def __init__(self, query: BaseQuery, page: int = 1, order_by: str = None, order_dir: str = None):
-
         self.total = query.count()
         self.offset = (page * self.per_page) - self.per_page
-        self.total_pages = ceil(self.total/self.per_page)
+        self.total_pages = ceil(self.total / self.per_page)
         self.query = query
         self.page = page
 

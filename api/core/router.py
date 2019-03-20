@@ -13,7 +13,6 @@ permissions = {}
 
 
 class Router:
-
     version = 'v1.0'
     routes = {}
 
@@ -54,7 +53,7 @@ class Router:
 
             if request.method == 'POST':
                 data = request.form
-                if 'first_name' in data and data['first_name'] and 'last_name' in data and data['last_name']\
+                if 'first_name' in data and data['first_name'] and 'last_name' in data and data['last_name'] \
                         and 'email' in data and data['email'] and 'password' in data and data['password']:
                     user_data = get_fillable(User, **data)
                     user = User(**user_data)

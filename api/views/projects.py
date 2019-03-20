@@ -12,7 +12,7 @@ class Projects(Resource):
     @token_required
     def get(self):
 
-        access = request.user.attributes.user_access if hasattr(request.user.attributes, 'user_access')\
+        access = request.user.attributes.user_access if hasattr(request.user.attributes, 'user_access') \
             else None
 
         q = Project.query.filter_by(deleted=None)
@@ -142,18 +142,25 @@ class Rooms(Resource):
     @token_required
     @access_required
     def put(self, room_id):
-        pass
 
-        room = Room.query.filter_by(id=room_id).first()
-        data = get_fillable(Room, **request.get_json())
+        form_data = request.get_json()
+        project_id = form_data['project_id']
+        del form_data['project_id']
 
+        object_data = get_fillable(Room, True, **form_data)
+
+        Room.query.filter(Room.id == room_id).filter(Room.project_id == project_id) \
+            .update(object_data)
+
+        db.session.commit()
+
+        return {'message': 'success'}
 
 
 class TimeIntervals(Resource):
 
     @token_required
     def get(self):
-
         result = []
         for interval in TimeInterval.query.all():
             result.append(row2dict(interval))

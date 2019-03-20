@@ -5,10 +5,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Link from 'react-router-dom/es/Link';
+import { clearNotifications } from '../actions/appActions';
 
 export default class Breadcrumbs extends React.Component {
     render() {
-        const { title, match } = this.props;
+        const { title, match, dispatch } = this.props;
 
         const parts = match.url.split('/');
         const items = [];
@@ -42,7 +43,10 @@ export default class Breadcrumbs extends React.Component {
                     { items.map((item, key) =>
                         <li key={ item.key } className="breadcrumb-item">
                             { itemsLast === key && item.name }
-                            { itemsLast !== key && <Link to={ item.link }>{ item.name }</Link> }
+                            { itemsLast !== key && <Link
+                                onClick={ () => dispatch(clearNotifications()) }
+                                to={ item.link }>{ item.name }</Link>
+                            }
                         </li>
                     )}
                     { title && <li className="breadcrumb-item active" aria-current="page">{ title }</li>}
@@ -53,6 +57,7 @@ export default class Breadcrumbs extends React.Component {
 
     static propTypes = {
         match: PropTypes.object,
-        title: PropTypes.string
+        dispatch: PropTypes.func,
+        title: PropTypes.string,
     };
 }

@@ -26,7 +26,6 @@ export const editRoom = (data, resolve, reject) =>
             method: 'PUT',
             headers: header,
         }, data).then(resp => {
-            console.log(resp);
             dispatch({ type: ROOM_CREATED, payload: resp });
             resolve(resp.data);
         }, reject), reject);

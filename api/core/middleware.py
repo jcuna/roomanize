@@ -60,7 +60,6 @@ def error_handler(app: Flask):
 
 class HttpException(Exception):
     def __init__(self, message, status_code=400):
-
         super(HttpException, self).__init__(message)
 
         self.status_code = status_code
