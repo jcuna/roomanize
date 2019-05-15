@@ -20,7 +20,7 @@ def register():
         'agreements.Agreements@agreements_url': '/agreements|/agreements/|/agreements/<int:agreement_id>',
         'agreements.Policies@policies_url': '/policies|/policies/<int:policy_id>',
 
-        'tenants.Tenants@tenants_url': '/tenants|/tenants/|/tenants/<int:tenants_id>',
+        'tenants.Tenants@tenants_url': '/tenants|/tenants/|/tenants/<int:tenant_id>',
     }
 
 

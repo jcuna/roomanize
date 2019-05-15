@@ -174,6 +174,8 @@ class Room(db.Model):
 
 class Tenant(db.Model):
     __tablename__ = 'tenants'
+    fillable = ['first_name', 'last_name', 'email', 'phone', 'identification_number']
+
     id = db.Column(db.BigInteger, primary_key=True)
     first_name = db.Column(db.String(30, collation=collation), nullable=False)
     last_name = db.Column(db.String(30, collation=collation), nullable=False, index=True)
@@ -198,6 +200,7 @@ class TenantHistory(db.Model):
     reference3_phone = db.Column(db.String(10, collation=collation), nullable=True)
 
     tenant = relationship(Tenant, back_populates='history')
+    rental_agreement = relationship('RentalAgreement', uselist=False)
 
 
 class RentalAgreement(db.Model):
@@ -209,7 +212,7 @@ class RentalAgreement(db.Model):
     entered_on = db.Column(db.DateTime(), nullable=False)
     terminated_on = db.Column(db.DateTime())
 
-    tenant_history = relationship(TenantHistory)
+    tenant_history = relationship(TenantHistory, uselist=False, back_populates='rental_agreement')
     room = relationship(Room)
     interval = relationship(TimeInterval)
 

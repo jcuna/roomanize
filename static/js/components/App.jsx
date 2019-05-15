@@ -118,7 +118,8 @@ const getInitialState = (state) => {
         token: state.user.token,
         roles: state.roles.roles,
         projects: state.projects,
-        rooms: state.rooms
+        rooms: state.rooms,
+        tenants: state.tenants,
     };
 };
 

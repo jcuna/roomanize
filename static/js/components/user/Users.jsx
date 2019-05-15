@@ -138,11 +138,11 @@ export default class Users extends React.Component {
 
                         return <tr key={ i }>
                             <th scope='row'>{ i }</th>
-                            <td>{userFromList.id}</td>
-                            <td>{userFromList.name}</td>
-                            <td>{userFromList.email}</td>
+                            <td>{ userFromList.id }</td>
+                            <td>{ userFromList.name }</td>
+                            <td>{ userFromList.email }</td>
                             <td>
-                                {userFromList.roles.map((obj, r) => r < rolesCount - 1 ? `${obj.name}, ` : obj.name)}
+                                { userFromList.roles.map((obj, r) => r < rolesCount - 1 ? `${obj.name}, ` : obj.name) }
                             </td>
                             <td>
                                 <i className={ canEdit ? 'text-info fas fa-user-edit' : 'fas fa-ban' }

@@ -1,3 +1,4 @@
+from datetime import datetime
 from math import ceil
 from flask_sqlalchemy import SQLAlchemy, BaseQuery
 from sqlalchemy.orm import joinedload
@@ -10,7 +11,8 @@ db = SQLAlchemy()
 def row2dict(row):
     d = {}
     for column in row.__table__.columns:
-        d[column.name] = getattr(row, column.name)
+        attr = getattr(row, column.name)
+        d[column.name] = str(attr) if isinstance(attr, datetime) else attr
 
     return d
 

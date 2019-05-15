@@ -48,13 +48,17 @@ class FormGenerator extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        Object.keys(this.state.references).forEach(key => {
+        const refKeys = Object.keys(this.state.references);
+
+        refKeys.forEach(key => {
             if (this.state.references[key].value !== prevState.references[key].value) {
                 const references = { ...this.state.references };
 
-                if (this.state.transformable[key]) {
-                    references[key].value = FormGenerator.transformValue(references[key]);
-                }
+                refKeys.forEach(item => {
+                    if (this.state.transformable[item]) {
+                        references[item].value = FormGenerator.transformValue(references[item]);
+                    }
+                });
 
                 this.state.onChangeCall[[key]] &&
                 this.state.onChangeCall[key](this.state.currentEvent, references);
@@ -66,7 +70,6 @@ class FormGenerator extends React.Component {
         /**
          * for now there's only one transformable
          */
-
         return reference.value.replace(/\D/g, '');
     }
 
@@ -97,15 +100,26 @@ class FormGenerator extends React.Component {
                     }
                     return this.createInputElement(b, k);
                 }),
+                this.props.inlineSubmit && FormGenerator.getSubmitButton(button)
             ),
-            typeof button !== 'undefined' && React.createElement(
-                'div',
-                { className: 'form-group' },
-                React.createElement(
-                    'button', { ...button, className: `btn btn-${button.type || 'primary'}` },
-                    button.value || 'Submit'
-                )
-            )
+            !this.props.inlineSubmit && typeof button !== 'undefined' && FormGenerator.getSubmitButton(button)
+        );
+    }
+
+    static getSubmitButton(button) {
+        let className = 'form-group';
+
+        if (button.className) {
+            className += ` ${button.className}`;
+        }
+
+        return React.createElement(
+            'div',
+            { className },
+            React.createElement(
+                'button', { ...button, className: `btn btn-${ button.type || 'primary' }` },
+                button.value || 'Submit',
+            ),
         );
     }
 
@@ -323,7 +337,7 @@ class FormGenerator extends React.Component {
     static propTypes = {
         formName: PropTypes.string.isRequired,
         onSubmit: PropTypes.func,
-        object: PropTypes.object,
+        inlineSubmit: PropTypes.bool,
         elements: PropTypes.arrayOf(PropTypes.shape({
             name: PropTypes.string.required,
             formElement: PropTypes.string,
@@ -343,10 +357,9 @@ class FormGenerator extends React.Component {
                 PropTypes.arrayOf(PropTypes.string),
             ]),
         })),
-        initialRefs: PropTypes.func,
         button: PropTypes.object,
         className: PropTypes.string,
-    }
+    };
 
     static get alpha_num_re() {
         return '^[a-zA-Z0-9_]*$';

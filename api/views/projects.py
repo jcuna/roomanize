@@ -47,7 +47,7 @@ class Projects(Resource):
         db.session.add(project)
         db.session.commit()
 
-        user = User.query.options().filter_by(email=session['user_email']).first()
+        user = User.query.filter_by(email=session['user_email']).first()
         attr = {}
         if user.attributes.user_preferences:
             attr = user.attributes.preferences

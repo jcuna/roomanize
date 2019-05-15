@@ -44,9 +44,9 @@ export default class UserManager extends React.Component {
                     projects
                 }
             },
-            first_name: props.editingUser.first_name,
-            last_name: props.editingUser.last_name,
-            email: props.editingUser.email,
+            first_name: props.editingUser && props.editingUser.first_name || null,
+            last_name: props.editingUser && props.editingUser.last_name || null,
+            email: props.editingUser && props.editingUser.email || null,
         };
 
         this.updateUserData = this.updateUserData.bind(this);

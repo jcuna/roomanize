@@ -100,10 +100,6 @@
       }
     ],
     "new-parens": 1,
-    "newline-after-var": [
-      1,
-      "always"
-    ],
     "no-array-constructor": 1,
     "no-continue": 1,
     "no-mixed-spaces-and-tabs": [

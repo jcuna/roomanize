@@ -19,6 +19,7 @@ import RoomForm from './rooms/RoomForm';
 import { ACCESS_TYPES, ENDPOINTS } from '../constants';
 import Contracts from './contracts/Contracts';
 import Tenants from './tenants/Tenants';
+import TenantsForm from './tenants/TenantsForm';
 
 export default class Routes extends React.Component {
     render() {
@@ -53,6 +54,10 @@ export default class Routes extends React.Component {
                 <Route exact path={ ep.AGREEMENTS_URL } render={ props => this.getComponent(Contracts, props) }/>
 
                 <Route exact path={ ep.TENANTS_URL } render={ props => this.getComponent(Tenants, props) }/>
+
+                <Route exact path={ `${ep.TENANTS_URL}/:action(nuevo|editar)/:tenant_id([0-9]+)?` }
+                    render={ props => this.getComponent(TenantsForm, props) }
+                />
 
                 <Route exact path={ `${ ep.PROJECTS_URL }/:project_id([0-9]+)?` } render={ props => this.getComponent(
                     Project, props, false, ep.PROJECTS_URL,
