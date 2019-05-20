@@ -5,6 +5,8 @@ from sqlalchemy.orm import joinedload
 from functools import wraps
 import jwt
 
+from views import Result
+
 db = SQLAlchemy()
 
 
@@ -46,13 +48,13 @@ def token_required(f):
             token = request.headers['x-access-token']
 
         if not token:
-            return {'error': 'Token is missing!'}, 401
+            return Result.error('Token is missing!', 401)
 
         try:
             data = jwt.decode(token, current_app.config['SECRET_KEY'])
             current_user = User.query.options(joinedload('roles')).filter_by(email=data['email']).first()
         except Exception:
-            return {'error': 'Token is invalid!'}, 401
+            return Result.error('Token is invalid!', 401)
 
         request.user = current_user
         return f(*args, **kwargs)
@@ -68,7 +70,7 @@ def access_required(f):
     def access_decorator(*args, **kwargs):
 
         if not request.user:
-            return {'error': 'Invalid user'}, 401
+            return Result.error('Invalid user', 401)
 
         has_access = False
 
@@ -81,7 +83,7 @@ def access_required(f):
                             break
 
         if not has_access:
-            return {'error': 'Access denied'}, 403
+            return Result.error('Access denied', 403)
 
         return f(*args, **kwargs)
 

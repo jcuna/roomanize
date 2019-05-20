@@ -4,8 +4,9 @@ from flask import request
 from flask_restful import Resource
 from sqlalchemy.orm import joinedload
 
-from dal.models import RentalAgreement, Tenant
+from dal.models import Tenant
 from dal.shared import token_required, access_required, db, get_fillable, Paginator, row2dict
+from views import Result
 
 
 class Tenants(Resource):
@@ -52,7 +53,7 @@ class Tenants(Resource):
     def post(self):
         data = request.get_json()
         if not data:
-            return {'error': 'tenant object is required'}, 400
+            return Result.error('tenant object is required')
 
         tenant_data = get_fillable(Tenant, **data)
         tenant = Tenant(**tenant_data)
@@ -62,12 +63,21 @@ class Tenants(Resource):
             db.session.commit()
         except sqlalchemy.exc.IntegrityError:
             used_key = 'email'
-            return {'error': used_key + ' ya ha sido utilizado'}, 400
+            return Result.error(used_key + ' ya ha sido utilizado')
 
         return dict(tenant_id=tenant.id)
 
     @token_required
     @access_required
     def put(self, tenant_id):
-        pass
 
+        tenant = Tenant.query.filter_by(id=tenant_id).first()
+
+        data = get_fillable(Tenant, **request.get_json())
+
+        for col in data.keys():
+            setattr(tenant, col, data[col])
+
+        db.session.commit()
+
+        return tenant.id

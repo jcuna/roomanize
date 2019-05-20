@@ -34,7 +34,11 @@ export default class TenantsForm extends React.Component {
         if (prevProps.tenants.selectedTenant.tenant_id !== this.props.tenants.selectedTenant.tenant_id) {
             this.setState({
                 ...this.state, ...this.props.tenants.selectedTenant,
-                button: { ...this.state.button, disabled: true, value: 'Actualizar' }
+                button: {
+                    ...this.state.button,
+                    disabled: true,
+                    value: this.props.tenants.selectedTenant.tenant_id && 'Crear' || 'Actualizar',
+                },
             });
         }
     }
@@ -87,9 +91,9 @@ export default class TenantsForm extends React.Component {
                     {
                         className: 'col-6',
                         name: 'identification_number',
-                        placeholder: 'Cedula',
+                        placeholder: 'Cedula (000-0000000-1)',
                         defaultValue: this.state.identification_number,
-                        validate: ['required', 'regex:^[0-9]{3}-[0-9]{7}-[0-9]{1}'],
+                        validate: ['required', 'regex:^[0-9]{3}-[0-9]{7}-[0-9]'],
                         onChange: this.onInputChange,
                     },
                 ] }

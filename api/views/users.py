@@ -12,6 +12,8 @@ from dal.shared import get_fillable, token_required, access_required, Paginator
 from dal.models import User, db, Role, UserToken, UserAttributes
 from flask_mail import Message
 
+from views import Result
+
 
 class Users(Resource):
 
@@ -22,7 +24,7 @@ class Users(Resource):
                 user = User.query.filter_by(email=session['user_email']).first()
             except Exception as ex:
                 if '1146' in ex.args[0]:
-                    return {'error': 'install'}, 501
+                    return Result.error('install', 501)
                 else:
                     raise ex
             if user:
@@ -36,9 +38,9 @@ class Users(Resource):
                 Cache.remember('users.count', User.query.count, 24 * 60 * 60)
             except Exception as ex:
                 if '1146' in ex.args[0]:
-                    return {'error': 'install'}, 501
+                    return Result.error('install', 501)
 
-        return {'error': 'no session'}, 403
+        return Result.error('no session', 403)
 
     @token_required
     def put(self):
@@ -63,7 +65,7 @@ class Users(Resource):
 
         db.session.commit()
         emit('USER_WS_CHANGED', {'data': user.id}, namespace='/' + str(user.id), broadcast=True)
-        return {'message': 'success'}
+        return Result.success()
 
 
 class UsersManager(Resource):
@@ -151,7 +153,7 @@ class UsersManager(Resource):
         user = User.query.options(joinedload('roles')).filter_by(id=user_id).first()
 
         if not user:
-            return {'error': 'User does not exist'}
+            return Result.error('User does not exist')
 
         user.first_name = raw_data['first_name']
         user.last_name = raw_data['last_name']
@@ -174,7 +176,7 @@ class UsersManager(Resource):
         db.session.commit()
         emit('USER_WS_CHANGED', {'data': user.id}, namespace='/' + str(user.id), broadcast=True)
 
-        return {'message': 'success'}
+        return Result.success()
 
     @token_required
     @access_required
@@ -183,14 +185,14 @@ class UsersManager(Resource):
         user.roles = []
         db.session.delete(user)
         db.session.commit()
-        return {'message': 'success'}
+        return Result.success()
 
 
 class Session(Resource):
     def post(self):
         auth = request.authorization
 
-        error = {'error': 'Could not verify'}
+        return Result.error('Could not verify')
 
         if not auth or not auth.username or not auth.password:
             return error, 401
@@ -214,7 +216,7 @@ class Session(Resource):
             session.pop('user_email')
             return {}
 
-        return {'error': "no session"}, 401
+        return Result.error('no session', 401)
 
 
 class Roles(Resource):
@@ -225,12 +227,12 @@ class Roles(Resource):
         role = request.get_json()
 
         if not role:
-            return {'error': 'name is required'}, 400
+            return Result.error('name is required')
 
         current = Role.query.filter_by(name=role).count()
 
         if current > 0:
-            return {'error': 'name already in used'}, 400
+            return Result.error('name already in used')
 
         role = Role(name=role.title())
         db.session.add(role)
@@ -264,7 +266,7 @@ class Roles(Resource):
         role.permissions = json.dumps(data['permissions'])
         db.session.commit()
         emit('ROLE_WS_CHANGED', {'data': role.name}, namespace='/' + role.name, broadcast=True)
-        return {'message': 'success'}, 201
+        return Result.success()
 
     @token_required
     @access_required
@@ -274,9 +276,9 @@ class Roles(Resource):
             Role.query.filter_by(id=role_id).delete()
             db.session.commit()
         except sqlalchemy.exc.IntegrityError as e:
-            return {'error': 'integrity constraint'}, 409
+            return Result.error('integrity constraint', 409)
 
-        return {'message': 'success'}
+        return Result.success()
 
 
 class Permissions(Resource):
@@ -321,7 +323,7 @@ class Activate(Resource):
         ut.expires = datetime.datetime.utcnow()
         db.session.commit()
 
-        return {'message': 'success'}
+        return Result.success()
 
 
 def get_user_attr(user: User):

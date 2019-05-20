@@ -5,6 +5,7 @@ from flask import request, session
 from flask_restful import Resource
 from dal.models import Project, TimeInterval, User, Room
 from dal.shared import token_required, access_required, db, get_fillable, row2dict, Paginator
+from views import Result
 
 
 class Projects(Resource):
@@ -37,7 +38,7 @@ class Projects(Resource):
         data = request.get_json()
 
         if not data:
-            return {'error': 'project object is required'}, 400
+            return Result.error('project object is required')
 
         project = Project(name=data['name'], contact=data['phone'])
 
@@ -89,7 +90,7 @@ class Projects(Resource):
             db.session.query(Project).filter_by(id=project_id).update(updated_data)
         db.session.commit()
 
-        return {'message': 'success'}
+        return Result.success()
 
 
 class Rooms(Resource):
@@ -135,7 +136,7 @@ class Rooms(Resource):
         try:
             db.session.commit()
         except sqlalchemy.exc.IntegrityError:
-            return {'error': 'Nombre ya ha sido utilizado'}, 400
+            return Result.error('Nombre ya ha sido utilizado')
 
         return dict(id=room.id)
 
@@ -154,7 +155,7 @@ class Rooms(Resource):
 
         db.session.commit()
 
-        return {'message': 'success'}
+        return Result.success()
 
 
 class TimeIntervals(Resource):
