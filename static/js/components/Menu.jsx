@@ -10,6 +10,7 @@ import { clearNotifications, toggleMobileMenu } from '../actions/appActions';
 import { hasAccess, menuItems } from '../utils/config';
 import { ACCESS_TYPES } from '../constants';
 import { updateMyUser } from '../actions/userActions';
+import FontAwesome from '../utils/FontAwesome';
 
 export default class Menu extends React.Component {
     constructor(props) {
@@ -21,10 +22,10 @@ export default class Menu extends React.Component {
     render() {
         return (
             <div className={ this.className }>
-                <i onClick={ this.toggleMenu } className="fas fa-times" aria-hidden="true"/>
+                <FontAwesome className={ 'menu-toggler' } onClick={ this.toggleMenu } type="times"/>
                 <h2 className='app-logo'><span>Room</span>anize</h2>
                 <nav id="mobile-nav">
-                    {this.getLinksBasedOffAccess()}
+                    { this.getLinksBasedOffAccess() }
                 </nav>
             </div>
         );

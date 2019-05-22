@@ -21,6 +21,7 @@ import Spinner from '../../utils/Spinner';
 import Breadcrumbs from '../../utils/Breadcrumbs';
 import { fetchUser } from '../../actions/userActions';
 import RequiresProject from './RequiresProject';
+import FontAwesome from '../../utils/FontAwesome';
 
 export default class Project extends React.Component {
     constructor(props) {
@@ -172,8 +173,8 @@ export default class Project extends React.Component {
                                 <td>{ project.address }</td>
                                 <td>
                                     { canEdit && <Link to={ `${ENDPOINTS.PROJECTS_URL}/${project.id}` }>
-                                        <i className='fa fa-edit'/></Link> ||
-                                    <i className='fas fa-ban'/> }
+                                        <FontAwesome type='edit'/></Link> ||
+                                    <FontAwesome type='ban'/> }
                                 </td>
                                 <td>{ this.getCheckbox(project, canEdit, this.props.user) }</td>
                             </tr>
@@ -212,7 +213,7 @@ export default class Project extends React.Component {
         this.props.dispatch(
             showOverlay(
                 <div className='panel'>{`Estas seguro que quieres ${label} ${checkbox.name}`}?</div>,
-                <div className='warning-prompt'><i className='fas fa-exclamation-triangle'/>Advertencia...</div>,
+                <div className='warning-prompt'><FontAwesome type='exclamation-triangle'/> Advertencia...</div>,
                 true,
                 button
             )

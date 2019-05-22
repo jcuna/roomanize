@@ -12,6 +12,7 @@ import Spinner from '../../utils/Spinner';
 import Link from 'react-router-dom/es/Link';
 import { afterPause, searchArray } from '../../utils/helpers';
 import Paginate from '../../utils/Paginate';
+import FontAwesome from '../../utils/FontAwesome';
 
 export default class Room extends Component {
     constructor(props) {
@@ -149,10 +150,10 @@ export default class Room extends Component {
                         <td>{ item.description }</td>
                         <td>
                             { canEdit &&
-                            <Link to={ `${ENDPOINTS.ROOMS_URL}/editar/${item.id}` } onClick={ this.selectRoom }>
-                                <i className='fa fa-edit' data-id={ item.id }/>
+                            <Link to={ `${ENDPOINTS.ROOMS_URL }/editar/${item.id}` } onClick={ this.selectRoom }>
+                                <FontAwesome type='edit' dataId={ item.id }/>
                             </Link> ||
-                            <i className='fas fa-ban'/> }
+                            <FontAwesome type='ban'/> }
                         </td>
                     </tr>;
                 }) }

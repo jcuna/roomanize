@@ -7,8 +7,6 @@ import Layout from './Layout.jsx';
 import { BrowserRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { fetchUser } from '../actions/userActions';
-import '../../css/app.scss';
-import '../../css/overrides.scss';
 import { token } from '../utils/token';
 import Spinner from '../utils/Spinner';
 import { fetchPermissions } from '../actions/roleActions';
@@ -17,7 +15,12 @@ import { setStateData } from '../utils/config';
 import PropTypes from 'prop-types';
 import { ALERTS, GENERIC_ERROR, STATUS } from '../constants';
 import { fetchProjects } from '../actions/projectActions';
-
+import '@fortawesome/fontawesome-free/js/all';
+import 'bootstrap-scss/bootstrap.scss';
+import 'bootstrap-scss/bootstrap-grid.scss';
+import 'bootstrap-scss/bootstrap-reboot.scss';
+import '../../css/app.scss';
+import '../../css/overrides.scss';
 class App extends React.Component {
     constructor(props) {
         super(props);

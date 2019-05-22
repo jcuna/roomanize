@@ -26,11 +26,11 @@ html {
     -ms-transition: all 1s ease;
     transition: all 1s ease;
     & .alert {
-      & .fas {
+      & span {
         position: absolute;
-        right: 0;
+        right: 6px;
         top: 0;
-        cursor: hand;
+        cursor: pointer;
         padding: 4px;
         font-size: 20px;
       }
@@ -66,7 +66,7 @@ html {
           outline: none;
         }
         span {
-          cursor: hand;
+          cursor: pointer;
         }
       }
     }
@@ -238,16 +238,7 @@ html {
 .fa-user-edit,
 .fa-trash,
 .fa-edit {
-  cursor: hand;
-}
-
-table {
-  th {
-    .fas {
-      cursor: pointer;
-      font-size: 24px;
-    }
-  }
+  cursor: pointer;
 }
 
 .first-load-spinner {
@@ -290,4 +281,9 @@ table {
 
 .pagination {
   justify-content: center;
+}
+
+
+path {
+  pointer-events: none;
 }

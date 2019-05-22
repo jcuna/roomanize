@@ -10,6 +10,7 @@ import Breadcrumbs from '../../utils/Breadcrumbs';
 import { getTenants, setSelectedTenant } from '../../actions/tenantsAction';
 import Spinner from '../../utils/Spinner';
 import { hasAccess } from '../../utils/config';
+import FontAwesome from '../../utils/FontAwesome';
 
 export default class Tenants extends React.Component {
     constructor(props) {
@@ -22,12 +23,11 @@ export default class Tenants extends React.Component {
 
     render() {
         const { history, tenants, dispatch } = this.props;
+        const canEdit = hasAccess(ENDPOINTS.TENANTS_URL, ACCESS_TYPES.WRITE);
 
         if (tenants.processing) {
             return <Spinner/>;
         }
-
-        const canEdit = hasAccess(ENDPOINTS.TENANTS_URL, ACCESS_TYPES.WRITE)
 
         const list = [];
         tenants.data.list.forEach(item => {
@@ -39,10 +39,12 @@ export default class Tenants extends React.Component {
             ];
 
             if (canEdit) {
-                row.push(<i className='text-info fas fa-user-edit'
+                row.push(<FontAwesome
+                    type='user-edit'
+                    className='text-info'
                     onClick={ () => {
                         dispatch(setSelectedTenant(item));
-                        history.push(`${ ENDPOINTS.TENANTS_URL}/editar/${item.id }`);
+                        history.push(`${ ENDPOINTS.TENANTS_URL }/editar/${ item.id }`);
                     } }/>);
             }
             list.push(row);
@@ -64,7 +66,7 @@ export default class Tenants extends React.Component {
                 />
                 <button
                     disabled={ false }
-                    onClick={ () => history.push(`${ENDPOINTS.TENANTS_URL}/nuevo`) }
+                    onClick={ () => history.push(`${ ENDPOINTS.TENANTS_URL }/nuevo`) }
                     className='btn btn-success'>
                     Nuevo Inquilino
                 </button>

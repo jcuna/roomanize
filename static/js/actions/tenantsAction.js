@@ -39,7 +39,7 @@ export const getTenants = (page, orderBy, resolve, reject) =>
     (dispatch) => {
         dispatch({ type: TENANTS_PROCESSING });
         token.through().then(header => api({
-            url: `tenants?page=${page}&orderBy=${orderBy}`,
+            url: `tenants?page=${ page }&orderBy=${ orderBy }`,
             method: 'GET',
             headers: header,
         }).then(resp => {
@@ -50,7 +50,7 @@ export const getTenants = (page, orderBy, resolve, reject) =>
 
 export const setSelectedTenant = (selected) =>
     (dispatch) => {
-        const payload = { ...selected, tenant_id: selected.id }
+        const payload = { ...selected, tenant_id: selected.id };
         delete payload.id;
         dispatch({ type: TENANT_SELECTED_SET, payload });
     };

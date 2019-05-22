@@ -6,6 +6,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { clearNotifications } from '../actions/appActions';
 import { ALERTS } from '../constants';
+import FontAwesome from './FontAwesome';
 
 export default class Notifications extends React.Component {
     render() {
@@ -14,9 +15,7 @@ export default class Notifications extends React.Component {
         if (this.props.notifications.length !== 0) {
             return notifications.map((item, key) => (
                 <div key={ key } className={ `alert alert-${item.type}` } role="alert">
-                    <i className="fas fa-times" aria-hidden="true" onClick={
-                        () => this.props.dispatch(clearNotifications())
-                    }>{}</i>
+                    <FontAwesome type='times' onClick={ () => this.props.dispatch(clearNotifications()) }/>
                     {item.message}
                 </div>)
             );

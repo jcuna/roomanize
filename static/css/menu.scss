@@ -15,18 +15,14 @@
   -ms-transition: all 1s ease;
   transition: all 1s ease;
 
-  > .fas {
-    float: right;
-    padding: 20px;
-    font-size: 40px;
-  }
-
-  .fas {
+  > .menu-toggler {
+    padding: 15px;
+    font-size: 30px;
     cursor: pointer;
   }
 
   .menu-item {
-    i {
+    svg {
       margin-right: 15px;
     }
 
@@ -34,9 +30,6 @@
       text-align: center;
       span {
         display: none;
-      }
-      .fas {
-        font-size: 40px;
       }
 
       h2.app-logo {

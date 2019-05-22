@@ -192,22 +192,20 @@ class Session(Resource):
     def post(self):
         auth = request.authorization
 
-        return Result.error('Could not verify')
-
         if not auth or not auth.username or not auth.password:
-            return error, 401
+            return Result.error('Could not verify')
 
         user = User.query.filter_by(email=auth.username).first()
 
         if not user:
-            return error, 401
+            return Result.error('Could not verify')
 
         if user.password_correct(auth.password):
             session['logged_in'] = True
             session['user_email'] = user.email
             return user_to_dict(user)
 
-        return error, 401
+        return Result.error('Could not verify')
 
     def delete(self):
 

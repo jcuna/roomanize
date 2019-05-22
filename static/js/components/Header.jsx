@@ -10,6 +10,7 @@ import { toggleMobileMenu } from '../actions/appActions';
 import { API_PREFIX, ENDPOINTS, STATUS } from '../constants';
 import { listenRoleChanges } from '../actions/roleActions';
 import { listenUserChanges, updateMyUser } from '../actions/userActions';
+import FontAwesome from '../utils/FontAwesome';
 
 class Header extends React.Component {
     constructor(props) {
@@ -101,7 +102,7 @@ class Header extends React.Component {
                                 { this.userMenu() }
                             </li>
                             <li className="navPanelToggle" onClick={ this.toggleMenu }>
-                                <span className="fas fa-bars"/>
+                                <FontAwesome type="bars"/>
                             </li>
                         </ul>
                     }

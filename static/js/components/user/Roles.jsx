@@ -11,13 +11,14 @@ import { notifications, showOverlay } from '../../actions/appActions';
 import '../../../css/roles.scss';
 import Permissions from '../Permissions';
 import { ALERTS, STATUS } from '../../constants';
+import FontAwesome from '../../utils/FontAwesome';
 
 export default class Roles extends React.Component {
     constructor(props) {
         super();
         this.state = {
             button: { value: 'Agregar role', disabled: 'disabled' },
-            deleteButtonClass: 'btn btn-danger'
+            deleteButtonClass: 'btn btn-danger',
         };
 
         this.modifyPermissions = this.modifyPermissions.bind(this);
@@ -47,8 +48,8 @@ export default class Roles extends React.Component {
                             onChange: this.toggleButtonDisabled,
                             name: 'role',
                             validate: 'required',
-                        }
-                    ]
+                        },
+                    ],
                 } }/>
             </div>
         );
@@ -57,11 +58,11 @@ export default class Roles extends React.Component {
     toggleButtonDisabled(event, validation) {
         if (validation.role.isValid) {
             this.setState({
-                button: { value: 'Agregar role' }
+                button: { value: 'Agregar role' },
             });
         } else {
             this.setState({
-                button: { value: 'Agregar role', disabled: 'disabled' }
+                button: { value: 'Agregar role', disabled: 'disabled' },
             });
         }
     }
@@ -77,7 +78,7 @@ export default class Roles extends React.Component {
 
         if (exists) {
             this.props.dispatch(notifications([
-                { type: ALERTS.DANGER, message: 'Role con mismo nombre ya existe' }
+                { type: ALERTS.DANGER, message: 'Role con mismo nombre ya existe' },
             ]));
             this.toggleButtonDisabled(event, validation);
         } else {
@@ -101,20 +102,22 @@ export default class Roles extends React.Component {
                 </tr>
             </thead>
             <tbody>
-                {this.props.roles.assigned.map((item, i) => {
+                { this.props.roles.assigned.map((item, i) => {
                     i++;
                     return <tr key={ i }>
                         <th scope='row'>{ i }</th>
-                        <td>{item.id}</td>
-                        <td>{item.name}</td>
+                        <td>{ item.id }</td>
+                        <td>{ item.name }</td>
                         <td>
-                            <i className='text-info fas fa-edit' data-id={ item.id } aria-hidden='true' onClick={ this.modifyPermissions }/>
+                            <FontAwesome type='edit' className='text-info' dataId={ item.id }
+                                onClick={ this.modifyPermissions }/>
                         </td>
                         <td>
-                            <i className='text-danger fas fa-trash' data-id={ item.id } aria-hidden='true' onClick={ this.confirmRoleDeletion }/>
+                            <FontAwesome type='trash' className='text-danger' dataId={ item.id }
+                                onClick={ this.confirmRoleDeletion }/>
                         </td>
                     </tr>;
-                })}
+                }) }
             </tbody>
         </table>;
     }
@@ -125,10 +128,11 @@ export default class Roles extends React.Component {
         </button>;
 
         this.props.dispatch(showOverlay(
-            <Permissions { ...this.props } id={ Number(e.target.getAttribute('data-id')) } onUpdate={ this.updateObject }/>,
+            <Permissions { ...this.props } id={ Number(e.target.getAttribute('data-id')) }
+                onUpdate={ this.updateObject }/>,
             'Editar Permisos',
             true,
-            button)
+            button),
         );
     }
 
@@ -156,14 +160,14 @@ export default class Roles extends React.Component {
 
         this.props.dispatch(showOverlay(
             <div className='panel'>Estas seguro que quieres elimiar el rol seleccionado?</div>,
-            <div className='warning-prompt'><i className='fas fa-exclamation-triangle'/>Advertencia...</div>,
+            <div className='warning-prompt'><FontAwesome type='exclamation-triangle'/> Advertencia...</div>,
             true,
-            button)
+            button),
         );
     }
 
     static propTypes = {
         roles: PropTypes.object,
         dispatch: PropTypes.func,
-    }
+    };
 }

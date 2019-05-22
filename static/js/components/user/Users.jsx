@@ -13,6 +13,7 @@ import { hasAccess } from '../../utils/config';
 import { ACCESS_TYPES, ALERTS, ENDPOINTS, STATUS } from '../../constants';
 import { afterPause, searchArray } from '../../utils/helpers';
 import Paginate from '../../utils/Paginate';
+import FontAwesome from '../../utils/FontAwesome';
 
 export default class Users extends React.Component {
     constructor(props) {
@@ -107,15 +108,17 @@ export default class Users extends React.Component {
                     <tr>
                         <th>#</th>
                         <th>
-                            id <i className={ `text-info fas fa-sort-numeric-${dir}` }
+                            ID <FontAwesome type={ `sort-numeric-${ dir }` } className='text-info'
                                 onClick={ () => this.orderBy('id') }/>
                         </th>
                         <th>
-                            Nombre <i className={ `text-info fas fa-sort-alpha-${dir }` }
-                                onClick={ () => this.orderBy('last_name') }/></th>
+                            Nombre <FontAwesome type={ `sort-alpha-${ dir }` } className='text-info'
+                                onClick={ () => this.orderBy('last_name') }/>
+                        </th>
                         <th>
-                            Email <i className={ `text-info fas fa-sort-alpha-${dir}` }
-                                onClick={ () => this.orderBy('email') }/></th>
+                            Email <FontAwesome type={ `sort-alpha-${ dir }` } className='text-info'
+                                onClick={ () => this.orderBy('email') }/>
+                        </th>
                         <th>
                             Roles
                         </th>
@@ -145,18 +148,16 @@ export default class Users extends React.Component {
                                 { userFromList.roles.map((obj, r) => r < rolesCount - 1 ? `${obj.name}, ` : obj.name) }
                             </td>
                             <td>
-                                <i className={ canEdit ? 'text-info fas fa-user-edit' : 'fas fa-ban' }
-                                    aria-hidden='true'
+                                <FontAwesome type={ canEdit ? 'user-edit' : 'ban' } className='text-info'
                                     onClick={ canEdit ? () => {
                                         this.openUserManager({
                                             ...userFromList,
-                                            roles: userFromList.roles.slice()
+                                            roles: userFromList.roles.slice(),
                                         });
                                     } : null }/>
                             </td>
                             <td>
-                                <i className={ canDelete ? 'text-danger fas fa-trash' : 'fas fa-ban' }
-                                    aria-hidden='true'
+                                <FontAwesome type={ canDelete ? 'trash' : 'ban' } className='text-danger'
                                     onClick={ canDelete ? () => this.deleteUser(userFromList.id) : null }/>
                             </td>
                         </tr>;
@@ -236,7 +237,7 @@ export default class Users extends React.Component {
 
         this.props.dispatch(showOverlay(
             <div className='panel'>Estas seguro que quieres elimiar el usuario seleccionado?</div>,
-            <div className='warning-prompt'><i className='fas fa-exclamation-triangle'/>Advertencia...</div>,
+            <div className='warning-prompt'><FontAwesome type='exclamation-triangle'/> Advertencia...</div>,
             true,
             button)
         );
