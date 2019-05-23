@@ -11,7 +11,6 @@ from core.router import permissions
 from dal.shared import get_fillable, token_required, access_required, Paginator
 from dal.models import User, db, Role, UserToken, UserAttributes
 from flask_mail import Message
-
 from views import Result
 
 
@@ -280,6 +279,7 @@ class Roles(API):
 
 
 class Permissions(API):
+
     @token_required
     def get(self):
         return permissions
@@ -326,6 +326,8 @@ class Activate(API):
 
 class Audit(API):
 
+    @token_required
+    @access_required
     def get(self):
         pass
 
