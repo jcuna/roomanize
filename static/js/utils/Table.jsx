@@ -33,7 +33,7 @@ Table.getBody = (input) => {
 
 Table.propTypes = {
     headers: PropTypes.array.isRequired,
-    rows: PropTypes.array.isRequired
+    rows: PropTypes.array.isRequired,
 };
 
 export default Table;

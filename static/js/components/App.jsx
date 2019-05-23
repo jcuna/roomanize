@@ -21,6 +21,7 @@ import 'bootstrap-scss/bootstrap-grid.scss';
 import 'bootstrap-scss/bootstrap-reboot.scss';
 import '../../css/app.scss';
 import '../../css/overrides.scss';
+
 class App extends React.Component {
     constructor(props) {
         super(props);

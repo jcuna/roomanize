@@ -12,6 +12,7 @@ def register():
         'users.Permissions@permissions_url': '/permissions|/permissions/',
         'users.UserTokens@user_tokens_url': '/user-tokens|/user-tokens/<user_token>',
         'users.Activate@user_activate_url': '/account/activate-pass',
+        'users.Audit@audit_url': '/audit|/audit/|/audit/<int:user_id>',
 
         'projects.Projects@projects_url': '/projects|/projects/|/projects/<int:project_id>',
         'projects.Rooms@rooms_url': '/rooms|/rooms/|/rooms/<int:room_id>',
@@ -21,6 +22,7 @@ def register():
         'agreements.Policies@policies_url': '/policies|/policies/<int:policy_id>',
 
         'tenants.Tenants@tenants_url': '/tenants|/tenants/|/tenants/<int:tenant_id>',
+
     }
 
 

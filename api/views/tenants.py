@@ -1,15 +1,13 @@
 import sqlalchemy
-
 from flask import request
-from flask_restful import Resource
 from sqlalchemy.orm import joinedload
-
+from core import API
 from dal.models import Tenant
 from dal.shared import token_required, access_required, db, get_fillable, Paginator, row2dict
 from views import Result
 
 
-class Tenants(Resource):
+class Tenants(API):
 
     @token_required
     @access_required
@@ -33,9 +31,13 @@ class Tenants(Resource):
         page = request.args.get('page') if 'page' in request.args else 1
         total_pages = 1
 
-        if 'query' in request.args:
-            # searching
-            tenants = []
+        q = request.args.get('query')
+        if q:
+            tenants = Tenant.query.filter(
+                (Tenant.identification_number.like('%' + q + '%')) |
+                (Tenant.phone.like('%' + q + '%')) |
+                (Tenant.email.like('%' + q + '%'))
+            ).all()
         else:
             order_by = request.args.get('orderBy') if 'orderBy' in request.args else 'id'
             paginator = Paginator(Tenant.query, int(page), order_by, request.args.get('orderDir'))

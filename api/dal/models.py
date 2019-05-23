@@ -1,5 +1,6 @@
 import json
 from sqlalchemy import UniqueConstraint
+from sqlalchemy.dialects.mysql import BIGINT
 from config import random_token
 from dal import db
 from sqlalchemy.orm import relationship
@@ -26,8 +27,9 @@ user_roles = db.Table('user_roles',
 
 
 class User(db.Model):
-    fillable = ['password', 'email', 'first_name', 'last_name', 'deleted']
     __tablename__ = 'users'
+    fillable = ['password', 'email', 'first_name', 'last_name', 'deleted']
+
     id = db.Column(db.BigInteger, primary_key=True)
     email = db.Column(db.String(50, collation=collation), nullable=False, unique=True)
     password = db.Column(db.String(80, collation=collation), nullable=True)
@@ -43,6 +45,7 @@ class User(db.Model):
                          )
     tokens = relationship('UserToken', back_populates='user')
     attributes = relationship('UserAttributes', back_populates='user', lazy='joined', uselist=False)
+    audit = relationship('Audit')
 
     def hash_password(self):
         self.password = generate_password_hash(str(self.password).encode("ascii"), method='sha256')
@@ -60,6 +63,7 @@ class User(db.Model):
 
 class UserAttributes(db.Model):
     __tablename__ = 'user_attributes'
+
     ua_id = db.Column(db.BigInteger, primary_key=True)
     user_id = db.Column(db.BigInteger, db.ForeignKey('users.id'), index=True)
     user_access = db.Column(
@@ -88,6 +92,7 @@ class UserAttributes(db.Model):
 
 class UserToken(db.Model):
     __tablename__ = 'user_tokens'
+
     id = db.Column(db.BigInteger, primary_key=True)
     user_id = db.Column(db.BigInteger, db.ForeignKey('users.id'), index=True)
     token = db.Column(db.String(64, collation=collation, ), unique=True, nullable=False)
@@ -113,6 +118,7 @@ class UserToken(db.Model):
 
 class Role(db.Model):
     __tablename__ = 'roles'
+
     id = db.Column(db.BigInteger, primary_key=True)
     name = db.Column(db.String(30, collation=collation), index=True)
     permissions = db.Column(db.Text(collation=collation))
@@ -137,6 +143,7 @@ class Role(db.Model):
 
 class Project(db.Model):
     __tablename__ = 'projects'
+
     id = db.Column(db.BigInteger, primary_key=True)
     name = db.Column(db.String(30, collation=collation), unique=True)
     address = db.Column(db.Text(collation=collation))
@@ -192,6 +199,7 @@ class Tenant(db.Model):
 
 class TenantHistory(db.Model):
     __tablename__ = 'tenant_history'
+
     id = db.Column(db.BigInteger, primary_key=True)
     tenant_id = db.Column(db.BigInteger, db.ForeignKey('tenants.id'), index=True, nullable=False)
     validated_on = db.Column(db.DateTime())
@@ -205,6 +213,7 @@ class TenantHistory(db.Model):
 
 class RentalAgreement(db.Model):
     __tablename__ = 'rental_agreements'
+
     id = db.Column(db.BigInteger, primary_key=True)
     tenant_history_id = db.Column(db.BigInteger, db.ForeignKey('tenant_history.id'), index=True, nullable=False)
     room_id = db.Column(db.BigInteger, db.ForeignKey('rooms.id'), index=True, nullable=False)
@@ -219,6 +228,7 @@ class RentalAgreement(db.Model):
 
 class Policy(db.Model):
     __tablename__ = 'policies'
+
     id = db.Column(db.BigInteger, primary_key=True)
     title = db.Column(db.String(30, collation=collation), index=True, nullable=False)
     text = db.Column(db.Text(collation=collation))
@@ -230,8 +240,25 @@ class Policy(db.Model):
 
 class Receipt(db.Model):
     __tablename__ = 'receipts'
+
     id = db.Column(db.BigInteger, primary_key=True)
     date = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime.utcnow())
     agreement_id = db.Column(db.BigInteger, index=True)
     amount = db.Column(db.DECIMAL(10, 2), nullable=False)
     balance = db.Column(db.DECIMAL(10, 2), nullable=False)
+
+
+class Audit(db.Model):
+    __tablename__ = 'audits'
+
+    id = db.Column(db.BigInteger, primary_key=True)
+    date = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime.utcnow())
+    user_id = db.Column(db.BigInteger, db.ForeignKey('users.id'), index=True, nullable=True)
+    ip = db.Column(BIGINT(unsigned=True), nullable=False)
+    endpoint = db.Column(db.String(255, collation=collation), nullable=False)
+    method = db.Column(db.String(7, collation=collation), nullable=False)
+    headers = db.Column(db.Text(collation=collation))
+    payload = db.Column(db.Text(collation=collation))
+    response = db.Column(db.Text(collation=collation))
+
+    user = relationship(User, uselist=False)

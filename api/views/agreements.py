@@ -1,11 +1,11 @@
 from flask import request
-from flask_restful import Resource
+from core import API
 from dal.models import RentalAgreement
 from dal.models import Policy
 from dal.shared import token_required, access_required, db
 
 
-class Agreements(Resource):
+class Agreements(API):
 
     @token_required
     @access_required
@@ -23,7 +23,7 @@ class Agreements(Resource):
         pass
 
 
-class Policies(Resource):
+class Policies(API):
 
     @token_required
     @access_required

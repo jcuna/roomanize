@@ -1,13 +1,11 @@
-export const searchArray = (array, value, key1, key2) => {
+export const searchArray = (array, value, keys) => {
     const result = [];
 
-    array.forEach(item => {
-        if (item[key1].toLowerCase().indexOf(value.toLowerCase()) > -1) {
-            result.push(item);
-        } else if (key2 && item[key2].toLowerCase().indexOf(value.toLowerCase()) > -1) {
+    array.forEach(item => keys.forEach(key => {
+        if (item[key].toLowerCase().indexOf(value.toLowerCase()) > -1) {
             result.push(item);
         }
-    });
+    }));
     return result;
 };
 

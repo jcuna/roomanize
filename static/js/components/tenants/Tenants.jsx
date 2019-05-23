@@ -7,30 +7,45 @@ import PropTypes from 'prop-types';
 import Table from '../../utils/Table';
 import { ACCESS_TYPES, ENDPOINTS } from '../../constants';
 import Breadcrumbs from '../../utils/Breadcrumbs';
-import { getTenants, setSelectedTenant } from '../../actions/tenantsAction';
+import { getTenants, searchTenants, setSelectedTenant } from '../../actions/tenantsAction';
 import Spinner from '../../utils/Spinner';
 import { hasAccess } from '../../utils/config';
 import FontAwesome from '../../utils/FontAwesome';
+import Paginate from '../../utils/Paginate';
+import { afterPause, searchArray } from '../../utils/helpers';
 
 export default class Tenants extends React.Component {
     constructor(props) {
         super(props);
 
         this.search = this.search.bind(this);
-        this.createNewTenant = this.createNewTenant.bind(this);
-        this.props.dispatch(getTenants(1, 'id'));
+        this.state = {
+            page: this.props.tenants.data.page,
+            orderBy: 'id',
+            orderDir: 'asc',
+            searching: false,
+            found: [],
+        };
+        this.props.dispatch(getTenants(this.props.tenants.data.page, this.state.orderBy, this.state.orderDir));
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (prevState.page !== this.state.page) {
+            this.props.dispatch(getTenants(this.state.page, this.state.orderBy, this.state.orderDir));
+        }
     }
 
     render() {
         const { history, tenants, dispatch } = this.props;
         const canEdit = hasAccess(ENDPOINTS.TENANTS_URL, ACCESS_TYPES.WRITE);
+        let data = [];
 
-        if (tenants.processing) {
-            return <Spinner/>;
+        if (!tenants.processing && !this.state.searching) {
+            data = this.state.found.length > 0 ? this.state.found : tenants.data.list;
         }
 
         const list = [];
-        tenants.data.list.forEach(item => {
+        data.forEach(item => {
             const row = [
                 item.first_name + ' ' + item.last_name,
                 item.email,
@@ -50,7 +65,7 @@ export default class Tenants extends React.Component {
             list.push(row);
         });
 
-        const header = ['Nombre', 'Email', 'Telephone', 'Cedula'];
+        const header = ['Nombre', 'Email', 'Telefono', 'Cedula'];
         if (canEdit) {
             header.push('Editar');
         }
@@ -60,7 +75,7 @@ export default class Tenants extends React.Component {
             <h1>Inquilinos</h1>
             <div className='table-actions'>
                 <input
-                    placeholder='Buscar'
+                    placeholder='Buscar: Cedula/Email/Telefono'
                     onChange={ this.search }
                     className='form-control'
                 />
@@ -71,17 +86,37 @@ export default class Tenants extends React.Component {
                     Nuevo Inquilino
                 </button>
             </div>
-
             <Table headers={ header } rows={ list }/>
+            { (tenants.processing || this.state.searching) && <Spinner/> }
+            <Paginate total_pages={ tenants.data.total_pages } initialPage={ tenants.data.page }
+                onPageChange={ (newPage) => this.setState({ page: newPage }) }/>
         </div>;
     }
 
-    search() {
-
-    }
-
-    createNewTenant() {
-
+    search({ target }) {
+        if (target.value === '') {
+            this.setState({ found: [] });
+            this.props.dispatch(getTenants(this.state.page, this.state.orderBy, this.state.orderDir));
+        } else {
+            const found = searchArray(
+                this.props.tenants.data.list, target.value, ['email', 'phone', 'identification_number']
+            );
+            if (found.length === 0) {
+                this.setState({
+                    searching: true,
+                    found: [],
+                });
+                afterPause(() => {
+                    if (target.value.length > 2) {
+                        this.props.dispatch(searchTenants(target.value, () => {
+                            this.setState({ searching: false });
+                        }));
+                    }
+                });
+            } else {
+                this.setState({ searching: false, found });
+            }
+        }
     }
 
     static propTypes = {

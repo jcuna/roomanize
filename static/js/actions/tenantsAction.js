@@ -35,11 +35,11 @@ export const editTenant = (data, resolve, reject) =>
         }, reject), reject);
     };
 
-export const getTenants = (page, orderBy, resolve, reject) =>
+export const getTenants = (page, orderBy, dir, resolve, reject) =>
     (dispatch) => {
         dispatch({ type: TENANTS_PROCESSING });
         token.through().then(header => api({
-            url: `tenants?page=${ page }&orderBy=${ orderBy }`,
+            url: `tenants?page=${ page }&orderBy=${ orderBy }&orderDir=${ dir }`,
             method: 'GET',
             headers: header,
         }).then(resp => {
@@ -57,3 +57,16 @@ export const setSelectedTenant = (selected) =>
 
 export const clearSelectedTenant = () =>
     (dispatch) => dispatch({ type: TENANT_SELECTED_CLEAR });
+
+export const searchTenants = (query, resolve, reject) =>
+    (dispatch) => {
+        dispatch({ type: TENANTS_PROCESSING });
+        token.through().then(header => api({
+            url: `tenants?query=${ query }`,
+            method: 'GET',
+            headers: header,
+        }).then(resp => {
+            dispatch({ type: TENANTS_FETCHED, payload: resp.data });
+            resolve && resolve();
+        }, reject), reject);
+    };

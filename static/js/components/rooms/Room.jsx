@@ -53,7 +53,7 @@ export default class Room extends Component {
                 { hasAccess(history.location.pathname, ACCESS_TYPES.WRITE) &&
                 <div className='table-actions'>
                     <input
-                        placeholder='Buscar'
+                        placeholder='Buscar: Nombre'
                         onChange={ this.search }
                         className='form-control'
                     />
@@ -91,7 +91,7 @@ export default class Room extends Component {
 
     search({ target }) {
         if (target.value !== '') {
-            const found = searchArray(this.props.rooms.data.list, target.value, 'name');
+            const found = searchArray(this.props.rooms.data.list, target.value, ['name']);
 
             if (found.length === 0) {
                 this.props.dispatch({ type: ROOMS_SEARCHING });

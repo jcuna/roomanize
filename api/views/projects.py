@@ -2,13 +2,13 @@ import json
 import sqlalchemy
 from datetime import datetime
 from flask import request, session
-from flask_restful import Resource
+from core import API
 from dal.models import Project, TimeInterval, User, Room
 from dal.shared import token_required, access_required, db, get_fillable, row2dict, Paginator
 from views import Result
 
 
-class Projects(Resource):
+class Projects(API):
 
     @token_required
     def get(self):
@@ -93,7 +93,7 @@ class Projects(Resource):
         return Result.success()
 
 
-class Rooms(Resource):
+class Rooms(API):
 
     @token_required
     @access_required
@@ -158,7 +158,7 @@ class Rooms(Resource):
         return Result.success()
 
 
-class TimeIntervals(Resource):
+class TimeIntervals(API):
 
     @token_required
     def get(self):

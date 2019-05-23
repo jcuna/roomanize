@@ -271,7 +271,7 @@ html {
   padding: 10px;
 
   input {
-    width: 160px;
+    width: 260px;
     margin-right: 10px;
     display: inline;
     top: 2px;
@@ -280,6 +280,9 @@ html {
 }
 
 .pagination {
+  .page-link {
+    cursor: pointer;
+  }
   justify-content: center;
 }
 

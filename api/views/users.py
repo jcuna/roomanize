@@ -2,10 +2,10 @@ import datetime
 import re
 from flask_socketio import emit
 import sqlalchemy
-from flask_restful import Resource, request
+from flask_restful import request
 from flask import session, json, current_app, render_template, url_for
 from sqlalchemy.orm import joinedload
-from core import Cache
+from core import Cache, API
 from core.middleware import HttpException
 from core.router import permissions
 from dal.shared import get_fillable, token_required, access_required, Paginator
@@ -15,7 +15,7 @@ from flask_mail import Message
 from views import Result
 
 
-class Users(Resource):
+class Users(API):
 
     def get(self):
 
@@ -68,7 +68,7 @@ class Users(Resource):
         return Result.success()
 
 
-class UsersManager(Resource):
+class UsersManager(API):
 
     @token_required
     @access_required
@@ -188,7 +188,7 @@ class UsersManager(Resource):
         return Result.success()
 
 
-class Session(Resource):
+class Session(API):
     def post(self):
         auth = request.authorization
 
@@ -217,7 +217,7 @@ class Session(Resource):
         return Result.error('no session', 401)
 
 
-class Roles(Resource):
+class Roles(API):
 
     @token_required
     @access_required
@@ -279,26 +279,26 @@ class Roles(Resource):
         return Result.success()
 
 
-class Permissions(Resource):
+class Permissions(API):
     @token_required
     def get(self):
         return permissions
 
 
-class UserTokens(Resource):
+class UserTokens(API):
 
     def get(self, user_token):
-        re = UserToken.query.filter_by(token=user_token).first()
+        jwt = UserToken.query.filter_by(token=user_token).first()
 
         time = datetime.datetime.utcnow()
 
-        if re and re.expires > time:
+        if jwt and jwt.expires > time:
             return {'isValid': True}
 
         return {'isValid': False}
 
 
-class Activate(Resource):
+class Activate(API):
 
     def post(self):
         data = request.get_json()
@@ -322,6 +322,12 @@ class Activate(Resource):
         db.session.commit()
 
         return Result.success()
+
+
+class Audit(API):
+
+    def get(self):
+        pass
 
 
 def get_user_attr(user: User):

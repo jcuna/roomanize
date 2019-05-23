@@ -50,7 +50,7 @@ export default class Users extends React.Component {
 
     search({ target }) {
         if (target.value !== '') {
-            const found = searchArray(this.props.user.list.users, target.value, 'name', 'email');
+            const found = searchArray(this.props.user.list.users, target.value, ['name', 'email']);
 
             if (found.length === 0) {
                 this.props.dispatch({ type: USERS_SEARCHING });
@@ -92,7 +92,7 @@ export default class Users extends React.Component {
             <h2>Usuarios</h2>
             <div className='table-actions'>
                 <input
-                    placeholder='Buscar'
+                    placeholder='Buscar: Nombre/Email'
                     onChange={ this.search }
                     className='form-control'
                 />
@@ -131,7 +131,7 @@ export default class Users extends React.Component {
                     </tr>
                 </thead>
                 <tbody>
-                    {displayData.map((userFromList, i) => {
+                    { displayData.map((userFromList, i) => {
                         i++;
                         const rolesCount = userFromList.roles.length;
                         const canEdit = hasAccess(ENDPOINTS.USERS_MANAGER_URL, ACCESS_TYPES.WRITE) &&
