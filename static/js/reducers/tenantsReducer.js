@@ -20,7 +20,7 @@ const initialData = {
         phone: '',
         identification_number: '',
         history: [],
-        tenant_id: null
+        id: null
     },
 };
 
@@ -33,7 +33,7 @@ export default function tenantsReducer(state = initialData, action) {
             return { ...state, processing: true, data: { ...state.data, list: [] }};
 
         case TENANT_CREATED:
-            return { ...state, processing: false, selectedTenant: action.payload };
+            return { ...state, processing: false, selectedTenant: { ...action.payload, history: [] }};
 
         case TENANT_SELECTED_CLEAR:
             return {
@@ -41,7 +41,11 @@ export default function tenantsReducer(state = initialData, action) {
             };
 
         case TENANT_SELECTED_SET:
-            return { ...state, selectedTenant: action.payload };
+            const selectedTenant = {
+                ...action.payload,
+                history: action.payload.history || [],
+            };
+            return { ...state, selectedTenant, processing: false };
 
         case TENANTS_PROCESSING_FAILED:
             return { ...state, processing: false };

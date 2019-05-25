@@ -36,7 +36,7 @@ export default class Tenants extends React.Component {
     }
 
     render() {
-        const { history, tenants, dispatch } = this.props;
+        const { history, tenants } = this.props;
         const canEdit = hasAccess(ENDPOINTS.TENANTS_URL, ACCESS_TYPES.WRITE);
         let data = [];
 
@@ -58,7 +58,6 @@ export default class Tenants extends React.Component {
                     type='user-edit'
                     className='text-info'
                     onClick={ () => {
-                        dispatch(setSelectedTenant(item));
                         history.push(`${ ENDPOINTS.TENANTS_URL }/editar/${ item.id }`);
                     } }/>);
             }

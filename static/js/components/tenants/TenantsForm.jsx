@@ -6,9 +6,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import FormGenerator from '../../utils/FromGenerator';
 import Breadcrumbs from '../../utils/Breadcrumbs';
-import { clearSelectedTenant, createTenant, editTenant } from '../../actions/tenantsAction';
+import { clearSelectedTenant, createTenant, editTenant, getTenant } from '../../actions/tenantsAction';
 import { notifications } from '../../actions/appActions';
 import { ALERTS, ENDPOINTS, GENERIC_ERROR } from '../../constants';
+import Spinner from '../../utils/Spinner';
 
 export default class TenantsForm extends React.Component {
     constructor(props) {
@@ -18,8 +19,10 @@ export default class TenantsForm extends React.Component {
         this.onInputChange = this.onInputChange.bind(this);
 
         const tenant_id = this.props.match.params.tenant_id || null;
+        const { dispatch } = this.props;
 
         this.state = {
+            notFound: false,
             button: {
                 disabled: true,
                 className: 'col-6',
@@ -28,16 +31,22 @@ export default class TenantsForm extends React.Component {
             },
             ...this.props.tenants.selectedTenant
         };
+
+        if (tenant_id) {
+            dispatch(getTenant(tenant_id, null, () => {
+                this.setState({ notFound: true });
+            }));
+        }
     }
 
-    componentDidUpdate(prevProps) {
-        if (prevProps.tenants.selectedTenant.tenant_id !== this.props.tenants.selectedTenant.tenant_id) {
+    componentDidUpdate(prevProps, { id }) {
+        if (this.props.tenants.selectedTenant && id !== this.props.tenants.selectedTenant.id) {
             this.setState({
                 ...this.state, ...this.props.tenants.selectedTenant,
                 button: {
                     ...this.state.button,
                     disabled: true,
-                    value: this.props.tenants.selectedTenant.tenant_id && 'Crear' || 'Actualizar',
+                    value: 'Actualizar',
                 },
             });
         }
@@ -49,7 +58,8 @@ export default class TenantsForm extends React.Component {
 
     render() {
         return <div>
-            <Breadcrumbs { ...this.props } title={ this.state.tenant_id ? 'Editar' : 'Nuevo' }/>
+            <Breadcrumbs { ...this.props } title={ this.state.id ? 'Editar' : 'Nuevo' }/>
+            { (!this.state.id && this.props.match.params.tenant_id) && <Spinner/> ||
             <FormGenerator
                 formName={ 'new-tenant' }
                 inlineSubmit={ true }
@@ -98,7 +108,7 @@ export default class TenantsForm extends React.Component {
                     },
                 ] }
                 button={ this.state.button }
-            />
+            /> }
         </div>;
     }
 
@@ -107,8 +117,8 @@ export default class TenantsForm extends React.Component {
         let verb = 'agregado';
         const data = {};
 
-        if (this.state.tenant_id) {
-            data.tenant_id = this.state.tenant_id;
+        if (this.state.id) {
+            data.id = this.state.id;
             verb = 'actualizado';
             action = editTenant;
         }

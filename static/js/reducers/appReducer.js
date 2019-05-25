@@ -22,6 +22,7 @@ export default function appReducer(state = {
     landingPage: '',
     clickedContent: false,
     overlay: {
+        menuIsOn: false,
         display: false,
         component: null,
         title: '',
@@ -49,7 +50,9 @@ export default function appReducer(state = {
         case OVERLAY_SHOW:
             return {
                 ...state,
+                showMobileMenu: false,
                 overlay: {
+                    menuIsOn: state.showMobileMenu,
                     display: true,
                     component: action.payload.component,
                     title: action.payload.title,
@@ -58,16 +61,21 @@ export default function appReducer(state = {
                 },
             };
         case OVERLAY_HIDE:
-            return {
-                ...state,
-                overlay: {
-                    display: false,
-                    component: null,
-                    title: '',
-                    closeButton: false,
-                    actionButton: null,
-                },
-            };
+            if (state.overlay) {
+                return {
+                    ...state,
+                    showMobileMenu: state.overlay.menuIsOn,
+                    overlay: {
+                        ...state.overlay,
+                        display: false,
+                        component: null,
+                        title: '',
+                        closeButton: false,
+                        actionButton: null,
+                    },
+                };
+            }
+            return { ...state };
         default:
             return state;
     }

@@ -16,9 +16,8 @@ export const createTenant = (data, resolve, reject) =>
             method: 'POST',
             headers: header,
         }, data).then(resp => {
-            data.tenant_id = resp.data.tenant_id;
-            dispatch({ type: TENANT_CREATED, payload: data });
-            resolve && resolve(data.tenant_id);
+            dispatch({ type: TENANT_CREATED, payload: resp.data });
+            resolve && resolve(data.id);
         }, reject), reject);
     };
 
@@ -26,11 +25,10 @@ export const editTenant = (data, resolve, reject) =>
     (dispatch) => {
         dispatch({ type: TENANTS_PROCESSING });
         token.through().then(header => api({
-            url: `tenants/${ data.tenant_id }`,
+            url: `tenants/${ data.id }`,
             method: 'PUT',
             headers: header,
-        }, data).then(resp => {
-            dispatch({ type: TENANT_CREATED, payload: resp.data });
+        }, data).then( () => {
             resolve && resolve();
         }, reject), reject);
     };
@@ -48,10 +46,22 @@ export const getTenants = (page, orderBy, dir, resolve, reject) =>
         }, reject), reject);
     };
 
+export const getTenant = (tenant_id, resolve, reject) =>
+    (dispatch) => {
+        dispatch({ type: TENANTS_PROCESSING });
+        token.through().then(header => api({
+            url: `tenants/${ tenant_id }`,
+            method: 'GET',
+            headers: header,
+        }).then(resp => {
+            dispatch({ type: TENANT_SELECTED_SET, payload: resp.data });
+            resolve && resolve();
+        }, reject), reject);
+    };
+
 export const setSelectedTenant = (selected) =>
     (dispatch) => {
-        const payload = { ...selected, tenant_id: selected.id };
-        delete payload.id;
+        const payload = { ...selected };
         dispatch({ type: TENANT_SELECTED_SET, payload });
     };
 
