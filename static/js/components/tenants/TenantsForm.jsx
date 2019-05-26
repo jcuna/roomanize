@@ -109,6 +109,37 @@ export default class TenantsForm extends React.Component {
                 ] }
                 button={ this.state.button }
             /> }
+
+            <div className='table-actions'>
+                <button
+                    onClick={ () => history.push(`${ ENDPOINTS.AGREEMENTS_URL }/nuevo`) }
+                    className='btn btn-success'>
+                    Nueva Registración
+                </button>
+            </div>
+
+            {
+                this.props.tenants.selectedTenant.history.length &&
+                TenantsForm.displayTenantHistory(this.props.tenants.selectedTenant.history)
+            }
+        </div>;
+    }
+
+    static displayTenantHistory(history) {
+        return <div className="tenant-history">
+            <h3>Historial</h3>
+            {
+                history.map((i, row) => {
+                    return (
+                        <div key={ i }>
+                            <hr/>
+                            <h4>References</h4>
+
+                        </div>
+                    );
+                })
+            }
+
         </div>;
     }
 

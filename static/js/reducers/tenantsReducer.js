@@ -37,7 +37,7 @@ export default function tenantsReducer(state = initialData, action) {
 
         case TENANT_SELECTED_CLEAR:
             return {
-                ...state, selectedTenant: initialData
+                ...state, selectedTenant: initialData.selectedTenant
             };
 
         case TENANT_SELECTED_SET:
