@@ -1,8 +1,8 @@
 @import 'vars';
-$height: 85%;
+$height: 460px;
 
 .permissions-container {
-  height: calc(100% - #{$heightResolve});
+  max-height: 500px;
   min-height: 200px;
   ul {
     list-style: none;

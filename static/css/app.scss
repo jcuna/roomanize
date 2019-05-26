@@ -58,6 +58,10 @@ html {
 
     .modal {
 
+      .modal-dialog {
+        margin: 60px auto;
+      }
+
       display: block;
       background-color: rgba(0, 0, 0, 0.4);
 
@@ -69,9 +73,6 @@ html {
           cursor: pointer;
         }
       }
-    }
-    .modal-dialog {
-      margin: 60px auto;
     }
 
     @media screen and (max-width: 1280px) {
