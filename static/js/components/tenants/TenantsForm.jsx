@@ -112,14 +112,13 @@ export default class TenantsForm extends React.Component {
 
             <div className='table-actions'>
                 <button
-                    onClick={ () => history.push(`${ ENDPOINTS.AGREEMENTS_URL }/nuevo`) }
+                    onClick={ () => this.props.history.push(`${ ENDPOINTS.AGREEMENTS_URL }/nuevo`) }
                     className='btn btn-success'>
                     Nueva Registración
                 </button>
             </div>
-
             {
-                this.props.tenants.selectedTenant.history.length &&
+                this.props.tenants.selectedTenant.history.length > 0 &&
                 TenantsForm.displayTenantHistory(this.props.tenants.selectedTenant.history)
             }
         </div>;
@@ -133,7 +132,7 @@ export default class TenantsForm extends React.Component {
                     return (
                         <div key={ i }>
                             <hr/>
-                            <h4>References</h4>
+                            <h4>Referencias</h4>
 
                         </div>
                     );
