@@ -67,7 +67,7 @@ class Tenants(API):
             used_key = 'email'
             return Result.error(used_key + ' ya ha sido utilizado')
 
-        return dict(tenant_id=tenant.id)
+        return dict(id=tenant.id)
 
     @token_required
     @access_required

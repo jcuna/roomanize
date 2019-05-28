@@ -1,5 +1,5 @@
 import api from '../utils/api';
-import { token } from '../utils/token';
+import token from '../utils/token';
 
 export const TENANT_CREATED = 'TENANT_CREATED';
 export const TENANTS_PROCESSING = 'TENANTS_PROCESSING';
@@ -17,7 +17,7 @@ export const createTenant = (data, resolve, reject) =>
             headers: header,
         }, data).then(resp => {
             dispatch({ type: TENANT_CREATED, payload: resp.data });
-            resolve && resolve(data.id);
+            resolve && resolve(resp.data.id);
         }, reject), reject);
     };
 
@@ -28,7 +28,7 @@ export const editTenant = (data, resolve, reject) =>
             url: `tenants/${ data.id }`,
             method: 'PUT',
             headers: header,
-        }, data).then( () => {
+        }, data).then(() => {
             resolve && resolve();
         }, reject), reject);
     };
@@ -46,6 +46,11 @@ export const getTenants = (page, orderBy, dir, resolve, reject) =>
         }, reject), reject);
     };
 
+export const setSelectedTenant = (selected) =>
+    (dispatch) => {
+        dispatch({ type: TENANT_SELECTED_SET, payload: selected });
+    };
+
 export const getTenant = (tenant_id, resolve, reject) =>
     (dispatch) => {
         dispatch({ type: TENANTS_PROCESSING });
@@ -54,15 +59,9 @@ export const getTenant = (tenant_id, resolve, reject) =>
             method: 'GET',
             headers: header,
         }).then(resp => {
-            dispatch({ type: TENANT_SELECTED_SET, payload: resp.data });
+            dispatch(setSelectedTenant(resp.data));
             resolve && resolve();
         }, reject), reject);
-    };
-
-export const setSelectedTenant = (selected) =>
-    (dispatch) => {
-        const payload = { ...selected };
-        dispatch({ type: TENANT_SELECTED_SET, payload });
     };
 
 export const clearSelectedTenant = () =>

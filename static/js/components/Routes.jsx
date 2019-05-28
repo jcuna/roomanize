@@ -17,9 +17,11 @@ import Project from './projects/Project';
 import Account from './user/Account';
 import RoomForm from './rooms/RoomForm';
 import { ACCESS_TYPES, ENDPOINTS } from '../constants';
-import Contracts from './contracts/Contracts';
 import Tenants from './tenants/Tenants';
-import TenantsForm from './tenants/TenantsForm';
+import TenantForm from './tenants/TenantForm';
+import AgreementsList from './agreements/AgreementsList';
+import AgreementNew from './agreements/AgreementNew';
+import AgreementEdit from './agreements/AgreementEdit';
 
 export default class Routes extends React.Component {
     render() {
@@ -51,12 +53,20 @@ export default class Routes extends React.Component {
                     this.getComponent(Users, props) }
                 />
 
-                <Route exact path={ ep.AGREEMENTS_URL } render={ props => this.getComponent(Contracts, props) }/>
+                <Route exact path={ ep.AGREEMENTS_URL } render={ props => this.getComponent(AgreementsList, props) }/>
+
+                <Route exact path={ `${ ep.AGREEMENTS_URL }/nuevo` }
+                    render={ props => this.getComponent(AgreementNew, props) }
+                />
+
+                <Route exact path={ `${ ep.AGREEMENTS_URL }/editar/:agreement_id([0-9]+)` }
+                    render={ props => this.getComponent(AgreementEdit, props) }
+                />
 
                 <Route exact path={ ep.TENANTS_URL } render={ props => this.getComponent(Tenants, props) }/>
 
                 <Route exact path={ `${ep.TENANTS_URL}/:action(nuevo|editar)/:tenant_id([0-9]+)?` }
-                    render={ props => this.getComponent(TenantsForm, props) }
+                    render={ props => this.getComponent(TenantForm, props) }
                 />
 
                 <Route exact path={ `${ ep.PROJECTS_URL }/:project_id([0-9]+)?` } render={ props => this.getComponent(

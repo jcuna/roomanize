@@ -5,6 +5,7 @@ import rolesReducer from './rolesReducer';
 import projectReducer from './projectReducer';
 import roomReducer from './roomReducer';
 import tenantsReducer from './tenantsReducer';
+import agreementsReducer from './agreementsReducer';
 
 export default combineReducers({
     app: appReducer,
@@ -13,4 +14,5 @@ export default combineReducers({
     projects: projectReducer,
     rooms: roomReducer,
     tenants: tenantsReducer,
+    agreements: agreementsReducer,
 });

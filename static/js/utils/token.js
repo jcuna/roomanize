@@ -89,4 +89,5 @@ class Token {
     }
 }
 
-export const token = new Token();
+const token = new Token();
+export default token;

@@ -1,6 +1,6 @@
 import api from '../utils/api';
-import { token } from '../utils/token';
-import { notifications } from './appActions';
+import token from '../utils/token';
+import { hideOverlay, notifications } from './appActions';
 import ws from '../utils/ws';
 import { fetchUser } from './userActions';
 import { ALERTS, GENERIC_ERROR } from '../constants';
@@ -54,11 +54,13 @@ export const deleteRole = (id) =>
                 type: ROLE_DELETE_SUCCESS,
                 payload: id,
             });
+            dispatch(hideOverlay());
             dispatch(notifications([{
                 type: ALERTS.INFO,
                 message: 'Role borrado correctamente.',
             }]));
         }, (err) => {
+            dispatch(hideOverlay());
             if (err.status < 500) {
                 let message = 'No tienes accesso a borrar roles';
 
@@ -129,6 +131,7 @@ export const commitPermissions = (permissions) =>
                 type: ALERTS.SUCCESS,
                 message: 'Acceso actualizado correctamente.',
             }]));
+            dispatch(hideOverlay());
         }, () => {
             dispatch({ type: PERMISSIONS_COMMIT_FAIL });
             dispatch(notifications([{

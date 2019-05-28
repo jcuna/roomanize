@@ -1,5 +1,5 @@
 import api from '../utils/api';
-import { token } from '../utils/token';
+import token from '../utils/token';
 
 export const PROJECT_UPDATING = 'PROJECT_UPDATING';
 export const PROJECT_UPDATED = 'PROJECT_UPDATED';

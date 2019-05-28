@@ -126,8 +126,6 @@ class Rooms(API):
     @access_required
     def post(self):
         data = request.get_json()
-        if 'time_interval_id' in data and int(data['time_interval_id']) == 0:
-            del data['time_interval_id']
 
         room_data = get_fillable(Room, **data)
         room = Room(**room_data)

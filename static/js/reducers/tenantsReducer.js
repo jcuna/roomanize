@@ -33,7 +33,7 @@ export default function tenantsReducer(state = initialData, action) {
             return { ...state, processing: true, data: { ...state.data, list: [] }};
 
         case TENANT_CREATED:
-            return { ...state, processing: false, selectedTenant: { ...action.payload, history: [] }};
+            return { ...state, processing: false };
 
         case TENANT_SELECTED_CLEAR:
             return {

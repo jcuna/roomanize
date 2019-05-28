@@ -10,13 +10,17 @@ import { clearSelectedTenant, createTenant, editTenant, getTenant } from '../../
 import { notifications } from '../../actions/appActions';
 import { ALERTS, ENDPOINTS, GENERIC_ERROR } from '../../constants';
 import Spinner from '../../utils/Spinner';
+import Table from '../../utils/Table';
+import Link from 'react-router-dom/es/Link';
+import { setAgreement } from '../../actions/agreementsAction';
 
-export default class TenantsForm extends React.Component {
+export default class TenantForm extends React.Component {
     constructor(props) {
         super(props);
 
         this.formSubmit = this.formSubmit.bind(this);
         this.onInputChange = this.onInputChange.bind(this);
+        this.newAgreementRegistration = this.newAgreementRegistration.bind(this);
 
         const tenant_id = this.props.match.params.tenant_id || null;
         const { dispatch } = this.props;
@@ -29,7 +33,7 @@ export default class TenantsForm extends React.Component {
                 value: tenant_id ? 'Actualizar' : 'Crear',
                 style: { width: '100%' },
             },
-            ...this.props.tenants.selectedTenant
+            ...this.props.tenants.selectedTenant,
         };
 
         if (tenant_id) {
@@ -50,6 +54,11 @@ export default class TenantsForm extends React.Component {
                 },
             });
         }
+        if (prevProps.match.params.tenant_id !== this.props.match.params.tenant_id) {
+            this.props.dispatch(getTenant(this.props.match.params.tenant_id, null, () => {
+                this.setState({ notFound: true });
+            }));
+        }
     }
 
     componentWillUnmount() {
@@ -57,8 +66,10 @@ export default class TenantsForm extends React.Component {
     }
 
     render() {
+        const editing = this.state.id !== null;
+
         return <div>
-            <Breadcrumbs { ...this.props } title={ this.state.id ? 'Editar' : 'Nuevo' }/>
+            <Breadcrumbs { ...this.props } title={ editing ? 'Editar' : 'Nuevo' }/>
             { (!this.state.id && this.props.match.params.tenant_id) && <Spinner/> ||
             <FormGenerator
                 formName={ 'new-tenant' }
@@ -110,30 +121,80 @@ export default class TenantsForm extends React.Component {
                 button={ this.state.button }
             /> }
 
-            <div className='table-actions'>
+            { editing && <div className='table-actions'>
                 <button
-                    onClick={ () => this.props.history.push(`${ ENDPOINTS.AGREEMENTS_URL }/nuevo`) }
+                    onClick={ this.newAgreementRegistration }
                     className='btn btn-success'>
                     Nueva Registración
                 </button>
-            </div>
+            </div> }
+
             {
                 this.props.tenants.selectedTenant.history.length > 0 &&
-                TenantsForm.displayTenantHistory(this.props.tenants.selectedTenant.history)
+                TenantForm.displayTenantHistory(this.props.tenants.selectedTenant.history)
             }
         </div>;
     }
 
+    newAgreementRegistration() {
+        const { tenants, dispatch } = this.props;
+        dispatch(setAgreement({
+            tenant: {
+                name: tenants.selectedTenant.first_name + ' ' + tenants.selectedTenant.last_name,
+                identification_number: tenants.selectedTenant.identification_number,
+                id: tenants.selectedTenant.id,
+            }
+        }));
+        this.props.history.push(`${ ENDPOINTS.AGREEMENTS_URL }/nuevo`);
+    }
+
     static displayTenantHistory(history) {
+        history.sort((a, b) => new Date(b.rental_agreement.entered_on) - new Date(a.rental_agreement.entered_on));
+
         return <div className="tenant-history">
             <h3>Historial</h3>
             {
-                history.map((i, row) => {
+                history.map((row, i) => {
+                    const items = [];
+                    let active = true;
+
+                    if (row.rental_agreement.terminated_on) {
+                        active = false;
+                        const date = new Date(row.rental_agreement.terminated_on);
+                        items.push(['Contrato Terminado en:', date.toDateString()]);
+                    } else {
+                        const date = new Date(row.rental_agreement.entered_on);
+                        items.push(['En vigencia desde', date.toDateString()]);
+                    }
+
+                    items.push([
+                        'No: Habitacion',
+                        <Link key={ i }
+                            to={ `${ ENDPOINTS.ROOMS_URL }/editar/${ row.rental_agreement.room.id }` }>
+                            { row.rental_agreement.room.name }
+                        </Link>,
+                    ]);
+
+                    items.push(['Referencia I', row.reference1_phone]);
+                    if (row.reference2_phone) {
+                        items.push(['Referencia II', row.reference2_phone]);
+                    }
+
+                    if (row.reference3_phone) {
+                        items.push(['Referencia III', row.reference3_phone]);
+                    }
+
+                    items.push(['Arrendamiento', row.rental_agreement.room.rent]);
+
+                    if (active) {
+                        items.push(['Proximo Pago', 'placeholder']);
+                        items.push(['Ultimo Pago', 'placeholder']);
+                    }
+
                     return (
                         <div key={ i }>
+                            <Table numberedRows={ false } headers={ [] } rows={ items }/>
                             <hr/>
-                            <h4>Referencias</h4>
-
                         </div>
                     );
                 })
@@ -157,13 +218,13 @@ export default class TenantsForm extends React.Component {
 
         this.props.dispatch(action(data, (tenant_id) => {
             if (tenant_id) {
-                this.props.history.push(`${ENDPOINTS.TENANTS_URL}/editar/${tenant_id}`);
+                this.props.history.push(`${ ENDPOINTS.TENANTS_URL }/editar/${ tenant_id }`);
             } else {
                 this.props.history.push(ENDPOINTS.TENANTS_URL);
             }
             this.props.dispatch(notifications({
                 type: ALERTS.SUCCESS,
-                message: `Inquilino ${verb} correctamente`,
+                message: `Inquilino ${ verb } correctamente`,
             }));
         }, () => {
             this.props.dispatch(notifications({
@@ -183,7 +244,7 @@ export default class TenantsForm extends React.Component {
         });
 
         this.setState({
-            button: { ...this.state.button, disabled: !isValid }
+            button: { ...this.state.button, disabled: !isValid },
         });
     }
 

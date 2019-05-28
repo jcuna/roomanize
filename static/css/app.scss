@@ -131,15 +131,20 @@ html {
   position: relative;
   cursor: progress!important;
   &:before {
-    content: "\F110";
+    content: "";
     position: absolute;
-    font: normal normal normal 25px Font Awesome\ 5 Free;
     left: 0;
     right: 0;
     margin: auto;
     z-index: 1;
-    -webkit-animation: a 2s infinite linear;
-    animation: a 2s infinite linear;
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    vertical-align: text-bottom;
+    border: 0.25em solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spinner-border .75s linear infinite;
   }
 
   &:after {
@@ -149,7 +154,7 @@ html {
     height: 100%;
     top: 0;
     left: 0;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(40, 40, 40, 0.8);
   }
 }
 

@@ -22,7 +22,6 @@ def register():
         'agreements.Policies@policies_url': '/policies|/policies/<int:policy_id>',
 
         'tenants.Tenants@tenants_url': '/tenants|/tenants/|/tenants/<int:tenant_id>',
-
     }
 
 

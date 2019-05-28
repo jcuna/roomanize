@@ -7,7 +7,7 @@ import Layout from './Layout.jsx';
 import { BrowserRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { fetchUser } from '../actions/userActions';
-import { token } from '../utils/token';
+import token from '../utils/token';
 import Spinner from '../utils/Spinner';
 import { fetchPermissions } from '../actions/roleActions';
 import { clickedContent, notifications, toggleMobileMenu } from '../actions/appActions';
@@ -124,6 +124,7 @@ const getInitialState = (state) => {
         projects: state.projects,
         rooms: state.rooms,
         tenants: state.tenants,
+        agreements: state.agreements,
     };
 };
 

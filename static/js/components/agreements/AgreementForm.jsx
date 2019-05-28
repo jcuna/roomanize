@@ -5,7 +5,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export default class Contracts extends React.Component {
+export default class AgreementForm extends React.Component {
     render() {
         return <h1>Contracts</h1>;
     }

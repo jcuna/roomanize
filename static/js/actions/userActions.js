@@ -1,5 +1,5 @@
 import api from '../utils/api';
-import { token } from '../utils/token';
+import token from '../utils/token';
 import { clearNotifications, needInstall, notifications, toggleMobileMenu } from './appActions';
 import ws from '../utils/ws';
 import { ALERTS, GENERIC_ERROR } from '../constants';

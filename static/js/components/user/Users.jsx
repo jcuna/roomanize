@@ -216,13 +216,14 @@ export default class Users extends React.Component {
             this.props.dispatch(fetchUsers(this.state.page));
             this.props.dispatch(hideOverlay());
             this.props.dispatch(notifications([
-                { type: ALERTS.SUCCESS, message: 'Usuario creado satisfactoriamente' }
+                { type: ALERTS.SUCCESS, message: 'Usuario creado satisfactoriamente' },
             ]));
-        }, () =>
+        }, () => {
+            this.props.dispatch(hideOverlay());
             this.props.dispatch(notifications([
-                { type: ALERTS.DANGER, message: 'Hubo un error creando el usuario' }
-            ]))
-        ));
+                { type: ALERTS.DANGER, message: 'Hubo un error creando el usuario' },
+            ]));
+        }));
     }
 
     deleteUser(id) {

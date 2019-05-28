@@ -7,12 +7,13 @@ import PropTypes from 'prop-types';
 import Table from '../../utils/Table';
 import { ACCESS_TYPES, ENDPOINTS } from '../../constants';
 import Breadcrumbs from '../../utils/Breadcrumbs';
-import { getTenants, searchTenants, setSelectedTenant } from '../../actions/tenantsAction';
+import { getTenants, searchTenants } from '../../actions/tenantsAction';
 import Spinner from '../../utils/Spinner';
 import { hasAccess } from '../../utils/config';
 import FontAwesome from '../../utils/FontAwesome';
 import Paginate from '../../utils/Paginate';
 import { afterPause, searchArray } from '../../utils/helpers';
+import Link from 'react-router-dom/es/Link';
 
 export default class Tenants extends React.Component {
     constructor(props) {
@@ -36,7 +37,7 @@ export default class Tenants extends React.Component {
     }
 
     render() {
-        const { history, tenants } = this.props;
+        const { tenants } = this.props;
         const canEdit = hasAccess(ENDPOINTS.TENANTS_URL, ACCESS_TYPES.WRITE);
         let data = [];
 
@@ -54,12 +55,13 @@ export default class Tenants extends React.Component {
             ];
 
             if (canEdit) {
-                row.push(<FontAwesome
-                    type='user-edit'
-                    className='text-info'
-                    onClick={ () => {
-                        history.push(`${ ENDPOINTS.TENANTS_URL }/editar/${ item.id }`);
-                    } }/>);
+                row.push(
+                    <Link to={ `${ ENDPOINTS.TENANTS_URL }/editar/${ item.id }` }>
+                        <FontAwesome
+                            type='user-edit'
+                            assName='text-info'
+                        />
+                    </Link>);
             }
             list.push(row);
         });
@@ -78,12 +80,13 @@ export default class Tenants extends React.Component {
                     onChange={ this.search }
                     className='form-control'
                 />
-                <button
-                    disabled={ false }
-                    onClick={ () => history.push(`${ ENDPOINTS.TENANTS_URL }/nuevo`) }
-                    className='btn btn-success'>
-                    Nuevo Inquilino
-                </button>
+                <Link to={ `${ ENDPOINTS.TENANTS_URL }/nuevo` }>
+                    <button
+                        disabled={ false }
+                        className='btn btn-success'>
+                        Nuevo Inquilino
+                    </button>
+                </Link>
             </div>
             <Table headers={ header } rows={ list }/>
             { (tenants.processing || this.state.searching) && <Spinner/> }
@@ -98,7 +101,7 @@ export default class Tenants extends React.Component {
             this.props.dispatch(getTenants(this.state.page, this.state.orderBy, this.state.orderDir));
         } else {
             const found = searchArray(
-                this.props.tenants.data.list, target.value, ['email', 'phone', 'identification_number']
+                this.props.tenants.data.list, target.value, ['email', 'phone', 'identification_number'],
             );
             if (found.length === 0) {
                 this.setState({

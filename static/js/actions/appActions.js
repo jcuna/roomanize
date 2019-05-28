@@ -32,7 +32,6 @@ export const notifications = (messages) => {
         messages = [messages];
     }
     return function (dispatch) {
-        dispatch(hideOverlay());
         dispatch({
             type: NOTIFICATIONS_SET,
             payload: messages,

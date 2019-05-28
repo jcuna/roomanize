@@ -37,12 +37,7 @@ class User(db.Model):
     last_name = db.Column(db.String(50, collation=collation), nullable=False, index=True)
     created_at = db.Column(db.DateTime(), nullable=False, default=datetime.datetime.utcnow())
     deleted = db.Column(db.Boolean, nullable=False, server_default='0', index=True)
-    roles = relationship('Role',
-                         secondary=user_roles, lazy='joined',
-                         backref=db.backref('users', lazy='dynamic'),
-                         # cascade="all, delete-orphan",
-                         # single_parent=True
-                         )
+    roles = relationship('Role', secondary=user_roles, lazy='joined', backref=db.backref('users', lazy='dynamic'))
     tokens = relationship('UserToken', back_populates='user')
     attributes = relationship('UserAttributes', back_populates='user', lazy='joined', uselist=False)
     audit = relationship('Audit')
@@ -156,7 +151,7 @@ class Project(db.Model):
 class TimeInterval(db.Model):
     __tablename__ = 'time_intervals'
     id = db.Column(db.Integer, primary_key=True)
-    interval = db.Column(db.String(15, collation=collation), primary_key=True)
+    interval = db.Column(db.String(15, collation=collation))
 
 
 class Room(db.Model):
@@ -166,13 +161,10 @@ class Room(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     project_id = db.Column(db.BigInteger, db.ForeignKey('projects.id'), index=True, nullable=False)
     name = db.Column(db.String(30, collation=collation))
-    rent = db.Column(db.Integer, nullable=True)
-    time_interval_id = db.Column(db.Integer, db.ForeignKey('time_intervals.id'), nullable=True)
     description = db.Column(db.Text(collation=collation))
     picture = db.Column(db.String(255, collation=collation))
 
     project = relationship(Project, back_populates='rooms')
-    time_interval = relationship(TimeInterval)
 
     __table_args__ = (
         UniqueConstraint('project_id', 'name', name='project_id_name_uc'),
@@ -217,13 +209,17 @@ class RentalAgreement(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     tenant_history_id = db.Column(db.BigInteger, db.ForeignKey('tenant_history.id'), index=True, nullable=False)
     room_id = db.Column(db.BigInteger, db.ForeignKey('rooms.id'), index=True, nullable=False)
+    project_id = db.Column(db.BigInteger, db.ForeignKey('projects.id'), index=True, nullable=False)
     time_interval_id = db.Column(db.Integer, db.ForeignKey('time_intervals.id'), nullable=False)
+    rate = db.Column(db.DECIMAL(10, 2), nullable=False)
+    created_on = db.Column(db.DateTime(), nullable=False, default=datetime.datetime.utcnow())
     entered_on = db.Column(db.DateTime(), nullable=False)
     terminated_on = db.Column(db.DateTime())
 
     tenant_history = relationship(TenantHistory, uselist=False, back_populates='rental_agreement')
-    room = relationship(Room)
-    interval = relationship(TimeInterval)
+    room = relationship(Room, uselist=False)
+    project = relationship(Project, uselist=False)
+    interval = relationship(TimeInterval, uselist=False)
 
 
 class Policy(db.Model):
@@ -238,23 +234,49 @@ class Policy(db.Model):
                         )
 
 
-class Receipt(db.Model):
-    __tablename__ = 'receipts'
+class Balance(db.Model):
+    __tablename__ = 'balances'
 
-    id = db.Column(db.BigInteger, primary_key=True)
-    date = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime.utcnow())
-    agreement_id = db.Column(db.BigInteger, index=True)
-    amount = db.Column(db.DECIMAL(10, 2), nullable=False)
+    id = db.Column(BIGINT(unsigned=True), primary_key=True)
+    agreement_id = db.Column(db.BigInteger, db.ForeignKey('rental_agreements.id'), index=True)
     balance = db.Column(db.DECIMAL(10, 2), nullable=False)
+    previous_balance = db.Column(db.DECIMAL(10, 2), nullable=False)
+    created_on = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime.utcnow())
+    due_date = db.Column(db.DateTime(), nullable=False, index=True)
+
+    agreement = relationship(RentalAgreement, uselist=False)
+    payments = relationship('Payment', backref='balances')
+
+
+class PaymentType(db.Model):
+    __tablename__ = 'payment_types'
+    id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.String(15, collation=collation))
+
+
+class Payment(db.Model):
+    __tablename__ = 'payments'
+
+    id = db.Column(BIGINT(unsigned=True), primary_key=True, autoincrement=1000)
+    balance_id = db.Column(BIGINT(unsigned=True), db.ForeignKey('balances.id'), index=True)
+    amount = db.Column(db.DECIMAL(10, 2), nullable=False)
+    paid_date = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime.utcnow())
+    payment_type_id = db.Column(db.Integer, db.ForeignKey('payment_types.id'), nullable=False)
+
+    payment_type = relationship(PaymentType, uselist=False)
+
+    @property
+    def type(self):
+        return self.payment_type.type
 
 
 class Audit(db.Model):
     __tablename__ = 'audits'
 
-    id = db.Column(db.BigInteger, primary_key=True)
+    id = db.Column(BIGINT(unsigned=True), primary_key=True)
     date = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime.utcnow())
     user_id = db.Column(db.BigInteger, db.ForeignKey('users.id'), index=True, nullable=True)
-    ip = db.Column(BIGINT(unsigned=True), nullable=False)
+    ip = db.Column(db.BigInteger, nullable=False)
     endpoint = db.Column(db.String(255, collation=collation), nullable=False)
     method = db.Column(db.String(7, collation=collation), nullable=False)
     headers = db.Column(db.Text(collation=collation))

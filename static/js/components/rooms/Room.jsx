@@ -57,11 +57,12 @@ export default class Room extends Component {
                         onChange={ this.search }
                         className='form-control'
                     />
-                    <button
-                        onClick={ () => history.push(`${ENDPOINTS.ROOMS_URL}/nuevo`) }
-                        className='btn btn-success'>
-                        Nueva Habitación
-                    </button>
+                    <Link to={ `${ ENDPOINTS.ROOMS_URL }/nuevo` }>
+                        <button
+                            className='btn btn-success'>
+                            Nueva Habitación
+                        </button>
+                    </Link>
                 </div>
                 }
                 { this.getList() }

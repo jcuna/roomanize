@@ -16,11 +16,9 @@ export default class RoomForm extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            button: { value: this.props.rooms.selectedRoom.id ? 'Editar' : 'Agregar', disabled: false },
-            rent: this.props.rooms.selectedRoom.rent || '',
+            button: { value: this.props.rooms.selectedRoom.id ? 'Editar' : 'Agregar', disabled: true },
             name: this.props.rooms.selectedRoom.name || '',
             description: this.props.rooms.selectedRoom.description || '',
-            time_interval_id: this.props.rooms.selectedRoom.time_interval_id || 0,
             id: this.props.rooms.selectedRoom.id || 0,
             project_id: this.props.rooms.selectedRoom.project_id || 0,
             picture: this.props.rooms.selectedRoom.picture || '',
@@ -59,23 +57,6 @@ export default class RoomForm extends Component {
                     {
                         className: 'col-6',
                         type: 'text',
-                        placeholder: 'Precio al mes',
-                        onChange: this.onInputChange,
-                        name: 'rent',
-                        defaultValue: this.state.rent,
-                        validate: ['required', 'number'],
-                    },
-                    {
-                        formElement: 'select',
-                        className: 'col-6',
-                        onChange: this.onInputChange,
-                        name: 'interval',
-                        options: this.getTimeIntervalOptions(),
-                        defaultValue: this.state.time_interval_id,
-                    },
-                    {
-                        className: 'col-6',
-                        type: 'text',
                         placeholder: 'Notas',
                         onChange: this.onInputChange,
                         name: 'notes',
@@ -101,8 +82,6 @@ export default class RoomForm extends Component {
         const room = {
             project_id: this.props.user.attributes.preferences.default_project,
             name: validation['room-name'].value,
-            rent: validation.rent.value,
-            time_interval_id: validation.interval.value,
             description: validation.notes.value,
             picture: '',
         };
@@ -145,7 +124,7 @@ export default class RoomForm extends Component {
     }
 
     onInputChange(e, validation) {
-        if (validation.rent.isValid && validation['room-name'].isValid) {
+        if (validation['room-name'].isValid) {
             this.formIsValid(true);
         } else {
             this.formIsValid(false);
@@ -155,7 +134,7 @@ export default class RoomForm extends Component {
     formIsValid(isIt) {
         this.setState({
             errors: isIt,
-            button: { value: 'Agregar', disabled: !isIt },
+            button: { value: this.props.rooms.selectedRoom.id ? 'Editar' : 'Agregar', disabled: !isIt },
         });
     }
 
