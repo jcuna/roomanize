@@ -72,7 +72,7 @@ export default class Tenants extends React.Component {
         }
 
         return <div>
-            <Breadcrumbs { ...this.props }/>
+            <Breadcrumbs { ...this.props } title='Inquilinos'/>
             <section className='widget'>
                 <h1>Inquilinos</h1>
                 <div className='table-actions'>

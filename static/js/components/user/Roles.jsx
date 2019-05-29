@@ -37,7 +37,7 @@ export default class Roles extends React.Component {
     render() {
         return (
             <div>
-                <Breadcrumbs { ...this.props }/>
+                <Breadcrumbs { ...this.props } title='Roles'/>
                 <section className='widget'>
                     <h2>Roles de Accesso</h2>
                     { this.rolesTable }

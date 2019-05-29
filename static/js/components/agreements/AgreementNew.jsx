@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 import { ALERTS, ENDPOINTS } from '../../constants';
 import { notifications } from '../../actions/appActions';
 import AgreementForm from './AgreementForm';
+import Breadcrumbs from '../../utils/Breadcrumbs';
 
 export default class AgreementNew extends React.Component {
     constructor(props) {
@@ -30,18 +31,20 @@ export default class AgreementNew extends React.Component {
         const { agreement } = this.props.agreements;
         return (
             <div>
-                <h1>Nuevo Contrato/Registracion</h1>
-
-                <div className="card text-center">
-                    <div className="card-header">Inquilino</div>
-                    <div className="card-body">
-                        <h4 className="card-title">
-                            { `${ agreement.tenant.name }` }
-                        </h4>
-                        <p className='sticky-top'>{ (agreement.tenant.identification_number) }</p>
+                <Breadcrumbs { ...this.props } title='Registración'/>
+                <section className='widget transparent'>
+                    <h2>Nuevo Contrato/Registracion</h2>
+                    <div className="card text-center">
+                        <div className="card-header">Inquilino</div>
+                        <div className="card-body">
+                            <h4 className="card-title">
+                                { `${ agreement.tenant.name }` }
+                            </h4>
+                            <p className='sticky-top'>{ (agreement.tenant.identification_number) }</p>
+                        </div>
                     </div>
-                </div>
-                <AgreementForm { ...this.props } onSubmit={ this.onSubmit } button={ this.state.button }/>
+                    <AgreementForm { ...this.props } onSubmit={ this.onSubmit } button={ this.state.button }/>
+                </section>
             </div>);
     }
 

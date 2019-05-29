@@ -75,7 +75,7 @@ export default class Project extends React.Component {
 
         return (
             <div>
-                <Breadcrumbs { ...this.props } title={ this.props.projects.editing.name }/>
+                <Breadcrumbs { ...this.props } title={ this.props.projects.editing.name || 'Proyectos' }/>
                 <section className="widget">
                     <h2>Proyectos</h2>
                     { notEditing && this.getProjects() }

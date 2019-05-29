@@ -56,6 +56,7 @@ export const FORM_VALIDATION = {
     REQUIRED: 'required',
     NO_SPACE: 'no_space',
     LENGTH: 'length',
+    DATE: 'date',
 };
 
 export const VALIDATE_FUNC_SUFFIX = 'Func';

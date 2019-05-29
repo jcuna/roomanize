@@ -64,6 +64,11 @@ html {
           color: $clearBlue;
         }
       }
+
+      .transparent {
+        background-color: transparent;
+        padding: 0;
+      }
     }
 
     form {
@@ -85,6 +90,13 @@ html {
     .modal {
 
       .modal-dialog {
+        .modal-content {
+          background-color: $backgroundColor;
+        }
+
+        .modal-body {
+          background-color: #FFFFFF;
+        }
         margin: 60px auto;
       }
 

@@ -114,31 +114,43 @@ export default class AgreementForm extends React.Component {
                         sections: [
                             {
                                 title: 'Intervalo de pago',
-                                className: 'col-6',
-                                elementsWrapperClass: '',
+                                className: 'col-4',
                                 elements: [
                                     {
                                         name: 'interval',
                                         formElement: 'select',
                                         onChange: this.inputChanged,
                                         defaultValue: 0,
-                                        options: this.getTimeIntervalOptions()
+                                        options: this.getTimeIntervalOptions(),
+                                        validate: 'required',
                                     },
                                 ]
                             },
                             {
                                 title: 'Precio De Arrendamiento',
-                                className: 'col-6',
-                                elementsWrapperClass: '',
+                                className: 'col-4',
                                 elements: [
                                     {
                                         name: 'rate',
                                         placeholder: 'Precio',
                                         onChange: this.inputChanged,
-                                        validate: ['number']
+                                        validate: ['number', 'required']
                                     },
                                 ]
-                            }
+                            },
+                            {
+                                title: 'Fecha De Entrada',
+                                className: 'col-4',
+                                elements: [
+                                    {
+                                        name: 'date',
+                                        type: 'date',
+                                        placeholder: 'Fecha',
+                                        onChange: this.inputChanged,
+                                        validate: ['required']
+                                    },
+                                ]
+                            },
                         ]
                     }
                 },
