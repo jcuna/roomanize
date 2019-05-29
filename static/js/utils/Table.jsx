@@ -33,13 +33,14 @@ Table.getBody = ({ rows, numberedRows }) => {
 };
 
 Table.propTypes = {
-    headers: PropTypes.array.isRequired,
+    headers: PropTypes.array,
     rows: PropTypes.array.isRequired,
     numberedRows: PropTypes.bool,
     className: PropTypes.string,
 };
 
 Table.defaultProps = {
+    headers: [],
     numberedRows: true,
 };
 

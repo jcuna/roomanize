@@ -193,7 +193,7 @@ export default class TenantForm extends React.Component {
 
                     return (
                         <div key={ i }>
-                            <Table numberedRows={ false } headers={ [] } rows={ items }/>
+                            <Table numberedRows={ false } rows={ items }/>
                             <hr/>
                         </div>
                     );

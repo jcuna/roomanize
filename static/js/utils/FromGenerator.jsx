@@ -13,8 +13,17 @@ class FormGenerator extends React.Component {
         const references = {};
         const onChangeCall = {};
         const transformable = {};
+        const parts = [];
 
-        props.elements.forEach(element => {
+        if (props.elements) {
+            parts.push(props.elements);
+        }
+
+        if (props.sections) {
+            props.sections.forEach(section => parts.push(section.elements));
+        }
+
+        parts.forEach(part => part.forEach(element => {
             let isTransformable = false;
 
             if (typeof element.validate === 'object') {
@@ -25,7 +34,7 @@ class FormGenerator extends React.Component {
             transformable[element.name] = isTransformable;
             references[element.name] = FormGenerator.getInitialValidationValue(element, isTransformable);
             onChangeCall[element.name] = element.onChange;
-        });
+        }));
         this.state = {
             transformable,
             references,
@@ -41,6 +50,7 @@ class FormGenerator extends React.Component {
     render() {
         return this.generateForm(
             this.props.elements,
+            this.props.sections,
             this.props.formName,
             this.props.button,
             this.props.className || 'form-section'
@@ -77,12 +87,13 @@ class FormGenerator extends React.Component {
      * @private
      *
      * @param {array} elements
+     * @param {array} sections
      * @param {string} formName
      * @param {object} button
      * @param {string} sectionClass
      * @returns {*}
      */
-    generateForm(elements, formName, button, sectionClass) {
+    generateForm(elements, sections, formName, button, sectionClass) {
         return React.createElement(
             'form',
             {
@@ -92,13 +103,28 @@ class FormGenerator extends React.Component {
                     this.props.onSubmit(event, this.state.references);
                 }
             },
+            sections && sections.map((section, k) =>
+                <section key={ k } className={ 'card ' + (section.className && section.className || '') }>
+                    <div className="card-header">
+                        { section.title }
+                    </div>
+                    <div className={ 'card-body ' + sectionClass }>
+                        { section.elements.map((element, key) => {
+                            if (React.isValidElement(element)) {
+                                return element;
+                            }
+                            return this.createInputElement(element, key);
+                        })}
+                    </div>
+                </section>
+            ),
 
             React.createElement('section', { className: sectionClass },
-                elements.map((b, k) => {
-                    if (React.isValidElement(b)) {
-                        return b;
+                elements && elements.map((element, k) => {
+                    if (React.isValidElement(element)) {
+                        return element;
                     }
-                    return this.createInputElement(b, k);
+                    return this.createInputElement(element, k);
                 }),
                 this.props.inlineSubmit && FormGenerator.getSubmitButton(button)
             ),
@@ -334,10 +360,19 @@ class FormGenerator extends React.Component {
         return null;
     }
 
-    static propTypes = {
-        formName: PropTypes.string.isRequired,
-        onSubmit: PropTypes.func,
-        inlineSubmit: PropTypes.bool,
+    static get alpha_num_re() {
+        return '^[a-zA-Z0-9_]*$';
+    }
+
+    static get email_re() {
+        return /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@(([[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    }
+
+    static get phone_re() {
+        return /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+    }
+
+    static elementsShape = {
         elements: PropTypes.arrayOf(PropTypes.shape({
             name: PropTypes.string.required,
             formElement: PropTypes.string,
@@ -356,22 +391,22 @@ class FormGenerator extends React.Component {
                 PropTypes.func,
                 PropTypes.arrayOf(PropTypes.string),
             ]),
+        }))
+    };
+
+    static propTypes = {
+        formName: PropTypes.string.isRequired,
+        onSubmit: PropTypes.func,
+        inlineSubmit: PropTypes.bool,
+        sections: PropTypes.arrayOf(PropTypes.shape({
+            className: PropTypes.string,
+            title: PropTypes.string.required,
+            elements: FormGenerator.elementsShape.elements
         })),
+        elements: FormGenerator.elementsShape.elements,
         button: PropTypes.object,
         className: PropTypes.string,
     };
-
-    static get alpha_num_re() {
-        return '^[a-zA-Z0-9_]*$';
-    }
-
-    static get email_re() {
-        return /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@(([[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    }
-
-    static get phone_re() {
-        return /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
-    }
 }
 
 FormGenerator[FORM_VALIDATION.NUMBER + VALIDATE_FUNC_SUFFIX] = ({ target }) => {

@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import FormGenerator from '../../utils/FromGenerator';
 import { commitPermissions, createRole, deleteRole, fetchRoles } from '../../actions/roleActions';
 import Spinner from '../../utils/Spinner';
-import { hideOverlay, notifications, showOverlay } from '../../actions/appActions';
+import { notifications, showOverlay } from '../../actions/appActions';
 import '../../../css/roles.scss';
 import Permissions from '../Permissions';
 import { ALERTS, STATUS } from '../../constants';
@@ -95,7 +95,6 @@ export default class Roles extends React.Component {
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>id</th>
                     <th>Nombre</th>
                     <th>Permisos</th>
                     <th>Borrar</th>
@@ -106,7 +105,6 @@ export default class Roles extends React.Component {
                     i++;
                     return <tr key={ i }>
                         <th scope='row'>{ i }</th>
-                        <td>{ item.id }</td>
                         <td>{ item.name }</td>
                         <td>
                             <FontAwesome type='edit' className='text-info' dataId={ item.id }

@@ -127,6 +127,75 @@ html {
   top: 10px;
 }
 
+form {
+  margin-bottom: 20px;
+}
+
+.autocomplete {
+  ul.item-list {
+    list-style: none;
+    padding: 0;
+    border: solid 1px $grey;
+    position: absolute;
+    z-index: 5;
+    background: #FFFFFF;
+    right: 0;
+    left: 0;
+    margin-top: 4px;
+    border-radius: 4px;
+    -webkit-box-shadow: 0 2px 5px 0 rgba(0,0,0,.16), 0 2px 10px 0 rgba(0,0,0,.12);
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,.16), 0 2px 10px 0 rgba(0,0,0,.12);
+    overflow: scroll;
+    max-height: 320px;
+    li {
+      padding: 8px 20px;
+      cursor: pointer;
+      &:hover {
+        background: $greyDark;
+      }
+    }
+    li.paginate {
+      cursor: auto;
+      span {
+        cursor: pointer;
+        color: $black;
+
+        &:hover {
+          opacity: 0.6;
+        }
+      }
+      text-align: center;
+      .left {
+        margin-right: 4px;
+      }
+      .right {
+        margin-left: 4px;
+      }
+    }
+  }
+
+  > span {
+    position: absolute;
+    z-index: 6;
+    top: 0;
+    right: 8px;
+    font-size: 26px;
+    color: $black;
+    cursor: pointer;
+    &:hover {
+      opacity: 0.6;
+    }
+  }
+}
+
+.loading-list {
+  height: 38px;
+  &:hover {
+    background: transparent;
+  }
+}
+
+.loading-list,
 .loading-button {
   position: relative;
   cursor: progress!important;
@@ -146,7 +215,9 @@ html {
     border-radius: 50%;
     animation: spinner-border .75s linear infinite;
   }
+}
 
+.loading-button {
   &:after {
     content: '';
     position: absolute;

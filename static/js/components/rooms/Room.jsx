@@ -135,7 +135,6 @@ export default class Room extends Component {
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>id</th>
                     <th>Nombre</th>
                     <th>Notas</th>
                     <th>Editar</th>
@@ -146,7 +145,6 @@ export default class Room extends Component {
                     i++;
                     return <tr key={ i }>
                         <th scope='row'>{ i }</th>
-                        <td>{ item.id }</td>
                         <td>{ item.name }</td>
                         <td>{ item.description }</td>
                         <td>
