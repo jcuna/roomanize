@@ -102,7 +102,7 @@ class Header extends React.Component {
                                 { this.userMenu() }
                             </li>
                             <li className="navPanelToggle" onClick={ this.toggleMenu }>
-                                <FontAwesome type="bars"/>
+                                <FontAwesome className='menu-grid' type="th"/>
                             </li>
                         </ul>
                     }

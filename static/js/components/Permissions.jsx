@@ -32,7 +32,7 @@ export default class Permissions extends React.Component {
 
     render() {
         return <div className="permissions-container">
-            <h3>{ this.role.name }</h3>
+            <h2>{ this.role.name }</h2>
             <div className="permissions right">
                 <ul>
                     { Object.values(this.props.roles.permissions).map((item, i) => {

@@ -6,6 +6,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Link from 'react-router-dom/es/Link';
 import { clearNotifications } from '../actions/appActions';
+import FontAwesome from './FontAwesome';
 
 export default class Breadcrumbs extends React.Component {
     render() {
@@ -39,7 +40,7 @@ export default class Breadcrumbs extends React.Component {
         return (
             <nav aria-label="breadcrumb">
                 <ol className="breadcrumb">
-                    <li className="breadcrumb-item"><Link to='/'>Home</Link></li>
+                    <li className="breadcrumb-item"><Link to='/'><FontAwesome type='home'/></Link></li>
                     { items.map((item, key) =>
                         <li key={ item.key } className="breadcrumb-item">
                             { itemsLast === key && item.name }

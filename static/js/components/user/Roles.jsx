@@ -12,6 +12,7 @@ import '../../../css/roles.scss';
 import Permissions from '../Permissions';
 import { ALERTS, STATUS } from '../../constants';
 import FontAwesome from '../../utils/FontAwesome';
+import Breadcrumbs from '../../utils/Breadcrumbs';
 
 export default class Roles extends React.Component {
     constructor(props) {
@@ -35,22 +36,26 @@ export default class Roles extends React.Component {
 
     render() {
         return (
-            <div className='roles-layout'>
-                { this.rolesTable }
-                <FormGenerator { ...{
-                    formName: 'roles-form',
-                    button: this.state.button,
-                    onSubmit: this.submit,
-                    elements: [
-                        {
-                            type: 'input',
-                            placeholder: 'Role',
-                            onChange: this.toggleButtonDisabled,
-                            name: 'role',
-                            validate: 'required',
-                        },
-                    ],
-                } }/>
+            <div>
+                <Breadcrumbs { ...this.props }/>
+                <section className='widget'>
+                    <h2>Roles de Accesso</h2>
+                    { this.rolesTable }
+                    <FormGenerator { ...{
+                        formName: 'roles-form',
+                        button: this.state.button,
+                        onSubmit: this.submit,
+                        elements: [
+                            {
+                                type: 'input',
+                                placeholder: 'Role',
+                                onChange: this.toggleButtonDisabled,
+                                name: 'role',
+                                validate: 'required',
+                            },
+                        ],
+                    } }/>
+                </section>
             </div>
         );
     }

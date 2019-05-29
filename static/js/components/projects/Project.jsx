@@ -74,12 +74,14 @@ export default class Project extends React.Component {
         const notEditing = typeof match.params.project_id === 'undefined';
 
         return (
-            <section className="project-wrapper">
+            <div>
                 <Breadcrumbs { ...this.props } title={ this.props.projects.editing.name }/>
-                <h3>Proyectos</h3>
-                { notEditing && this.getProjects() }
-                { (projects.projects.length < 10 && canCreate || !notEditing) && this.getForm(this.props) }
-            </section>
+                <section className="widget">
+                    <h2>Proyectos</h2>
+                    { notEditing && this.getProjects() }
+                    { (projects.projects.length < 10 && canCreate || !notEditing) && this.getForm(this.props) }
+                </section>
+            </div>
         );
     }
 

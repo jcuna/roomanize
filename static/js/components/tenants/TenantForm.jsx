@@ -70,56 +70,58 @@ export default class TenantForm extends React.Component {
 
         return <div>
             <Breadcrumbs { ...this.props } title={ editing ? 'Editar' : 'Nuevo' }/>
-            { (!this.state.id && this.props.match.params.tenant_id) && <Spinner/> ||
-            <FormGenerator
-                formName={ 'new-tenant' }
-                inlineSubmit={ true }
-                onSubmit={ this.formSubmit }
-                className={ 'form-group row' }
-                elements={ [
-                    {
-                        className: 'col-6',
-                        name: 'first_name',
-                        placeholder: 'Nombre',
-                        defaultValue: this.state.first_name,
-                        validate: 'required',
-                        onChange: this.onInputChange,
-                    },
-                    {
-                        className: 'col-6',
-                        name: 'last_name',
-                        placeholder: 'Apellidos',
-                        defaultValue: this.state.last_name,
-                        validate: 'required',
-                        onChange: this.onInputChange,
-                    },
-                    {
-                        className: 'col-6',
-                        name: 'email',
-                        placeholder: 'Email',
-                        defaultValue: this.state.email,
-                        validate: 'email',
-                        onChange: this.onInputChange,
-                    },
-                    {
-                        className: 'col-6',
-                        name: 'phone',
-                        placeholder: 'Telefono',
-                        defaultValue: this.state.phone,
-                        validate: ['phone', 'required'],
-                        onChange: this.onInputChange,
-                    },
-                    {
-                        className: 'col-6',
-                        name: 'identification_number',
-                        placeholder: 'Cedula (000-0000000-1)',
-                        defaultValue: this.state.identification_number,
-                        validate: ['required', 'regex:^[0-9]{3}-[0-9]{7}-[0-9]'],
-                        onChange: this.onInputChange,
-                    },
-                ] }
-                button={ this.state.button }
-            /> }
+            <section className='widget'>
+                { (!this.state.id && this.props.match.params.tenant_id) && <Spinner/> ||
+                <FormGenerator
+                    formName={ 'new-tenant' }
+                    inlineSubmit={ true }
+                    onSubmit={ this.formSubmit }
+                    className={ 'form-group row' }
+                    elements={ [
+                        {
+                            className: 'col-6',
+                            name: 'first_name',
+                            placeholder: 'Nombre',
+                            defaultValue: this.state.first_name,
+                            validate: 'required',
+                            onChange: this.onInputChange,
+                        },
+                        {
+                            className: 'col-6',
+                            name: 'last_name',
+                            placeholder: 'Apellidos',
+                            defaultValue: this.state.last_name,
+                            validate: 'required',
+                            onChange: this.onInputChange,
+                        },
+                        {
+                            className: 'col-6',
+                            name: 'email',
+                            placeholder: 'Email',
+                            defaultValue: this.state.email,
+                            validate: 'email',
+                            onChange: this.onInputChange,
+                        },
+                        {
+                            className: 'col-6',
+                            name: 'phone',
+                            placeholder: 'Telefono',
+                            defaultValue: this.state.phone,
+                            validate: ['phone', 'required'],
+                            onChange: this.onInputChange,
+                        },
+                        {
+                            className: 'col-6',
+                            name: 'identification_number',
+                            placeholder: 'Cedula (000-0000000-1)',
+                            defaultValue: this.state.identification_number,
+                            validate: ['required', 'regex:^[0-9]{3}-[0-9]{7}-[0-9]'],
+                            onChange: this.onInputChange,
+                        },
+                    ] }
+                    button={ this.state.button }
+                /> }
+            </section>
 
             { editing && <div className='table-actions'>
                 <button
@@ -152,7 +154,7 @@ export default class TenantForm extends React.Component {
         history.sort((a, b) => new Date(b.rental_agreement.entered_on) - new Date(a.rental_agreement.entered_on));
 
         return <div className="tenant-history">
-            <h3>Historial</h3>
+            <h2>Historial</h2>
             {
                 history.map((row, i) => {
                     const items = [];
@@ -236,7 +238,6 @@ export default class TenantForm extends React.Component {
 
     onInputChange(e, validate) {
         let isValid = true;
-
         Object.keys(validate).forEach(item => {
             if (!validate[item].isValid) {
                 isValid = false;

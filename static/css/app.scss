@@ -6,7 +6,9 @@ html {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, ".SFNSText-Regular", sans-serif;
   min-height: 100%;
   position: relative;
+  background-color: $backgroundColor;
   body {
+    background-color: $backgroundColor;
     margin-bottom: $height-footer + $headerHeight + 36;
     overflow-x: hidden;
     .footer {
@@ -38,6 +40,30 @@ html {
 
     & .content-area {
       min-height: 100%;
+
+      .widget {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-flex: 1;
+        -ms-flex-positive: 1;
+        flex-grow: 1;
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        -webkit-box-shadow: 0 0 13px 0 rgba(82,63,105,0.05);
+        box-shadow: 0 0 13px 0 rgba(82,63,105,0.05);
+        background-color: #FFFFFF;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        padding: 8px;
+
+        h3, h2, h1 {
+          text-align: center;
+          color: $clearBlue;
+        }
+      }
     }
 
     form {
@@ -154,15 +180,17 @@ form {
         background: $greyDark;
       }
     }
-    li.paginate {
+    li.paginate,
+    li.unselectable {
       cursor: auto;
       span {
         cursor: pointer;
         color: $black;
-
-        &:hover {
-          opacity: 0.6;
-        }
+      }
+    }
+    li.paginate {
+      &:hover {
+        opacity: 0.6;
       }
       text-align: center;
       .left {
@@ -361,9 +389,70 @@ form {
     cursor: pointer;
   }
   justify-content: center;
+  .active {
+    .page-link {
+      background-color: $clearBlue;
+      border-color: $clearBlue;
+    }
+  }
 }
 
 
 path {
   pointer-events: none;
+}
+
+.breadcrumb {
+  background-color: transparent;
+
+  .breadcrumb-item {
+    position: relative;
+    padding: 0 8px;
+    font-size: 20px;
+    color: $clearBlue;
+    -webkit-transition: all 0.3s;
+    transition: all 0.3s;
+  }
+  .breadcrumb-item + .breadcrumb-item:before {
+    display: block;
+    padding: 0;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    content: " ";
+    background: rgba(149, 156, 182, 0.5);
+    position: absolute;
+    top: 14px;
+    left: 0;
+  }
+
+  a {
+    outline: none !important;
+    color: $clearBlue;
+    &:hover {
+      color: $hover1;
+      text-decoration: none;
+    }
+  }
+
+}
+.pagination a,
+a {
+  color: $link;
+  text-decoration: none;
+  background-color: transparent;
+  &:hover {
+    color: $hover2;
+    text-decoration: none;
+  }
+}
+
+.card {
+  margin-bottom: 12px;
+}
+
+.row {
+  .card {
+    width: 100%;
+  }
 }

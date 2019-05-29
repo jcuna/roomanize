@@ -22,8 +22,8 @@ export default class Tenants extends React.Component {
         this.search = this.search.bind(this);
         this.state = {
             page: this.props.tenants.data.page,
-            orderBy: 'id',
-            orderDir: 'asc',
+            orderBy: 'updated_on',
+            orderDir: 'desc',
             searching: false,
             found: [],
         };
@@ -73,25 +73,29 @@ export default class Tenants extends React.Component {
 
         return <div>
             <Breadcrumbs { ...this.props }/>
-            <h1>Inquilinos</h1>
-            <div className='table-actions'>
-                <input
-                    placeholder='Buscar: Cedula/Email/Telefono'
-                    onChange={ this.search }
-                    className='form-control'
-                />
-                <Link to={ `${ ENDPOINTS.TENANTS_URL }/nuevo` }>
-                    <button
-                        disabled={ false }
-                        className='btn btn-success'>
-                        Nuevo Inquilino
-                    </button>
-                </Link>
-            </div>
-            <Table headers={ header } rows={ list }/>
-            { (tenants.processing || this.state.searching) && <Spinner/> }
-            <Paginate total_pages={ tenants.data.total_pages } initialPage={ tenants.data.page }
-                onPageChange={ (newPage) => this.setState({ page: newPage }) }/>
+            <section className='widget'>
+                <h1>Inquilinos</h1>
+                <div className='table-actions'>
+                    <input
+                        placeholder='Buscar: Cedula/Email/Telefono'
+                        onChange={ this.search }
+                        className='form-control'
+                    />
+                    <Link to={ `${ ENDPOINTS.TENANTS_URL }/nuevo` }>
+                        <button
+                            disabled={ false }
+                            className='btn btn-success'>
+                            Nuevo Inquilino
+                        </button>
+                    </Link>
+                </div>
+                <Table headers={ header } rows={ list }/>
+                { (tenants.processing || this.state.searching) && <Spinner/> }
+                {tenants.data.total_pages > 1 &&
+                <Paginate total_pages={ tenants.data.total_pages } initialPage={ tenants.data.page }
+                    onPageChange={ (newPage) => this.setState({ page: newPage }) }
+                /> }
+            </section>
         </div>;
     }
 

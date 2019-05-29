@@ -4,7 +4,6 @@
 
 import React, { Component } from 'react';
 import FormGenerator from '../../utils/FromGenerator';
-import { fetchTimeIntervals } from '../../actions/projectActions';
 import PropTypes from 'prop-types';
 import { createRoom, editRoom, fetchRooms, selectRoom } from '../../actions/roomActions';
 import { notifications } from '../../actions/appActions';
@@ -26,9 +25,6 @@ export default class RoomForm extends Component {
         };
         this.handleSubmit = this.handleSubmit.bind(this);
         this.onInputChange = this.onInputChange.bind(this);
-        if (props.projects.timeIntervals.length === 0) {
-            props.dispatch(fetchTimeIntervals());
-        }
     }
 
     render() {
@@ -38,44 +34,36 @@ export default class RoomForm extends Component {
 
         const creating = typeof this.props.rooms.selectedRoom.id === 'undefined';
 
-        return <section>
+        return <div>
             <Breadcrumbs { ...this.props } title={ creating ? 'Nuevo' : 'Editar' }/>
-            <FormGenerator { ...{
-                className: 'form-group row',
-                formName: 'new-room',
-                button: this.state.button,
-                elements: [
-                    {
-                        className: 'col-6',
-                        type: 'text',
-                        placeholder: 'Numero/Nombre de Habitación',
-                        onChange: this.onInputChange,
-                        name: 'room-name',
-                        defaultValue: this.state.name,
-                        validate: 'required',
-                    },
-                    {
-                        className: 'col-6',
-                        type: 'text',
-                        placeholder: 'Notas',
-                        onChange: this.onInputChange,
-                        name: 'notes',
-                        defaultValue: this.state.description,
-                    },
-                ],
-                onSubmit: this.handleSubmit,
-            } }/>
-        </section>;
-    }
-
-    getTimeIntervalOptions() {
-        const options = [];
-
-        options[0] = 'Intervalo de Pago';
-
-        this.props.projects.timeIntervals.forEach(
-            item => options[item.id] = item.interval);
-        return options;
+            <section className='widget'>
+                <FormGenerator { ...{
+                    className: 'form-group row',
+                    formName: 'new-room',
+                    button: this.state.button,
+                    elements: [
+                        {
+                            className: 'col-6',
+                            type: 'text',
+                            placeholder: 'Numero/Nombre de Habitación',
+                            onChange: this.onInputChange,
+                            name: 'room-name',
+                            defaultValue: this.state.name,
+                            validate: 'required',
+                        },
+                        {
+                            className: 'col-6',
+                            type: 'text',
+                            placeholder: 'Notas',
+                            onChange: this.onInputChange,
+                            name: 'notes',
+                            defaultValue: this.state.description,
+                        },
+                    ],
+                    onSubmit: this.handleSubmit,
+                } }/>
+            </section>
+        </div>;
     }
 
     handleSubmit(event, validation) {

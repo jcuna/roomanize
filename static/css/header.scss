@@ -4,6 +4,9 @@
   color: $semiWhite;
   font-size: 20px;
   height: $headerHeight;
+  margin-bottom: 10px;
+  -webkit-box-shadow: 0 0 40px 0 rgba(82,63,105,0.1);
+  box-shadow: 0 0 40px 0 rgba(82,63,105,0.1);
   .logo {
     color: #ffffff;
     line-height: inherit;
@@ -19,6 +22,10 @@
   }
 
   .inner {
+    position: relative;
+    z-index: 99;
+    background-color: $theme;
+    padding: 40px;
 
     ul.super-menu {
       position: absolute;
@@ -29,10 +36,9 @@
       > li {
         display: inline-block;
         vertical-align: top;
-        margin: 15px 8px;
       }
-
       .user-icon {
+        margin: 15px 8px;
 
         .user-pic {
           background-color: $semiWhite;
@@ -87,30 +93,26 @@
 
       }
 
-      #navPanelToggle {
+      .navPanelToggle {
         position: relative;
+        margin: 6px 10px;
       }
     }
 
-    position: relative;
-    z-index: 99;
-    background-color: $theme;
-    padding: 40px;
-
-    .fa-bars {
-      font-size: 50px;
+    .menu-grid {
+      font-size: 46px;
       cursor: pointer;
       padding: 8px;
       &:hover {
-        background-color: $themeDark;
+        color: rgba(255, 255, 255, 0.6);
       }
     }
   }
 
   #banner {
-    padding-top: 95px;
+    padding-top: 100px;
     height: $bannerHeight;
-    background-image: url("/images/workbook.jpg");
+    background-image: url(/images/workbook.jpg);
     background-size: cover;
     background-position: top;
     background-repeat: no-repeat;
@@ -118,7 +120,7 @@
     position: absolute;
     width: 100%;
     left: 0;
-    top: 0;
+    top: 30px;
     color: #fff;
   }
 }

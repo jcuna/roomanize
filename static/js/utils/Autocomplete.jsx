@@ -27,6 +27,7 @@ export default class Autocomplete extends React.Component {
                 placeholder={ this.props.placeholder }
                 onClick={ this.showItems }
                 name={ this.props.name }
+                onChange={ this.props.onChange }
             />
             { this.state.showItems && <FontAwesome type='times' onClick={ this.hideItems }/> }
             { this.state.showItems && <ul className='item-list'>{ this.getItems() }</ul> }
@@ -40,7 +41,17 @@ export default class Autocomplete extends React.Component {
         let i = 0;
         const result = this.props.items.map((item) => {
             i++;
-            return <li key={ i } data-id={ item.key } onClick={ this.selectItem }>{ item.label }</li>;
+
+            let className = 'drop-item';
+            let onClick = this.selectItem;
+
+            if (Number(item.key) === 0) {
+                className += ' unselectable';
+                onClick = null;
+            }
+            return <li key={ i } className={ className } data-id={ item.key } onClick={ onClick }>
+                { item.label }
+            </li>;
         });
         if (this.props.total_pages > 1) {
             result.push(
@@ -75,8 +86,8 @@ export default class Autocomplete extends React.Component {
         name: PropTypes.string,
         placeholder: PropTypes.string,
         items: PropTypes.arrayOf(PropTypes.shape({
-            key: PropTypes.number.required,
-            label: PropTypes.string.required,
+            key: PropTypes.number.isRequired,
+            label: PropTypes.string.isRequired,
         })),
         onChange: PropTypes.func,
         onSelect: PropTypes.func,

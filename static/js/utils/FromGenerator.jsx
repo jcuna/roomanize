@@ -14,13 +14,19 @@ class FormGenerator extends React.Component {
         const onChangeCall = {};
         const transformable = {};
         const parts = [];
-
         if (props.elements) {
             parts.push(props.elements);
         }
 
         if (props.sections) {
-            props.sections.forEach(section => parts.push(section.elements));
+            props.sections.forEach(section => {
+                if (section.elements) {
+                    parts.push(section.elements);
+                }
+                if (section.wrapper) {
+                    section.wrapper.sections.forEach(nestedSection => parts.push(nestedSection.elements));
+                }
+            });
         }
 
         parts.forEach(part => part.forEach(element => {
@@ -103,21 +109,7 @@ class FormGenerator extends React.Component {
                     this.props.onSubmit(event, this.state.references);
                 }
             },
-            sections && sections.map((section, k) =>
-                <section key={ k } className={ 'card ' + (section.className && section.className || '') }>
-                    <div className="card-header">
-                        { section.title }
-                    </div>
-                    <div className={ 'card-body ' + sectionClass }>
-                        { section.elements.map((element, key) => {
-                            if (React.isValidElement(element)) {
-                                return element;
-                            }
-                            return this.createInputElement(element, key);
-                        })}
-                    </div>
-                </section>
-            ),
+            sections && this.getFormSections(sections, sectionClass),
 
             React.createElement('section', { className: sectionClass },
                 elements && elements.map((element, k) => {
@@ -130,6 +122,37 @@ class FormGenerator extends React.Component {
             ),
             !this.props.inlineSubmit && typeof button !== 'undefined' && FormGenerator.getSubmitButton(button)
         );
+    }
+
+    getFormSections(sections, sectionClass = '') {
+        return sections.map((section, k) => {
+            if (section.wrapper) {
+                return <section key={ k } className={ (section.wrapper.className || '') }>
+                    { section.wrapper.sections.map((nestedSection, i) => this.getSection(nestedSection, i)) }
+                </section>;
+            }
+            return this.getSection(section, k, sectionClass);
+        });
+    }
+    getSection(section, k, sectionClass = '') {
+        return <section key={ k } className={ section.className || '' }>
+            <div className={ (section.elementsWrapperClass || '') }>
+                <div className={ 'card' }>
+                    <div className="card-header">
+                        { section.title }
+                    </div>
+                    <div className={ 'card-body ' + sectionClass +
+                    (section.cardBodyClass && ' ' + section.cardBodyClass || '') }>
+                        { section.elements.map((element, key) => {
+                            if (React.isValidElement(element)) {
+                                return element;
+                            }
+                            return this.createInputElement(element, key);
+                        })}
+                    </div>
+                </div>
+            </div>
+        </section>;
     }
 
     static getSubmitButton(button) {
@@ -188,7 +211,7 @@ class FormGenerator extends React.Component {
 
         if ((isArray && element.validate.indexOf(FORM_VALIDATION.REQUIRED > -1) || isString &&
             element.validate === FORM_VALIDATION.REQUIRED) &&
-            typeof element.defaultValue === 'undefined' || element.defaultValue === '') {
+            (typeof element.defaultValue === 'undefined' || element.defaultValue === '')) {
             isValid = false;
         }
         if (isTransformable && (typeof element.defaultValue !== 'undefined' || element.defaultValue !== '')) {
@@ -391,7 +414,7 @@ class FormGenerator extends React.Component {
                 PropTypes.func,
                 PropTypes.arrayOf(PropTypes.string),
             ]),
-        }))
+        })),
     };
 
     static propTypes = {
@@ -399,9 +422,25 @@ class FormGenerator extends React.Component {
         onSubmit: PropTypes.func,
         inlineSubmit: PropTypes.bool,
         sections: PropTypes.arrayOf(PropTypes.shape({
+            elementsWrapperClass: PropTypes.string,
             className: PropTypes.string,
-            title: PropTypes.string.required,
-            elements: FormGenerator.elementsShape.elements
+            cardBodyClass: PropTypes.string,
+            title: PropTypes.string,
+            elements: FormGenerator.elementsShape.elements,
+            wrapper: PropTypes.shape({
+                className: PropTypes.string,
+                sections: PropTypes.arrayOf(PropTypes.shape({
+                    elementsWrapperClass: PropTypes.string,
+                    className: PropTypes.string,
+                    cardBodyClass: PropTypes.string,
+                    title: PropTypes.string,
+                    elements: FormGenerator.elementsShape.elements,
+                    wrapper: PropTypes.shape({
+                        className: PropTypes.string,
+                        sections: PropTypes.array.isRequired, // same as parents sections without the wrapper
+                    }),
+                })),
+            }),
         })),
         elements: FormGenerator.elementsShape.elements,
         button: PropTypes.object,

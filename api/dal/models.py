@@ -35,7 +35,7 @@ class User(db.Model):
     password = db.Column(db.String(80, collation=collation), nullable=True)
     first_name = db.Column(db.String(50, collation=collation), nullable=False, index=True)
     last_name = db.Column(db.String(50, collation=collation), nullable=False, index=True)
-    created_at = db.Column(db.DateTime(), nullable=False, default=datetime.datetime.utcnow())
+    created_at = db.Column(db.DateTime(), nullable=False, default=datetime.datetime.utcnow)
     deleted = db.Column(db.Boolean, nullable=False, server_default='0', index=True)
     roles = relationship('Role', secondary=user_roles, lazy='joined', backref=db.backref('users', lazy='dynamic'))
     tokens = relationship('UserToken', back_populates='user')
@@ -179,11 +179,18 @@ class Tenant(db.Model):
     first_name = db.Column(db.String(30, collation=collation), nullable=False)
     last_name = db.Column(db.String(30, collation=collation), nullable=False, index=True)
     email = db.Column(db.String(50, collation=collation), nullable=True, unique=True)
-    phone = db.Column(db.String(10, collation=collation), nullable=True, unique=True)
     identification_number = db.Column(
         db.String(25, collation=collation),
         comment='National ID. i.e. Cedula, License',
         unique=True
+    )
+    phone = db.Column(db.String(10, collation=collation), nullable=True, unique=True)
+    created_on = db.Column(db.DateTime(), nullable=False, default=datetime.datetime.utcnow)
+    updated_on = db.Column(
+        db.DateTime(),
+        nullable=False,
+        default=datetime.datetime.utcnow,
+        onupdate=datetime.datetime.utcnow
     )
 
     history = relationship('TenantHistory', back_populates='tenant')
@@ -212,7 +219,7 @@ class RentalAgreement(db.Model):
     project_id = db.Column(db.BigInteger, db.ForeignKey('projects.id'), index=True, nullable=False)
     time_interval_id = db.Column(db.Integer, db.ForeignKey('time_intervals.id'), nullable=False)
     rate = db.Column(db.DECIMAL(10, 2), nullable=False)
-    created_on = db.Column(db.DateTime(), nullable=False, default=datetime.datetime.utcnow())
+    created_on = db.Column(db.DateTime(), nullable=False, default=datetime.datetime.utcnow)
     entered_on = db.Column(db.DateTime(), nullable=False)
     terminated_on = db.Column(db.DateTime())
 
@@ -228,7 +235,7 @@ class Policy(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     title = db.Column(db.String(30, collation=collation), index=True, nullable=False)
     text = db.Column(db.Text(collation=collation))
-    start_ttv = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime.utcnow())
+    start_ttv = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime.utcnow)
     end_ttv = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime(
         9999, 12, 31, 23, 59, 59, 999999)
                         )
@@ -241,7 +248,7 @@ class Balance(db.Model):
     agreement_id = db.Column(db.BigInteger, db.ForeignKey('rental_agreements.id'), index=True)
     balance = db.Column(db.DECIMAL(10, 2), nullable=False)
     previous_balance = db.Column(db.DECIMAL(10, 2), nullable=False)
-    created_on = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime.utcnow())
+    created_on = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime.utcnow)
     due_date = db.Column(db.DateTime(), nullable=False, index=True)
 
     agreement = relationship(RentalAgreement, uselist=False)
@@ -260,7 +267,7 @@ class Payment(db.Model):
     id = db.Column(BIGINT(unsigned=True), primary_key=True, autoincrement=1000)
     balance_id = db.Column(BIGINT(unsigned=True), db.ForeignKey('balances.id'), index=True)
     amount = db.Column(db.DECIMAL(10, 2), nullable=False)
-    paid_date = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime.utcnow())
+    paid_date = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime.utcnow)
     payment_type_id = db.Column(db.Integer, db.ForeignKey('payment_types.id'), nullable=False)
 
     payment_type = relationship(PaymentType, uselist=False)
@@ -274,7 +281,7 @@ class Audit(db.Model):
     __tablename__ = 'audits'
 
     id = db.Column(BIGINT(unsigned=True), primary_key=True)
-    date = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime.utcnow())
+    date = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime.utcnow)
     user_id = db.Column(db.BigInteger, db.ForeignKey('users.id'), index=True, nullable=True)
     ip = db.Column(db.BigInteger, nullable=False)
     endpoint = db.Column(db.String(255, collation=collation), nullable=False)
