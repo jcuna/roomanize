@@ -6,7 +6,4 @@ RUN apt-get update && \
     apt-get install -y nodejs && \
     npm i -g npm
 
-COPY . /app
 WORKDIR /app
-
-RUN chmod +x build.sh

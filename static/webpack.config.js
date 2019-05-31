@@ -1,21 +1,25 @@
 /* eslint-disable */
 const webpack = require('webpack');
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 
 module.exports = env => {
+    const isDev = env.NODE_ENV === 'dev';
+    const assetPath = 'dist/';
+
     return {
         entry: [
             '@babel/polyfill',
-            path.resolve(__dirname, 'js/index.jsx')
+            path.resolve(__dirname, 'js/index.jsx'),
         ],
         output: {
-            path: path.resolve(__dirname, '/dist'),
-            filename: 'bundle.js',
-            publicPath: '/dist'
+            path: path.resolve(__dirname, 'public'),
+            filename: assetPath + '[name].bundle.js',
+            publicPath: '/',
         },
         resolve: {
-            extensions: ['.js', '.jsx', '.css']
+            extensions: ['.js', '.jsx', '.css'],
         },
         module: {
             rules: [
@@ -25,39 +29,61 @@ module.exports = env => {
                     use: [
                         'babel-loader',
                         'eslint-loader',
-                    ]
+                    ],
                 },
                 {
                     test: /\.scss$/,
                     use: [
-                        MiniCssExtractPlugin.loader,
+                        isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
                         'css-loader',
                         'sass-loader',
                     ],
                 },
-            ]
+            ],
         },
         plugins: [
+
+            new HtmlWebpackPlugin({
+                title: 'Roomanize',
+                hash: !isDev,
+                template: 'index.html',
+                favicon: 'favicon.ico',
+                filename: 'index.html'
+            }),
+
             new MiniCssExtractPlugin({
-                filename: "style.css",
-                chunkFilename: "[id].css"
+                filename: assetPath + 'style.css',
+                chunkFilename: assetPath + 'vendor.css',
             }),
             new webpack.DefinePlugin({
-                'process.env': {
-                    NODE_ENV: JSON.stringify(env.NODE_ENV)
-                }
+                'env': {
+                    NODE_ENV: JSON.stringify(env.NODE_ENV),
+                },
             }),
-            new webpack.HotModuleReplacementPlugin(),
         ],
+
+        optimization: {
+            splitChunks: {
+                cacheGroups: {
+                    vendor: {
+                        test: /node_modules/,
+                        chunks: 'initial',
+                        name: 'vendor',
+                        enforce: true,
+                    },
+                },
+            },
+        },
+
         devServer: {
-            contentBase: path.resolve(__dirname),
+            contentBase: path.resolve(__dirname, 'public/'),
             hot: true,
             compress: true,
-            publicPath: path.resolve(__dirname, '/dist'),
+            publicPath: '/',
             port: 3000,
             host: '0.0.0.0',
             disableHostCheck: true,
             historyApiFallback: true,
         },
-    }
+    };
 };

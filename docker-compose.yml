@@ -83,7 +83,7 @@ services:
       - --web
       - --docker
       - --docker.domain=localhost
-      - --logLevel=DEBUG
+      - --logLevel=ERROR
       - --entryPoints=Name:http Address::80 #Redirect.EntryPoint:https
 #      - --entryPoints=Name:https Address::443 TLS:/certs/cert.pem,/certs/key.pem
 #      - --defaultentrypoints=http,https

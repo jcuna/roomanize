@@ -12,6 +12,8 @@ env/
 build/
 develop-eggs/
 dist/
+*/public/index.html
+*/public/favicon.ico
 downloads/
 eggs/
 .eggs/
