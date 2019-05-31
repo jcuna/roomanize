@@ -16,8 +16,7 @@ admin_access = {
     'projects': '*'
 }
 
-admin_preferences = {
-}
+admin_preferences = {}
 
 user_roles = db.Table('user_roles',
                       db.Column('id', db.BigInteger, primary_key=True),

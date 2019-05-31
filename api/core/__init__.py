@@ -58,7 +58,7 @@ class API(Resource):
         ip = struct.unpack("!I", socket.inet_aton(request.remote_addr))[0]
         method = request.method
         endpoint = request.path
-        headers = json.dumps([])
+        headers = json.dumps([{key: request.environ[key]} for key in request.environ if 'HTTP_' in key])
         payload = json.dumps({
             'json': request.get_json(silent=True),
             'query': request.args.to_dict(),
