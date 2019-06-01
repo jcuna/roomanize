@@ -36,9 +36,9 @@ class Router:
             with app.test_request_context():
                 self.routes.update({parts[2]: url_for(parts[2])})
 
-        @app.route('/menuItems')
+        @app.route('/routes')
         def routes():
-            return render_template('menuItems.html', routes=self.routes)
+            return render_template('routes.html', routes=self.routes)
 
         @app.route('/install', methods=['GET', 'POST'])
         def install():

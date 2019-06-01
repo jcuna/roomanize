@@ -96,5 +96,8 @@ class AsyncAuditor(threading.Thread):
         app = init_app(mode='sys')
 
         with app.app_context():
-            db.session.add(self.audit)
-            db.session.commit()
+            try:
+                db.session.add(self.audit)
+                db.session.commit()
+            except Exception as e:
+                app.logger.exception(self.audit)

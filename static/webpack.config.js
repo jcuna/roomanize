@@ -52,8 +52,8 @@ module.exports = env => {
             }),
 
             new MiniCssExtractPlugin({
-                filename: assetPath + 'style.css',
-                chunkFilename: assetPath + 'vendor.css',
+                filename: assetPath + '[name].style.css',
+                chunkFilename: assetPath + 'vendor.style.css',
             }),
             new webpack.DefinePlugin({
                 'env': {
