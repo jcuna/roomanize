@@ -101,11 +101,6 @@ def access_map():
 
 class Paginator:
     per_page = 20
-    total = 0
-    offset = 0
-    total_pages = 0
-    query = None
-    page = 1
 
     def __init__(self, query: BaseQuery, page: int = 1, order_by: str = None, order_dir: str = None):
         self.total = query.count()
