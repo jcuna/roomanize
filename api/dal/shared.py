@@ -1,4 +1,4 @@
-from datetime import datetime
+from decimal import Decimal, getcontext
 from math import ceil
 from flask_sqlalchemy import SQLAlchemy, BaseQuery
 from sqlalchemy.orm import joinedload
@@ -14,7 +14,13 @@ def row2dict(row):
     d = {}
     for column in row.__table__.columns:
         attr = getattr(row, column.name)
-        d[column.name] = str(attr) if isinstance(attr, datetime) else attr
+        if isinstance(attr, Decimal):
+            getcontext().prec = 2
+            d[column.name] = str(attr)
+        elif not isinstance(attr, str):
+            d[column.name] = str(attr) if attr is not None else ''
+        else:
+            d[column.name] = attr
 
     return d
 

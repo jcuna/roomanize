@@ -200,7 +200,6 @@ class TenantHistory(db.Model):
 
     id = db.Column(db.BigInteger, primary_key=True)
     tenant_id = db.Column(db.BigInteger, db.ForeignKey('tenants.id'), index=True, nullable=False)
-    validated_on = db.Column(db.DateTime())
     reference1_phone = db.Column(db.String(10, collation=collation), nullable=False)
     reference2_phone = db.Column(db.String(10, collation=collation), nullable=True)
     reference3_phone = db.Column(db.String(10, collation=collation), nullable=True)
@@ -211,6 +210,7 @@ class TenantHistory(db.Model):
 
 class RentalAgreement(db.Model):
     __tablename__ = 'rental_agreements'
+    fillable = ['tenant_history_id', 'room_id', 'project_id', 'time_interval_id', 'rate', 'entered_on']
 
     id = db.Column(db.BigInteger, primary_key=True)
     tenant_history_id = db.Column(db.BigInteger, db.ForeignKey('tenant_history.id'), index=True, nullable=False)

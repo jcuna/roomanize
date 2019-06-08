@@ -22,6 +22,7 @@ import Breadcrumbs from '../../utils/Breadcrumbs';
 import { fetchUser } from '../../actions/userActions';
 import RequiresProject from './RequiresProject';
 import FontAwesome from '../../utils/FontAwesome';
+import { formatPhone } from '../../utils/helpers';
 
 export default class Project extends React.Component {
     constructor(props) {
@@ -171,7 +172,7 @@ export default class Project extends React.Component {
                             <tr key={ i }>
                                 <th scope='row'>{ i + 1 }</th>
                                 <td>{ project.name }</td>
-                                <td>{ project.contact }</td>
+                                <td>{ formatPhone(project.contact) }</td>
                                 <td>{ project.address }</td>
                                 <td>
                                     { canEdit && <Link to={ `${ENDPOINTS.PROJECTS_URL}/${project.id}` }>

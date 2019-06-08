@@ -4,10 +4,11 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ALERTS, ENDPOINTS } from '../../constants';
+import { ALERTS, ENDPOINTS, GENERIC_ERROR } from '../../constants';
 import { notifications } from '../../actions/appActions';
 import AgreementForm from './AgreementForm';
 import Breadcrumbs from '../../utils/Breadcrumbs';
+import { createAgreement } from '../../actions/agreementsAction';
 
 export default class AgreementNew extends React.Component {
     constructor(props) {
@@ -21,10 +22,6 @@ export default class AgreementNew extends React.Component {
         }
 
         this.onSubmit = this.onSubmit.bind(this);
-
-        this.state = {
-            button: { value: 'Crear', disabled: true },
-        };
     }
 
     render() {
@@ -43,13 +40,17 @@ export default class AgreementNew extends React.Component {
                             <p className='sticky-top'>{ (agreement.tenant.identification_number) }</p>
                         </div>
                     </div>
-                    <AgreementForm { ...this.props } onSubmit={ this.onSubmit } button={ this.state.button }/>
+                    <AgreementForm { ...this.props } onSubmit={ this.onSubmit }/>
                 </section>
             </div>);
     }
 
-    onSubmit() {
-
+    onSubmit(data) {
+        const submissionData = { ...data, tenant_id: this.props.agreements.agreement.tenant.id };
+        this.props.dispatch(createAgreement(submissionData, (id) => {
+            this.props.history.push(`${ENDPOINTS.AGREEMENTS_URL}/${id}`);
+            this.dispatch(notifications({ type: ALERTS.SUCCESS, message: 'Registración completa' }));
+        }, () => this.dispatch(notifications({ type: ALERTS.DANGER, message: GENERIC_ERROR }))));
     }
 
     static propTypes = {

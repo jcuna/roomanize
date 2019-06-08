@@ -13,6 +13,7 @@ import Spinner from '../../utils/Spinner';
 import Table from '../../utils/Table';
 import Link from 'react-router-dom/es/Link';
 import { setAgreement } from '../../actions/agreementsAction';
+import { formatDateEs, formatPhone } from '../../utils/helpers';
 
 export default class TenantForm extends React.Component {
     constructor(props) {
@@ -166,7 +167,7 @@ export default class TenantForm extends React.Component {
                         items.push(['Contrato Terminado en:', date.toDateString()]);
                     } else {
                         const date = new Date(row.rental_agreement.entered_on);
-                        items.push(['En vigencia desde', date.toDateString()]);
+                        items.push(['En vigencia desde', formatDateEs(date)]);
                     }
 
                     items.push([
@@ -177,19 +178,20 @@ export default class TenantForm extends React.Component {
                         </Link>,
                     ]);
 
-                    items.push(['Referencia I', row.reference1_phone]);
+                    items.push(['Referencia I', formatPhone(row.reference1_phone)]);
                     if (row.reference2_phone) {
-                        items.push(['Referencia II', row.reference2_phone]);
+                        items.push(['Referencia II', formatPhone(row.reference2_phone)]);
                     }
 
                     if (row.reference3_phone) {
-                        items.push(['Referencia III', row.reference3_phone]);
+                        items.push(['Referencia III', formatPhone(row.reference3_phone)]);
                     }
 
-                    items.push(['Arrendamiento', row.rental_agreement.room.rent]);
+                    items.push(['Arrendamiento', `RD$ ${row.rental_agreement.rate}`]);
 
                     if (active) {
                         items.push(['Proximo Pago', 'placeholder']);
+                        items.push(['Balance', 'placeholder']);
                         items.push(['Ultimo Pago', 'placeholder']);
                     }
 

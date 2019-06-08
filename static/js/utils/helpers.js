@@ -11,7 +11,7 @@ export const searchArray = (array, value, keys) => {
 
 let timeout = 0;
 
-export const afterPause = (resolve) => {
+export const afterPause = resolve => {
     if (timeout) {
         clearTimeout(timeout);
     }
@@ -20,4 +20,14 @@ export const afterPause = (resolve) => {
         resolve();
         timeout = 0;
     }, 1000);
+};
+
+export const formatPhone = phone => {
+    const re = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+    return phone.replace(re, '($1) $2-$3');
+};
+
+export const formatDateEs = date => {
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    return date.toLocaleDateString('es-US', options);
 };

@@ -12,7 +12,7 @@ import Spinner from '../../utils/Spinner';
 import { hasAccess } from '../../utils/config';
 import FontAwesome from '../../utils/FontAwesome';
 import Paginate from '../../utils/Paginate';
-import { afterPause, searchArray } from '../../utils/helpers';
+import { afterPause, formatPhone, searchArray } from '../../utils/helpers';
 import Link from 'react-router-dom/es/Link';
 
 export default class Tenants extends React.Component {
@@ -50,7 +50,7 @@ export default class Tenants extends React.Component {
             const row = [
                 item.first_name + ' ' + item.last_name,
                 item.email,
-                item.phone,
+                formatPhone(item.phone),
                 item.identification_number,
             ];
 

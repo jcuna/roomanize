@@ -28,6 +28,7 @@ export default class Autocomplete extends React.Component {
                 onClick={ this.showItems }
                 name={ this.props.name }
                 onChange={ this.props.onChange }
+                autoComplete='off'
             />
             { this.state.showItems && <FontAwesome type='times' onClick={ this.hideItems }/> }
             { this.state.showItems && <ul className='item-list'>{ this.getItems() }</ul> }
@@ -78,6 +79,9 @@ export default class Autocomplete extends React.Component {
 
     hideItems() {
         this.setState({ showItems: false });
+        if (this.input.current.value === '') {
+            this.props.onSelect({ key: 0, label: '' });
+        }
     }
 
     static propTypes = {
@@ -86,7 +90,7 @@ export default class Autocomplete extends React.Component {
         name: PropTypes.string,
         placeholder: PropTypes.string,
         items: PropTypes.arrayOf(PropTypes.shape({
-            key: PropTypes.number.isRequired,
+            key: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
             label: PropTypes.string.isRequired,
         })),
         onChange: PropTypes.func,

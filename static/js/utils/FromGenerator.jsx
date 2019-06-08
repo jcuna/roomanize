@@ -30,6 +30,10 @@ class FormGenerator extends React.Component {
         }
 
         parts.forEach(part => part.forEach(element => {
+            if (React.isValidElement(element)) {
+                return;
+            }
+
             let isTransformable = false;
 
             if (typeof element.validate === 'object') {
@@ -67,7 +71,7 @@ class FormGenerator extends React.Component {
         const refKeys = Object.keys(this.state.references);
 
         refKeys.forEach(key => {
-            if (this.state.references[key].value !== prevState.references[key].value) {
+            if (typeof key !== 'undefined' && this.state.references[key].value !== prevState.references[key].value) {
                 const references = { ...this.state.references };
 
                 refKeys.forEach(item => {
@@ -205,16 +209,15 @@ class FormGenerator extends React.Component {
     static getInitialValidationValue(element, isTransformable) {
         let isValid = true;
         const isArray = typeof element.validate === 'object';
-
+        const isEmpty = typeof element.defaultValue === 'undefined' || element.defaultValue === '';
         let value = typeof element.defaultValue === 'undefined' ? '' : element.defaultValue;
         const isString = typeof element.validate === 'string';
 
-        if ((isArray && element.validate.indexOf(FORM_VALIDATION.REQUIRED > -1) || isString &&
-            element.validate === FORM_VALIDATION.REQUIRED) &&
-            (typeof element.defaultValue === 'undefined' || element.defaultValue === '')) {
+        if ((isArray && element.validate.indexOf(FORM_VALIDATION.REQUIRED) > -1 || isString &&
+            element.validate === FORM_VALIDATION.REQUIRED) && isEmpty) {
             isValid = false;
         }
-        if (isTransformable && (typeof element.defaultValue !== 'undefined' || element.defaultValue !== '')) {
+        if (!isEmpty && isTransformable && (typeof element.defaultValue !== 'undefined' || element.defaultValue !== '')) {
             if (isArray) {
                 element.validate.forEach(method => {
                     if (typeof FormGenerator[method + VALIDATE_TRANSFORM_FUNC] === 'function') {
@@ -456,7 +459,7 @@ FormGenerator[FORM_VALIDATION.NUMBER + VALIDATE_FUNC_SUFFIX] = ({ target }) => {
 };
 
 FormGenerator[FORM_VALIDATION.REQUIRED + VALIDATE_FUNC_SUFFIX] = ({ target }) => {
-    return target.value.replace(' ', '') !== '';
+    return target.value.replace(' ', '') !== '' && Number(target.value) !== 0;
 };
 
 FormGenerator[FORM_VALIDATION.ALPHA_NUM + VALIDATE_FUNC_SUFFIX] = ({ target }) => {

@@ -23,6 +23,10 @@ export default class AgreementForm extends React.Component {
         this.state = {
             loadingRooms: false,
             rooms,
+            button: { value: 'Crear', disabled: true },
+            validInputs: false,
+            room_id: 0,
+            data: {},
         };
 
         this.inputChanged = this.inputChanged.bind(this);
@@ -30,10 +34,17 @@ export default class AgreementForm extends React.Component {
         this.selectRoom = this.selectRoom.bind(this);
         this.fetchNextRoomPage = this.fetchNextRoomPage.bind(this);
         this.fetchPreviousRoomPage = this.fetchPreviousRoomPage.bind(this);
+        this.onSubmit = this.onSubmit.bind(this);
 
         this.props.dispatch(fetchRooms(1));
         if (props.projects.timeIntervals.length === 0) {
             props.dispatch(fetchTimeIntervals());
+        }
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (prevState.room_id !== this.state.room_id || prevState.validInputs !== this.state.validInputs) {
+            this.verifyInputs();
         }
     }
 
@@ -51,8 +62,8 @@ export default class AgreementForm extends React.Component {
 
         return <FormGenerator
             formName='agreement-form'
-            onSubmit={ this.props.onSubmit }
-            button={ this.props.button }
+            onSubmit={ this.onSubmit }
+            button={ this.state.button }
             sections={ [
                 {
                     title: 'Unidad/Habitación',
@@ -167,12 +178,26 @@ export default class AgreementForm extends React.Component {
     }
 
     selectRoom(room) {
-        this.setState({ data: [] });
-        console.log(room);
+        this.setState({ room_id: Number(room.key) });
     }
 
-    inputChanged(validate) {
-        console.log(validate);
+    inputChanged(e, validate) {
+        let allValid = true;
+        Object.keys(validate).forEach(key => {
+            if (!validate[key].isValid) {
+                allValid = false;
+                return;
+            }
+        });
+        this.setState({ validInputs: allValid, data: validate });
+    }
+
+    verifyInputs() {
+        if (this.state.room_id !== 0 && typeof this.state.room_id !== 'undefined' && this.state.validInputs) {
+            this.setState({ button: { ...this.state.button, disabled: false }});
+        } else {
+            this.setState({ button: { ...this.state.button, disabled: true }});
+        }
     }
 
     roomInputChanged({ target }) {
@@ -195,6 +220,15 @@ export default class AgreementForm extends React.Component {
         }
     }
 
+    onSubmit() {
+        const data = {
+            room_id: this.state.room_id,
+        };
+        Object.keys(this.state.data).forEach(key => data[key] = this.state.data[key].value);
+
+        this.props.onSubmit(data);
+    }
+
     getTimeIntervalOptions() {
         const options = [];
 
@@ -208,7 +242,6 @@ export default class AgreementForm extends React.Component {
     static propTypes = {
         dispatch: PropTypes.func,
         onSubmit: PropTypes.func,
-        button: PropTypes.object,
         agreement: PropTypes.object,
         rooms: PropTypes.object,
         projects: PropTypes.object,
