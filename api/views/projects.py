@@ -3,6 +3,7 @@ import sqlalchemy
 from datetime import datetime
 from flask import request, session
 from core import API
+from core.middleware import HttpException
 from dal.models import Project, TimeInterval, User, Room
 from dal.shared import token_required, access_required, db, get_fillable, row2dict, Paginator
 from views import Result
@@ -97,11 +98,19 @@ class Rooms(API):
 
     @token_required
     @access_required
-    def get(self):
+    def get(self, room_id=None):
 
-        result = []
         project_id = request.user.attributes.preferences['default_project']
 
+        if room_id:
+            room = Room.query.filter_by(id=room_id).filter_by(project_id=project_id).first()
+
+            if not room:
+                raise HttpException('Not found', 404)
+
+            return row2dict(room)
+
+        result = []
         page = request.args.get('page') if 'page' in request.args else 1
         total_pages = 1
 

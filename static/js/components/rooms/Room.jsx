@@ -25,14 +25,14 @@ export default class Room extends Component {
             page: props.match.params.page || 1,
         };
 
-        if (props.rooms.status === STATUS.PENDING) {
+        if (props.rooms.status === STATUS.PENDING ||
+            (props.rooms.status === STATUS.COMPLETE && props.rooms.data.list.length === 0)) {
             this.paginateRooms();
         } else {
             this.state.page = props.rooms.data.page;
             this.props.history.push(`${ENDPOINTS.ROOMS_URL}/${this.state.page}`);
         }
 
-        props.dispatch(selectRoom({}));
         this.selectRoom = this.selectRoom.bind(this);
         this.search = this.search.bind(this);
         this.switchPage = this.switchPage.bind(this);
@@ -167,7 +167,7 @@ export default class Room extends Component {
 
     selectRoom({ target }) {
         this.props.rooms.data.list.forEach(room => {
-            if (room.id === Number(target.getAttribute('data-id'))) {
+            if (Number(room.id) === Number(target.getAttribute('data-id'))) {
                 this.props.dispatch(selectRoom(room));
                 return;
             }

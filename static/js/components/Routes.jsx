@@ -77,6 +77,8 @@ export default class Routes extends React.Component {
                     this.getComponent(Account, props, true) }
                 />
 
+                <Route path='/error/404' component={ ErrorPage } type={ 404 }/>
+                <Route path='/error/403' component={ ErrorPage } type={ 403 }/>
                 <Route component={ ErrorPage }/>
             </Switch>
         );

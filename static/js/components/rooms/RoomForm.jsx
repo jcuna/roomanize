@@ -5,34 +5,49 @@
 import React, { Component } from 'react';
 import FormGenerator from '../../utils/FromGenerator';
 import PropTypes from 'prop-types';
-import { createRoom, editRoom, fetchRooms, selectRoom } from '../../actions/roomActions';
+import { createRoom, editRoom, fetchRoom, fetchRooms, selectRoom } from '../../actions/roomActions';
 import { notifications } from '../../actions/appActions';
-import { ALERTS, ENDPOINTS, GENERIC_ERROR } from '../../constants';
+import { ALERTS, ENDPOINTS, GENERIC_ERROR, STATUS } from '../../constants';
 import Breadcrumbs from '../../utils/Breadcrumbs';
-import { Redirect } from 'react-router-dom';
+import Spinner from '../../utils/Spinner';
 
 export default class RoomForm extends Component {
     constructor(props) {
         super(props);
-        this.state = {
-            button: { value: this.props.rooms.selectedRoom.id ? 'Editar' : 'Agregar', disabled: true },
-            name: this.props.rooms.selectedRoom.name || '',
-            description: this.props.rooms.selectedRoom.description || '',
-            id: this.props.rooms.selectedRoom.id || 0,
-            project_id: this.props.rooms.selectedRoom.project_id || 0,
-            picture: this.props.rooms.selectedRoom.picture || '',
-            errors: true,
-        };
+        this.state = { errors: true, ...RoomForm.getStateFromProps(props) };
+
         this.handleSubmit = this.handleSubmit.bind(this);
         this.onInputChange = this.onInputChange.bind(this);
+
+        if (typeof this.props.match.params.room_id !== 'undefined' && this.state.id === 0 &&
+            this.props.rooms.status !== STATUS.TRANSMITTING) {
+            this.props.dispatch(fetchRoom(this.props.match.params.room_id, () => {
+                this.props.history.push('/error/404');
+            }));
+        }
+    }
+
+    static getStateFromProps({ rooms }) {
+        return {
+            button: { value: rooms.selectedRoom.id ? 'Editar' : 'Agregar', disabled: true },
+            name: rooms.selectedRoom.name || '',
+            description: rooms.selectedRoom.description || '',
+            id: rooms.selectedRoom.id || 0,
+            project_id: rooms.selectedRoom.project_id || 0,
+            picture: rooms.selectedRoom.picture || '',
+        };
+    }
+
+    componentWillUnmount() {
+        this.props.dispatch(selectRoom({}));
     }
 
     render() {
-        if (typeof this.props.match.params.room_id !== 'undefined' && this.state.id === 0) {
-            return <Redirect to={ ENDPOINTS.ROOMS_URL }/>;
-        }
+        const creating = typeof this.props.match.params.room_id === 'undefined';
 
-        const creating = typeof this.props.rooms.selectedRoom.id === 'undefined';
+        if (!creating && this.state.id === 0) {
+            return <Spinner/>;
+        }
 
         return <div>
             <Breadcrumbs { ...this.props } title={ creating ? 'Nuevo' : 'Editar' }/>
@@ -108,6 +123,10 @@ export default class RoomForm extends Component {
         if (this.props.location.pathname === `${ENDPOINTS.ROOMS_URL}/nuevo` &&
             prevState.id !== this.state.id) {
             this.props.history.push(`${ENDPOINTS.ROOMS_URL}/editar/${this.props.rooms.selectedRoom.id}`);
+        }
+
+        if (prevProps.rooms.selectedRoom.id !== this.props.rooms.selectedRoom.id) {
+            this.setState({ ...RoomForm.getStateFromProps(this.props) });
         }
     }
 

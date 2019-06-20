@@ -4,7 +4,6 @@ from flask_sqlalchemy import SQLAlchemy, BaseQuery
 from sqlalchemy.orm import joinedload
 from functools import wraps
 import jwt
-
 from views import Result
 
 db = SQLAlchemy()

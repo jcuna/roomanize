@@ -24,7 +24,7 @@ export default function roomReducer(state = initState, action) {
         case ROOMS_FETCHED:
             return { ...state, status: STATUS.COMPLETE, data: action.payload };
         case ROOM_SELECTED:
-            return { ...state, selectedRoom: action.payload };
+            return { ...state, selectedRoom: action.payload, status: STATUS.COMPLETE };
         case ROOMS_SEARCHING:
             return { ...state, searchingBackEnd: true };
         case ROOMS_SEARCHED:

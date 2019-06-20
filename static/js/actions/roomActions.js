@@ -7,6 +7,7 @@ export const ROOMS_FETCHING = 'ROOMS_FETCHING';
 export const ROOMS_SEARCHING = 'ROOMS_SEARCHING';
 export const ROOMS_SEARCHED = 'ROOMS_SEARCHED';
 export const ROOMS_FETCHED = 'ROOMS_FETCHED';
+export const ROOM_FETCHED = 'ROOM_FETCHED';
 
 export const createRoom = (data, resolve, reject) =>
     (dispatch) =>
@@ -45,6 +46,18 @@ export const fetchRooms = (page, reject) =>
 export const selectRoom = (room) => {
     return { type: ROOM_SELECTED, payload: room };
 };
+
+export const fetchRoom = (rom_id, reject) =>
+    (dispatch) => {
+        dispatch({ type: ROOMS_FETCHING });
+        token.through().then(header => api({
+            url: `rooms/${rom_id}`,
+            method: 'GET',
+            headers: header,
+        }).then(resp => {
+            dispatch(selectRoom(resp.data));
+        }, reject), reject);
+    };
 
 export const searchRooms = (q, resolve, reject) =>
     (dispatch) => {
