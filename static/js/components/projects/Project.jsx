@@ -189,7 +189,7 @@ export default class Project extends React.Component {
     }
 
     getCheckbox(item, canEdit, { attributes }) {
-        const active = attributes.preferences.default_project === item.id;
+        const active = attributes.preferences.default_project === Number(item.id);
 
         if (canEdit) {
             const label = active ? 'Desactivar' : 'Activar';
