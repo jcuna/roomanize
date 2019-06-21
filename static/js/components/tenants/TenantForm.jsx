@@ -14,6 +14,7 @@ import Table from '../../utils/Table';
 import Link from 'react-router-dom/es/Link';
 import { setAgreement } from '../../actions/agreementsAction';
 import { formatDateEs, formatPhone } from '../../utils/helpers';
+import '../../../css/tenants/tenantform.scss';
 
 export default class TenantForm extends React.Component {
     constructor(props) {
@@ -189,10 +190,26 @@ export default class TenantForm extends React.Component {
 
                     items.push(['Arrendamiento', `RD$ ${row.rental_agreement.rate}`]);
 
+                    const { balance } = row.rental_agreement;
                     if (active) {
-                        items.push(['Proximo Pago', 'placeholder']);
-                        items.push(['Balance', 'placeholder']);
-                        items.push(['Ultimo Pago', 'placeholder']);
+                        if (balance.length > 0) {
+                            let last_payment = 'Nunca';
+
+                            if (typeof balance[1] !== 'undefined') {
+                                if (typeof balance[1].last_payment.paid_date !== 'undefined') {
+                                    last_payment = TenantForm.createLastPaymentComponent(balance[1].last_payment);
+                                } else if (typeof balance[0].last_payment.paid_date !== 'undefined') {
+                                    last_payment = TenantForm.createLastPaymentComponent(balance[0].last_payment);
+                                }
+                            }
+                            items.push(['Proximo Pago', formatDateEs(new Date(balance[0].due_date))]);
+                            items.push(['Balance', `$RD ${balance[0].balance}`]);
+                            items.push(['Ultimo Pago', last_payment]);
+                        }
+                        items.push([
+                            '',
+                            <Link key={ row.id } to={ `${ENDPOINTS.AGREEMENTS_URL}/${row.id}` }>Editar</Link>
+                        ]);
                     }
 
                     return (
@@ -203,8 +220,16 @@ export default class TenantForm extends React.Component {
                     );
                 })
             }
-
         </div>;
+    }
+
+    static createLastPaymentComponent(last_payment) {
+        return (
+            <span className='last-payment'>
+                <span>{ formatDateEs(new Date(last_payment.paid_date)) }</span>
+                <span className='amount'>{ `($RD ${ last_payment.amount })` }</span>
+            </span>
+        );
     }
 
     formSubmit(e, obj) {

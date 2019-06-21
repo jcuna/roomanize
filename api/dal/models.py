@@ -263,7 +263,7 @@ class PaymentType(db.Model):
 class Payment(db.Model):
     __tablename__ = 'payments'
 
-    id = db.Column(BIGINT(unsigned=True), primary_key=True, autoincrement=1000)
+    id = db.Column(BIGINT(unsigned=True), primary_key=True)
     balance_id = db.Column(BIGINT(unsigned=True), db.ForeignKey('balances.id'), index=True)
     amount = db.Column(db.DECIMAL(10, 2), nullable=False)
     paid_date = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime.utcnow)

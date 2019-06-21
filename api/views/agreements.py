@@ -1,6 +1,8 @@
+from datetime import datetime
 from flask import request
 from core import API
-from dal.models import RentalAgreement, TenantHistory, Room, TimeInterval, Policy
+from core.middleware import HttpException
+from dal.models import RentalAgreement, TenantHistory, Room, TimeInterval, Policy, Balance
 from dal.shared import token_required, access_required, db
 
 
@@ -20,6 +22,10 @@ class Agreements(API):
             'tenant_id': data['tenant_id'],
             'reference1_phone': data['reference1']
         }
+
+        if datetime.strptime(data['date'], '%Y-%m-%d') < datetime.utcnow():
+            raise HttpException('Invalid date', 400)
+
         if data['reference2']:
             tenant_data['reference2_phone'] = data['reference2']
         if data['reference3']:
@@ -37,7 +43,15 @@ class Agreements(API):
             entered_on=data['date']
         )
 
+        balance = Balance(
+            agreement=agreement,
+            balance=agreement.rate,
+            previous_balance=0.00,
+            due_date=agreement.entered_on
+        )
+
         db.session.add(agreement)
+        db.session.add(balance)
         db.session.commit()
 
         return dict(id=agreement.id)

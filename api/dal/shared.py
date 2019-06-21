@@ -11,15 +11,17 @@ db = SQLAlchemy()
 
 def row2dict(row):
     d = {}
-    for column in row.__table__.columns:
-        attr = getattr(row, column.name)
-        if isinstance(attr, Decimal):
-            getcontext().prec = 2
-            d[column.name] = str(attr)
-        elif not isinstance(attr, str):
-            d[column.name] = str(attr) if attr is not None else ''
-        else:
-            d[column.name] = attr
+
+    if row:
+        for column in row.__table__.columns:
+            attr = getattr(row, column.name)
+            if isinstance(attr, Decimal):
+                getcontext().prec = 2
+                d[column.name] = str(attr)
+            elif not isinstance(attr, str):
+                d[column.name] = str(attr) if attr is not None else ''
+            else:
+                d[column.name] = attr
 
     return d
 

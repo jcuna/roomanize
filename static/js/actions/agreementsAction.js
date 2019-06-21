@@ -15,7 +15,7 @@ export const createAgreement = (data, resolve, reject) =>
             method: 'POST',
             headers: header,
         }, data).then(resp => {
-            resolve && resolve();
+            resolve && resolve(resp.data.id);
             dispatch({ type: AGREEMENT_CREATED, payload: resp.data });
         }, reject), reject);
     };
