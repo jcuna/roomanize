@@ -2,7 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from app import db, init_app
 from dal.models import collation, TimeInterval, PaymentType
 
-app = init_app()
+app = init_app('sys')
 
 
 def seed_time_intervals(db: SQLAlchemy):
@@ -39,5 +39,5 @@ def run_migration():
 
 
 def clear_cache():
-    from app import cache
+    from core import cache
     cache.clear()

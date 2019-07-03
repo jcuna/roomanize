@@ -9,6 +9,7 @@ import { notifications } from '../../actions/appActions';
 import AgreementForm from './AgreementForm';
 import Breadcrumbs from '../../utils/Breadcrumbs';
 import { createAgreement } from '../../actions/agreementsAction';
+import Link from 'react-router-dom/es/Link';
 
 export default class AgreementNew extends React.Component {
     constructor(props) {
@@ -35,7 +36,9 @@ export default class AgreementNew extends React.Component {
                         <div className="card-header">Inquilino</div>
                         <div className="card-body">
                             <h4 className="card-title">
-                                { `${ agreement.tenant.name }` }
+                                <Link to={ `${ ENDPOINTS.TENANTS_URL}/editar/${agreement.tenant.id }` }>
+                                    { agreement.tenant.name }
+                                </Link>
                             </h4>
                             <p className='sticky-top'>{ (agreement.tenant.identification_number) }</p>
                         </div>
@@ -47,8 +50,8 @@ export default class AgreementNew extends React.Component {
 
     onSubmit(data) {
         const submissionData = { ...data, tenant_id: this.props.agreements.agreement.tenant.id };
-        this.props.dispatch(createAgreement(submissionData, (id) => {
-            this.props.history.push(`${ENDPOINTS.AGREEMENTS_URL}/${id}`);
+        this.props.dispatch(createAgreement(submissionData, () => {
+            this.props.history.push(`${ ENDPOINTS.TENANTS_URL}/editar/${ this.props.agreements.agreement.tenant.id }`);
             this.dispatch(notifications({ type: ALERTS.SUCCESS, message: 'Registración completa' }));
         }, () => this.dispatch(notifications({ type: ALERTS.DANGER, message: GENERIC_ERROR }))));
     }

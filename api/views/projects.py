@@ -4,7 +4,7 @@ from datetime import datetime
 from flask import request, session
 from core import API
 from core.middleware import HttpException
-from dal.models import Project, TimeInterval, User, Room
+from dal.models import Project, TimeInterval, User, Room, PaymentType
 from dal.shared import token_required, access_required, db, get_fillable, row2dict, Paginator
 from views import Result
 
@@ -172,5 +172,16 @@ class TimeIntervals(API):
         result = []
         for interval in TimeInterval.query.all():
             result.append(row2dict(interval))
+
+        return result
+
+
+class PaymentTypes(API):
+
+    @token_required
+    def get(self):
+        result = []
+        for payment in PaymentType.query.all():
+            result.append(row2dict(payment))
 
         return result

@@ -1,4 +1,5 @@
 import json
+import os
 import socket
 import struct
 import sys
@@ -7,15 +8,12 @@ from flask import request
 from dal.models import Audit
 from flask_restful import Resource
 from .router import Router
-from .middleware import Middleware
-from .middleware import error_handler
+from .utils import get_logger, app_path
+from .middleware import Middleware, error_handler
 from pprint import pformat
 from flask_caching import Cache as CacheService
 from simplecrypt import encrypt, decrypt
 from base64 import b64encode, b64decode
-
-
-cache = CacheService()
 
 
 def c_print(obj):
@@ -100,6 +98,19 @@ class AsyncAuditor(threading.Thread):
                 app.logger.exception(self.audit)
 
 
+def runner(app):
+
+    # if this is not a second spawn for auto reload worker
+    if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+        from config.crons import cron_jobs
+        from apscheduler.schedulers.background import BackgroundScheduler
+
+        scheduler = BackgroundScheduler(timezone='utc')
+        scheduler.start()
+        for job in cron_jobs:
+            scheduler.add_job(**job)
+
+
 class Encryptor:
 
     password = 'password'
@@ -112,4 +123,6 @@ class Encryptor:
         return b64decode(decrypt(self.password, string))
 
 
+# auto exec
+cache = CacheService()
 encryptor = Encryptor()

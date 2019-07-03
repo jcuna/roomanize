@@ -1,6 +1,5 @@
 import api from '../utils/api';
 import token from '../utils/token';
-
 export const PROJECT_UPDATING = 'PROJECT_UPDATING';
 export const PROJECT_UPDATED = 'PROJECT_UPDATED';
 export const PROJECT_CREATING = 'PROJECT_CREATING';
@@ -12,6 +11,8 @@ export const PROJECT_REQUIRED = 'PROJECT_REQUIRED';
 export const PROJECT_EDITING = 'PROJECT_EDITING';
 export const PROJECT_EDITING_CLEAR = 'PROJECT_EDITING_CLEAR';
 export const TIME_INTERVALS_FETCHED = 'TIME_INTERVALS_FETCHED';
+export const PAYMENT_TYPES_FETCHED = 'PAYMENT_TYPES_FETCHED';
+export const PAYMENT_TYPES_FETCHED_FAILED = 'PAYMENT_TYPES_FETCHED_FAILED';
 
 export const fetchProjects = (fail) =>
     (dispatch) => {
@@ -23,8 +24,8 @@ export const fetchProjects = (fail) =>
                 headers: header
             }).then((resp) => {
                 dispatch({ type: PROJECTS_FETCHED, payload: resp.data });
-            }, () => {
-                fail();
+            }, err => {
+                fail && fail(err);
                 dispatch({ type: PROJECTS_FETCHED_FAIL });
             })
         );
@@ -78,4 +79,20 @@ export const fetchTimeIntervals = () =>
                 headers: header,
             }).then(resp => dispatch({ type: TIME_INTERVALS_FETCHED, payload: resp.data }));
         });
+    };
+
+export const fetchPaymentTypes = (fail) =>
+    (dispatch) => {
+        token.through().then(header =>
+            api({
+                url: `/payment-types`,
+                method: 'GET',
+                headers: header
+            }).then((resp) => {
+                dispatch({ type: PAYMENT_TYPES_FETCHED, payload: resp.data });
+            }, err => {
+                fail && fail(err);
+                dispatch({ type: PAYMENT_TYPES_FETCHED_FAILED });
+            })
+        );
     };

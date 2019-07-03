@@ -2,15 +2,16 @@ from datetime import datetime
 from flask import request
 from core import API
 from core.middleware import HttpException
-from dal.models import RentalAgreement, TenantHistory, Room, TimeInterval, Policy, Balance
-from dal.shared import token_required, access_required, db
+from dal.models import RentalAgreement, TenantHistory, Room, TimeInterval, Policy, Balance, Payment
+from dal.shared import token_required, access_required, db, get_fillable, row2dict
+from views import Result
 
 
 class Agreements(API):
 
     @token_required
     @access_required
-    def get(self):
+    def get(self, agreement_id=None):
         pass
 
     @token_required
@@ -23,7 +24,7 @@ class Agreements(API):
             'reference1_phone': data['reference1']
         }
 
-        if datetime.strptime(data['date'], '%Y-%m-%d') < datetime.utcnow():
+        if datetime.strptime(data['date'], '%Y-%m-%d').date() < datetime.utcnow().date():
             raise HttpException('Invalid date', 400)
 
         if data['reference2']:
@@ -54,11 +55,46 @@ class Agreements(API):
         db.session.add(balance)
         db.session.commit()
 
-        return dict(id=agreement.id)
+        return Result.id(agreement.id)
 
     @token_required
     @access_required
-    def put(self):
+    def put(self, agreement_id):
+
+        data = request.get_json()
+
+        if datetime.strptime(data['terminated_on'], '%Y-%m-%d').date() > datetime.utcnow().date():
+            raise HttpException('Invalid date', 400)
+
+        agreement = RentalAgreement.query.filter_by(id=agreement_id).first()
+        for item in get_fillable(RentalAgreement, ):
+            agreement.set_attribute(**item)
+
+        db.session.add(agreement)
+        db.session.commit()
+
+        return Result.success()
+
+
+class BalancePayments(API):
+
+    @token_required
+    @access_required
+    def post(self):
+
+        data = request.get_json()
+
+        balance = Balance.query.filter_by(id=data['balance_id']).first()
+        balance.payments.append(Payment(**get_fillable(Payment, **data)))
+
+        db.session.commit()
+
+        return Result.id(balance.id)
+
+    def delete(self, payment_id):
+        pass
+
+    def get(self, payment_id):
         pass
 
 

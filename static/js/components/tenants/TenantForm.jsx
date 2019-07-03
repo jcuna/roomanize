@@ -7,14 +7,19 @@ import PropTypes from 'prop-types';
 import FormGenerator from '../../utils/FromGenerator';
 import Breadcrumbs from '../../utils/Breadcrumbs';
 import { clearSelectedTenant, createTenant, editTenant, getTenant } from '../../actions/tenantsAction';
-import { notifications } from '../../actions/appActions';
-import { ALERTS, ENDPOINTS, GENERIC_ERROR } from '../../constants';
+import { hideOverlay, notifications, showOverlay } from '../../actions/appActions';
+import { ACCESS_TYPES, ALERTS, ENDPOINTS, GENERIC_ERROR } from '../../constants';
 import Spinner from '../../utils/Spinner';
 import Table from '../../utils/Table';
 import Link from 'react-router-dom/es/Link';
-import { setAgreement } from '../../actions/agreementsAction';
+import { setAgreement, updateAgreement } from '../../actions/agreementsAction';
 import { formatDateEs, formatPhone } from '../../utils/helpers';
 import '../../../css/tenants/tenantform.scss';
+import FontAwesome from '../../utils/FontAwesome';
+import Button from '../../utils/Button';
+import PaymentForm from '../payments/PaymentForm';
+import { fetchPaymentTypes } from '../../actions/projectActions';
+import { hasAccess } from '../../utils/config';
 
 export default class TenantForm extends React.Component {
     constructor(props) {
@@ -23,11 +28,16 @@ export default class TenantForm extends React.Component {
         this.formSubmit = this.formSubmit.bind(this);
         this.onInputChange = this.onInputChange.bind(this);
         this.newAgreementRegistration = this.newAgreementRegistration.bind(this);
+        this.confirmEndAgreement = this.confirmEndAgreement.bind(this);
+        this.lastDateChanged = this.lastDateChanged.bind(this);
+        this.newPayment = this.newPayment.bind(this);
 
         const tenant_id = this.props.match.params.tenant_id || null;
         const { dispatch } = this.props;
+        this.lastDateInput = React.createRef();
 
         this.state = {
+            lastDate: null,
             notFound: false,
             button: {
                 disabled: true,
@@ -37,6 +47,10 @@ export default class TenantForm extends React.Component {
             },
             ...this.props.tenants.selectedTenant,
         };
+
+        if (this.props.projects.paymentTypes.length === 0) {
+            this.props.dispatch(fetchPaymentTypes());
+        }
 
         if (tenant_id) {
             dispatch(getTenant(tenant_id, null, () => {
@@ -69,6 +83,8 @@ export default class TenantForm extends React.Component {
 
     render() {
         const editing = this.state.id !== null;
+        const canUpdateAgreement = hasAccess(ENDPOINTS.AGREEMENTS_URL, ACCESS_TYPES.WRITE);
+        const canProcessPayments = hasAccess(ENDPOINTS.BALANCE_PAYMENTS_URL, ACCESS_TYPES.WRITE);
 
         return <div>
             <Breadcrumbs { ...this.props } title={ editing ? 'Editar' : 'Nuevo' }/>
@@ -135,7 +151,13 @@ export default class TenantForm extends React.Component {
 
             {
                 this.props.tenants.selectedTenant.history.length > 0 &&
-                TenantForm.displayTenantHistory(this.props.tenants.selectedTenant.history)
+                TenantForm.displayTenantHistory(
+                    this.props.tenants.selectedTenant.history,
+                    this.confirmEndAgreement,
+                    this.newPayment,
+                    canProcessPayments,
+                    canUpdateAgreement
+                )
             }
         </div>;
     }
@@ -152,7 +174,7 @@ export default class TenantForm extends React.Component {
         this.props.history.push(`${ ENDPOINTS.AGREEMENTS_URL }/nuevo`);
     }
 
-    static displayTenantHistory(history) {
+    static displayTenantHistory(history, onFinalize, newPayment, canProcessPayments, canUpdateAgreements) {
         history.sort((a, b) => new Date(b.rental_agreement.entered_on) - new Date(a.rental_agreement.entered_on));
 
         return <div className="tenant-history">
@@ -190,27 +212,60 @@ export default class TenantForm extends React.Component {
 
                     items.push(['Arrendamiento', `RD$ ${row.rental_agreement.rate}`]);
 
+                    // balances are sorted in the back end desc by date, so the most recent balance will be at index 0
                     const { balance } = row.rental_agreement;
                     if (active) {
                         if (balance.length > 0) {
                             let last_payment = 'Nunca';
 
-                            if (typeof balance[1] !== 'undefined') {
-                                if (typeof balance[1].last_payment.paid_date !== 'undefined') {
-                                    last_payment = TenantForm.createLastPaymentComponent(balance[1].last_payment);
-                                } else if (typeof balance[0].last_payment.paid_date !== 'undefined') {
-                                    last_payment = TenantForm.createLastPaymentComponent(balance[0].last_payment);
+                            if (balance.length > 0) {
+                                if (typeof balance[1] !== 'undefined' && typeof balance[1].payments !== 'undefined') {
+                                    last_payment = TenantForm.createLastPaymentComponent(balance[1].payments);
+                                } else if (typeof balance[0] !== 'undefined' &&
+                                    typeof balance[0].payments !== 'undefined') {
+                                    last_payment = TenantForm.createLastPaymentComponent(balance[0].payments);
                                 }
                             }
-                            items.push(['Proximo Pago', formatDateEs(new Date(balance[0].due_date))]);
-                            items.push(['Balance', `$RD ${balance[0].balance}`]);
+                            let credit = 0;
+                            let remaining_balance = balance[0].balance;
+                            if (typeof balance[0].payments !== 'undefined') {
+                                balance[0].payments.forEach(payment => remaining_balance -= Number(payment.amount));
+                            }
+                            if (remaining_balance < 0) {
+                                credit = Math.abs(remaining_balance);
+                                remaining_balance = 0;
+                            }
+
+                            remaining_balance > 0 && items.push(
+                                ['Proximo Pago', formatDateEs(new Date(balance[0].due_date))]
+                            );
+                            items.push(['Balance', `$RD ${ remaining_balance }`]);
+                            credit > 0 && items.push(['Credito', `$RD ${ credit }`]);
                             items.push(['Ultimo Pago', last_payment]);
                         }
-                        items.push([
-                            '',
-                            <Link key={ row.id } to={ `${ENDPOINTS.AGREEMENTS_URL}/${row.id}` }>Editar</Link>
+                        canUpdateAgreements && items.push([
+                            'Finalizar Contrato',
+                            <Button
+                                type='warning'
+                                size='sm'
+                                key={ row.id }
+                                data-id={ row.id }
+                                onClick={ onFinalize }
+                                value='Terminar'
+                            />
                         ]);
                     }
+
+                    canProcessPayments && items.push([
+                        '',
+                        <Button
+                            type='info'
+                            key={ row.id + 1 } data-id={ row.id }
+                            value='Effectuar Pago'
+                            size='sm'
+                            onClick={ newPayment }
+                        />
+                    ]);
 
                     return (
                         <div key={ i }>
@@ -223,11 +278,71 @@ export default class TenantForm extends React.Component {
         </div>;
     }
 
-    static createLastPaymentComponent(last_payment) {
+    newPayment({ target }) {
+        this.props.dispatch(showOverlay(
+            <PaymentForm { ...this.props } target_id={ target.getAttribute('data-id') }/>,
+            'Hacer un Pago',
+            true
+        ));
+    }
+
+    lastDateChanged(e, validate) {
+        if (validate['last-date'].isValid) {
+            this.setState({ lastDate: validate['last-date'].value });
+        }
+    }
+
+    confirmEndAgreement({ target }) {
+        const button = <button
+            type='button' onClick={ () => {
+                if (!this.state.lastDate) {
+                    this.lastDateInput.current.classList.add('is-invalid');
+                } else {
+                    const data = {
+                        id: target.getAttribute('data-id'),
+                        terminated_on: this.state.lastDate
+                    };
+                    this.lastDateInput.current.classList.remove('is-invalid');
+                    this.props.dispatch(updateAgreement(data, () => {
+                        this.props.dispatch(hideOverlay());
+                        this.props.dispatch(notifications({
+                            type: ALERTS.SUCCESS, message: 'Contrato terminado correctamente'
+                        }));
+                        this.props.dispatch(getTenant(this.props.match.params.tenant_id));
+                    }, err => {
+                        this.props.dispatch(hideOverlay());
+                        this.props.dispatch(notifications({
+                            type: ALERTS.DANGER, message: err.resp.error || GENERIC_ERROR
+                        }));
+                    }));
+                }
+            } } className='btn btn-warning'>OK</button>;
+
+        this.props.dispatch(showOverlay(
+            <div>
+                <h4 className='panel'>Estas seguro que deseas finalizar este contrato?</h4>
+                <FormGenerator formName='contract-end' elements={ [{
+                    name: 'last-date',
+                    type: 'date',
+                    placeholder: 'Fecha',
+                    onChange: this.lastDateChanged,
+                    validate: ['required'],
+                    ref: this.lastDateInput
+                }] }/>
+                <small className=''>Seleccione la fecha de termino. Solo hoy y fechas pasadas.</small>
+            </div>,
+            <div className='warning-prompt'><FontAwesome type='exclamation-triangle'/> Advertencia...</div>,
+            true,
+            button
+        ));
+    }
+
+    static createLastPaymentComponent(payments) {
+        const by_date = payments.sort((a, b) => new Date(b.paid_date) - new Date(a.paid_date));
         return (
             <span className='last-payment'>
-                <span>{ formatDateEs(new Date(last_payment.paid_date)) }</span>
-                <span className='amount'>{ `($RD ${ last_payment.amount })` }</span>
+                <span>{ formatDateEs(new Date(by_date[0].paid_date)) }</span>
+                <span className='amount'>{ `($RD ${ by_date[0].amount })` }</span>
             </span>
         );
     }
@@ -281,5 +396,6 @@ export default class TenantForm extends React.Component {
         match: PropTypes.object,
         tenants: PropTypes.object,
         history: PropTypes.object,
+        projects: PropTypes.object,
     };
 }

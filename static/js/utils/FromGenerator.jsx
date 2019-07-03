@@ -193,12 +193,13 @@ class FormGenerator extends React.Component {
                     placeholder: element.placeholder,
                     className: FormGenerator.getClassName(element, isMultiCol),
                     onChange: this.bindValidate(element, reference),
-                    ref: reference,
+                    ref: element.ref,
+                    reference,
                     value: element.value,
                     defaultValue: this.state.references[element.name].value,
                     defaultChecked: element.checked,
                     disabled: element.disabled || false,
-                    readOnly: element.readOnly || false
+                    readOnly: element.readOnly || false,
                 },
                 this.getSecondParam(element)
             ),

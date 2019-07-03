@@ -17,9 +17,11 @@ def register():
         'projects.Projects@projects_url': '/projects|/projects/|/projects/<int:project_id>',
         'projects.Rooms@rooms_url': '/rooms|/rooms/|/rooms/<int:room_id>',
         'projects.TimeIntervals@time_intervals_url': '/time-intervals|/time-intervals/',
+        'projects.PaymentTypes@payment_types_url': '/payment-types|/payment-types/',
 
         'agreements.Agreements@agreements_url': '/agreements|/agreements/|/agreements/<int:agreement_id>',
         'agreements.Policies@policies_url': '/policies|/policies/<int:policy_id>',
+        'agreements.BalancePayments@balance_payments_url': '/pay-balance|/pay-balance/<int:payment_id>',
 
         'tenants.Tenants@tenants_url': '/tenants|/tenants/|/tenants/<int:tenant_id>',
     }
@@ -32,6 +34,7 @@ no_permissions = [
     'views.users.Permissions',
     'views.users.Activate',
     'views.projects.TimeIntervals',
+    'views.projects.PaymentTypes',
 ]
 
 default_access = {

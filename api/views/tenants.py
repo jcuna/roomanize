@@ -91,16 +91,14 @@ class Tenants(API):
                 history['rental_agreement']['balance'] = []
             result['history'].append(history)
 
-        balances = Balance.query.filter(Balance.agreement_id.in_(rental_ids)). \
+        balances = Balance.query.options(joinedload('payments')).filter(Balance.agreement_id.in_(rental_ids)). \
             group_by(Balance.id).order_by(Balance.due_date.desc()).limit(2)
 
         for row in result['history']:
             for balance in balances:
                 if balance.agreement_id == int(row['rental_agreement']['id']):
                     dict_balance = row2dict(balance)
-                    dict_balance['last_payment'] = row2dict(
-                        Payment.query.filter_by(balance_id=balance.id).order_by(Payment.paid_date.desc()).first()
-                    )
+                    dict_balance['payments'] = list(map(lambda pay: row2dict(pay), balance.payments))
                     row['rental_agreement']['balance'].append(dict_balance)
 
         return result

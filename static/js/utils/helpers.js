@@ -27,7 +27,20 @@ export const formatPhone = phone => {
     return phone.replace(re, '($1) $2-$3');
 };
 
+export const capitalizeAll = str => {
+    return str.replace(/\w\S*/g, txt => {
+        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+    });
+};
+
 export const formatDateEs = date => {
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    return date.toLocaleDateString('es-US', options);
+    // account for utc +4 hour
+    // date.setHours(date.getHours() - 4);
+    const options = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    };
+    return capitalizeAll(date.toLocaleDateString('es-US', options));
 };

@@ -1,4 +1,5 @@
 import {
+    PAYMENT_TYPES_FETCHED,
     PROJECT_EDITING,
     PROJECT_EDITING_CLEAR,
     PROJECT_REQUIRED,
@@ -20,7 +21,8 @@ export default function projectReducer(state = {
     editing: editingInitState,
     projects: [],
     requiresProject: false,
-    timeIntervals: []
+    timeIntervals: [],
+    paymentTypes: [],
 }, action) {
     switch (action.type) {
         case PROJECTS_FETCHED:
@@ -44,6 +46,9 @@ export default function projectReducer(state = {
 
         case TIME_INTERVALS_FETCHED:
             return { ...state, timeIntervals: action.payload };
+
+        case PAYMENT_TYPES_FETCHED:
+            return { ...state, paymentTypes: action.payload };
 
         default:
             return state;

@@ -1,7 +1,7 @@
-import logging
 import sys
 import traceback
 from flask import Flask, jsonify
+from core import get_logger
 
 
 class Middleware:
@@ -11,9 +11,7 @@ class Middleware:
         self.debug = debug
 
     def __call__(self, environ, start_response) -> Flask:
-        if self.debug:
-            logging.basicConfig()
-
+        # do any middleware stuff here!
         return self.app(environ, start_response)
 
 
@@ -37,7 +35,8 @@ def error_handler(app: Flask):
         return response
 
     def handle_error_response_prod(error: Exception):
-        app.logger.exception(error)
+        logger = get_logger('app')
+        logger.exception(error)
         json_output = {
             'error': 'An unexpected error occurred',
         }

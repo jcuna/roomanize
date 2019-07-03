@@ -250,7 +250,7 @@ class Balance(db.Model):
     created_on = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime.utcnow)
     due_date = db.Column(db.DateTime(), nullable=False, index=True)
 
-    agreement = relationship(RentalAgreement, uselist=False)
+    agreement = relationship(RentalAgreement, uselist=False, backref='balances')
     payments = relationship('Payment', backref='balances')
 
 
@@ -262,6 +262,7 @@ class PaymentType(db.Model):
 
 class Payment(db.Model):
     __tablename__ = 'payments'
+    fillable = ['amount', 'payment_type_id']
 
     id = db.Column(BIGINT(unsigned=True), primary_key=True)
     balance_id = db.Column(BIGINT(unsigned=True), db.ForeignKey('balances.id'), index=True)

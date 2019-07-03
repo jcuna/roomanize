@@ -25,6 +25,7 @@ export const ENDPOINTS = {
     ROOMS_URL: '/habitaciones',
     AGREEMENTS_URL: '/contratos',
     TENANTS_URL: '/inquilinos',
+    BALANCE_PAYMENTS_URL: '/recibos',
     ROLES_URL: '/roles',
     USERS_MANAGER_URL: '/usuarios',
     PROJECTS_URL: '/proyectos',
