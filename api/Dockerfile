@@ -9,4 +9,5 @@ RUN apt-get update && apt-get install -y ssmtp \
 COPY ./requirements.txt /build/requirements.txt
 WORKDIR /usr/src/app
 
+RUN pip install pydevd-pycharm~=191.7479.19
 RUN pip install -r /build/requirements.txt

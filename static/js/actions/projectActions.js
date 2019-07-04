@@ -85,7 +85,7 @@ export const fetchPaymentTypes = (fail) =>
     (dispatch) => {
         token.through().then(header =>
             api({
-                url: `/payment-types`,
+                url: '/payment-types',
                 method: 'GET',
                 headers: header
             }).then((resp) => {

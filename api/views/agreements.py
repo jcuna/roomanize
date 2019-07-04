@@ -1,9 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import request
 from core import API
 from core.middleware import HttpException
+from core.utils import date_to_utc
 from dal.models import RentalAgreement, TenantHistory, Room, TimeInterval, Policy, Balance, Payment
-from dal.shared import token_required, access_required, db, get_fillable, row2dict
+from dal.shared import token_required, access_required, db, get_fillable
 from views import Result
 
 
@@ -24,7 +25,7 @@ class Agreements(API):
             'reference1_phone': data['reference1']
         }
 
-        if datetime.strptime(data['date'], '%Y-%m-%d').date() < datetime.utcnow().date():
+        if datetime.strptime(data['date'], '%Y-%m-%d').date() < (datetime.utcnow().date() - timedelta(days=5)):
             raise HttpException('Invalid date', 400)
 
         if data['reference2']:
@@ -63,14 +64,15 @@ class Agreements(API):
 
         data = request.get_json()
 
-        if datetime.strptime(data['terminated_on'], '%Y-%m-%d').date() > datetime.utcnow().date():
-            raise HttpException('Invalid date', 400)
+        if 'terminated_on' in data:
+            data['terminated_on'] = date_to_utc(data['terminated_on']).date()
+            if data['terminated_on'] > datetime.utcnow().date():
+                raise HttpException('Invalid date', 400)
 
         agreement = RentalAgreement.query.filter_by(id=agreement_id).first()
-        for item in get_fillable(RentalAgreement, ):
-            agreement.set_attribute(**item)
+        for item in get_fillable(RentalAgreement, **data):
+            setattr(agreement, item, data[item])
 
-        db.session.add(agreement)
         db.session.commit()
 
         return Result.success()
@@ -85,11 +87,12 @@ class BalancePayments(API):
         data = request.get_json()
 
         balance = Balance.query.filter_by(id=data['balance_id']).first()
-        balance.payments.append(Payment(**get_fillable(Payment, **data)))
+        payment = Payment(**get_fillable(Payment, **data))
+        balance.payments.append(payment)
 
         db.session.commit()
 
-        return Result.id(balance.id)
+        return Result.id(payment.id)
 
     def delete(self, payment_id):
         pass

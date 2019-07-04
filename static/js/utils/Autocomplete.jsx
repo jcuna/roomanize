@@ -46,7 +46,7 @@ export default class Autocomplete extends React.Component {
             let className = 'drop-item';
             let onClick = this.selectItem;
 
-            if (Number(item.key) === 0) {
+            if (Number(item.key) === 0 || item.unselectable) {
                 className += ' unselectable';
                 onClick = null;
             }
@@ -92,6 +92,7 @@ export default class Autocomplete extends React.Component {
         items: PropTypes.arrayOf(PropTypes.shape({
             key: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
             label: PropTypes.string.isRequired,
+            unselectable: PropTypes.bool,
         })),
         onChange: PropTypes.func,
         onSelect: PropTypes.func,

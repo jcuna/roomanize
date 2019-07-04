@@ -1,27 +1,87 @@
 from datetime import datetime, timedelta
-from pprint import pprint
-
-from sqlalchemy.orm import joinedload
-
+from time import time
+from dateutil.relativedelta import *
+import sqlalchemy
+from sqlalchemy.orm import joinedload, load_only, defer
+from config.constants import *
 from core import get_logger
 from dal import db
 from dal.models import Balance, RentalAgreement
+from app import init_app
 
 
 def balances_cron():
+    start = time()
+
     logger = get_logger('balances_cron')
     logger.debug('')
     logger.debug('Initiating daily balance creator')
-    today = datetime.utcnow()
-    yesterday = today - timedelta(days=1)
-    bef_yesterday = yesterday - timedelta(days=1)
-    agreements = RentalAgreement.query.options(joinedload('balances')).filter(RentalAgreement.terminated_on.is_(None))\
-        .filter(RentalAgreement.id.notin_(
-            Balance.query.with_entities(Balance.agreement_id).filter(Balance.due_date >= today.date()).all()
+
+    app = init_app('sys')
+
+    with app.app_context():
+        today = datetime.utcnow()
+        yesterday = today - timedelta(days=1)
+        bef_yesterday = yesterday - timedelta(days=1)
+
+        try:
+            agreements = RentalAgreement.query.options(
+                joinedload('balances.payments'), joinedload('interval')).filter(RentalAgreement.terminated_on.is_(None))\
+                .filter(RentalAgreement.id.notin_(
+                    Balance.query.options(
+                        defer(Balance.id),
+                        load_only(Balance.agreement_id)
+                    ).filter((Balance.due_date >= today.date())).subquery()))\
+                .join(Balance).filter(Balance.due_date.between(bef_yesterday.date(), yesterday.date()))
+            # logger.debug(agreements.statement.compile())
+            process_agreements(agreements, logger)
+
+        except (sqlalchemy.exc.OperationalError, Exception) as e:
+            logger.error('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
+            logger.error('View exception below')
+            logger.exception('Error: ')
+
+        logger.info('Took: ' + str(timedelta(seconds=(time() - start))))
+
+
+def process_agreements(agreements, logger):
+
+    agreement: RentalAgreement
+    for agreement in agreements:
+        if len(agreement.balances) > 1:
+            logger.error('Invalid agreement was setup with more than two balances per cycle')
+
+        logger.info('Processing agreement id: ' + str(agreement.id))
+
+        cycle_balance: Balance
+        cycle_balance = agreement.balances[0]
+        payments = sum(map(lambda b: b.amount, cycle_balance.payments))
+
+        logger.info(str(len(cycle_balance.payments)) + ' Payments processed Total:' + str(payments))
+
+        previous_balance = cycle_balance.balance - payments
+        new_balance = previous_balance + agreement.rate
+
+        logger.info('Previous balance: ' + str(previous_balance) + ' | New balance: ' + str(new_balance))
+
+        if agreement.interval.interval == SEMANAL:
+            delta = timedelta(weeks=1)
+        elif agreement.interval.interval == QUINCENAL:
+            delta = timedelta(days=14)
+        else:
+            delta = relativedelta(months=1)
+
+        new_cycle_balance = Balance(
+            agreement=agreement,
+            balance=new_balance,
+            previous_balance=previous_balance,
+            due_date=cycle_balance.due_date + delta
         )
-    ).join(Balance).filter(Balance.due_date.between(yesterday.date(), bef_yesterday.date))
+        logger.info('Agreement entered on: ' + str(agreement.entered_on))
+        logger.info('Pay cycle: ' + agreement.interval.interval)
+        logger.info('Last due date: ' + str(cycle_balance.due_date))
+        logger.info('Next due date: ' + str(new_cycle_balance.due_date))
 
-    logger.debug(agreements.statement.compile())
+        db.session.add(new_cycle_balance)
 
-    for agreement in agreements.all():
-        pprint(agreement)
+    db.session.commit()

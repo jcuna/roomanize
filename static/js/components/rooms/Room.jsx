@@ -142,6 +142,7 @@ export default class Room extends Component {
                     <th>#</th>
                     <th>Nombre</th>
                     <th>Notas</th>
+                    <th>Alquilado</th>
                     <th>Editar</th>
                 </tr>
             </thead>
@@ -152,6 +153,9 @@ export default class Room extends Component {
                         <th scope='row'>{ i }</th>
                         <td>{ item.name }</td>
                         <td>{ item.description }</td>
+                        <td>
+                            { item.reserved ? String.fromCodePoint(0x2714) : String.fromCodePoint(0x1F6AB) }
+                        </td>
                         <td>
                             { canEdit &&
                             <Link to={ `${ENDPOINTS.ROOMS_URL }/editar/${item.id}` } onClick={ this.selectRoom }>

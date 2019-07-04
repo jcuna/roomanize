@@ -18,7 +18,7 @@ import '../../../css/tenants/tenantform.scss';
 import FontAwesome from '../../utils/FontAwesome';
 import Button from '../../utils/Button';
 import PaymentForm from '../payments/PaymentForm';
-import { fetchPaymentTypes } from '../../actions/projectActions';
+import { fetchPaymentTypes, fetchTimeIntervals } from '../../actions/projectActions';
 import { hasAccess } from '../../utils/config';
 
 export default class TenantForm extends React.Component {
@@ -50,6 +50,10 @@ export default class TenantForm extends React.Component {
 
         if (this.props.projects.paymentTypes.length === 0) {
             this.props.dispatch(fetchPaymentTypes());
+        }
+
+        if (props.projects.timeIntervals.length === 0) {
+            props.dispatch(fetchTimeIntervals());
         }
 
         if (tenant_id) {
@@ -156,7 +160,8 @@ export default class TenantForm extends React.Component {
                     this.confirmEndAgreement,
                     this.newPayment,
                     canProcessPayments,
-                    canUpdateAgreement
+                    canUpdateAgreement,
+                    this.props.projects.timeIntervals,
                 )
             }
         </div>;
@@ -174,7 +179,7 @@ export default class TenantForm extends React.Component {
         this.props.history.push(`${ ENDPOINTS.AGREEMENTS_URL }/nuevo`);
     }
 
-    static displayTenantHistory(history, onFinalize, newPayment, canProcessPayments, canUpdateAgreements) {
+    static displayTenantHistory(history, onFinalize, newPayment, canProcessPayments, canUpdateAgreements, timeIntervals) {
         history.sort((a, b) => new Date(b.rental_agreement.entered_on) - new Date(a.rental_agreement.entered_on));
 
         return <div className="tenant-history">
@@ -216,18 +221,23 @@ export default class TenantForm extends React.Component {
                     const { balance } = row.rental_agreement;
                     if (active) {
                         if (balance.length > 0) {
+                            items.push([
+                                'Ciclo de Pago',
+                                timeIntervals.filter(a => a.id === row.rental_agreement.time_interval_id)
+                                    .pop().interval
+                            ]);
+
                             let last_payment = 'Nunca';
 
                             if (balance.length > 0) {
-                                if (typeof balance[1] !== 'undefined' && typeof balance[1].payments !== 'undefined') {
-                                    last_payment = TenantForm.createLastPaymentComponent(balance[1].payments);
-                                } else if (typeof balance[0] !== 'undefined' &&
-                                    typeof balance[0].payments !== 'undefined') {
+                                if (balance[0].payments.length > 0) {
                                     last_payment = TenantForm.createLastPaymentComponent(balance[0].payments);
+                                } else if (typeof balance[1] !== 'undefined' && balance[1].payments.length > 0) {
+                                    last_payment = TenantForm.createLastPaymentComponent(balance[1].payments);
                                 }
                             }
                             let credit = 0;
-                            let remaining_balance = balance[0].balance;
+                            let remaining_balance = Number(balance[0].balance);
                             if (typeof balance[0].payments !== 'undefined') {
                                 balance[0].payments.forEach(payment => remaining_balance -= Number(payment.amount));
                             }
@@ -239,7 +249,10 @@ export default class TenantForm extends React.Component {
                             remaining_balance > 0 && items.push(
                                 ['Proximo Pago', formatDateEs(new Date(balance[0].due_date))]
                             );
-                            items.push(['Balance', `$RD ${ remaining_balance }`]);
+                            items.push(['Balance', `$RD ${ (remaining_balance.toFixed(2)) }`]);
+                            balance[0].previous_balance > 0 &&
+                                items.push(['Balance Anterior', `$RD ${ balance[0].previous_balance }`]);
+
                             credit > 0 && items.push(['Credito', `$RD ${ credit }`]);
                             items.push(['Ultimo Pago', last_payment]);
                         }
@@ -254,18 +267,18 @@ export default class TenantForm extends React.Component {
                                 value='Terminar'
                             />
                         ]);
-                    }
 
-                    canProcessPayments && items.push([
-                        '',
-                        <Button
-                            type='info'
-                            key={ row.id + 1 } data-id={ row.id }
-                            value='Effectuar Pago'
-                            size='sm'
-                            onClick={ newPayment }
-                        />
-                    ]);
+                        canProcessPayments && items.push([
+                            '',
+                            <Button
+                                type='info'
+                                key={ row.id + 1 } data-id={ balance[0].id }
+                                value='Effectuar Pago'
+                                size='sm'
+                                onClick={ newPayment }
+                            />
+                        ]);
+                    }
 
                     return (
                         <div key={ i }>

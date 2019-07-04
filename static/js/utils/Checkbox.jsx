@@ -31,7 +31,7 @@ Checkbox.propTypes = {
     checked: PropTypes.bool,
     label: PropTypes.string,
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    value: PropTypes.number
+    value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
 };
 
 Checkbox.defaultProps = {

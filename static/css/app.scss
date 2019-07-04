@@ -194,7 +194,7 @@ form {
     }
     li.paginate,
     li.unselectable {
-      cursor: auto;
+      cursor: not-allowed;
       span {
         cursor: pointer;
         color: $black;

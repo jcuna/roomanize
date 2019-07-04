@@ -33,14 +33,35 @@ export const capitalizeAll = str => {
     });
 };
 
+/**
+ * This formats dates only. time is depreciated.
+ * @param {Date} date
+ * @returns {string}
+ */
 export const formatDateEs = date => {
-    // account for utc +4 hour
-    // date.setHours(date.getHours() - 4);
     const options = {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
         day: 'numeric',
     };
-    return capitalizeAll(date.toLocaleDateString('es-US', options));
+    date = new Date(date.toDateString());
+    const today = new Date(new Date().toDateString());
+    const delta = Math.round(Number(today - date) / 1000);
+    const day = 60 * 60 * 24; // in seconds
+
+    switch (delta) {
+        case 0:
+            return 'Hoy';
+        case -day:
+            return 'Mañana';
+        case -(day * 2):
+            return 'Pasado Mañana';
+        case day:
+            return 'Ayer';
+        case day * 2:
+            return 'Antes De Ayer';
+        default:
+            return capitalizeAll(date.toLocaleDateString('es-US', options));
+    }
 };

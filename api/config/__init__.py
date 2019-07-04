@@ -14,9 +14,8 @@ def debug():
     turns on pycharm debugger on runtime
     :return:
     """
-    sys.path.append("config/pycharm-debug-py3k.egg")
     import pydevd
-    pydevd.settrace('host.docker.internal', port=9001, stdoutToServer=True, stderrToServer=True)
+    pydevd.settrace('host.docker.internal', port=9001, stdoutToServer=False, stderrToServer=False)
 
 
 def get_mail(app_instance: Flask):

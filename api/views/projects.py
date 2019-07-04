@@ -2,9 +2,10 @@ import json
 import sqlalchemy
 from datetime import datetime
 from flask import request, session
+from sqlalchemy.orm import joinedload
 from core import API
 from core.middleware import HttpException
-from dal.models import Project, TimeInterval, User, Room, PaymentType
+from dal.models import Project, TimeInterval, User, Room, PaymentType, RentalAgreement
 from dal.shared import token_required, access_required, db, get_fillable, row2dict, Paginator
 from views import Result
 
@@ -119,7 +120,10 @@ class Rooms(API):
             rooms = Room.query.filter((Room.name.like('%' + q + '%'))).filter_by(project_id=project_id).all()
 
         else:
-            sql_query = Room.query.filter_by(project_id=project_id)
+            sql_query = Room.query.options(joinedload('rental_agreement').load_only(RentalAgreement.id))\
+                .filter_by(project_id=project_id)\
+                .outerjoin(RentalAgreement, RentalAgreement.room_id == Room.id)
+
             order_by = request.args.get('orderBy') if 'orderBy' in request.args else 'id'
             paginator = Paginator(sql_query, int(page), order_by, request.args.get('orderDir'))
             total_pages = paginator.total_pages
@@ -127,7 +131,9 @@ class Rooms(API):
 
         if rooms:
             for room in rooms:
-                result.append(row2dict(room))
+                room_dic = row2dict(room)
+                room_dic['reserved'] = room.rental_agreement is not None
+                result.append(room_dic)
 
         return {'list': result, 'page': page, 'total_pages': total_pages}
 

@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from app import db, init_app
+from config.constants import *
 from dal.models import collation, TimeInterval, PaymentType
 
 app = init_app('sys')
@@ -7,9 +8,9 @@ app = init_app('sys')
 
 def seed_time_intervals(db: SQLAlchemy):
     time_intervals = [
-        TimeInterval(id=100, interval="Semanal"),
-        TimeInterval(id=200, interval="Quincenal"),
-        TimeInterval(id=400, interval="Mensual")
+        TimeInterval(id=100, interval=SEMANAL),
+        TimeInterval(id=200, interval=QUINCENAL),
+        TimeInterval(id=400, interval=MENSUAL)
     ]
 
     db.session.bulk_save_objects(time_intervals)
@@ -18,9 +19,9 @@ def seed_time_intervals(db: SQLAlchemy):
 
 def seed_payment_types(db: SQLAlchemy):
     payment_types = [
-        PaymentType(id=100, type='Effectivo'),
-        PaymentType(id=200, type='Credito'),
-        PaymentType(id=400, type='Cheque'),
+        PaymentType(id=100, type=EFFECTIVO),
+        PaymentType(id=200, type=CREDITO),
+        PaymentType(id=400, type=CHEQUE),
     ]
 
     db.session.bulk_save_objects(payment_types)

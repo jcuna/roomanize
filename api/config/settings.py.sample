@@ -27,3 +27,5 @@ CACHE_CONFIG = {
     'CACHE_TYPE': 'simple',
     'CACHE_KEY_PREFIX': 'local_dev',
 }
+
+TIME_ZONE = 'America/New_York'

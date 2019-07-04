@@ -1,6 +1,9 @@
 import logging
 import os
+from datetime import datetime
 from pathlib import Path
+import pytz
+from flask import current_app
 
 app_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
@@ -47,3 +50,9 @@ class Lock:
     def __exit__(self, type, value, traceback):
         # remove pid file
         pass
+
+
+def date_to_utc(date: str):
+    date = datetime.strptime(date, '%Y-%m-%d')
+    localized = pytz.timezone(current_app.config['TIME_ZONE']).localize(date)
+    return localized.astimezone(pytz.utc)

@@ -1,8 +1,11 @@
 from flask import Flask
 from flask_socketio import SocketIO
 from config import get_mail
+from core import get_logger
 from dal.shared import db
 import core
+
+app_logger = get_logger()
 
 
 def init_app(mode='web') -> Flask:

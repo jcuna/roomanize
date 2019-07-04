@@ -1,11 +1,12 @@
 import json
-from sqlalchemy import UniqueConstraint
+import pytz
+from sqlalchemy import UniqueConstraint, and_
 from sqlalchemy.dialects.mysql import BIGINT
 from config import random_token
 from dal import db
 from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash, check_password_hash
-import datetime
+from datetime import datetime, timedelta
 import jwt
 from flask import current_app
 from config.routes import default_access
@@ -34,7 +35,7 @@ class User(db.Model):
     password = db.Column(db.String(80, collation=collation), nullable=True)
     first_name = db.Column(db.String(50, collation=collation), nullable=False, index=True)
     last_name = db.Column(db.String(50, collation=collation), nullable=False, index=True)
-    created_at = db.Column(db.DateTime(), nullable=False, default=datetime.datetime.utcnow)
+    created_at = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow)
     deleted = db.Column(db.Boolean, nullable=False, server_default='0', index=True)
     roles = relationship('Role', secondary=user_roles, lazy='joined', backref=db.backref('users', lazy='dynamic'))
     tokens = relationship('UserToken', back_populates='user')
@@ -48,7 +49,7 @@ class User(db.Model):
         return check_password_hash(self.password, plain_password)
 
     def get_token(self):
-        exp = datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+        exp = datetime.utcnow() + timedelta(minutes=30)
         return {
             'value': jwt.encode({'email': self.email, 'exp': exp}, current_app.config['SECRET_KEY']).decode('utf-8'),
             'expires': round(exp.timestamp())
@@ -107,7 +108,7 @@ class UserToken(db.Model):
             if not so:
                 self.token = temp_token
 
-        self.expires = datetime.datetime.utcnow() + datetime.timedelta(hours=4)
+        self.expires = datetime.utcnow() + timedelta(hours=4)
 
 
 class Role(db.Model):
@@ -153,23 +154,6 @@ class TimeInterval(db.Model):
     interval = db.Column(db.String(15, collation=collation))
 
 
-class Room(db.Model):
-    __tablename__ = 'rooms'
-    fillable = ['project_id', 'name', 'rent', 'time_interval_id', 'description', 'picture']
-
-    id = db.Column(db.BigInteger, primary_key=True)
-    project_id = db.Column(db.BigInteger, db.ForeignKey('projects.id'), index=True, nullable=False)
-    name = db.Column(db.String(30, collation=collation))
-    description = db.Column(db.Text(collation=collation))
-    picture = db.Column(db.String(255, collation=collation))
-
-    project = relationship(Project, back_populates='rooms')
-
-    __table_args__ = (
-        UniqueConstraint('project_id', 'name', name='project_id_name_uc'),
-    )
-
-
 class Tenant(db.Model):
     __tablename__ = 'tenants'
     fillable = ['first_name', 'last_name', 'email', 'phone', 'identification_number']
@@ -184,12 +168,12 @@ class Tenant(db.Model):
         unique=True
     )
     phone = db.Column(db.String(10, collation=collation), nullable=True, unique=True)
-    created_on = db.Column(db.DateTime(), nullable=False, default=datetime.datetime.utcnow)
+    created_on = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow)
     updated_on = db.Column(
         db.DateTime(),
         nullable=False,
-        default=datetime.datetime.utcnow,
-        onupdate=datetime.datetime.utcnow
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
     )
 
     history = relationship('TenantHistory', back_populates='tenant')
@@ -210,7 +194,7 @@ class TenantHistory(db.Model):
 
 class RentalAgreement(db.Model):
     __tablename__ = 'rental_agreements'
-    fillable = ['tenant_history_id', 'room_id', 'project_id', 'time_interval_id', 'rate', 'entered_on']
+    fillable = ['tenant_history_id', 'room_id', 'project_id', 'time_interval_id', 'rate', 'entered_on', 'terminated_on']
 
     id = db.Column(db.BigInteger, primary_key=True)
     tenant_history_id = db.Column(db.BigInteger, db.ForeignKey('tenant_history.id'), index=True, nullable=False)
@@ -218,14 +202,40 @@ class RentalAgreement(db.Model):
     project_id = db.Column(db.BigInteger, db.ForeignKey('projects.id'), index=True, nullable=False)
     time_interval_id = db.Column(db.Integer, db.ForeignKey('time_intervals.id'), nullable=False)
     rate = db.Column(db.DECIMAL(10, 2), nullable=False)
-    created_on = db.Column(db.DateTime(), nullable=False, default=datetime.datetime.utcnow)
-    entered_on = db.Column(db.DateTime(), nullable=False)
+    created_on = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow)
+    _entered_on = db.Column('entered_on', db.DateTime(), nullable=False)
     terminated_on = db.Column(db.DateTime())
 
     tenant_history = relationship(TenantHistory, uselist=False, back_populates='rental_agreement')
-    room = relationship(Room, uselist=False)
+    room = relationship('Room', uselist=False)
     project = relationship(Project, uselist=False)
     interval = relationship(TimeInterval, uselist=False)
+
+    @property
+    def entered_on(self):
+        return self._entered_on.astimezone(pytz.timezone(current_app.config['TIME_ZONE'])).date()
+
+
+class Room(db.Model):
+    __tablename__ = 'rooms'
+    fillable = ['project_id', 'name', 'rent', 'time_interval_id', 'description', 'picture']
+
+    id = db.Column(db.BigInteger, primary_key=True)
+    project_id = db.Column(db.BigInteger, db.ForeignKey('projects.id'), index=True, nullable=False)
+    name = db.Column(db.String(30, collation=collation))
+    description = db.Column(db.Text(collation=collation))
+    picture = db.Column(db.String(255, collation=collation))
+
+    project = relationship(Project, back_populates='rooms')
+    rental_agreement = relationship(
+        'RentalAgreement',
+        uselist=False,
+        primaryjoin=and_(RentalAgreement.room_id == id, RentalAgreement.terminated_on.is_(None))
+    )
+
+    __table_args__ = (
+        UniqueConstraint('project_id', 'name', name='project_id_name_uc'),
+    )
 
 
 class Policy(db.Model):
@@ -234,8 +244,8 @@ class Policy(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     title = db.Column(db.String(30, collation=collation), index=True, nullable=False)
     text = db.Column(db.Text(collation=collation))
-    start_ttv = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime.utcnow)
-    end_ttv = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime(
+    start_ttv = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.utcnow)
+    end_ttv = db.Column(db.DateTime(), nullable=False, index=True, default=datetime(
         9999, 12, 31, 23, 59, 59, 999999)
                         )
 
@@ -247,7 +257,7 @@ class Balance(db.Model):
     agreement_id = db.Column(db.BigInteger, db.ForeignKey('rental_agreements.id'), index=True)
     balance = db.Column(db.DECIMAL(10, 2), nullable=False)
     previous_balance = db.Column(db.DECIMAL(10, 2), nullable=False)
-    created_on = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime.utcnow)
+    created_on = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.utcnow)
     due_date = db.Column(db.DateTime(), nullable=False, index=True)
 
     agreement = relationship(RentalAgreement, uselist=False, backref='balances')
@@ -267,10 +277,14 @@ class Payment(db.Model):
     id = db.Column(BIGINT(unsigned=True), primary_key=True)
     balance_id = db.Column(BIGINT(unsigned=True), db.ForeignKey('balances.id'), index=True)
     amount = db.Column(db.DECIMAL(10, 2), nullable=False)
-    paid_date = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime.utcnow)
+    _paid_date = db.Column('paid_date', db.DateTime(), nullable=False, index=True, default=datetime.utcnow)
     payment_type_id = db.Column(db.Integer, db.ForeignKey('payment_types.id'), nullable=False)
 
     payment_type = relationship(PaymentType, uselist=False)
+
+    @property
+    def paid_date(self):
+        return self._paid_date.astimezone(pytz.timezone(current_app.config['TIME_ZONE']))
 
     @property
     def type(self):
@@ -281,7 +295,7 @@ class Audit(db.Model):
     __tablename__ = 'audits'
 
     id = db.Column(BIGINT(unsigned=True), primary_key=True)
-    date = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.datetime.utcnow)
+    date = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.utcnow)
     user_id = db.Column(db.BigInteger, db.ForeignKey('users.id'), index=True, nullable=True)
     ip = db.Column(db.BigInteger, nullable=False)
     endpoint = db.Column(db.String(255, collation=collation), nullable=False)

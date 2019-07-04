@@ -78,7 +78,7 @@ export default class AgreementForm extends React.Component {
                                 onChange={ this.roomInputChanged }
                                 className='form-control'
                                 onSelect={ this.selectRoom }
-                                items={ data.list.map(item => ({ key: item.id, label: item.name })) }
+                                items={ data.list.map(item => ({ unselectable: item.reserved, key: item.id, label: item.name })) }
                                 total_pages={ Number(data.total_pages) }
                                 page={ Number(data.page) }
                                 onNext={ this.fetchNextRoomPage }
@@ -124,7 +124,7 @@ export default class AgreementForm extends React.Component {
                         className: 'row',
                         sections: [
                             {
-                                title: 'Intervalo de pago',
+                                title: 'Ciclo de pago',
                                 className: 'col-4',
                                 elements: [
                                     {
@@ -232,7 +232,7 @@ export default class AgreementForm extends React.Component {
     getTimeIntervalOptions() {
         const options = [];
 
-        options[0] = 'Intervalo de Pago';
+        options[0] = 'Ciclo de Pago';
 
         this.props.projects.timeIntervals.forEach(
             item => options[item.id] = item.interval);
