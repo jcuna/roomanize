@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 const FontAwesome = (props) => {
     return (
         <span className={ props.className } onClick={ props.onClick }>
-            <i className={ `fas fa-${ props.type }` } data-id={ props.dataId }/>
+            <i { ...props } className={ `fas fa-${ props.type }` } />
         </span>
     );
 };
@@ -18,7 +18,6 @@ FontAwesome.propTypes = {
     type: PropTypes.string.isRequired,
     onClick: PropTypes.func,
     className: PropTypes.string,
-    dataId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };
 
 FontAwesome.defaultProps = {

@@ -22,6 +22,7 @@ def register():
         'agreements.Agreements@agreements_url': '/agreements|/agreements/|/agreements/<int:agreement_id>',
         'agreements.Policies@policies_url': '/policies|/policies/<int:policy_id>',
         'agreements.BalancePayments@balance_payments_url': '/pay-balance|/pay-balance/<int:payment_id>',
+        'agreements.Receipts@receipts_url': '/receipts|/receipts/',
 
         'tenants.Tenants@tenants_url': '/tenants|/tenants/|/tenants/<int:tenant_id>',
     }
@@ -38,5 +39,6 @@ no_permissions = [
 ]
 
 default_access = {
-    'views.projects.Projects': ['read']
+    'views.projects.Projects': ['read'],
+    # 'views.agreements.Receipts': ['read'],
 }

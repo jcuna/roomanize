@@ -99,7 +99,7 @@ export const fetchPermissions = () =>
         dispatch({ type: PERMISSIONS_FETCHING });
         token.through().then(header => {
             api({
-                url: 'permissions',
+                url: '/permissions',
                 method: 'GET',
                 headers: header,
             }).then(resp => {
@@ -119,7 +119,7 @@ export const commitPermissions = (permissions) =>
     (dispatch) => {
         dispatch({ type: ROLE_CREATE_DISPATCHED });
         token.through().then(header => api({
-            url: 'roles',
+            url: '/roles',
             method: 'PUT',
             headers: header,
         }, permissions).then(() => {

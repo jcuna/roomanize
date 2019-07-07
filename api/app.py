@@ -2,6 +2,7 @@ from flask import Flask
 from flask_socketio import SocketIO
 from config import get_mail
 from core import get_logger
+from core.utils import basic_logging
 from dal.shared import db
 import core
 
@@ -14,6 +15,7 @@ def init_app(mode='web') -> Flask:
     this_app.config.from_envvar('APP_SETTINGS_PATH')
     this_app.debug = this_app.config['APP_ENV'] == 'develop'
     this_app.env = this_app.config['APP_ENV']
+    basic_logging(app_logger.handlers, this_app.env)
 
     core.Encryptor.password = this_app.config['SECRET_KEY']
 

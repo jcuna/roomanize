@@ -34,6 +34,7 @@ def run_migration():
         connection.cursor().execute("SET NAMES 'utf8mb4' COLLATE '" + collation + "'")
 
         db.create_all()
+        connection.cursor().execute("ALTER TABLE payments AUTO_INCREMENT = 1000;")
 
         seed_time_intervals(db)
         seed_payment_types(db)

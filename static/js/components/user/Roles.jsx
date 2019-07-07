@@ -16,7 +16,7 @@ import Breadcrumbs from '../../utils/Breadcrumbs';
 
 export default class Roles extends React.Component {
     constructor(props) {
-        super();
+        super(props);
         this.state = {
             button: { value: 'Agregar role', disabled: 'disabled' },
             deleteButtonClass: 'btn btn-danger',
@@ -112,11 +112,11 @@ export default class Roles extends React.Component {
                         <th scope='row'>{ i }</th>
                         <td>{ item.name }</td>
                         <td>
-                            <FontAwesome type='edit' className='text-info' dataId={ item.id }
+                            <FontAwesome type='edit' className='text-info' data-id={ item.id }
                                 onClick={ this.modifyPermissions }/>
                         </td>
                         <td>
-                            <FontAwesome type='trash' className='text-danger' dataId={ item.id }
+                            <FontAwesome type='trash' className='text-danger' data-id={ item.id }
                                 onClick={ this.confirmRoleDeletion }/>
                         </td>
                     </tr>;

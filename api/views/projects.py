@@ -135,7 +135,7 @@ class Rooms(API):
                 room_dic['reserved'] = room.rental_agreement is not None
                 result.append(room_dic)
 
-        return {'list': result, 'page': page, 'total_pages': total_pages}
+        return Result.paginate(result, page, total_pages)
 
     @token_required
     @access_required

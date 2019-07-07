@@ -1,7 +1,7 @@
 import sys
 import traceback
 from flask import Flask, jsonify
-from core import get_logger
+from app import app_logger
 
 
 class Middleware:
@@ -35,8 +35,7 @@ def error_handler(app: Flask):
         return response
 
     def handle_error_response_prod(error: Exception):
-        logger = get_logger('app')
-        logger.exception(error)
+        app_logger.exception(error)
         json_output = {
             'error': 'An unexpected error occurred',
         }

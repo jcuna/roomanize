@@ -11,3 +11,7 @@ class Result:
     @staticmethod
     def id(_id):
         return {'id': _id}
+
+    @staticmethod
+    def paginate(result, page, total_pages):
+        return {'list': result, 'page': page, 'total_pages': total_pages}

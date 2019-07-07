@@ -22,6 +22,7 @@ import TenantForm from './tenants/TenantForm';
 import AgreementsList from './agreements/AgreementsList';
 import AgreementNew from './agreements/AgreementNew';
 import AgreementEdit from './agreements/AgreementEdit';
+import Receipts from './receipts/Receipts';
 
 export default class Routes extends React.Component {
     render() {
@@ -61,6 +62,10 @@ export default class Routes extends React.Component {
 
                 <Route exact path={ `${ ep.AGREEMENTS_URL }/editar/:agreement_id([0-9]+)` }
                     render={ props => this.getComponent(AgreementEdit, props) }
+                />
+
+                <Route exact path={ `${ ep.RECEIPTS_URL }/:action(recibo|inquilino)?/:id([0-9]+)?` }
+                    render={ (props) => this.getMiddleware(RequiresProject, Receipts, ep.RECEIPTS_URL, props) }
                 />
 
                 <Route exact path={ ep.TENANTS_URL } render={ props => this.getComponent(Tenants, props) }/>

@@ -1,5 +1,4 @@
 import json
-import pytz
 from sqlalchemy import UniqueConstraint, and_
 from sqlalchemy.dialects.mysql import BIGINT
 from config import random_token
@@ -19,11 +18,12 @@ admin_access = {
 
 admin_preferences = {}
 
-user_roles = db.Table('user_roles',
-                      db.Column('id', db.BigInteger, primary_key=True),
-                      db.Column('user_id', db.BigInteger, db.ForeignKey('users.id'), index=True),
-                      db.Column('role_id', db.BigInteger, db.ForeignKey('roles.id'), index=True)
-                      )
+user_roles = db.Table(
+    'user_roles',
+    db.Column('id', db.BigInteger, primary_key=True),
+    db.Column('user_id', db.BigInteger, db.ForeignKey('users.id'), index=True),
+    db.Column('role_id', db.BigInteger, db.ForeignKey('roles.id'), index=True)
+)
 
 
 class User(db.Model):
@@ -194,7 +194,7 @@ class TenantHistory(db.Model):
 
 class RentalAgreement(db.Model):
     __tablename__ = 'rental_agreements'
-    fillable = ['tenant_history_id', 'room_id', 'project_id', 'time_interval_id', 'rate', 'entered_on', 'terminated_on']
+    fillable = ['tenant_history_id', 'room_id', 'project_id', 'time_interval_id', 'rate', 'entered_on', 'deposit']
 
     id = db.Column(db.BigInteger, primary_key=True)
     tenant_history_id = db.Column(db.BigInteger, db.ForeignKey('tenant_history.id'), index=True, nullable=False)
@@ -202,18 +202,15 @@ class RentalAgreement(db.Model):
     project_id = db.Column(db.BigInteger, db.ForeignKey('projects.id'), index=True, nullable=False)
     time_interval_id = db.Column(db.Integer, db.ForeignKey('time_intervals.id'), nullable=False)
     rate = db.Column(db.DECIMAL(10, 2), nullable=False)
-    created_on = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow)
-    _entered_on = db.Column('entered_on', db.DateTime(), nullable=False)
+    deposit = db.Column(db.DECIMAL(10, 2), nullable=False)
+    created_on = db.Column('created_on', db.DateTime(), nullable=False, default=datetime.utcnow)
+    entered_on = db.Column(db.DateTime(), nullable=False)
     terminated_on = db.Column(db.DateTime())
 
     tenant_history = relationship(TenantHistory, uselist=False, back_populates='rental_agreement')
     room = relationship('Room', uselist=False)
     project = relationship(Project, uselist=False)
     interval = relationship(TimeInterval, uselist=False)
-
-    @property
-    def entered_on(self):
-        return self._entered_on.astimezone(pytz.timezone(current_app.config['TIME_ZONE'])).date()
 
 
 class Room(db.Model):
@@ -277,14 +274,10 @@ class Payment(db.Model):
     id = db.Column(BIGINT(unsigned=True), primary_key=True)
     balance_id = db.Column(BIGINT(unsigned=True), db.ForeignKey('balances.id'), index=True)
     amount = db.Column(db.DECIMAL(10, 2), nullable=False)
-    _paid_date = db.Column('paid_date', db.DateTime(), nullable=False, index=True, default=datetime.utcnow)
+    paid_date = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.utcnow)
     payment_type_id = db.Column(db.Integer, db.ForeignKey('payment_types.id'), nullable=False)
 
     payment_type = relationship(PaymentType, uselist=False)
-
-    @property
-    def paid_date(self):
-        return self._paid_date.astimezone(pytz.timezone(current_app.config['TIME_ZONE']))
 
     @property
     def type(self):

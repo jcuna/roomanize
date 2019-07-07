@@ -5,6 +5,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FORM_VALIDATION, VALIDATE_FUNC_SUFFIX, VALIDATE_TRANSFORM_FUNC } from '../constants';
+import { dateToDatetimeString } from './helpers';
 
 class FormGenerator extends React.Component {
     constructor(props) {
@@ -192,7 +193,7 @@ class FormGenerator extends React.Component {
                     htmlFor: element.for,
                     placeholder: element.placeholder,
                     className: FormGenerator.getClassName(element, isMultiCol),
-                    onChange: this.bindValidate(element, reference),
+                    onChange: this.bindValidate(element, element.ref),
                     ref: element.ref,
                     reference,
                     value: element.value,
@@ -240,6 +241,8 @@ class FormGenerator extends React.Component {
 
         if (event.target.type === 'radio' || event.target.type === 'checkbox') {
             value = event.target.checked;
+        } else if (event.target.type === 'date') {
+            value = dateToDatetimeString(event.target.value);
         } else {
             value = event.target.value;
         }

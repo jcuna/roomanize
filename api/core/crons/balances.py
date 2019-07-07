@@ -14,26 +14,26 @@ def balances_cron():
     start = time()
 
     logger = get_logger('balances_cron')
-    logger.debug('')
-    logger.debug('Initiating daily balance creator')
+    logger.info('')
+    logger.info('Initiating daily balance creator')
 
     app = init_app('sys')
 
     with app.app_context():
         today = datetime.utcnow()
         yesterday = today - timedelta(days=1)
-        bef_yesterday = yesterday - timedelta(days=1)
+        five_days_ago = yesterday - timedelta(days=5)
 
         try:
             agreements = RentalAgreement.query.options(
-                joinedload('balances.payments'), joinedload('interval')).filter(RentalAgreement.terminated_on.is_(None))\
-                .filter(RentalAgreement.id.notin_(
+                joinedload('balances.payments'), joinedload('interval')).filter(
+                RentalAgreement.terminated_on.is_(None)).filter(RentalAgreement.id.notin_(
                     Balance.query.options(
                         defer(Balance.id),
                         load_only(Balance.agreement_id)
                     ).filter((Balance.due_date >= today.date())).subquery()))\
-                .join(Balance).filter(Balance.due_date.between(bef_yesterday.date(), yesterday.date()))
-            # logger.debug(agreements.statement.compile())
+                .join(Balance).filter(Balance.due_date.between(five_days_ago.date(), yesterday.date()))
+            # logger.info(agreements.statement.compile())
             process_agreements(agreements, logger)
 
         except (sqlalchemy.exc.OperationalError, Exception) as e:

@@ -36,7 +36,7 @@ class Tenants(API):
             for tenant in tenants:
                 result.append(row2dict(tenant))
 
-        return {'list': result, 'page': page, 'total_pages': total_pages}
+        return Result.paginate(result, page, total_pages)
 
     @token_required
     @access_required
@@ -55,7 +55,7 @@ class Tenants(API):
             used_key = 'email'
             return Result.error(used_key + ' ya ha sido utilizado')
 
-        return dict(id=tenant.id)
+        return Result.id(tenant.id)
 
     @token_required
     @access_required
@@ -75,7 +75,11 @@ class Tenants(API):
     @staticmethod
     def get_tenant(tenant_id):
 
-        tenant = Tenant.query.options(joinedload('history.rental_agreement.room')).filter_by(id=tenant_id).first()
+        tenant = Tenant.query.options(
+            joinedload('history'),
+            joinedload('history.rental_agreement'),
+            joinedload('history.rental_agreement.room'),
+        ).filter_by(id=tenant_id).first()
         result = row2dict(tenant)
         result['history'] = []
         rental_ids = []

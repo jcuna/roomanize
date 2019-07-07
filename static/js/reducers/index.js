@@ -6,6 +6,7 @@ import projectReducer from './projectReducer';
 import roomReducer from './roomReducer';
 import tenantsReducer from './tenantsReducer';
 import agreementsReducer from './agreementsReducer';
+import receiptsReducer from './receiptsReducer';
 
 export default combineReducers({
     app: appReducer,
@@ -15,4 +16,5 @@ export default combineReducers({
     rooms: roomReducer,
     tenants: tenantsReducer,
     agreements: agreementsReducer,
+    receipts: receiptsReducer,
 });

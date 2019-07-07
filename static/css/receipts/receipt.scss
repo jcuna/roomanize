@@ -1,0 +1,102 @@
+@import "../vars";
+
+.receipt-wrapper {
+  .receipt {
+    margin-bottom: 20px;
+    position: relative;
+
+    .header, h5 {
+      text-align: center;
+    }
+
+    .divider {
+      border-bottom: 1px dashed $clearBlue;
+      margin: 6px 0;
+    }
+
+    .print-button, .email-button {
+      font-size: 28px;
+      cursor: pointer;
+      position: absolute;
+      color: $link;
+      top: 5px;
+
+      &:hover {
+        color: $hover2
+      }
+    }
+
+    .print-button {
+      right: 5px;
+    }
+
+    .email-button {
+      right: 50px;
+    }
+
+    table {
+      margin-top: 12px;
+    }
+
+  }
+}
+
+#printing {
+
+  .receipt {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+}
+
+@media print {
+  .table-striped tbody tr,
+  html {
+    background-color: #FFF!important;
+  }
+  .alert,
+  .receipt-wrapper,
+  .mobile-menu,
+  .footer,
+  div nav,
+  .widget h1,
+  .widget .table-actions,
+  header#header {
+    display: none;
+  }
+
+  .body-container.body-displaced {
+    width: 100%!important;
+  }
+
+  .container {
+    width: 100%!important;
+    padding: 0!important;
+    margin: 0!important;
+    min-width: 100%!important;
+  }
+
+  #printing {
+    position: absolute;
+    top: 0;
+    h4 {
+      font-size: 38px;
+    }
+    small {
+      font-size: 28px;
+    }
+    font-size: 34px!important;
+    display: block;
+    .print-button,
+    .email-button {
+      display: none;
+    }
+    .receipt, a {
+      border-color: #FFF;
+      outline: 0;
+      box-shadow: none;
+      text-decoration: none;
+    }
+  }
+}

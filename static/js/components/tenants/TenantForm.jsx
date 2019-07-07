@@ -29,7 +29,7 @@ export default class TenantForm extends React.Component {
         this.onInputChange = this.onInputChange.bind(this);
         this.newAgreementRegistration = this.newAgreementRegistration.bind(this);
         this.confirmEndAgreement = this.confirmEndAgreement.bind(this);
-        this.lastDateChanged = this.lastDateChanged.bind(this);
+        this.onTerminateContractChange = this.onTerminateContractChange.bind(this);
         this.newPayment = this.newPayment.bind(this);
 
         const tenant_id = this.props.match.params.tenant_id || null;
@@ -87,8 +87,9 @@ export default class TenantForm extends React.Component {
 
     render() {
         const editing = this.state.id !== null;
-        const canUpdateAgreement = hasAccess(ENDPOINTS.AGREEMENTS_URL, ACCESS_TYPES.WRITE);
-        const canProcessPayments = hasAccess(ENDPOINTS.BALANCE_PAYMENTS_URL, ACCESS_TYPES.WRITE);
+        const canUpdateAgreement = hasAccess(ENDPOINTS.AGREEMENTS_URL, ACCESS_TYPES.WRITE) &&
+            hasAccess(ENDPOINTS.AGREEMENTS_URL, ACCESS_TYPES.READ);
+        const canProcessPayments = hasAccess(ENDPOINTS.RECEIPTS_URL, ACCESS_TYPES.WRITE);
 
         return <div>
             <Breadcrumbs { ...this.props } title={ editing ? 'Editar' : 'Nuevo' }/>
@@ -180,7 +181,17 @@ export default class TenantForm extends React.Component {
     }
 
     static displayTenantHistory(history, onFinalize, newPayment, canProcessPayments, canUpdateAgreements, timeIntervals) {
-        history.sort((a, b) => new Date(b.rental_agreement.entered_on) - new Date(a.rental_agreement.entered_on));
+        history.sort((a, b) => {
+            const aDate = new Date(a.rental_agreement.entered_on);
+            const bDate = new Date(b.rental_agreement.entered_on);
+
+            if (aDate > bDate) {
+                return -1;
+            } else if (aDate < bDate) {
+                return 1;
+            }
+            return 0;
+        });
 
         return <div className="tenant-history">
             <h2>Historial</h2>
@@ -221,7 +232,7 @@ export default class TenantForm extends React.Component {
                     const { balance } = row.rental_agreement;
                     if (active) {
                         if (balance.length > 0) {
-                            items.push([
+                            timeIntervals.length > 0 && items.push([
                                 'Ciclo de Pago',
                                 timeIntervals.filter(a => a.id === row.rental_agreement.time_interval_id)
                                     .pop().interval
@@ -246,44 +257,64 @@ export default class TenantForm extends React.Component {
                                 remaining_balance = 0;
                             }
 
+                            const nextPayDate = new Date(balance[0].due_date);
+                            const hadPreviousBalance = balance[0].previous_balance > 0;
+                            let nextPay = formatDateEs(nextPayDate);
+                            if (Number(nextPayDate) < Number(new Date()) || hadPreviousBalance && remaining_balance > balance[0].previous_balance) {
+                                nextPay = <span className='urgent'>Ahora!</span>;
+                            }
+
                             remaining_balance > 0 && items.push(
-                                ['Proximo Pago', formatDateEs(new Date(balance[0].due_date))]
+                                ['Proximo Pago', nextPay]
                             );
                             items.push(['Balance', `$RD ${ (remaining_balance.toFixed(2)) }`]);
-                            balance[0].previous_balance > 0 &&
+                            hadPreviousBalance &&
                                 items.push(['Balance Anterior', `$RD ${ balance[0].previous_balance }`]);
 
                             credit > 0 && items.push(['Credito', `$RD ${ credit }`]);
                             items.push(['Ultimo Pago', last_payment]);
                         }
-                        canUpdateAgreements && items.push([
-                            'Finalizar Contrato',
-                            <Button
-                                type='warning'
-                                size='sm'
-                                key={ row.id }
-                                data-id={ row.id }
-                                onClick={ onFinalize }
-                                value='Terminar'
-                            />
-                        ]);
-
-                        canProcessPayments && items.push([
-                            '',
-                            <Button
-                                type='info'
-                                key={ row.id + 1 } data-id={ balance[0].id }
-                                value='Effectuar Pago'
-                                size='sm'
-                                onClick={ newPayment }
-                            />
-                        ]);
                     }
 
                     return (
                         <div key={ i }>
                             <Table numberedRows={ false } rows={ items }/>
                             <hr/>
+                            { active && <div className='tenant-actions row'>
+                                { canProcessPayments &&
+                                <div className='col-4'>
+                                    <Button
+                                        type='info'
+                                        key={ row.id + 1 } data-id={ balance[0].id }
+                                        value='Efectuar Pago'
+                                        size='sm'
+                                        onClick={ newPayment }
+                                    />
+                                </div>
+                                }
+                                { canProcessPayments &&
+                                <div className='col-4'>
+                                    <Link
+                                        className='btn btn-sm btn-success'
+                                        key={ row.id + row.tenant_id }
+                                        to={ `${ ENDPOINTS.RECEIPTS_URL }/inquilino/${ row.tenant_id }` }>
+                                        Ver recibos
+                                    </Link>
+                                </div>
+                                }
+                                { canUpdateAgreements &&
+                                <div className='col-4'>
+                                    <Button
+                                        type='warning'
+                                        size='sm'
+                                        key={ row.id }
+                                        data-id={ row.id }
+                                        onClick={ onFinalize }
+                                        value='Terminar contrato'
+                                    />
+                                </div>
+                                }
+                            </div> }
                         </div>
                     );
                 })
@@ -299,25 +330,34 @@ export default class TenantForm extends React.Component {
         ));
     }
 
-    lastDateChanged(e, validate) {
+    onTerminateContractChange(e, validate) {
         if (validate['last-date'].isValid) {
-            this.setState({ lastDate: validate['last-date'].value });
+            this.setState({ lastDate: validate['last-date'] });
+        }
+        if (validate.refund.isValid) {
+            this.setState({ refund: validate.refund });
         }
     }
 
     confirmEndAgreement({ target }) {
         const button = <button
             type='button' onClick={ () => {
-                if (!this.state.lastDate) {
+                if (!this.state.lastDate.isValid) {
                     this.lastDateInput.current.classList.add('is-invalid');
+                } else if (!this.state.refund.isValid) {
+                    return;
                 } else {
                     const data = {
                         id: target.getAttribute('data-id'),
-                        terminated_on: this.state.lastDate
+                        terminated_on: this.state.lastDate.value,
                     };
+                    if (typeof this.state.refund !== 'undefined') {
+                        data.refund = Number(this.state.refund.value);
+                    }
                     this.lastDateInput.current.classList.remove('is-invalid');
                     this.props.dispatch(updateAgreement(data, () => {
                         this.props.dispatch(hideOverlay());
+                        this.props.dispatch(getTenant(this.props.match.params.tenant_id));
                         this.props.dispatch(notifications({
                             type: ALERTS.SUCCESS, message: 'Contrato terminado correctamente'
                         }));
@@ -334,15 +374,23 @@ export default class TenantForm extends React.Component {
         this.props.dispatch(showOverlay(
             <div>
                 <h4 className='panel'>Estas seguro que deseas finalizar este contrato?</h4>
-                <FormGenerator formName='contract-end' elements={ [{
-                    name: 'last-date',
-                    type: 'date',
-                    placeholder: 'Fecha',
-                    onChange: this.lastDateChanged,
-                    validate: ['required'],
-                    ref: this.lastDateInput
-                }] }/>
-                <small className=''>Seleccione la fecha de termino. Solo hoy y fechas pasadas.</small>
+                <FormGenerator formName='contract-end' elements={ [
+                    <small key={ 3 } className=''>Seleccione la fecha de termino. Solo hoy y fechas pasadas.</small>,
+                    {
+                        name: 'last-date',
+                        type: 'date',
+                        placeholder: 'Fecha',
+                        onChange: this.onTerminateContractChange,
+                        validate: ['required'],
+                        ref: this.lastDateInput
+                    },
+                    {
+                        name: 'refund',
+                        onChange: this.onTerminateContractChange,
+                        placeholder: 'Reembolso',
+                        validate: ['number']
+                    }
+                ] }/>
             </div>,
             <div className='warning-prompt'><FontAwesome type='exclamation-triangle'/> Advertencia...</div>,
             true,

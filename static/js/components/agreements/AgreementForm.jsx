@@ -125,7 +125,7 @@ export default class AgreementForm extends React.Component {
                         sections: [
                             {
                                 title: 'Ciclo de pago',
-                                className: 'col-4',
+                                className: 'col-6',
                                 elements: [
                                     {
                                         name: 'interval',
@@ -138,8 +138,21 @@ export default class AgreementForm extends React.Component {
                                 ]
                             },
                             {
+                                title: 'Fecha De Entrada',
+                                className: 'col-6',
+                                elements: [
+                                    {
+                                        name: 'date',
+                                        type: 'date',
+                                        placeholder: 'Fecha',
+                                        onChange: this.inputChanged,
+                                        validate: ['required']
+                                    },
+                                ]
+                            },
+                            {
                                 title: 'Precio De Arrendamiento',
-                                className: 'col-4',
+                                className: 'col-6',
                                 elements: [
                                     {
                                         name: 'rate',
@@ -150,15 +163,14 @@ export default class AgreementForm extends React.Component {
                                 ]
                             },
                             {
-                                title: 'Fecha De Entrada',
-                                className: 'col-4',
+                                title: 'Deposito',
+                                className: 'col-6',
                                 elements: [
                                     {
-                                        name: 'date',
-                                        type: 'date',
-                                        placeholder: 'Fecha',
+                                        name: 'deposit',
+                                        placeholder: 'Deposito',
                                         onChange: this.inputChanged,
-                                        validate: ['required']
+                                        validate: ['number', 'required']
                                     },
                                 ]
                             },

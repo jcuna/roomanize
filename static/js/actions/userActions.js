@@ -246,7 +246,7 @@ export const searchUsers = (q, resolve, reject) =>
     (dispatch) => {
         dispatch({ type: USERS_SEARCHING });
         token.through().then(header => api({
-            url: `users?query=${q}`,
+            url: `/users?query=${q}`,
             method: 'GET',
             headers: header,
         }).then(resp => {

@@ -33,18 +33,24 @@ export const capitalizeAll = str => {
     });
 };
 
-/**
- * This formats dates only. time is depreciated.
- * @param {Date} date
- * @returns {string}
- */
-export const formatDateEs = date => {
+export const friendlyDateEs = (date) => {
     const options = {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
         day: 'numeric',
     };
+    return capitalizeAll(date.toLocaleDateString('es-US', options));
+};
+
+/**
+ * This formats dates only. time is depreciated.
+ * @param {Date} date
+ * @returns {string}
+ */
+export const formatDateEs = date => {
+    // convert to match users timezone
+    date.setHours(date.getHours() - (date.getTimezoneOffset() / 60));
     date = new Date(date.toDateString());
     const today = new Date(new Date().toDateString());
     const delta = Math.round(Number(today - date) / 1000);
@@ -62,6 +68,15 @@ export const formatDateEs = date => {
         case day * 2:
             return 'Antes De Ayer';
         default:
-            return capitalizeAll(date.toLocaleDateString('es-US', options));
+            return friendlyDateEs(date);
     }
 };
+
+export const dateToDatetimeString = (localDate) => {
+    const today = new Date();
+    const time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
+    return localDate + ' ' + time;
+};
+
+export const generateNonce = () =>
+    Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);

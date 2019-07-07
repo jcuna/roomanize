@@ -20,9 +20,9 @@ export const menuItems = [
     },
     {
         icon: 'fas fa-file-contract',
-        link: ENDPOINTS.AGREEMENTS_URL,
-        name: 'Contratos',
-        endpoint: getEndpoint(ENDPOINTS.AGREEMENTS_URL)
+        link: ENDPOINTS.RECEIPTS_URL,
+        name: 'Recibos',
+        endpoint: getEndpoint(ENDPOINTS.RECEIPTS_URL)
     },
     {
         icon: 'fas fa-people-carry',

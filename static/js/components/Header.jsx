@@ -77,7 +77,7 @@ class Header extends React.Component {
 
         if (typeof attributes.preferences.default_project !== 'undefined') {
             projects.forEach(item => {
-                if (item.id === attributes.preferences.default_project) {
+                if (Number(item.id) === attributes.preferences.default_project) {
                     name = item.name;
                 }
             });

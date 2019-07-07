@@ -100,11 +100,7 @@ class UsersManager(API):
             }, user.roles))
         }, users))
 
-        return {
-            'page': page,
-            'total_pages': total_pages,
-            'list': user_list
-        }
+        return Result.paginate(user_list, page, total_pages)
 
     @token_required
     @access_required

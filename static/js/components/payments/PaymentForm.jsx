@@ -91,7 +91,7 @@ export default class PaymentForm extends React.Component {
                 type: ALERTS.SUCCESS,
                 message: 'Pago procesado correctamente'
             }));
-            this.props.history.push(`${ ENDPOINTS.TENANTS_URL }/${resp.id}`);
+            this.props.history.push(`${ ENDPOINTS.RECEIPTS_URL }/recibo/${resp.id}`);
         }, () => {
             this.props.dispatch(hideOverlay());
             this.props.dispatch(notifications({ type: ALERTS.DANGER, message: GENERIC_ERROR }));

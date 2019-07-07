@@ -125,6 +125,7 @@ const getInitialState = (state) => {
         rooms: state.rooms,
         tenants: state.tenants,
         agreements: state.agreements,
+        receipts: state.receipts,
     };
 };
 

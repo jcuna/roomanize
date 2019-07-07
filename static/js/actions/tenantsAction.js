@@ -12,7 +12,7 @@ export const createTenant = (data, resolve, reject) =>
     (dispatch) => {
         dispatch({ type: TENANTS_PROCESSING });
         token.through().then(header => api({
-            url: 'tenants',
+            url: '/tenants',
             method: 'POST',
             headers: header,
         }, data).then(resp => {
@@ -25,7 +25,7 @@ export const editTenant = (data, resolve, reject) =>
     (dispatch) => {
         dispatch({ type: TENANTS_PROCESSING });
         token.through().then(header => api({
-            url: `tenants/${ data.id }`,
+            url: `/tenants/${ data.id }`,
             method: 'PUT',
             headers: header,
         }, data).then(() => {
@@ -37,7 +37,7 @@ export const getTenants = (page, orderBy, dir, resolve, reject) =>
     (dispatch) => {
         dispatch({ type: TENANTS_PROCESSING });
         token.through().then(header => api({
-            url: `tenants?page=${ page }&orderBy=${ orderBy }&orderDir=${ dir }`,
+            url: `/tenants?page=${ page }&orderBy=${ orderBy }&orderDir=${ dir }`,
             method: 'GET',
             headers: header,
         }).then(resp => {
@@ -55,7 +55,7 @@ export const getTenant = (tenant_id, resolve, reject) =>
     (dispatch) => {
         dispatch({ type: TENANTS_PROCESSING });
         token.through().then(header => api({
-            url: `tenants/${ tenant_id }`,
+            url: `/tenants/${ tenant_id }`,
             method: 'GET',
             headers: header,
         }).then(resp => {
@@ -71,7 +71,7 @@ export const searchTenants = (query, resolve, reject) =>
     (dispatch) => {
         dispatch({ type: TENANTS_PROCESSING });
         token.through().then(header => api({
-            url: `tenants?query=${ query }`,
+            url: `/tenants?query=${ query }`,
             method: 'GET',
             headers: header,
         }).then(resp => {
