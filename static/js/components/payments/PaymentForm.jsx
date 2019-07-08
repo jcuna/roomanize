@@ -69,28 +69,26 @@ export default class PaymentForm extends React.Component {
                 ref: this.amountInput,
                 autoComplete: 'off',
             },
-            {
-                name: 'payment_type_id',
-                placeholder: 'Cantidad',
-                validate: 'required',
-                onChange: this.onInputChange,
-                formElement: 'select',
-                defaultValue: 100,
-                options: this.getPaymentTypes(),
-            },
         ];
         if (this.state.paymentType === 100) {
-            elements.push(
-                {
-                    name: 'cash',
-                    placeholder: 'Cantidad en Effectivo',
-                    defaultValue: '',
-                    validate: ['required', 'number'],
-                    onChange: this.onInputChange,
-                    autoComplete: 'off',
-                }
-            );
+            elements.push({
+                name: 'cash',
+                placeholder: 'Cantidad en Effectivo',
+                defaultValue: '',
+                validate: ['required', 'number'],
+                onChange: this.onInputChange,
+                autoComplete: 'off',
+            });
         }
+        elements.push({
+            name: 'payment_type_id',
+            placeholder: 'Cantidad',
+            validate: 'required',
+            onChange: this.onInputChange,
+            formElement: 'select',
+            defaultValue: 100,
+            options: this.getPaymentTypes(),
+        });
         return elements;
     }
 
@@ -154,6 +152,10 @@ export default class PaymentForm extends React.Component {
         if (prevState.paymentType !== this.state.paymentType) {
             this.forceUpdate();
         }
+    }
+
+    componentDidMount() {
+        this.amountInput.current.focus();
     }
 
     static propTypes = {
