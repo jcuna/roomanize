@@ -1,3 +1,4 @@
+@import "../vars";
 .last-payment {
   .amount {
     margin-left: 4px;
@@ -7,4 +8,12 @@
 
 .tenant-actions {
   padding: 0 30px 16px;
+}
+
+.payment-change {
+  font-size: 28px;
+  font-weight: bolder;
+  td:nth-child(2) {
+    color: $bootstrapGreen;
+  }
 }

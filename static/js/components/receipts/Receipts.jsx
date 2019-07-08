@@ -10,6 +10,7 @@ import Paginate from '../../utils/Paginate';
 import { getReceipts, searchReceipts } from '../../actions/receiptsActions';
 import Receipt from './Receipt';
 import { afterPause, generateNonce } from '../../utils/helpers';
+import { fetchPaymentTypes, fetchTimeIntervals } from '../../actions/projectActions';
 
 export default class Receipts extends React.Component {
     constructor(props) {
@@ -17,6 +18,7 @@ export default class Receipts extends React.Component {
 
         this.state = {
             search: { key: '', value: '' },
+            searching: false,
             page: 1,
             toPrint: { id: 0, nonce: 0 },
         };
@@ -25,6 +27,13 @@ export default class Receipts extends React.Component {
 
         this.print = this.print.bind(this);
         this.search = this.search.bind(this);
+
+        if (this.props.projects.timeIntervals.length === 0) {
+            props.dispatch(fetchTimeIntervals());
+        }
+        if (this.props.projects.paymentTypes.length === 0) {
+            props.dispatch(fetchPaymentTypes());
+        }
     }
 
     fetchData(props) {
@@ -33,14 +42,22 @@ export default class Receipts extends React.Component {
         const byUser = props.match.params.action === 'inquilino';
         const id = props.match.params.id;
 
-        if (customSearch) {
-            props.dispatch(searchReceipts(this.state.search.key, id, this.state.search.value, 'desc', this.state.page));
-        } else if (byReceipt) {
-            props.dispatch(searchReceipts('receipt', id, 'paid_date', 'desc', this.state.page));
-        } else if (byUser) {
-            props.dispatch(searchReceipts('tenant', id, 'paid_date', 'desc', this.state.page));
-        } else {
-            props.dispatch(getReceipts(this.state.page, 'paid_date', 'desc'));
+        if (!this.state.searching) {
+            if (customSearch) {
+                props.dispatch(searchReceipts(
+                    this.state.search.key,
+                    this.state.search.value,
+                    'paid_date',
+                    'desc',
+                    this.state.page)
+                );
+            } else if (byReceipt) {
+                props.dispatch(searchReceipts('receipt', id, 'paid_date', 'desc', this.state.page));
+            } else if (byUser) {
+                props.dispatch(searchReceipts('tenant', id, 'paid_date', 'desc', this.state.page));
+            } else {
+                props.dispatch(getReceipts(this.state.page, 'paid_date', 'desc'));
+            }
         }
     }
 
@@ -50,12 +67,26 @@ export default class Receipts extends React.Component {
             <Breadcrumbs { ...this.props } title='Recibos'/>
             <section className='widget'>
                 <h1>Recibos</h1>
-                <div className='table-actions'>
-                    <input
-                        placeholder='Buscar: # Recibo/Fecha'
-                        onChange={ this.search }
-                        className='form-control'
-                    />
+                <div className='form-row'>
+                    <div className='form-group col-md-6'>
+                        <label htmlFor='receipt'>Buscar por numero de recibo</label>
+                        <input
+                            name='receipt'
+                            placeholder='Buscar: # Recibo'
+                            onChange={ this.search }
+                            className='form-control'
+                        />
+                    </div>
+                    <div className='form-group col-md-6'>
+                        <label htmlFor='paid_date'>Buscar por Fecha</label>
+                        <input
+                            type='date'
+                            name='paid_date'
+                            placeholder='Fecha'
+                            onChange={ this.search }
+                            className='form-control'
+                        />
+                    </div>
                 </div>
                 { receipts.data.list.map(r =>
                     <Receipt
@@ -87,21 +118,22 @@ export default class Receipts extends React.Component {
             this.setState({
                 search: { key: '', value: '' },
             });
-            this.fetchData(this.props);
         } else {
             const { dispatch } = this.props;
             afterPause(() => {
                 if (target.value.length > 2) {
-                    if (isNaN(target.value)) {
-                        this.setState({
-                            search: { key: 'paid_date', value: target.value },
-                            page: 1,
-                        });
-                        dispatch(searchReceipts(
-                            'paid_date', target.value, 'paid_date', 'desc', 1));
-                    } else {
-                        dispatch(searchReceipts('receipt', target.value, 'paid_date', 'desc', 1));
-                    }
+                    const key = target.getAttribute('name');
+                    this.setState({
+                        search: { key, value: target.value },
+                        page: 1,
+                        searching: true,
+                    });
+                    dispatch(searchReceipts(
+                        key, target.value, 'paid_date', 'desc', 1, () => {
+                            this.setState({
+                                searching: false,
+                            });
+                        }));
                 }
             });
         }

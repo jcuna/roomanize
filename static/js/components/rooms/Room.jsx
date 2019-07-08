@@ -159,7 +159,7 @@ export default class Room extends Component {
                         <td>
                             { canEdit &&
                             <Link to={ `${ENDPOINTS.ROOMS_URL }/editar/${item.id}` } onClick={ this.selectRoom }>
-                                <FontAwesome type='edit' dataId={ item.id }/>
+                                <FontAwesome type='edit' data-id={ item.id }/>
                             </Link> ||
                             <FontAwesome type='ban'/> }
                         </td>

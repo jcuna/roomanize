@@ -8,7 +8,6 @@ import Table from '../../utils/Table';
 import { formatPhone, friendlyDateEs } from '../../utils/helpers';
 import '../../../css/receipts/receipt.scss';
 import FontAwesome from '../../utils/FontAwesome';
-import { fetchPaymentTypes, fetchTimeIntervals } from '../../actions/projectActions';
 import { ENDPOINTS } from '../../constants';
 import Link from 'react-router-dom/es/Link';
 
@@ -17,13 +16,6 @@ export default class Receipt extends React.Component {
         super(props);
 
         this.email = this.email.bind(this);
-
-        if (props.timeIntervals.length === 0) {
-            props.dispatch(fetchTimeIntervals());
-        }
-        if (props.paymentTypes.length === 0) {
-            props.dispatch(fetchPaymentTypes());
-        }
     }
 
     render() {

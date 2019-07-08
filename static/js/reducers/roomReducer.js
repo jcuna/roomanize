@@ -3,7 +3,14 @@
  */
 
 import { STATUS } from '../constants';
-import { ROOM_SELECTED, ROOMS_FETCHED, ROOMS_FETCHING, ROOMS_SEARCHED, ROOMS_SEARCHING } from '../actions/roomActions';
+import {
+    ROOM_SELECTED,
+    ROOMS_CLEAR,
+    ROOMS_FETCHED,
+    ROOMS_FETCHING,
+    ROOMS_SEARCHED,
+    ROOMS_SEARCHING,
+} from '../actions/roomActions';
 import { PROJECT_UPDATING } from '../actions/projectActions';
 
 const initState = {
@@ -29,6 +36,7 @@ export default function roomReducer(state = initState, action) {
             return { ...state, searchingBackEnd: true };
         case ROOMS_SEARCHED:
             return { ...state, searchingBackEnd: false };
+        case ROOMS_CLEAR:
         case PROJECT_UPDATING:
             return { ...initState };
         default:

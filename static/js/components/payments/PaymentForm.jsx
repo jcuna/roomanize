@@ -9,6 +9,7 @@ import { fetchPaymentTypes } from '../../actions/projectActions';
 import { makePayment } from '../../actions/agreementsAction';
 import { hideOverlay, notifications } from '../../actions/appActions';
 import { ALERTS, ENDPOINTS, GENERIC_ERROR } from '../../constants';
+import Table from '../../utils/Table';
 
 export default class PaymentForm extends React.Component {
     constructor(props) {
@@ -17,8 +18,13 @@ export default class PaymentForm extends React.Component {
         this.onInputChange = this.onInputChange.bind(this);
         this.submitPayment = this.submitPayment.bind(this);
 
+        this.amountInput = React.createRef();
+
         this.state = {
             button: { value: 'Confirmar Pago', disabled: true },
+            paymentType: this.props.defaultPaymentType,
+            change: 0,
+            showChange: false,
         };
 
         if (this.props.projects.paymentTypes.length === 0) {
@@ -35,29 +41,57 @@ export default class PaymentForm extends React.Component {
     }
 
     get form() {
-        return <FormGenerator
-            formName='payment-form'
-            button={ this.state.button }
-            onSubmit={ this.submitPayment }
-            elements={ [
+        return <div>
+            <FormGenerator
+                formName='payment-form'
+                button={ this.state.button }
+                onSubmit={ this.submitPayment }
+                elements={ this.getFormElements() }
+            />
+            { this.state.showChange && this.getChangeElement() }
+        </div>;
+    }
+
+    getChangeElement() {
+        return <div className='payment-change'>
+            <Table numberedRows={ false } rows={ [['Cambio:', (this.state.change > 0 && this.state.change || 0)]] }/>
+        </div>;
+    }
+
+    getFormElements() {
+        const elements = [
+            {
+                name: 'amount',
+                placeholder: 'Monto A Pagar $RD',
+                defaultValue: '',
+                validate: ['required', 'number'],
+                onChange: this.onInputChange,
+                ref: this.amountInput,
+                autoComplete: 'off',
+            },
+            {
+                name: 'payment_type_id',
+                placeholder: 'Cantidad',
+                validate: 'required',
+                onChange: this.onInputChange,
+                formElement: 'select',
+                defaultValue: 100,
+                options: this.getPaymentTypes(),
+            },
+        ];
+        if (this.state.paymentType === 100) {
+            elements.push(
                 {
-                    name: 'amount',
-                    placeholder: 'Cantidad $RD',
+                    name: 'cash',
+                    placeholder: 'Cantidad en Effectivo',
                     defaultValue: '',
                     validate: ['required', 'number'],
                     onChange: this.onInputChange,
-                },
-                {
-                    name: 'payment_type_id',
-                    placeholder: 'Cantidad',
-                    validate: 'required',
-                    onChange: this.onInputChange,
-                    formElement: 'select',
-                    defaultValue: 100,
-                    options: this.getPaymentTypes(),
-                },
-            ] }
-        />;
+                    autoComplete: 'off',
+                }
+            );
+        }
+        return elements;
     }
 
     getPaymentTypes() {
@@ -70,12 +104,30 @@ export default class PaymentForm extends React.Component {
         return options;
     }
 
-    onInputChange(e, { amount, payment_type_id }) {
-        if (amount.isValid && payment_type_id.isValid) {
-            this.setState({
-                button: { ...this.state.button, disabled: false }
-            });
+    onInputChange(e, { amount, payment_type_id, cash }) {
+        const state = {
+            paymentType: Number(payment_type_id.value)
+        };
+
+        const validData = amount.isValid && payment_type_id.isValid;
+        const validCashPayment = validData && Number(payment_type_id.value) === this.props.defaultPaymentType &&
+            cash.isValid;
+
+        if (validData && Number(payment_type_id.value) !== this.props.defaultPaymentType || validCashPayment) {
+            state.button = { ...this.state.button, disabled: false };
+            if (validCashPayment) {
+                state.change = (Number(cash.value) - Number(amount.value)).toFixed(2);
+                state.showChange = true;
+            } else {
+                state.change = 0;
+                state.showChange = false;
+            }
+        } else {
+            state.button = { ...this.state.button, disabled: true };
+            state.change = 0;
+            state.showChange = false;
         }
+        this.setState(state);
     }
 
     submitPayment(e, { amount, payment_type_id }) {
@@ -98,15 +150,23 @@ export default class PaymentForm extends React.Component {
         }));
     }
 
+    componentDidUpdate(prevProps, prevState) {
+        if (prevState.paymentType !== this.state.paymentType) {
+            this.forceUpdate();
+        }
+    }
+
     static propTypes = {
         dispatch: PropTypes.func,
         target_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired, // id of the balance or item being paid for
         type: PropTypes.string,
         projects: PropTypes.object,
         history: PropTypes.object,
+        defaultPaymentType: PropTypes.number,
     };
 
     static defaultProps = {
         type: 'agreement', // not used at the moment, but will likely be useful for payments of other types.
+        defaultPaymentType: 100, // not used at the moment, but will likely be useful for payments of other types.
     };
 }

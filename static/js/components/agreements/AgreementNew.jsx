@@ -10,6 +10,7 @@ import AgreementForm from './AgreementForm';
 import Breadcrumbs from '../../utils/Breadcrumbs';
 import { createAgreement } from '../../actions/agreementsAction';
 import Link from 'react-router-dom/es/Link';
+import { clearRooms } from '../../actions/roomActions';
 
 export default class AgreementNew extends React.Component {
     constructor(props) {
@@ -52,7 +53,8 @@ export default class AgreementNew extends React.Component {
         const submissionData = { ...data, tenant_id: this.props.agreements.agreement.tenant.id };
         this.props.dispatch(createAgreement(submissionData, () => {
             this.props.history.push(`${ ENDPOINTS.TENANTS_URL}/editar/${ this.props.agreements.agreement.tenant.id }`);
-            this.dispatch(notifications({ type: ALERTS.SUCCESS, message: 'Registración completa' }));
+            this.props.dispatch(notifications({ type: ALERTS.SUCCESS, message: 'Registración completa' }));
+            this.props.dispatch(clearRooms());
         }, () => this.dispatch(notifications({ type: ALERTS.DANGER, message: GENERIC_ERROR }))));
     }
 

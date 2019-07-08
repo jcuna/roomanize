@@ -280,7 +280,7 @@ export default class TenantForm extends React.Component {
                         <div key={ i }>
                             <Table numberedRows={ false } rows={ items }/>
                             <hr/>
-                            { active && <div className='tenant-actions row'>
+                            { balance.length > 0 && active && <div className='tenant-actions row'>
                                 { canProcessPayments &&
                                 <div className='col-4'>
                                     <Button

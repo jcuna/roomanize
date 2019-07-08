@@ -8,6 +8,7 @@ export const ROOMS_SEARCHING = 'ROOMS_SEARCHING';
 export const ROOMS_SEARCHED = 'ROOMS_SEARCHED';
 export const ROOMS_FETCHED = 'ROOMS_FETCHED';
 export const ROOM_FETCHED = 'ROOM_FETCHED';
+export const ROOMS_CLEAR = 'ROOMS_CLEAR';
 
 export const createRoom = (data, resolve, reject) =>
     (dispatch) =>
@@ -74,3 +75,6 @@ export const searchRooms = (q, resolve, reject) =>
             reject(err);
         }), reject);
     };
+
+export const clearRooms = () =>
+    (dispatch) => dispatch({ type: ROOMS_CLEAR });

@@ -59,7 +59,7 @@ export default class Tenants extends React.Component {
                     <Link to={ `${ ENDPOINTS.TENANTS_URL }/editar/${ item.id }` }>
                         <FontAwesome
                             type='user-edit'
-                            assName='text-info'
+                            className='text-info'
                         />
                     </Link>);
             }
