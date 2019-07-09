@@ -44,13 +44,20 @@ export const friendlyDateEs = (date) => {
 };
 
 /**
+ * convert to match users timezone
+ * @param {Date} date
+ */
+export const toLocalTimezone = (date) => {
+    date.setHours(date.getHours() - (date.getTimezoneOffset() / 60));
+};
+
+/**
  * This formats dates only. time is depreciated.
  * @param {Date} date
  * @returns {string}
  */
 export const formatDateEs = date => {
-    // convert to match users timezone
-    date.setHours(date.getHours() - (date.getTimezoneOffset() / 60));
+    toLocalTimezone(date);
     date = new Date(date.toDateString());
     const today = new Date(new Date().toDateString());
     const delta = Math.round(Number(today - date) / 1000);

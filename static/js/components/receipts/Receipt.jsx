@@ -5,7 +5,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Table from '../../utils/Table';
-import { formatPhone, friendlyDateEs } from '../../utils/helpers';
+import { formatPhone, friendlyDateEs, toLocalTimezone } from '../../utils/helpers';
 import '../../../css/receipts/receipt.scss';
 import FontAwesome from '../../utils/FontAwesome';
 import { ENDPOINTS } from '../../constants';
@@ -22,6 +22,10 @@ export default class Receipt extends React.Component {
         const { project, receipt, timeIntervals, paymentTypes, onPrint, id } = this.props;
         const paymentType = paymentTypes.length > 0 &&
             paymentTypes.filter(a => Number(a.id) === Number(receipt.payment_type_id)).pop().type;
+        const enteredOn = new Date(receipt.balance.agreement.entered_on);
+        const paidDate = new Date(receipt.paid_date);
+        toLocalTimezone(enteredOn);
+        toLocalTimezone(paidDate);
         // const currentBalance = (Number(receipt.balance.balance) - Number(receipt.amount)).toFixed(2);
         return (
             <div id={ id || receipt.id } className='receipt-wrapper'>
@@ -54,13 +58,13 @@ export default class Receipt extends React.Component {
                             </Link>
                         ],
                         ['Telefono', formatPhone(receipt.user.phone)],
-                        ['Inquilino Desde', friendlyDateEs(new Date(receipt.balance.agreement.entered_on))],
+                        ['Inquilino Desde', friendlyDateEs(enteredOn)],
                         ['Ciclo De Pago',
                             timeIntervals.length > 0 && timeIntervals.filter(a =>
                                 Number(a.id) === Number(receipt.balance.agreement.time_interval_id)).pop().interval
                         ],
                         ['-----------', '-----------'],
-                        ['Fecha De Pago', friendlyDateEs(new Date(receipt.paid_date))],
+                        ['Fecha De Pago', friendlyDateEs(paidDate)],
                         ['Balance Ciclo Anterior', receipt.balance.previous_balance],
                         // ['Balance', receipt.balance.balance],
                         ['Pago en ' + paymentType, receipt.amount],
