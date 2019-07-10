@@ -8,7 +8,7 @@ import FormGenerator from '../../utils/FromGenerator';
 import Autocomplete from '../../utils/Autocomplete';
 import { fetchRooms, searchRooms } from '../../actions/roomActions';
 import { STATUS } from '../../constants';
-import { afterPause, searchArray } from '../../utils/helpers';
+import { afterPause, formatDecimal, searchArray } from '../../utils/helpers';
 import { fetchTimeIntervals } from '../../actions/projectActions';
 
 export default class AgreementForm extends React.Component {
@@ -195,12 +195,17 @@ export default class AgreementForm extends React.Component {
 
     inputChanged(e, validate) {
         let allValid = true;
+        const inputName = e.target.getAttribute('name');
         Object.keys(validate).forEach(key => {
             if (!validate[key].isValid) {
                 allValid = false;
                 return;
             }
         });
+        if (inputName === 'rate' || inputName === 'deposit') {
+            formatDecimal(e);
+        }
+
         this.setState({ validInputs: allValid, data: validate });
     }
 

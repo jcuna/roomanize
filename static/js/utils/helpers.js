@@ -87,3 +87,29 @@ export const dateToDatetimeString = (localDate) => {
 
 export const generateNonce = () =>
     Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+
+/**
+ *
+ * @param {object} target - type Event object
+ */
+export const formatDecimal = ({ target }) => {
+    let position = target.selectionStart;
+
+    if (target.value.replace(/[0-9]/g, '').length === 2) {
+        target.value = target.value.replace('.', '');
+    }
+
+    if (!isNaN(target.value)) {
+        if (target.value.indexOf('.') < 0) {
+            target.value += '.00';
+        }
+    }
+    if (target.value.split('.').pop().length > 2) {
+        target.value = target.value.substring(0, target.value.length - 1);
+    }
+    if (position > target.value.indexOf('.') + 4) {
+        target.value = target.value.substring(0, target.value.length - 1);
+        position -= 2;
+    }
+    target.selectionEnd = position;
+};

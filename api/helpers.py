@@ -22,6 +22,7 @@ def seed_payment_types(db: SQLAlchemy):
         PaymentType(id=100, type=EFFECTIVO),
         PaymentType(id=200, type=CREDITO),
         PaymentType(id=400, type=CHEQUE),
+        PaymentType(id=600, type=REEMBOLSO),
     ]
 
     db.session.bulk_save_objects(payment_types)

@@ -62,3 +62,6 @@ export const FORM_VALIDATION = {
 
 export const VALIDATE_FUNC_SUFFIX = 'Func';
 export const VALIDATE_TRANSFORM_FUNC = 'Transform';
+
+export const CASH_PAYMENT_ID = 100;
+export const REFUND_PAYMENT_ID = 600;

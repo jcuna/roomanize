@@ -8,8 +8,9 @@ import FormGenerator from '../../utils/FromGenerator';
 import { fetchPaymentTypes } from '../../actions/projectActions';
 import { makePayment } from '../../actions/agreementsAction';
 import { hideOverlay, notifications } from '../../actions/appActions';
-import { ALERTS, ENDPOINTS, GENERIC_ERROR } from '../../constants';
+import { ALERTS, CASH_PAYMENT_ID, ENDPOINTS, GENERIC_ERROR, REFUND_PAYMENT_ID } from '../../constants';
 import Table from '../../utils/Table';
+import { formatDecimal } from '../../utils/helpers';
 
 export default class PaymentForm extends React.Component {
     constructor(props) {
@@ -22,7 +23,7 @@ export default class PaymentForm extends React.Component {
 
         this.state = {
             button: { value: 'Confirmar Pago', disabled: true },
-            paymentType: this.props.defaultPaymentType,
+            paymentType: CASH_PAYMENT_ID,
             change: 0,
             showChange: false,
         };
@@ -103,18 +104,24 @@ export default class PaymentForm extends React.Component {
     }
 
     onInputChange(e, { amount, payment_type_id, cash }) {
+        const { target } = e;
+        const coercedPaymentId = Number(payment_type_id.value);
+        const coercedAmount = Number(amount.value);
         const state = {
-            paymentType: Number(payment_type_id.value)
+            paymentType: coercedPaymentId
         };
 
-        const validData = amount.isValid && payment_type_id.isValid;
-        const validCashPayment = validData && Number(payment_type_id.value) === this.props.defaultPaymentType &&
-            cash.isValid;
+        if (target.getAttribute('name') !== 'payment_type_id') {
+            formatDecimal(e);
+        }
 
-        if (validData && Number(payment_type_id.value) !== this.props.defaultPaymentType || validCashPayment) {
+        const validData = amount.isValid && payment_type_id.isValid;
+        const validCashPayment = validData && coercedPaymentId === CASH_PAYMENT_ID && cash.isValid;
+
+        if (validData && coercedPaymentId !== CASH_PAYMENT_ID || validCashPayment) {
             state.button = { ...this.state.button, disabled: false };
             if (validCashPayment) {
-                state.change = (Number(cash.value) - Number(amount.value)).toFixed(2);
+                state.change = (Number(cash.value) - coercedAmount).toFixed(2);
                 state.showChange = true;
             } else {
                 state.change = 0;
@@ -132,9 +139,8 @@ export default class PaymentForm extends React.Component {
         const data = {
             balance_id: Number(this.props.target_id),
             payment_type_id: payment_type_id.value,
-            amount: amount.value,
+            amount: Number(payment_type_id.value) === REFUND_PAYMENT_ID ? (-Number(amount.value)) : Number(amount.value),
         };
-
         this.props.dispatch(makePayment(data, (resp) => {
             this.props.dispatch(hideOverlay());
             this.props.dispatch(notifications({
@@ -164,11 +170,10 @@ export default class PaymentForm extends React.Component {
         type: PropTypes.string,
         projects: PropTypes.object,
         history: PropTypes.object,
-        defaultPaymentType: PropTypes.number,
     };
 
     static defaultProps = {
-        type: 'agreement', // not used at the moment, but will likely be useful for payments of other types.
-        defaultPaymentType: 100, // not used at the moment, but will likely be useful for payments of other types.
+        // not used at the moment, but will likely be useful for payments of other types.
+        type: 'agreement',
     };
 }
