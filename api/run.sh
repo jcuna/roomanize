@@ -2,6 +2,10 @@
 
 cd ${APP_PATH}
 
+if [ ! -d "$APP_PATH/log" ]; then
+    mkdir "$APP_PATH/log"
+fi
+
 if [ "$APP_ENV" = "develop" ]; then
     while true
     do

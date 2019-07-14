@@ -22,8 +22,8 @@ class Users(API):
             try:
                 user = User.query.filter_by(email=session['user_email']).first()
             except Exception as ex:
-                if '1146' in ex.args[0]:
-                    return Result.error('install', 501)
+                if 'UndefinedTable' in ex.args[0]:
+                    return Result.error(ex.args, 501)
                 else:
                     raise ex
             if user:
@@ -36,7 +36,7 @@ class Users(API):
                 # executions when a user is just logged out.
                 Cache.remember('users.count', User.query.count, 24 * 60 * 60)
             except Exception as ex:
-                if '1146' in ex.args[0]:
+                if 'UndefinedTable' in ex.args[0]:
                     return Result.error('install', 501)
 
         return Result.error('no session', 403)

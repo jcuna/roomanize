@@ -25,6 +25,8 @@ def register():
         'agreements.Receipts@receipts_url': '/receipts|/receipts/',
 
         'tenants.Tenants@tenants_url': '/tenants|/tenants/|/tenants/<int:tenant_id>',
+
+        'expenses.Expenses@expenses_url': '/expenses|/expenses/|/expenses/<int:expense_id>',
     }
 
 
@@ -40,5 +42,5 @@ no_permissions = [
 
 default_access = {
     'views.projects.Projects': ['read'],
-    # 'views.agreements.Receipts': ['read'],
+    'views.agreements.Receipts': ['read'],
 }

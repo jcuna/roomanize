@@ -13,10 +13,10 @@ export const getEndpoint = (endpoint) => {
 
 export const menuItems = [
     {
-        icon: 'fas fa-bed',
-        link: ENDPOINTS.ROOMS_URL,
-        name: 'Habitaciones',
-        endpoint: getEndpoint(ENDPOINTS.ROOMS_URL)
+        icon: 'fas fa-folder-open',
+        link: ENDPOINTS.EXPENSES_URL,
+        name: 'Gastos',
+        endpoint: getEndpoint(ENDPOINTS.EXPENSES_URL)
     },
     {
         icon: 'fas fa-file-contract',
@@ -41,6 +41,12 @@ export const menuItems = [
         link: ENDPOINTS.USERS_MANAGER_URL,
         name: 'Usuarios',
         endpoint: getEndpoint(ENDPOINTS.USERS_MANAGER_URL)
+    },
+    {
+        icon: 'fas fa-bed',
+        link: ENDPOINTS.ROOMS_URL,
+        name: 'Habitaciones',
+        endpoint: getEndpoint(ENDPOINTS.ROOMS_URL)
     },
     {
         icon: 'fas fa-chart-line',

@@ -29,6 +29,7 @@ export const ENDPOINTS = {
     ROLES_URL: '/roles',
     USERS_MANAGER_URL: '/usuarios',
     PROJECTS_URL: '/proyectos',
+    EXPENSES_URL: '/gastos',
 };
 
 export const ACCESS_TYPES = {

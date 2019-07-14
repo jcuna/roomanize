@@ -114,7 +114,5 @@ node_modules/
 
 # development files
 db/*
-!db/phpmyadmin
 .develop
-pycharm-debug-py3k.egg
 sqlalchemy.bulk.py

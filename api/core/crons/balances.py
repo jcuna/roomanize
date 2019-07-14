@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time as d_time
 from time import time
 from dateutil.relativedelta import *
 import sqlalchemy
@@ -20,19 +20,19 @@ def balances_cron():
     app = init_app('sys')
 
     with app.app_context():
-        today = datetime.utcnow()
+        today = datetime.combine(datetime.utcnow().date(), d_time.max)
         yesterday = today - timedelta(days=1)
         five_days_ago = yesterday - timedelta(days=5)
 
         try:
             agreements = RentalAgreement.query.options(
-                joinedload('balances.payments'), joinedload('interval')).filter(
+                joinedload('balances'), joinedload('balances.payments'), joinedload('interval')).filter(
                 RentalAgreement.terminated_on.is_(None)).filter(RentalAgreement.id.notin_(
                     Balance.query.options(
                         defer(Balance.id),
                         load_only(Balance.agreement_id)
-                    ).filter((Balance.due_date >= today.date())).subquery()))\
-                .join(Balance).filter(Balance.due_date.between(five_days_ago.date(), yesterday.date()))
+                    ).filter((Balance.due_date >= today)).subquery()))\
+                .join(Balance).filter(Balance.due_date.between(five_days_ago, yesterday))
             # logger.info(agreements.statement.compile())
             process_agreements(agreements, logger)
 

@@ -157,9 +157,9 @@ class Receipts(API):
         elif 'receipt' in request.args:
             query = query.filter(Payment.id == request.args.get('receipt'))
         elif 'paid_date' in request.args:
-            day_start = datetime.strptime(request.args.get('paid_date') + ' 00:00:00', '%Y-%m-%d %H:%M:%S')
-            day_end = datetime.strptime(request.args.get('paid_date') + ' 23:59:59', '%Y-%m-%d %H:%M:%S')
-            query = query.filter(Payment.paid_date.between(day_start, day_end))
+            day_start = request.args.get('paid_date') + ' 00:00:00'
+            day_end = request.args.get('paid_date') + ' 23:59:59'
+            query = query.filter(Payment.paid_date.between(local_to_utc(day_start), local_to_utc(day_end)))
 
         order_by = request.args.get('orderBy') if 'orderBy' in request.args else 'id'
         paginator = Paginator(query, int(page), order_by, request.args.get('orderDir'))

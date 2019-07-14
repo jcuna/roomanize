@@ -31,12 +31,11 @@ def seed_payment_types(db: SQLAlchemy):
 
 def run_migration():
     with app.app_context():
-        connection = db.engine.raw_connection()
-        connection.cursor().execute("SET NAMES 'utf8mb4' COLLATE '" + collation + "'")
+        # connection = db.engine.raw_connection()
+        # connection.cursor().execute("SET NAMES 'utf8mb4' COLLATE '" + collation + "'")
 
         db.create_all()
-        connection.cursor().execute("ALTER TABLE payments AUTO_INCREMENT = 1000;")
-
+        db.session.commit()
         seed_time_intervals(db)
         seed_payment_types(db)
 

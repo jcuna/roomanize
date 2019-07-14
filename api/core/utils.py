@@ -4,31 +4,34 @@ from datetime import datetime
 from pathlib import Path
 import pytz
 from flask import current_app
-
-app_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-log_path = app_path + '/log/'
-default_log = 'app'
+import queue
+from logging.handlers import QueueHandler, QueueListener, RotatingFileHandler
 
 
-def basic_logging(handler, env):
-    level = logging.DEBUG if env == 'develop' else logging.WARN
-    logging.basicConfig(handlers=handler, level=level)
+def get_queue_logger(name='app'):
+
+    log_queue = queue.Queue(-1)
+    queue_handler = QueueHandler(log_queue)
+    handler = RotatingFileHandler(log_path + name + '.log', maxBytes=100000, backupCount=1)
+    handler.setFormatter(log_formatter)
+    listener = QueueListener(log_queue, handler)
+
+    logger = logging.getLogger(name)
+    logger.addHandler(queue_handler)
+
+    listener.start()
+    return logger
 
 
-def get_logger(name=default_log):
+def get_logger(name):
     """
     return a logger with default settings
 
     :return: Logger
     """
-    if not Path(log_path).is_dir():
-        os.mkdir(log_path)
 
-    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-
-    handler = logging.FileHandler(log_path + name + '.log')
-
-    handler.setFormatter(formatter)
+    handler = RotatingFileHandler(log_path + name + '.log', maxBytes=100000, backupCount=1)
+    handler.setFormatter(log_formatter)
 
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
@@ -78,3 +81,11 @@ def utc_to_local(date: datetime) -> datetime:
     :return: datetime
     """
     return date.astimezone(pytz.timezone(current_app.config['TIME_ZONE']))
+
+
+app_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+log_path = app_path + '/log/'
+log_formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+
+if not Path(log_path).is_dir():
+    os.mkdir(log_path)

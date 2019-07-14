@@ -1,5 +1,5 @@
 import json
-from sqlalchemy import UniqueConstraint, and_
+from sqlalchemy import UniqueConstraint, and_, Sequence
 from sqlalchemy.dialects.mysql import BIGINT
 from config import random_token
 from dal import db
@@ -10,7 +10,7 @@ import jwt
 from flask import current_app
 from config.routes import default_access
 
-collation = 'utf8mb4_unicode_ci'
+collation = 'und-x-icu'
 
 admin_access = {
     'projects': '*'
@@ -271,7 +271,7 @@ class Payment(db.Model):
     __tablename__ = 'payments'
     fillable = ['amount', 'payment_type_id']
 
-    id = db.Column(BIGINT(unsigned=True), primary_key=True)
+    id = db.Column(BIGINT(unsigned=True), Sequence('payments_id_seq', start=1000, increment=1), primary_key=True)
     balance_id = db.Column(BIGINT(unsigned=True), db.ForeignKey('balances.id'), index=True)
     amount = db.Column(db.DECIMAL(10, 2), nullable=False)
     paid_date = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.utcnow)
