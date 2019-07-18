@@ -27,6 +27,7 @@ def register():
         'tenants.Tenants@tenants_url': '/tenants|/tenants/|/tenants/<int:tenant_id>',
 
         'expenses.Expenses@expenses_url': '/expenses|/expenses/|/expenses/<int:expense_id>',
+        'expenses.ExpenseToken@expense_token_url': '/expense-token|/expense-token/<string:token>',
     }
 
 

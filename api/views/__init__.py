@@ -9,9 +9,13 @@ class Result:
         return {'error': message}, code
 
     @staticmethod
-    def id(_id):
-        return {'id': _id}
+    def id(_id: int):
+        return {'id': _id}, 200
 
     @staticmethod
-    def paginate(result, page, total_pages):
-        return {'list': result, 'page': page, 'total_pages': total_pages}
+    def paginate(result: list, page: int, total_pages: int):
+        return {'list': result, 'page': page, 'total_pages': total_pages}, 200
+
+    @staticmethod
+    def custom(result: dict):
+        return result, 200

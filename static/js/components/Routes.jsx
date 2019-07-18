@@ -24,6 +24,7 @@ import AgreementNew from './agreements/AgreementNew';
 import AgreementEdit from './agreements/AgreementEdit';
 import Receipts from './receipts/Receipts';
 import Expenses from './expenses/Expenses';
+import ExpenseForm from './expenses/ExpenseForm';
 
 export default class Routes extends React.Component {
     render() {
@@ -79,10 +80,11 @@ export default class Routes extends React.Component {
                     Project, props, false, ep.PROJECTS_URL,
                 ) }/>
 
-                <Route exact path={ `${ ep.EXPENSES_URL }/:expense_id([0-9]+)?` } render={ props => this.getComponent(
-                    Expenses, props, false, ep.EXPENSES_URL,
-                ) }/>
+                <Route exact path={ ep.EXPENSES_URL } render={ props => this.getComponent(Expenses, props) }/>
 
+                <Route exact path={ `${ep.EXPENSES_URL}/:action(nuevo|editar)/:expense_id([0-9]+)?` }
+                    render={ props => this.getComponent(ExpenseForm, props) }
+                />
                 <Route exact path={ ep.ACCOUNT_PROFILE } render={ props =>
                     this.getComponent(Account, props, true) }
                 />

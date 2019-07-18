@@ -6,6 +6,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Breadcrumbs from '../../utils/Breadcrumbs';
 import QRCode from 'qrcode.react';
+import { ENDPOINTS } from '../../constants';
+import Link from 'react-router-dom/es/Link';
 
 export default class Expenses extends React.Component {
     constructor(props) {
@@ -18,7 +20,15 @@ export default class Expenses extends React.Component {
                 <Breadcrumbs { ...this.props }/>
                 <section className='widget'>
                     <h2>Expenses</h2>
-                    <QRCode value='https://www.google.com'/>
+                    <div className='table-actions'>
+                        <Link to={ `${ ENDPOINTS.EXPENSES_URL }/nuevo` }>
+                            <button
+                                disabled={ false }
+                                className='btn btn-success'>
+                                Nuevo Inquilino
+                            </button>
+                        </Link>
+                    </div>
                 </section>
             </div>
         );
