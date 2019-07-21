@@ -181,32 +181,38 @@ class FormGenerator extends React.Component {
         const isMultiCol = FormGenerator.colForm(element);
         const formElement = typeof element.formElement === 'undefined' ? 'input' : element.formElement;
         const reference = FormGenerator.getReference(element);
+        const labelBefore = element.type !== 'radio' && element.type !== 'checkbox';
 
-        return React.createElement(
-            'div',
-            { className: FormGenerator.getParentClassName(element, isMultiCol), key },
-            React.createElement(
-                formElement, {
-                    type: element.type,
-                    name: element.name,
-                    id: element.id,
-                    htmlFor: element.for,
-                    placeholder: element.placeholder,
-                    className: FormGenerator.getClassName(element, isMultiCol),
-                    onChange: this.bindValidate(element, element.ref),
-                    ref: element.ref,
-                    reference,
-                    value: element.value,
-                    defaultValue: this.state.references[element.name].value,
-                    defaultChecked: element.checked,
-                    disabled: element.disabled || false,
-                    readOnly: element.readOnly || false,
-                    autoComplete: element.autoComplete
-                },
-                this.getSecondParam(element)
-            ),
-            element.label && React.createElement('label', { htmlFor: element.id }, element.label)
-        );
+        const children = [];
+
+        if (element.label && labelBefore) {
+            children.push(React.createElement('label', { htmlFor: element.name, key: 1 }, element.label));
+        }
+        children.push(React.createElement(
+            formElement, {
+                key: 2,
+                type: element.type,
+                name: element.name,
+                id: element.id,
+                htmlFor: element.for,
+                placeholder: element.placeholder,
+                className: FormGenerator.getClassName(element, isMultiCol),
+                onChange: this.bindValidate(element, element.ref),
+                ref: element.ref,
+                reference,
+                value: element.value,
+                defaultValue: this.state.references[element.name].value,
+                defaultChecked: element.checked,
+                disabled: element.disabled || false,
+                readOnly: element.readOnly || false,
+                autoComplete: element.autoComplete
+            },
+            element.options && this.getSecondParam(element)
+        ));
+        if (element.label && !labelBefore) {
+            children.push(React.createElement('label', { htmlFor: element.name, key }, element.label));
+        }
+        return <div key={ key } className={ FormGenerator.getParentClassName(element, isMultiCol) }>{ children }</div>;
     }
 
     static getInitialValidationValue(element, isTransformable) {
@@ -384,11 +390,8 @@ class FormGenerator extends React.Component {
     }
 
     getSecondParam(element) {
-        if (element.options) {
-            return element.options.map((val, p) =>
-                React.createElement('option', { value: p, key: p }, val));
-        }
-        return null;
+        return element.options.map((val, p) =>
+            React.createElement('option', { value: p, key: p }, val));
     }
 
     static get alpha_num_re() {

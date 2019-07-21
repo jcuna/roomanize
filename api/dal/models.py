@@ -100,7 +100,7 @@ class UserToken(db.Model):
 
     user = relationship(User, back_populates='tokens')
 
-    def new_token(self, email):
+    def new_token(self, email, expires: datetime = datetime.utcnow() + timedelta(hours=4)):
         while not self.token:
             temp_token = random_token(email)
             so = self.query.filter_by(token=temp_token).count()
@@ -108,7 +108,7 @@ class UserToken(db.Model):
             if not so:
                 self.token = temp_token
 
-        self.expires = datetime.utcnow() + timedelta(hours=4)
+        self.expires = expires
 
 
 class Role(db.Model):
@@ -282,6 +282,21 @@ class Payment(db.Model):
     @property
     def type(self):
         return self.payment_type.type
+
+
+class Expense(db.Model):
+    __tablename__ = 'expenses'
+    fillable = ['amount', 'expense_date']
+
+    id = db.Column(BIGINT(unsigned=True), primary_key=True)
+    project_id = db.Column(db.BigInteger, db.ForeignKey('projects.id'), index=True, nullable=False)
+    amount = db.Column(db.DECIMAL(10, 2), nullable=False)
+    description = db.Column(db.String(512), nullable=False)
+    input_date = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow)
+    expense_date = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.utcnow)
+    receipt_scans = db.Column(db.JSON)
+
+    project = relationship(Project, uselist=False)
 
 
 class Audit(db.Model):

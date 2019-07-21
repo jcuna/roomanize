@@ -5,7 +5,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Breadcrumbs from '../../utils/Breadcrumbs';
-import QRCode from 'qrcode.react';
 import { ENDPOINTS } from '../../constants';
 import Link from 'react-router-dom/es/Link';
 
@@ -25,7 +24,7 @@ export default class Expenses extends React.Component {
                             <button
                                 disabled={ false }
                                 className='btn btn-success'>
-                                Nuevo Inquilino
+                                Agregar gasto
                             </button>
                         </Link>
                     </div>

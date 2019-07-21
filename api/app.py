@@ -1,12 +1,10 @@
 from flask import Flask
 from flask_socketio import SocketIO
 from config import get_mail
-from core.utils import get_queue_logger
+from core.utils import app_logger
 from dal.shared import db
 import core
 import logging
-
-app_logger = get_queue_logger()
 
 
 def init_app(mode='web') -> Flask:

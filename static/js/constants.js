@@ -17,6 +17,10 @@ export const ALERTS = {
     DANGER: 'danger',
 };
 
+/**
+ *
+ * format is backend endpoint name upper-cased and front end path
+ */
 export const ENDPOINTS = {
     ACCOUNT_URL: '/account',
     ACCOUNT_PROFILE: '/account/profile',
@@ -30,6 +34,13 @@ export const ENDPOINTS = {
     USERS_MANAGER_URL: '/usuarios',
     PROJECTS_URL: '/proyectos',
     EXPENSES_URL: '/gastos',
+    EXPENSE_SCANS_URL: '/escanear-recibo',
+    NOT_FOUND: '/error/404',
+    NO_ACCESS: '/error/403',
+};
+
+export const BACKEND_URLS = {
+    EXPENSE_SCANS: '/expense-scans'
 };
 
 export const ACCESS_TYPES = {

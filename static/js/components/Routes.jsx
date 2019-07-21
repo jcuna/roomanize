@@ -85,12 +85,13 @@ export default class Routes extends React.Component {
                 <Route exact path={ `${ep.EXPENSES_URL}/:action(nuevo|editar)/:expense_id([0-9]+)?` }
                     render={ props => this.getComponent(ExpenseForm, props) }
                 />
+
                 <Route exact path={ ep.ACCOUNT_PROFILE } render={ props =>
                     this.getComponent(Account, props, true) }
                 />
 
-                <Route path='/error/404' component={ ErrorPage } type={ 404 }/>
-                <Route path='/error/403' component={ ErrorPage } type={ 403 }/>
+                <Route path={ ep.NOT_FOUND } component={ ErrorPage } type={ 404 }/>
+                <Route path={ ep.NO_ACCESS } component={ ErrorPage } type={ 403 }/>
                 <Route component={ ErrorPage }/>
             </Switch>
         );

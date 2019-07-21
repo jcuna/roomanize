@@ -15,6 +15,7 @@ import Routes from './Routes';
 import Account from './user/Account';
 import Login from './user/Login';
 import { ENDPOINTS } from '../constants';
+import ExpenseScans from './expenses/ExpenseScans';
 
 export default class Layout extends React.Component {
     render() {
@@ -34,6 +35,11 @@ export default class Layout extends React.Component {
                                     />
                                     <Route exact path='/account/activate/:user_token' render={ (props2) =>
                                         <Account { ...this.props } { ...props2 }/> }
+                                    />
+                                    <Route
+                                        exact path={
+                                            `${ENDPOINTS.EXPENSE_SCANS_URL}/:token([a-f0-9]+)/:expense_id([0-9]+)`
+                                        } render={ (props2) => <ExpenseScans { ...this.props } { ...props2 }/> }
                                     />
                                     <RequiresLogin { ...props }>
                                         <Routes { ...props }/>

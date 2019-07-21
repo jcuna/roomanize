@@ -86,6 +86,7 @@ def utc_to_local(date: datetime) -> datetime:
 app_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 log_path = app_path + '/log/'
 log_formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+app_logger = get_queue_logger()
 
 if not Path(log_path).is_dir():
     os.mkdir(log_path)

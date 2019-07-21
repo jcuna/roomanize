@@ -1,7 +1,8 @@
 import sys
 import traceback
 from flask import Flask, jsonify
-from app import app_logger
+
+from core.utils import app_logger
 
 
 class Middleware:

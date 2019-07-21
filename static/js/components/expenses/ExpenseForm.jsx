@@ -12,33 +12,57 @@ import { formatDecimal, generateNonce } from '../../utils/helpers';
 import {
     clearScanUrl,
     EXPENSE_TOKEN_ADDED,
-    getExpenseToken,
-    getUploadedPics
+    createNewExpense,
+    getExpense
 } from '../../actions/expenseActions';
 import ws from '../../utils/ws';
-import Spinner from '../../utils/Spinner';
+import { ENDPOINTS } from '../../constants';
 
 export default class ExpenseForm extends React.Component {
     constructor(props) {
         super(props);
 
         this.onInputChange = this.onInputChange.bind(this);
+        this.onButtonContinue = this.onButtonContinue.bind(this);
         const nonce = generateNonce();
 
         this.state = {
-            button: {value: 'Agregar', disabled: true},
+            button: { value: 'Continuar', disabled: true },
             amount: '',
             description: '',
+            date: '',
             inputsValid: false,
             nonce,
             token: null,
+            expense_id: null,
+        };
+    }
+
+    onButtonContinue(e, validate) {
+        this.setState({ button: { ...this.state.button, disabled: true }});
+        const payload = {
+            nonce: this.state.nonce,
+            amount: validate.amount.value,
+            description: validate.description.value,
+            date: validate.date.value,
         };
 
-        this.props.dispatch(getExpenseToken(nonce, (token) => {
-            ws(EXPENSE_TOKEN_ADDED, `/expenses-token/${ token }`, () => {
-                this.props.dispatch(getUploadedPics(token));
+        this.props.dispatch(createNewExpense(payload, ({ token, id, domain }) => {
+            this.setState({ expense_id: id, token, domain });
+            ws(EXPENSE_TOKEN_ADDED, `/expense-scans/${ token }/${id}`, () => {
+                this.props.dispatch(getExpense(id));
             });
         }));
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        const { inputsValid, amount, description, date } = this.state;
+        if (prevState.inputsValid !== inputsValid || inputsValid && (
+            prevState.amount !== amount || prevState.description !== description || prevState.date !== date)) {
+            this.setState({
+                button: { ...this.state.button, disabled: !this.state.inputsValid }
+            });
+        }
     }
 
     render() {
@@ -58,18 +82,23 @@ export default class ExpenseForm extends React.Component {
         if (e.target.getAttribute('name') === 'amount') {
             formatDecimal(e);
         }
-        if (validate.amount.isValid && validate.description.isValid) {
-            this.setState({inputsValid: true});
-        }
+        this.setState({
+            inputsValid: validate.amount.isValid && validate.description.isValid && validate.date.isValid,
+            date: validate.date.value,
+            description: validate.description.value,
+            amount: validate.amount.value,
+        });
     }
 
     getForm() {
         return <FormGenerator
             formName='expense-form'
             button={ this.state.button }
+            onSubmit={ this.onButtonContinue }
             elements={ [
                 {
                     name: 'amount',
+                    autoComplete: 'off',
                     placeholder: 'Cantidad',
                     defaultValue: this.state.amount,
                     validate: ['number', 'required'],
@@ -83,6 +112,14 @@ export default class ExpenseForm extends React.Component {
                     validate: ['required'],
                     onChange: this.onInputChange,
                 },
+                {
+                    name: 'date',
+                    type: 'date',
+                    label: 'Fecha en el recibo',
+                    defaultValue: this.state.date,
+                    validate: ['required'],
+                    onChange: this.onInputChange,
+                },
             ] }
         />;
     }
@@ -92,20 +129,25 @@ export default class ExpenseForm extends React.Component {
     }
 
     renderQR() {
-        if (this.props.expenses.token) {
+        const { expense_id, token, domain } = this.state;
+        const path = ENDPOINTS.EXPENSE_SCANS_URL;
+        if (token && expense_id) {
+            console.log(`${ domain }${ path }/${ token }/${ expense_id }`);
             return <div className='qr-section'>
                 <h4>Escanea codigo QR con la camara del telefono para subir recibo</h4>
-                <QRCode value={ this.props.expenses.scan_url + '/' + this.props.expenses.token }/>
+                <QRCode
+                    value={ `${ domain }${ path }/${ token }/${ expense_id }` }
+                />
                 <div className='receipts'>
                     { ExpenseForm.renderReceiptPic(this.props.expenses) }
                 </div>
             </div>;
         }
-        return <Spinner/>;
+        return null;
     }
 
     static renderReceiptPic({ scans }) {
-        return scans.map((pic, i) => <img key={ i } src={ pic } alt='recibo'/>);
+        return scans.map((pic, i) => <img key={ i } src={ pic } alt='recibo' className='receipt-scan'/>);
     }
 
     static propTypes = {
