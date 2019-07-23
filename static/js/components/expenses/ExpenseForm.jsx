@@ -36,13 +36,14 @@ export default class ExpenseForm extends React.Component {
                 if (typeof expense === 'undefined') {
                     this.props.history.push(ENDPOINTS.NOT_FOUND)
                 }
-                const d = new Date(expense.input_date);
-                toLocalTimezone(d);
-
+                let d = '';
+                if (expense.input_date) {
+                    d = toDatePicker(toLocalTimezone(new Date(expense.input_date)));
+                }
                 this.setState({
                     amount: expense.amount,
                     description: expense.description,
-                    date: toDatePicker(d),
+                    date: d,
                     expense_id: expense.id,
                 });
 
