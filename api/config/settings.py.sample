@@ -32,4 +32,8 @@ TIME_ZONE = 'America/New_York'
 # the following entry is used to test external urls for dev environments.
 # this is used to test receipts upload functionality via smart phone
 # make sure to include protocol http cs https.
-EXTERNAL_DEV_URL = 'http://10.0.0.23'
+EXTERNAL_DEV_URL = 'http://10.0.0.23:8000'
+
+AWS_ACCESS_KEY_ID = ''
+AWS_SECRET_ACCESS_KEY = ''
+AWS_FILE_MANAGER_BUCKET_NAME = 'roomanize'

@@ -109,7 +109,6 @@ export default class Users extends React.Component {
                 <table className='table table-striped'>
                     <thead>
                         <tr>
-                            <th>#</th>
                             <th>
                                 ID <FontAwesome type={ `sort-numeric-${ dir }` } className='text-info'
                                     onClick={ () => this.orderBy('id') }/>
@@ -135,14 +134,12 @@ export default class Users extends React.Component {
                     </thead>
                     <tbody>
                         { displayData.map((userFromList, i) => {
-                            i++;
                             const rolesCount = userFromList.roles.length;
                             const canEdit = hasAccess(ENDPOINTS.USERS_MANAGER_URL, ACCESS_TYPES.WRITE) &&
                                 userFromList.email !== user.email;
                             const canDelete = hasAccess(ENDPOINTS.USERS_MANAGER_URL, ACCESS_TYPES.DELETE) &&
                                 userFromList.email !== user.email;
                             return <tr key={ i }>
-                                <th scope='row'>{ i }</th>
                                 <td>{ userFromList.id }</td>
                                 <td>{ userFromList.name }</td>
                                 <td>{ userFromList.email }</td>

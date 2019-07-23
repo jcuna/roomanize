@@ -14,16 +14,19 @@ const urlEncode = require('query-string');
  * @param {object} data
  * @param {boolean} crossDomain
  * @param {object} headers
+ * @param {boolean} omitContentType
  * @returns {Promise}
  */
-const normalFetch = (url, method, data, crossDomain, headers = {}) => {
-    headers = { ...headers, 'Content-Type': 'application/json' };
+const normalFetch = (url, method, data, crossDomain, headers = {}, omitContentType) => {
+    if (!headers['Content-Type'] && !omitContentType) {
+        headers = { ...headers, 'Content-Type': 'application/json' };
+    }
 
     const request = {
         headers,
         method,
         credentials: 'same-origin',
-        body: JSON.stringify(data),
+        body: headers['Content-Type'] === 'application/json' ? JSON.stringify(data) : data,
     };
 
     return new Promise((resolve, reject) => {
@@ -66,10 +69,11 @@ const jsonpFetch = function (url, data) {
  *
  * @param {object} request
  * @param {object} [data] - {}
+ * @param {boolean} [omitContentType] - false
  * @param {boolean} [jsonp] - false
  * @returns {Promise}
  */
-const api = (request, data, jsonp = false) => {
+const api = (request, data, omitContentType = false, jsonp = false) => {
     let url = request.url;
     const crossDomain = url.indexOf('http') === 0;
     const method = typeof request.method === 'undefined' ? 'GET' : request.method;
@@ -82,7 +86,7 @@ const api = (request, data, jsonp = false) => {
     if (jsonp) {
         return jsonpFetch(url, data);
     }
-    return normalFetch(url, method, data, crossDomain, request.headers);
+    return normalFetch(url, method, data, crossDomain, request.headers, omitContentType);
 };
 
 export default api;

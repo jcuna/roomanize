@@ -10,7 +10,6 @@ const Table = (props) => {
         { props.headers.length > 0 &&
         <thead>
             <tr>
-                <th>#</th>
                 { Table.getHeaders(props.headers) }
             </tr>
         </thead> }
@@ -41,7 +40,7 @@ Table.propTypes = {
 
 Table.defaultProps = {
     headers: [],
-    numberedRows: true,
+    numberedRows: false,
 };
 
 export default Table;

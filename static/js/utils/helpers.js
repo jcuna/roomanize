@@ -51,6 +51,11 @@ export const toLocalTimezone = (date) => {
     date.setHours(date.getHours() - (date.getTimezoneOffset() / 60));
 };
 
+export const toDatePicker = (date) => {
+    const month = String(date.getMonth() + 1);
+    return date.getFullYear() + '-' + ('0' + month.slice(-2)) + '-' + (('0' + date.getDate()).slice(-2));
+};
+
 /**
  * This formats dates only. time is depreciated.
  * @param {Date} date

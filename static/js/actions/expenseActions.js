@@ -8,8 +8,9 @@ export const EXPENSE_CREATING = 'EXPENSE_CREATING';
 export const EXPENSE_CREATED = 'EXPENSE_CREATED';
 export const EXPENSE_TOKEN_ADDED = 'EXPENSE_TOKEN_ADDED';
 export const EXPENSE_TOKEN_CLEAR = 'EXPENSE_TOKEN_CLEAR';
+export const EXPENSE_RECEIPT_UPLOADED = 'EXPENSE_RECEIPT_UPLOADED';
 
-export const getExpenses = (page, orderBy, dir, resolve, reject) =>
+export const getExpenses = (page, orderBy = 'expense_date', dir = 'desc', resolve, reject) =>
     (dispatch) => {
         dispatch({ type: EXPENSE_FETCHING });
         token.through().then(header => {
@@ -33,6 +34,7 @@ export const getExpense = (expense_id, resolve, reject) =>
                 method: 'GET',
                 headers: header,
             }).then(resp => {
+                console.log(resp.data)
                 dispatch({ type: EXPENSE_FETCHED, payload: resp.data });
                 resolve && resolve();
             }, reject);
@@ -54,34 +56,23 @@ export const createNewExpense = (payload, resolve, reject) =>
         }, reject);
     };
 
-export const updateExpense = (payload, resolve, reject) =>
+export const editExpense = (expense_id, body, resolve, reject) =>
     (dispatch) => {
         dispatch({ type: EXPENSE_CREATING });
         token.through().then(header => {
             api({
-                url: '/expenses/',
-                method: 'PUT',
+                url: `/expenses/${expense_id}`,
+                method: 'POST',
                 headers: header,
-            }, payload).then(resp => {
+            }, body).then(resp => {
                 dispatch({ type: EXPENSE_CREATED, payload: resp.data });
-                resolve && resolve(resp.data.token);
+                resolve && resolve(resp.data);
             }, reject);
         }, reject);
     };
 
 export const clearScanUrl = () =>
     (dispatch) => dispatch({ type: EXPENSE_TOKEN_CLEAR });
-
-export const uploadReceiptScan = (payload, resolve, reject) =>
-    (dispatch) => {
-        api({
-            url: '/expenses-token',
-            method: 'POST',
-        }, payload).then(resp => {
-            dispatch({ type: EXPENSE_CREATED, payload: resp.data });
-            resolve && resolve();
-        }, reject);
-    };
 
 export const validateExpenseToken = (user_token, expense_id, resolve, reject) =>
     (dispatch) => {
@@ -91,5 +82,18 @@ export const validateExpenseToken = (user_token, expense_id, resolve, reject) =>
         }).then(resp => {
             dispatch({ type: EXPENSE_CREATED, payload: resp.data });
             resolve && resolve(resp.data);
+        }, reject);
+    };
+
+export const uploadReceipt = (user_token, expense_id, file, resolve, reject) =>
+    (dispatch) => {
+        const formData = new FormData();
+        formData.append(file.name, file);
+        api({
+            url: `${ BACKEND_URLS.EXPENSE_SCANS }/${ user_token }/${ expense_id }`,
+            method: 'POST',
+        }, formData, true).then(() => {
+            dispatch({ type: EXPENSE_RECEIPT_UPLOADED });
+            resolve && resolve();
         }, reject);
     };

@@ -1,6 +1,7 @@
 import json
 from sqlalchemy import UniqueConstraint, and_, Sequence
 from sqlalchemy.dialects.mysql import BIGINT
+from sqlalchemy.ext.mutable import MutableList
 from config import random_token
 from dal import db
 from sqlalchemy.orm import relationship
@@ -294,7 +295,7 @@ class Expense(db.Model):
     description = db.Column(db.String(512), nullable=False)
     input_date = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow)
     expense_date = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.utcnow)
-    receipt_scans = db.Column(db.JSON)
+    receipt_scans = db.Column(MutableList.as_mutable(db.JSON))
 
     project = relationship(Project, uselist=False)
 

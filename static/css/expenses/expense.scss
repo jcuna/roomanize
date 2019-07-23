@@ -1,3 +1,41 @@
+@import "../vars";
+
 .qr-section {
   text-align: center;
+}
+
+.scan-user {
+  margin: 10px auto;
+}
+
+.scan-button-wrapper {
+  margin: auto;
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+
+  & input[type=file] {
+    height: 50px;
+    width: 162px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  button {
+    border: 2px solid $clearBlue;
+    color: $clearBlue;
+    background-color: $grey;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 20px;
+    font-weight: bold;
+
+    span {
+      margin-right: 10px;
+    }
+
+  }
 }

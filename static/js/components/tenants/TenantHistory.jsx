@@ -127,7 +127,8 @@ export default class TenantHistory extends React.Component {
                             const nextPayDate = new Date(balance[0].due_date);
                             const hadPreviousBalance = balance[0].previous_balance > 0;
                             let nextPay = formatDateEs(nextPayDate);
-                            if (Number(nextPayDate) < Number(new Date()) || hadPreviousBalance && remaining_balance > balance[0].previous_balance) {
+                            if (Number(nextPayDate) < Number(new Date()) ||
+                                hadPreviousBalance && remaining_balance > balance[0].previous_balance) {
                                 nextPay = <span className='urgent'>Ahora!</span>;
                             }
 

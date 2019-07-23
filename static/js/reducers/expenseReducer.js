@@ -21,8 +21,9 @@ const initialData = {
 export default function receiptsReducer(state = initialData, { type, payload }) {
     switch (type) {
         case EXPENSE_FETCHING:
-        case EXPENSE_CREATING:
             return { ...state, processing: true, data: { ...state.data, list: [] }};
+        case EXPENSE_CREATING:
+            return { ...state, processing: true };
         case EXPENSE_FETCHED:
             return { ...state, processing: false, data: payload };
         case EXPENSE_CREATED:

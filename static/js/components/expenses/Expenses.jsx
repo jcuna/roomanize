@@ -5,21 +5,36 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Breadcrumbs from '../../utils/Breadcrumbs';
-import { ENDPOINTS } from '../../constants';
+import { ACCESS_TYPES, ENDPOINTS } from '../../constants';
 import Link from 'react-router-dom/es/Link';
+import { getExpenses } from '../../actions/expenseActions';
+import Spinner from '../../utils/Spinner';
+import Table from '../../utils/Table';
+import FontAwesome from '../../utils/FontAwesome';
+import { hasAccess } from '../../utils/config';
 
 export default class Expenses extends React.Component {
     constructor(props) {
         super(props);
+
+        this.state = {
+            page: 1,
+            total_pages: 1,
+        };
+        if (this.props.expenses.data.list.length === 0) {
+            this.props.dispatch(getExpenses(this.state.page));
+        }
     }
 
     render() {
+        const { expenses } = this.props;
+        const canWrite = hasAccess(ENDPOINTS.EXPENSES_URL, ACCESS_TYPES.WRITE);
         return (
             <div>
                 <Breadcrumbs { ...this.props }/>
                 <section className='widget'>
                     <h2>Expenses</h2>
-                    <div className='table-actions'>
+                    { canWrite && <div className='table-actions'>
                         <Link to={ `${ ENDPOINTS.EXPENSES_URL }/nuevo` }>
                             <button
                                 disabled={ false }
@@ -27,13 +42,50 @@ export default class Expenses extends React.Component {
                                 Agregar gasto
                             </button>
                         </Link>
-                    </div>
+                    </div> }
+                    { this.getExpenses(expenses) }
                 </section>
             </div>
         );
     }
 
+    getExpenses({ data, processing }) {
+        if (processing) {
+            return <Spinner/>;
+        }
+
+        data = this.formatRows(data);
+
+        return <Table
+            rows={ data.rows }
+            headers={ data.headers }
+            numberedRows={ false }
+        />;
+    }
+
+    formatRows({ list }) {
+        const canView = hasAccess(ENDPOINTS.EXPENSES_URL, ACCESS_TYPES.READ);
+        const rows = list.map((a, k) => {
+            const row = [a.amount, a.description, a.input_date];
+            if (canView) {
+                row.push(<Link key={ k } to={ `${ENDPOINTS.EXPENSES_URL}/editar/${ a.id }` }>
+                    <FontAwesome type='edit'/>
+                </Link>);
+            }
+            return row;
+        });
+        const headers = ['Monto', 'Descripción', 'Fecha'];
+        if (canView) {
+            headers.push('Info');
+        }
+        return {
+            rows,
+            headers,
+        };
+    }
+
     static propTypes = {
         dispatch: PropTypes.func,
+        expenses: PropTypes.object,
     };
 }

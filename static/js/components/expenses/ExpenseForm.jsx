@@ -8,15 +8,18 @@ import Breadcrumbs from '../../utils/Breadcrumbs';
 import FormGenerator from '../../utils/FromGenerator';
 import QRCode from 'qrcode.react';
 import '../../../css/expenses/expense.scss';
-import { formatDecimal, generateNonce } from '../../utils/helpers';
+import { formatDecimal, generateNonce, toDatePicker, toLocalTimezone } from '../../utils/helpers';
 import {
     clearScanUrl,
     EXPENSE_TOKEN_ADDED,
     createNewExpense,
-    getExpense
+    getExpense, editExpense
 } from '../../actions/expenseActions';
 import ws from '../../utils/ws';
-import { ENDPOINTS } from '../../constants';
+import { ACCESS_TYPES, ENDPOINTS } from '../../constants';
+import { hasAccess } from '../../utils/config';
+import Spinner from '../../utils/Spinner';
+import Table from '../../utils/Table';
 
 export default class ExpenseForm extends React.Component {
     constructor(props) {
@@ -25,9 +28,37 @@ export default class ExpenseForm extends React.Component {
         this.onInputChange = this.onInputChange.bind(this);
         this.onButtonContinue = this.onButtonContinue.bind(this);
         const nonce = generateNonce();
+        const editing = this.props.match.params.action === 'editar';
+
+        if (editing) {
+            this.props.dispatch(getExpense(this.props.match.params.expense_id, () => {
+                const expense = this.props.expenses.data.list[0];
+                if (typeof expense === 'undefined') {
+                    this.props.history.push(ENDPOINTS.NOT_FOUND)
+                }
+                const d = new Date(expense.input_date);
+                toLocalTimezone(d);
+
+                this.setState({
+                    amount: expense.amount,
+                    description: expense.description,
+                    date: toDatePicker(d),
+                    expense_id: expense.id,
+                });
+
+                this.props.dispatch(editExpense(expense.id, { nonce }, ({ token, id, domain }) => {
+                    this.setState({ expense_id: id, token, domain });
+                    ws(EXPENSE_TOKEN_ADDED, `/expense-scans/${ token }/${ id }`, (re) => {
+                        console.log(re);
+                        this.props.dispatch(getExpense(id));
+                    });
+                }));
+            }));
+        }
 
         this.state = {
             button: { value: 'Continuar', disabled: true },
+            editing,
             amount: '',
             description: '',
             date: '',
@@ -49,7 +80,8 @@ export default class ExpenseForm extends React.Component {
 
         this.props.dispatch(createNewExpense(payload, ({ token, id, domain }) => {
             this.setState({ expense_id: id, token, domain });
-            ws(EXPENSE_TOKEN_ADDED, `/expense-scans/${ token }/${id}`, () => {
+            ws(EXPENSE_TOKEN_ADDED, `/expense-scans/${ token }/${ id }`, (re) => {
+                console.log(re);
                 this.props.dispatch(getExpense(id));
             });
         }));
@@ -66,13 +98,19 @@ export default class ExpenseForm extends React.Component {
     }
 
     render() {
+        const canWrite = hasAccess(ENDPOINTS.EXPENSES_URL, ACCESS_TYPES.WRITE);
+        const title = this.state.editing ? 'Ver/Editar Gasto' : 'Nuevo Gasto';
+
         return (
             <div>
-                <Breadcrumbs { ...this.props } title='Nuevo'/>
+                <Breadcrumbs { ...this.props } title={ title }/>
                 <section className='widget'>
-                    <h2>Agregar Gastos</h2>
-                    { this.getForm() }
+                    <h2>{ title }</h2>
+                    { this.getForm(canWrite, this.state.editing) }
                     { this.renderQR() }
+                    <div className='receipts'>
+                        { ExpenseForm.renderReceiptPic(this.props.expenses.data, canWrite) }
+                    </div>
                 </section>
             </div>
         );
@@ -90,7 +128,19 @@ export default class ExpenseForm extends React.Component {
         });
     }
 
-    getForm() {
+    getForm(canWrite, editing) {
+        if (editing && this.state.amount === '') {
+            return <Spinner/>;
+        }
+
+        if (!canWrite) {
+            return <Table rows={ [
+                ['Monto', this.state.amount],
+                ['Descripción', this.state.description],
+                ['Fecha', this.state.date],
+            ] }/>;
+        }
+
         return <FormGenerator
             formName='expense-form'
             button={ this.state.button }
@@ -132,26 +182,25 @@ export default class ExpenseForm extends React.Component {
         const { expense_id, token, domain } = this.state;
         const path = ENDPOINTS.EXPENSE_SCANS_URL;
         if (token && expense_id) {
-            console.log(`${ domain }${ path }/${ token }/${ expense_id }`);
             return <div className='qr-section'>
                 <h4>Escanea codigo QR con la camara del telefono para subir recibo</h4>
                 <QRCode
                     value={ `${ domain }${ path }/${ token }/${ expense_id }` }
                 />
-                <div className='receipts'>
-                    { ExpenseForm.renderReceiptPic(this.props.expenses) }
-                </div>
             </div>;
         }
         return null;
     }
 
-    static renderReceiptPic({ scans }) {
-        return scans.map((pic, i) => <img key={ i } src={ pic } alt='recibo' className='receipt-scan'/>);
+    static renderReceiptPic({ list }, canDelete) {
+        return list.length === 1 && list[0].signed_urls &&
+            list[0].signed_urls.map((pic, i) => <img key={ i } src={ pic } alt='recibo' className='receipt-scan'/>);
     }
 
     static propTypes = {
         dispatch: PropTypes.func,
         expenses: PropTypes.object,
+        match: PropTypes.object,
+        history: PropTypes.object,
     };
 }

@@ -4,8 +4,10 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { validateExpenseToken } from '../../actions/expenseActions';
+import { uploadReceipt, validateExpenseToken } from '../../actions/expenseActions';
 import { ENDPOINTS } from '../../constants';
+import '../../../css/expenses/expense.scss';
+import FontAwesome from '../../utils/FontAwesome';
 
 export default class Expenses extends React.Component {
     constructor(props) {
@@ -19,7 +21,7 @@ export default class Expenses extends React.Component {
             validateExpenseToken(
                 this.props.match.params.token,
                 this.props.match.params.expense_id,
-                null,
+                (resp) => this.setState({ user: resp.user }),
                 () => {
                     this.props.history.push(ENDPOINTS.NOT_FOUND);
                 }
@@ -32,6 +34,7 @@ export default class Expenses extends React.Component {
             <div>
                 <section className='widget'>
                     <h2>Escaneo de Recibos</h2>
+                    <h4 className='scan-user'>{ this.state.user }</h4>
                     { this.getUploadedReceipts() }
                     { this.getScanInput() }
                 </section>
@@ -39,8 +42,12 @@ export default class Expenses extends React.Component {
         );
     }
 
-    uploadReceipt(e) {
-        console.log(e);
+    uploadReceipt({ target }) {
+        this.props.dispatch(uploadReceipt(
+            this.props.match.params.token,
+            this.props.match.params.expense_id,
+            target.files[0]
+        ));
     }
 
     getUploadedReceipts() {
@@ -49,8 +56,9 @@ export default class Expenses extends React.Component {
     }
 
     getScanInput() {
-        return <div className='scan-button'>
-            <input onChange={ this.uploadReceipt } className='btn btn-success' type='file' accept='image/*' capture/>
+        return <div className='scan-button-wrapper'>
+            <button><FontAwesome type='upload'/>Escanear</button>
+            <input onChange={ this.uploadReceipt } type='file' accept='image/*' capture/>
         </div>;
     }
 

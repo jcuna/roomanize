@@ -39,6 +39,7 @@ no_permissions = [
     'views.users.Activate',
     'views.projects.TimeIntervals',
     'views.projects.PaymentTypes',
+    'views.expenses.ExpenseScans',
 ]
 
 default_access = {
