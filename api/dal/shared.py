@@ -132,7 +132,7 @@ class Paginator:
         return self.query.offset(self.offset).limit(self.per_page)
 
 
-class ModelIter(dict):
+class ModelIter(object):
     def __iter__(self):
         if hasattr(self, '__table__'):
             for column in self.__table__.columns:
