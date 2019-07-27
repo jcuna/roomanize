@@ -130,3 +130,19 @@ class Paginator:
 
     def get_result(self):
         return self.query.offset(self.offset).limit(self.per_page)
+
+
+class ModelIter(dict):
+    def __iter__(self):
+        if hasattr(self, '__table__'):
+            for column in self.__table__.columns:
+                attr = getattr(self, column.name)
+                if isinstance(attr, Decimal):
+                    getcontext().prec = 2
+                    yield column.name, str(attr)
+                elif isinstance(attr, datetime):
+                    yield column.name, str(attr)
+                elif not isinstance(attr, str):
+                    yield column.name, str(attr) if attr is not None else column.name, None
+                else:
+                    yield column.name, attr

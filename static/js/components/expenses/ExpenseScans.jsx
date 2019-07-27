@@ -4,11 +4,11 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { uploadReceipt, validateExpenseToken } from '../../actions/expenseActions';
-import { ALERTS, ENDPOINTS } from '../../constants';
+import { clearExpenses, uploadReceipt, validateExpenseToken } from '../../actions/expenseActions';
+import { ALERTS } from '../../constants';
 import '../../../css/expenses/expense.scss';
 import FontAwesome from '../../utils/FontAwesome';
-import { ImageCompression } from '../../utils/helpers';
+// import { ImageCompression } from '../../utils/helpers';
 import { notifications } from '../../actions/appActions';
 
 export default class Expenses extends React.Component {
@@ -73,6 +73,11 @@ export default class Expenses extends React.Component {
             <button><FontAwesome type='upload'/>Escanear</button>
             <input onChange={ this.uploadReceipt } type='file' accept='image/*' capture/>
         </div>;
+    }
+
+    componentWillUnmount() {
+        this.props.dispatch(clearExpenses());
+        //this.props.dispatch(expireToken(this.props.match.params.token));
     }
 
     static propTypes = {

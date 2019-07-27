@@ -69,9 +69,7 @@ class Expenses(API):
 
         if 'nonce' in data:
             domain = current_app.config['EXTERNAL_DEV_URL'] if 'EXTERNAL_DEV_URL' in current_app.config else ''
-            ut = UserToken(
-                user_id=request.user.id
-            )
+            ut = UserToken(user_id=request.user.id)
             ut.new_token(data['nonce'])
 
             ut.target = '/expense-scans/' + ut.token + '/' + str(expense.id)

@@ -1,9 +1,8 @@
 import {
     EXPENSE_FETCHED,
     EXPENSE_FETCHING,
-    EXPENSE_TOKEN_CLEAR,
     EXPENSE_CREATED,
-    EXPENSE_CREATING
+    EXPENSE_CREATING, CLEAR_EXPENSES
 } from '../actions/expenseActions';
 
 const initialData = {
@@ -28,8 +27,8 @@ export default function receiptsReducer(state = initialData, { type, payload }) 
             return { ...state, processing: false, data: payload };
         case EXPENSE_CREATED:
             return { ...state, processing: false, domain: payload.domain, token: payload.token };
-        case EXPENSE_TOKEN_CLEAR:
-            return { ...state, domain: null, token: null, scans: [] };
+        case CLEAR_EXPENSES:
+            return { ...initialData };
         default:
             return state;
     }

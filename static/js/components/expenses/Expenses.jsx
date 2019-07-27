@@ -26,6 +26,12 @@ export default class Expenses extends React.Component {
         }
     }
 
+    componentDidUpdate({ expenses }) {
+        if (this.props.expenses.data.list.length < expenses.data.list.length) {
+            this.props.dispatch(getExpenses(this.state.page));
+        }
+    }
+
     render() {
         const { expenses } = this.props;
         const canWrite = hasAccess(ENDPOINTS.EXPENSES_URL, ACCESS_TYPES.WRITE);

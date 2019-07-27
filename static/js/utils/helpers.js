@@ -246,7 +246,10 @@ export class ImageCompression {
         for (let v = 0; v < this.dest.height; v++) {
             this.center.y = (v + 0.5) * this.ratio;
             this.icenter.y = Math.floor(this.center.y);
-            let a, b, g, r;
+            let a;
+            let b;
+            let g;
+            let r;
             a = r = g = b = 0;
             for (let i = this.icenter.x - this.range2; i <= this.icenter.x + this.range2; i++) {
                 if (i < 0 || i >= this.src.width) {
@@ -293,7 +296,8 @@ export class ImageCompression {
         this.canvas.height = this.dest.height;
         this.ctx.drawImage(this.img, 0, 0, this.dest.width, this.dest.height);
         this.src = this.ctx.getImageData(0, 0, this.dest.width, this.dest.height);
-        let idx, idx2;
+        let idx;
+        let idx2;
         for (let i = 0; i < this.dest.width; i++) {
             for (let j = 0; j < this.dest.height; j++) {
                 idx = (j * this.dest.width + i) * 3;

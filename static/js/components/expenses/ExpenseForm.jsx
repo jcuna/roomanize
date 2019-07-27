@@ -10,16 +10,16 @@ import QRCode from 'qrcode.react';
 import '../../../css/expenses/expense.scss';
 import { formatDecimal, generateNonce, toDatePicker, toLocalTimezone } from '../../utils/helpers';
 import {
-    clearScanUrl,
     EXPENSE_TOKEN_ADDED,
     createNewExpense,
-    getExpense, editExpense
+    getExpense, editExpense, clearExpenses
 } from '../../actions/expenseActions';
 import ws from '../../utils/ws';
 import { ACCESS_TYPES, ENDPOINTS } from '../../constants';
 import { hasAccess } from '../../utils/config';
 import Spinner from '../../utils/Spinner';
 import Table from '../../utils/Table';
+import FontAwesome from '../../utils/FontAwesome';
 
 export default class ExpenseForm extends React.Component {
     constructor(props) {
@@ -27,6 +27,7 @@ export default class ExpenseForm extends React.Component {
 
         this.onInputChange = this.onInputChange.bind(this);
         this.onButtonContinue = this.onButtonContinue.bind(this);
+        this.deleteReceiptScan = this.deleteReceiptScan.bind(this);
         const nonce = generateNonce();
         const editing = this.props.match.params.action === 'editar';
 
@@ -34,11 +35,13 @@ export default class ExpenseForm extends React.Component {
             this.props.dispatch(getExpense(this.props.match.params.expense_id, () => {
                 const expense = this.props.expenses.data.list[0];
                 if (typeof expense === 'undefined') {
-                    this.props.history.push(ENDPOINTS.NOT_FOUND)
+                    this.props.history.push(ENDPOINTS.NOT_FOUND);
                 }
                 let d = '';
                 if (expense.input_date) {
-                    d = toDatePicker(toLocalTimezone(new Date(expense.input_date)));
+                    d = new Date(expense.input_date);
+                    toLocalTimezone(d);
+                    d = toDatePicker(d);
                 }
                 this.setState({
                     amount: expense.amount,
@@ -110,7 +113,7 @@ export default class ExpenseForm extends React.Component {
                     { this.getForm(canWrite, this.state.editing) }
                     { this.renderQR() }
                     <div className='receipts'>
-                        { ExpenseForm.renderReceiptPic(this.props.expenses.data, canWrite) }
+                        { this.renderReceiptPic(this.props.expenses.data, canWrite) }
                     </div>
                 </section>
             </div>
@@ -176,7 +179,7 @@ export default class ExpenseForm extends React.Component {
     }
 
     componentWillUnmount() {
-        this.props.dispatch(clearScanUrl());
+        this.props.dispatch(clearExpenses());
     }
 
     renderQR() {
@@ -193,9 +196,18 @@ export default class ExpenseForm extends React.Component {
         return null;
     }
 
-    static renderReceiptPic({ list }, canDelete) {
+    renderReceiptPic({ list }, canDelete) {
         return list.length === 1 && list[0].signed_urls &&
-            list[0].signed_urls.map((pic, i) => <img key={ i } src={ pic } alt='recibo' className='receipt-scan'/>);
+            list[0].signed_urls.map((pic, i) =>
+                <div key={ i }>
+                    <img src={ pic } alt='recibo' className='receipt-scan'/>
+                    { canDelete && <FontAwesome type={ 'remove' } onClick={ this.deleteReceiptScan } data-id={ i }/> }
+                </div>
+            );
+    }
+
+    deleteReceiptScan({ target }) {
+        console.log(target);
     }
 
     static propTypes = {

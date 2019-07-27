@@ -93,8 +93,6 @@ export default class TenantHistory extends React.Component {
                         items.push(['Referencia III', formatPhone(row.reference3_phone)]);
                     }
 
-                    items.push(['Arrendamiento', `RD$ ${row.rental_agreement.rate}`]);
-
                     // balances are sorted in the back end desc by date, so the most recent balance will be at index 0
                     const { balance } = row.rental_agreement;
                     if (active) {
@@ -135,13 +133,23 @@ export default class TenantHistory extends React.Component {
                             remaining_balance > 0 && items.push(
                                 ['Proximo Pago', nextPay]
                             );
+                            items.push(['Arrendamiento', `RD$ ${row.rental_agreement.rate}`]);
                             items.push(['Balance', `$RD ${ (remaining_balance.toFixed(2)) }`]);
                             hadPreviousBalance &&
-                                items.push(['Balance Anterior', `$RD ${ balance[0].previous_balance }`]);
+                            items.push([
+                                'Deuda',
+                                <span
+                                    key={ balance[0].previous_balance }
+                                    className='urgent'>
+                                    $RD ${ balance[0].previous_balance }
+                                </span>
+                            ]);
 
                             credit > 0 && items.push(['Credito', `$RD ${ credit }`]);
                             items.push(['Ultimo Pago', last_payment]);
                         }
+                    } else {
+                        items.push(['Arrendamiento', `RD$ ${row.rental_agreement.rate}`]);
                     }
 
                     return (

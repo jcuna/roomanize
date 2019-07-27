@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 import jwt
 from flask import current_app
 from config.routes import default_access
+from dal.shared import ModelIter
 
 collation = 'und-x-icu'
 
@@ -27,7 +28,7 @@ user_roles = db.Table(
 )
 
 
-class User(db.Model):
+class User(db.Model, ModelIter):
     __tablename__ = 'users'
     fillable = ['password', 'email', 'first_name', 'last_name', 'deleted']
 
@@ -57,7 +58,7 @@ class User(db.Model):
         }
 
 
-class UserAttributes(db.Model):
+class UserAttributes(db.Model, ModelIter):
     __tablename__ = 'user_attributes'
 
     ua_id = db.Column(db.BigInteger, primary_key=True)
@@ -86,7 +87,7 @@ class UserAttributes(db.Model):
         return json.loads(self.user_access)
 
 
-class UserToken(db.Model):
+class UserToken(db.Model, ModelIter):
     __tablename__ = 'user_tokens'
 
     id = db.Column(db.BigInteger, primary_key=True)
@@ -112,7 +113,7 @@ class UserToken(db.Model):
         self.expires = expires
 
 
-class Role(db.Model):
+class Role(db.Model, ModelIter):
     __tablename__ = 'roles'
 
     id = db.Column(db.BigInteger, primary_key=True)
@@ -137,7 +138,7 @@ class Role(db.Model):
         return combined_permissions
 
 
-class Project(db.Model):
+class Project(db.Model, ModelIter):
     __tablename__ = 'projects'
 
     id = db.Column(db.BigInteger, primary_key=True)
@@ -149,13 +150,13 @@ class Project(db.Model):
     rooms = relationship('Room', back_populates='project')
 
 
-class TimeInterval(db.Model):
+class TimeInterval(db.Model, ModelIter):
     __tablename__ = 'time_intervals'
     id = db.Column(db.Integer, primary_key=True)
     interval = db.Column(db.String(15, collation=collation))
 
 
-class Tenant(db.Model):
+class Tenant(db.Model, ModelIter):
     __tablename__ = 'tenants'
     fillable = ['first_name', 'last_name', 'email', 'phone', 'identification_number']
 
@@ -180,7 +181,7 @@ class Tenant(db.Model):
     history = relationship('TenantHistory', back_populates='tenant')
 
 
-class TenantHistory(db.Model):
+class TenantHistory(db.Model, ModelIter):
     __tablename__ = 'tenant_history'
 
     id = db.Column(db.BigInteger, primary_key=True)
@@ -193,7 +194,7 @@ class TenantHistory(db.Model):
     rental_agreement = relationship('RentalAgreement', uselist=False)
 
 
-class RentalAgreement(db.Model):
+class RentalAgreement(db.Model, ModelIter):
     __tablename__ = 'rental_agreements'
     fillable = ['tenant_history_id', 'room_id', 'project_id', 'time_interval_id', 'rate', 'entered_on', 'deposit']
 
@@ -214,7 +215,7 @@ class RentalAgreement(db.Model):
     interval = relationship(TimeInterval, uselist=False)
 
 
-class Room(db.Model):
+class Room(db.Model, ModelIter):
     __tablename__ = 'rooms'
     fillable = ['project_id', 'name', 'rent', 'time_interval_id', 'description', 'picture']
 
@@ -236,7 +237,7 @@ class Room(db.Model):
     )
 
 
-class Policy(db.Model):
+class Policy(db.Model, ModelIter):
     __tablename__ = 'policies'
 
     id = db.Column(db.BigInteger, primary_key=True)
@@ -248,7 +249,7 @@ class Policy(db.Model):
                         )
 
 
-class Balance(db.Model):
+class Balance(db.Model, ModelIter):
     __tablename__ = 'balances'
 
     id = db.Column(BIGINT(unsigned=True), primary_key=True)
@@ -262,13 +263,13 @@ class Balance(db.Model):
     payments = relationship('Payment', backref='balances')
 
 
-class PaymentType(db.Model):
+class PaymentType(db.Model, ModelIter):
     __tablename__ = 'payment_types'
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(15, collation=collation))
 
 
-class Payment(db.Model):
+class Payment(db.Model, ModelIter):
     __tablename__ = 'payments'
     fillable = ['amount', 'payment_type_id']
 
@@ -285,7 +286,7 @@ class Payment(db.Model):
         return self.payment_type.type
 
 
-class Expense(db.Model):
+class Expense(db.Model, ModelIter):
     __tablename__ = 'expenses'
     fillable = ['amount', 'expense_date']
 
@@ -300,7 +301,7 @@ class Expense(db.Model):
     project = relationship(Project, uselist=False)
 
 
-class Audit(db.Model):
+class Audit(db.Model, ModelIter):
     __tablename__ = 'audits'
 
     id = db.Column(BIGINT(unsigned=True), primary_key=True)

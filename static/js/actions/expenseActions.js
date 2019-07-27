@@ -7,8 +7,8 @@ export const EXPENSE_FETCHED = 'EXPENSE_FETCHED';
 export const EXPENSE_CREATING = 'EXPENSE_CREATING';
 export const EXPENSE_CREATED = 'EXPENSE_CREATED';
 export const EXPENSE_TOKEN_ADDED = 'EXPENSE_TOKEN_ADDED';
-export const EXPENSE_TOKEN_CLEAR = 'EXPENSE_TOKEN_CLEAR';
 export const EXPENSE_RECEIPT_UPLOADED = 'EXPENSE_RECEIPT_UPLOADED';
+export const CLEAR_EXPENSES = 'CLEAR_EXPENSES';
 
 export const getExpenses = (page, orderBy = 'expense_date', dir = 'desc', resolve, reject) =>
     (dispatch) => {
@@ -34,7 +34,6 @@ export const getExpense = (expense_id, resolve, reject) =>
                 method: 'GET',
                 headers: header,
             }).then(resp => {
-                console.log(resp.data)
                 dispatch({ type: EXPENSE_FETCHED, payload: resp.data });
                 resolve && resolve();
             }, reject);
@@ -71,8 +70,8 @@ export const editExpense = (expense_id, body, resolve, reject) =>
         }, reject);
     };
 
-export const clearScanUrl = () =>
-    (dispatch) => dispatch({ type: EXPENSE_TOKEN_CLEAR });
+export const clearExpenses = () =>
+    (dispatch) => dispatch({ type: CLEAR_EXPENSES });
 
 export const validateExpenseToken = (user_token, expense_id, resolve, reject) =>
     (dispatch) => {
