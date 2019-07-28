@@ -42,7 +42,13 @@ class Expenses(API):
         return Result.paginate(result, page, total_pages)
 
     def put(self):
-        return {}
+        data = request.get_json()
+        if 'expire' in data and 'token' in data:
+            ut = UserToken.query.filter_by(token=data['token']).first()
+            ut.expires = datetime.utcnow()
+            db.session.commit()
+
+        return Result.success()
 
     @token_required
     @access_required
@@ -89,6 +95,9 @@ class ExpenseScans(API):
         return {
             'user': ut.user.first_name + ' ' + ut.user.last_name
         }
+
+    def put(self, token, expense_id):
+        pass
 
     def post(self, token, expense_id):
         # uploads new scan

@@ -102,7 +102,7 @@ class UserToken(db.Model, ModelIter):
 
     user = relationship(User, back_populates='tokens')
 
-    def new_token(self, email, expires: datetime = datetime.utcnow() + timedelta(hours=4)):
+    def new_token(self, email: str, expires: datetime = None):
         while not self.token:
             temp_token = random_token(email)
             so = self.query.filter_by(token=temp_token).count()
@@ -110,7 +110,7 @@ class UserToken(db.Model, ModelIter):
             if not so:
                 self.token = temp_token
 
-        self.expires = expires
+        self.expires = expires if expires else datetime.utcnow() + timedelta(hours=4)
 
 
 class Role(db.Model, ModelIter):

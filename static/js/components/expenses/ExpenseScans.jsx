@@ -8,7 +8,7 @@ import { clearExpenses, uploadReceipt, validateExpenseToken } from '../../action
 import { ALERTS } from '../../constants';
 import '../../../css/expenses/expense.scss';
 import FontAwesome from '../../utils/FontAwesome';
-// import { ImageCompression } from '../../utils/helpers';
+import { ImageCompression } from '../../utils/helpers';
 import { notifications } from '../../actions/appActions';
 
 export default class Expenses extends React.Component {
@@ -18,6 +18,7 @@ export default class Expenses extends React.Component {
             receipts: [],
             user: '',
             invalid: false,
+            processing: false,
         };
         this.uploadReceipt = this.uploadReceipt.bind(this);
         this.props.dispatch(
@@ -36,6 +37,7 @@ export default class Expenses extends React.Component {
     }
 
     render() {
+        console.log(this.state)
         return (
             <div>
                 <section className='widget'>
@@ -48,36 +50,45 @@ export default class Expenses extends React.Component {
     }
 
     uploadReceipt({ target }) {
-        // const file = target.files[0];
-        // if (file.size > this.props.max_upload_size) {
-        //     const canvas = document.createElement('canvas');
-        //     const img = new Image();
-        //     img.onload = () => {
-        //         const ic = new ImageCompression(canvas, img);
-        //         ic.hermiteCompress(300, () => alert('done'));
-        //         const w = document.getElementsByClassName('widget')[0];
-        //         w.parentNode.insertBefore(canvas, w.nextSibling);
-        //     };
-        //
-        //     img.src = URL.createObjectURL(file);
-        // }
+        this.setState({ processing: true });
+        const file = target.files[0];
+        if (file.size > this.props.max_upload_size) {
+            const canvas = document.createElement('canvas');
+            const img = new Image();
+
+            img.onload = () => {
+                const ic = new ImageCompression(canvas, img);
+                ic.hermiteCompress(img.width > img.height ? 200 : 400).then(() => {
+                    const w = document.getElementsByClassName('widget')[0];
+                    w.parentNode.insertBefore(canvas, w.nextSibling);
+                    this.setState({ processing: false });
+                    //this.sendFileToServer(file);
+                });
+            };
+            img.src = URL.createObjectURL(file);
+        } else {
+            this.sendFileToServer(file);
+        }
+    }
+
+    sendFileToServer(file) {
         this.props.dispatch(uploadReceipt(
             this.props.match.params.token,
             this.props.match.params.expense_id,
-            target.files[0]
+            file
         ));
     }
 
     getScanInput() {
+        const icon = this.state.processing ? 'spinner' : 'upload';
         return <div className='scan-button-wrapper'>
-            <button><FontAwesome type='upload'/>Escanear</button>
+            <button><FontAwesome spin={ this.state.processing } type={ icon }/>Escanear</button>
             <input onChange={ this.uploadReceipt } type='file' accept='image/*' capture/>
         </div>;
     }
 
     componentWillUnmount() {
         this.props.dispatch(clearExpenses());
-        //this.props.dispatch(expireToken(this.props.match.params.token));
     }
 
     static propTypes = {

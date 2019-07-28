@@ -120,8 +120,8 @@ export const formatDecimal = ({ target }) => {
 };
 
 export class ImageCompression {
-    constructor(elem, img) {
-        this.elem = elem;
+    constructor(canvas, img) {
+        this.canvas = canvas;
         this.img = img;
 
         this.process1 = this.process1.bind(this);
@@ -143,101 +143,110 @@ export class ImageCompression {
         };
     }
 
-    // elem: canvas element, img: image element, sx: scaled width, lobes: kernel radius
-    lanczosCompress(width, lobes, resolve) {
-        this.resolve = resolve;
-        this.elem.width = this.img.width;
-        this.elem.height = this.img.height;
-        this.elem.style.display = 'none';
-        this.ctx = this.elem.getContext('2d');
-        this.ctx.drawImage(this.img, 0, 0);
-        this.src = this.ctx.getImageData(0, 0, this.img.width, this.img.height);
-        this.dest = {
-            width,
-            height: Math.round(this.img.height * width / this.img.width),
-        };
-        this.dest.data = new Array(this.dest.width * this.dest.height * 3);
-        this.lanczos = this.lanczosCreate(lobes);
-        this.ratio = this.img.width / width;
-        this.rcp_ratio = 2 / this.ratio;
-        this.range2 = Math.ceil(this.ratio * lobes / 2);
-        this.cacheLanc = {};
-        this.center = {};
-        this.icenter = {};
-        setTimeout(this.process1, 0, 0);
+    // canvas: canvas element, img: image element, sx: scaled width, lobes: kernel radius
+    lanczosCompress(width, lobes) {
+        return new Promise((resolve, reject) => {
+            try {
+                this.resolve = resolve;
+                this.canvas.width = this.img.width;
+                this.canvas.height = this.img.height;
+                this.canvas.style.display = 'none';
+                this.ctx = this.canvas.getContext('2d');
+                this.ctx.drawImage(this.img, 0, 0);
+                this.src = this.ctx.getImageData(0, 0, this.img.width, this.img.height);
+                this.dest = {
+                    width,
+                    height: Math.round(this.img.height * width / this.img.width),
+                };
+                this.dest.data = new Array(this.dest.width * this.dest.height * 3);
+                this.lanczos = this.lanczosCreate(lobes);
+                this.ratio = this.img.width / width;
+                this.rcp_ratio = 2 / this.ratio;
+                this.range2 = Math.ceil(this.ratio * lobes / 2);
+                this.cacheLanc = {};
+                this.center = {};
+                this.icenter = {};
+                setTimeout(this.process1, 0, 0);
+            } catch (e) {
+                reject(e);
+            }
+        });
     }
 
-    hermiteCompress(width, resolve) {
-        width = Math.round(width);
-        const height = Math.round(this.img.height * width / this.img.width);
+    hermiteCompress(width) {
+        return new Promise((resolve, reject) => {
+            try {
+                width = Math.round(width);
+                const W = this.img.width;
+                const H = this.img.height;
+                this.canvas.width = W;
+                this.canvas.height = H;
+                const ctx = this.canvas.getContext('2d');
+                const H2 = Math.round(this.img.height * width / this.img.width);
+                ctx.drawImage(this.img, 0, 0);
 
-        const ratio_w = this.img.width / width;
-        const ratio_h = this.img.height / height;
-        const ratio_w_half = Math.ceil(ratio_w / 2);
-        const ratio_h_half = Math.ceil(ratio_h / 2);
+                const img = this.canvas.getContext('2d').getImageData(0, 0, W, H);
+                const img2 = this.canvas.getContext('2d').getImageData(0, 0, width, H2);
+                const data = img.data;
+                const data2 = img2.data;
+                const ratio_w = W / width;
+                const ratio_h = H / H2;
+                const ratio_w_half = Math.ceil(ratio_w / 2);
+                const ratio_h_half = Math.ceil(ratio_h / 2);
 
-        const ctx = this.elem.getContext('2d');
-        ctx.drawImage(this.img, 0, 0);
-        const img = ctx.getImageData(0, 0, this.img.width, this.img.height);
-        const img2 = ctx.createImageData(width, height);
-        const data = img.data;
-        const data2 = img2.data;
-
-        for (let j = 0; j < height; j++) {
-            for (let i = 0; i < width; i++) {
-                const x2 = (i + j * width) * 4;
-                let weight = 0;
-                let weights = 0;
-                let weights_alpha = 0;
-                let gx_r = 0;
-                let gx_g = 0;
-                let gx_b = 0;
-                let gx_a = 0;
-                const center_y = (j + 0.5) * ratio_h;
-                const yy_start = Math.floor(j * ratio_h);
-                const yy_stop = Math.ceil((j + 1) * ratio_h);
-                for (let yy = yy_start; yy < yy_stop; yy++) {
-                    const dy = Math.abs(center_y - (yy + 0.5)) / ratio_h_half;
-                    const center_x = (i + 0.5) * ratio_w;
-                    const w0 = dy * dy; //pre-calc part of w
-                    const xx_start = Math.floor(i * ratio_w);
-                    const xx_stop = Math.ceil((i + 1) * ratio_w);
-                    for (let xx = xx_start; xx < xx_stop; xx++) {
-                        const dx = Math.abs(center_x - (xx + 0.5)) / ratio_w_half;
-                        const w = Math.sqrt(w0 + dx * dx);
-                        if (w >= 1) {
-                            //pixel too far
-                            continue;
+                for (let j = 0; j < H2; j++) {
+                    for (let i = 0; i < width; i++) {
+                        const x2 = (i + j * width) * 4;
+                        let weight = 0;
+                        let weights = 0;
+                        let weights_alpha = 0;
+                        let gx_r = 0;
+                        let gx_g = 0;
+                        let gx_b = 0;
+                        let gx_a = 0;
+                        const center_y = (j + 0.5) * ratio_h;
+                        for (let yy = Math.floor(j * ratio_h); yy < (j + 1) * ratio_h; yy++) {
+                            const dy = Math.abs(center_y - (yy + 0.5)) / ratio_h_half;
+                            const center_x = (i + 0.5) * ratio_w;
+                            const w0 = dy * dy; //pre-calc part of w
+                            for (let xx = Math.floor(i * ratio_w); xx < (i + 1) * ratio_w; xx++) {
+                                let dx = Math.abs(center_x - (xx + 0.5)) / ratio_w_half;
+                                const w = Math.sqrt(w0 + dx * dx);
+                                if (w >= -1 && w <= 1) {
+                                    //hermite filter
+                                    weight = 2 * w * w * w - 3 * w * w + 1;
+                                    if (weight > 0) {
+                                        dx = 4 * (xx + yy * W);
+                                        //alpha
+                                        gx_a += weight * data[dx + 3];
+                                        weights_alpha += weight;
+                                        //colors
+                                        if (data[dx + 3] < 255) {
+                                            weight = weight * data[dx + 3] / 250;
+                                        }
+                                        gx_r += weight * data[dx];
+                                        gx_g += weight * data[dx + 1];
+                                        gx_b += weight * data[dx + 2];
+                                        weights += weight;
+                                    }
+                                }
+                            }
                         }
-                        //hermite filter
-                        weight = 2 * w * w * w - 3 * w * w + 1;
-                        const pos_x = 4 * (xx + yy * this.img.width);
-                        //alpha
-                        gx_a += weight * data[pos_x + 3];
-                        weights_alpha += weight;
-                        //colors
-                        if (data[pos_x + 3] < 255) {
-                            weight = weight * data[pos_x + 3] / 250;
-                        }
-                        gx_r += weight * data[pos_x];
-                        gx_g += weight * data[pos_x + 1];
-                        gx_b += weight * data[pos_x + 2];
-                        weights += weight;
+                        data2[x2] = gx_r / weights;
+                        data2[x2 + 1] = gx_g / weights;
+                        data2[x2 + 2] = gx_b / weights;
+                        data2[x2 + 3] = gx_a / weights_alpha;
                     }
                 }
-                data2[x2] = gx_r / weights;
-                data2[x2 + 1] = gx_g / weights;
-                data2[x2 + 2] = gx_b / weights;
-                data2[x2 + 3] = gx_a / weights_alpha;
+                this.canvas.getContext('2d').clearRect(0, 0, Math.max(W, width), Math.max(H, H2));
+                this.canvas.width = width;
+                this.canvas.height = H2;
+                this.canvas.getContext('2d').putImageData(img2, 0, 0);
+                resolve(this.canvas);
+            } catch (e) {
+                reject(e);
             }
-        }
-        // ctx.clearRect(0, 0, this.img.width, this.img.height);
-        // this.elem.width = width;
-        // this.elem.height = height;
-        //draw
-        ctx.putImageData(img, 0, 0);
-        this.elem.style.display = 'block';
-        resolve();
+        });
     }
 
     process1(u) {
@@ -308,7 +317,7 @@ export class ImageCompression {
             }
         }
         this.ctx.putImageData(this.src, 0, 0);
-        this.elem.style.display = 'block';
-        this.resolve();
+        this.canvas.style.display = 'block';
+        this.resolve(this.canvas);
     }
 }

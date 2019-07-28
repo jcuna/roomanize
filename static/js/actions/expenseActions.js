@@ -9,6 +9,7 @@ export const EXPENSE_CREATED = 'EXPENSE_CREATED';
 export const EXPENSE_TOKEN_ADDED = 'EXPENSE_TOKEN_ADDED';
 export const EXPENSE_RECEIPT_UPLOADED = 'EXPENSE_RECEIPT_UPLOADED';
 export const CLEAR_EXPENSES = 'CLEAR_EXPENSES';
+export const EXPENSE_EXPIRE_TOKEN = 'EXPENSE_EXPIRE_TOKEN';
 
 export const getExpenses = (page, orderBy = 'expense_date', dir = 'desc', resolve, reject) =>
     (dispatch) => {
@@ -72,6 +73,18 @@ export const editExpense = (expense_id, body, resolve, reject) =>
 
 export const clearExpenses = () =>
     (dispatch) => dispatch({ type: CLEAR_EXPENSES });
+
+export const expireToken = (user_token, resolve, reject) =>
+    (dispatch) => token.through().then(header => {
+        api({
+            url: '/expenses/',
+            method: 'PUT',
+            headers: header,
+        }, { token: user_token, expire: true }).then(resp => {
+            dispatch({ type: EXPENSE_EXPIRE_TOKEN });
+            resolve && resolve(resp.data);
+        }, reject);
+    }, reject);
 
 export const validateExpenseToken = (user_token, expense_id, resolve, reject) =>
     (dispatch) => {

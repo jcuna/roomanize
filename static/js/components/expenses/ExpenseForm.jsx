@@ -12,7 +12,7 @@ import { formatDecimal, generateNonce, toDatePicker, toLocalTimezone } from '../
 import {
     EXPENSE_TOKEN_ADDED,
     createNewExpense,
-    getExpense, editExpense, clearExpenses
+    getExpense, editExpense, clearExpenses, expireToken
 } from '../../actions/expenseActions';
 import ws from '../../utils/ws';
 import { ACCESS_TYPES, ENDPOINTS } from '../../constants';
@@ -180,6 +180,7 @@ export default class ExpenseForm extends React.Component {
 
     componentWillUnmount() {
         this.props.dispatch(clearExpenses());
+        //this.props.dispatch(expireToken(this.props.expenses.token));
     }
 
     renderQR() {
@@ -188,6 +189,7 @@ export default class ExpenseForm extends React.Component {
         if (token && expense_id) {
             return <div className='qr-section'>
                 <h4>Escanea codigo QR con la camara del telefono para subir recibo</h4>
+                <h6>Debes mantener esta ventana activa mientras escaneas.</h6>
                 <QRCode
                     value={ `${ domain }${ path }/${ token }/${ expense_id }` }
                 />
