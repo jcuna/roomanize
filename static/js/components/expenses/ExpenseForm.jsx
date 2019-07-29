@@ -53,7 +53,6 @@ export default class ExpenseForm extends React.Component {
                 this.props.dispatch(editExpense(expense.id, { nonce }, ({ token, id, domain }) => {
                     this.setState({ expense_id: id, token, domain });
                     ws(EXPENSE_TOKEN_ADDED, `/expense-scans/${ token }/${ id }`, (re) => {
-                        console.log(re);
                         this.props.dispatch(getExpense(id));
                     });
                 }));
@@ -85,7 +84,6 @@ export default class ExpenseForm extends React.Component {
         this.props.dispatch(createNewExpense(payload, ({ token, id, domain }) => {
             this.setState({ expense_id: id, token, domain });
             ws(EXPENSE_TOKEN_ADDED, `/expense-scans/${ token }/${ id }`, (re) => {
-                console.log(re);
                 this.props.dispatch(getExpense(id));
             });
         }));
@@ -180,7 +178,7 @@ export default class ExpenseForm extends React.Component {
 
     componentWillUnmount() {
         this.props.dispatch(clearExpenses());
-        //this.props.dispatch(expireToken(this.props.expenses.token));
+        this.props.dispatch(expireToken(this.props.expenses.token));
     }
 
     renderQR() {
@@ -203,9 +201,14 @@ export default class ExpenseForm extends React.Component {
             list[0].signed_urls.map((pic, i) =>
                 <div key={ i }>
                     <img src={ pic } alt='recibo' className='receipt-scan'/>
-                    { canDelete && <FontAwesome type={ 'remove' } onClick={ this.deleteReceiptScan } data-id={ i }/> }
+                    { canDelete && <FontAwesome type={ 'trash' } onClick={ this.deleteReceiptScan } data-id={ i }/> }
+                    { <FontAwesome type={ 'sync-alt' } onClick={ this.rotate } data-id={ i }/> }
                 </div>
             );
+    }
+
+    rotate( { target }) {
+        console.log(target);
     }
 
     deleteReceiptScan({ target }) {

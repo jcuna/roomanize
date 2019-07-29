@@ -33,10 +33,10 @@ class Storage(object):
     def get_file(self, object_name):
         return self.get_client().get_object(Bucket=self.bucket, Key=object_name)['Body'].read()
 
-    def put_new(self, body, object_name):
+    def put_new(self, body, object_name, content_type=None):
         if hasattr(body, 'content_type'):
             content_type = body.content_type
-        else:
+        elif not content_type:
             content_type = 'binary/octet-stream'
         return self.get_client().put_object(Body=body, Bucket=self.bucket, Key=object_name, ContentType=content_type)
 

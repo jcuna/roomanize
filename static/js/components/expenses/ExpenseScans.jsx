@@ -8,7 +8,7 @@ import { clearExpenses, uploadReceipt, validateExpenseToken } from '../../action
 import { ALERTS } from '../../constants';
 import '../../../css/expenses/expense.scss';
 import FontAwesome from '../../utils/FontAwesome';
-import { ImageCompression } from '../../utils/helpers';
+import { ImageCompression } from '../../utils/ImageCompression';
 import { notifications } from '../../actions/appActions';
 
 export default class Expenses extends React.Component {
@@ -37,12 +37,12 @@ export default class Expenses extends React.Component {
     }
 
     render() {
-        console.log(this.state)
         return (
             <div>
                 <section className='widget'>
                     <h2>Escaneo de Recibos</h2>
                     <h4 className='scan-user'>{ this.state.user }</h4>
+                    { this.state.processing && <h1><FontAwesome spin={ true } type={ 'spinner' }/></h1> }
                     { !this.state.invalid && this.getScanInput() }
                 </section>
             </div>
@@ -58,31 +58,29 @@ export default class Expenses extends React.Component {
 
             img.onload = () => {
                 const ic = new ImageCompression(canvas, img);
-                ic.hermiteCompress(img.width > img.height ? 200 : 400).then(() => {
-                    const w = document.getElementsByClassName('widget')[0];
-                    w.parentNode.insertBefore(canvas, w.nextSibling);
-                    this.setState({ processing: false });
-                    //this.sendFileToServer(file);
+                ic.hermiteCompress(600).then(() => {
+                    this.sendFileToServer(canvas.toDataURL(), file.name);
                 });
             };
             img.src = URL.createObjectURL(file);
         } else {
-            this.sendFileToServer(file);
+            this.sendFileToServer(file, file.name);
         }
     }
 
-    sendFileToServer(file) {
+    sendFileToServer(file, name) {
         this.props.dispatch(uploadReceipt(
             this.props.match.params.token,
             this.props.match.params.expense_id,
-            file
+            file, name, () => {
+                this.setState({ processing: false });
+            }
         ));
     }
 
     getScanInput() {
-        const icon = this.state.processing ? 'spinner' : 'upload';
         return <div className='scan-button-wrapper'>
-            <button><FontAwesome spin={ this.state.processing } type={ icon }/>Escanear</button>
+            <button><FontAwesome type='upload'/>Escanear</button>
             <input onChange={ this.uploadReceipt } type='file' accept='image/*' capture/>
         </div>;
     }

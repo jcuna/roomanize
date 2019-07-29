@@ -1,3 +1,4 @@
+import base64
 import hashlib
 from datetime import datetime
 import os
@@ -11,6 +12,7 @@ from core.utils import local_to_utc
 from dal.models import UserToken, Expense, db
 from dal.shared import token_required, access_required, Paginator, row2dict
 from views import Result
+from mimetypes import guess_extension
 
 
 class Expenses(API):
@@ -112,15 +114,27 @@ class ExpenseScans(API):
 
         s3 = Storage(current_app.config['AWS_FILE_MANAGER_BUCKET_NAME'])
 
-        for file in request.files:
-            filename, extension = os.path.splitext(file)
+        if len(request.files) > 0:
+            for file in request.files:
+                filename, extension = os.path.splitext(file)
+                key_name = 'receipts/' + hashlib.sha256(
+                    (str(datetime.utcnow().timestamp()) + filename + extension + token).encode('utf8')
+                ).hexdigest() + extension
+
+                expense.receipt_scans.append(key_name)
+
+                s3.put_new(request.files[file], key_name)
+        else:
+            filename, _ = os.path.splitext(request.form.get('name'))
+            content_type, base64_img = request.form.get('image').split(':')[1].split(';')
+            extension = guess_extension(content_type)
+            img = base64.decodebytes(base64_img.split(',')[1].encode('utf-8'))
             key_name = 'receipts/' + hashlib.sha256(
                 (str(datetime.utcnow().timestamp()) + filename + extension + token).encode('utf8')
             ).hexdigest() + extension
 
             expense.receipt_scans.append(key_name)
-
-            s3.put_new(request.files[file], key_name)
+            s3.put_new(img, key_name, content_type)
 
         db.session.commit()
         emit(

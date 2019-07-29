@@ -97,10 +97,11 @@ export const validateExpenseToken = (user_token, expense_id, resolve, reject) =>
         }, reject);
     };
 
-export const uploadReceipt = (user_token, expense_id, file, resolve, reject) =>
+export const uploadReceipt = (user_token, expense_id, file, name, resolve, reject) =>
     (dispatch) => {
         const formData = new FormData();
-        formData.append(file.name, file);
+        formData.append('image', file);
+        formData.append('name', name);
         api({
             url: `${ BACKEND_URLS.EXPENSE_SCANS }/${ user_token }/${ expense_id }`,
             method: 'POST',
