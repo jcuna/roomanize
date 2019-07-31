@@ -60,7 +60,7 @@ class Projects(API):
         user.attributes.user_preferences = json.dumps(attr)
         db.session.commit()
 
-        return dict(id=project.id)
+        return Result.custom({'id': project.id})
 
     @token_required
     @access_required
@@ -96,7 +96,6 @@ class Projects(API):
 
 
 class Rooms(API):
-
     @token_required
     @access_required
     def get(self, room_id=None):
@@ -109,7 +108,7 @@ class Rooms(API):
             if not room:
                 raise HttpException('Not found', 404)
 
-            return row2dict(room)
+            return Result.model(room)
 
         result = []
         page = request.args.get('page') if 'page' in request.args else 1

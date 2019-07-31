@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import boto3
 from flask import current_app
 from botocore.exceptions import ClientError
-from core.utils import app_logger
+from core.utils import get_logger
 
 
 class Storage(object):
@@ -66,6 +66,7 @@ class Storage(object):
                 ExpiresIn=expiration
             )
         except ClientError as e:
+            app_logger = get_logger('app')
             app_logger.error(e)
             return None
 

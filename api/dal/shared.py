@@ -133,6 +133,10 @@ class Paginator:
 
 
 class ModelIter(object):
+
+    def __init__(self, *args, **kwargs):
+        super(self, *args, **kwargs)
+
     def __iter__(self):
         if hasattr(self, '__table__'):
             for column in self.__table__.columns:
@@ -142,7 +146,9 @@ class ModelIter(object):
                     yield column.name, str(attr)
                 elif isinstance(attr, datetime):
                     yield column.name, str(attr)
+                elif isinstance(attr, db.Model):
+                    return dict(attr)
                 elif not isinstance(attr, str):
-                    yield column.name, str(attr) if attr is not None else column.name, None
+                    yield column.name, str(attr) if attr is not None else None
                 else:
                     yield column.name, attr

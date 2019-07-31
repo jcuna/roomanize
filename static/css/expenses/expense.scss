@@ -42,12 +42,35 @@
 
 .receipts {
   text-align: center;
-  div {
-    //height: 50px;
-    //border-top: solid 50px $semiWhite;
-  }
-  img {
-    height: 100px;
-    //position: absolute
+  > div {
+      position: relative;
+      margin: 10px;
+      div {
+        height: 40px;
+        position: relative;
+        width: 120px;
+        margin: auto;
+        span {
+          position: absolute;
+          top: 0;
+          font-size: 28px;
+          cursor: pointer;
+          :hover {
+            opacity: 0.6;
+          }
+        }
+        span:first-child {
+          padding-top: 10px;
+          left: 0;
+        }
+        span:nth-child(2) {
+          right: 0;
+        }
+      }
+
+      img {
+        height: 100px;
+        cursor: pointer;
+      }
   }
 }

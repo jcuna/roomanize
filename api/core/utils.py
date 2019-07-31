@@ -8,34 +8,45 @@ import queue
 from logging.handlers import QueueHandler, QueueListener, RotatingFileHandler
 
 
-def get_queue_logger(name='app'):
+def queue_logger():
 
-    log_queue = queue.Queue(-1)
-    queue_handler = QueueHandler(log_queue)
-    handler = RotatingFileHandler(log_path + name + '.log', maxBytes=100000, backupCount=1)
-    handler.setFormatter(log_formatter)
-    listener = QueueListener(log_queue, handler)
-
-    logger = logging.getLogger(name)
-    logger.addHandler(queue_handler)
-
-    listener.start()
-    return logger
+    que = queue.Queue(-1)  # no limit on size
+    queue_handler = QueueHandler(que)
+    non_block_listener = LogListener(que)
+    root = logging.getLogger()
+    root.addHandler(queue_handler)
+    non_block_listener.start()
+    return non_block_listener
 
 
-def get_logger(name):
+class LogListener(QueueListener):
+    """
+    dynamically add new handlers to the queue listener
+    """
+    def add_handler(self, handler):
+        # tuples are immutable
+        self.handlers = self.handlers + (handler,)
+        self.stop()
+        self.start()
+
+
+def get_logger(name='app'):
     """
     return a logger with default settings
 
     :return: Logger
     """
+    logger = logging.getLogger(name)
+    if len(logger.handlers) > 0:
+        return logger
 
     handler = RotatingFileHandler(log_path + name + '.log', maxBytes=100000, backupCount=1)
     handler.setFormatter(log_formatter)
 
-    logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
     logger.addHandler(handler)
+
+    listener.add_handler(handler)
 
     return logger
 
@@ -85,8 +96,8 @@ def utc_to_local(date: datetime) -> datetime:
 
 app_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 log_path = app_path + '/log/'
-log_formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-app_logger = get_queue_logger()
+log_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+listener = queue_logger()
 
 if not Path(log_path).is_dir():
     os.mkdir(log_path)

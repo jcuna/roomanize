@@ -19,3 +19,10 @@ class Result:
     @staticmethod
     def custom(result: dict):
         return result, 200
+
+    @staticmethod
+    def model(data):
+        if isinstance(data, list):
+            return list(map(dict, data))
+
+        return dict(data)

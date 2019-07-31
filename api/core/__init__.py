@@ -2,7 +2,6 @@ import json
 import os
 import socket
 import struct
-import sys
 import threading
 from flask import request
 from dal.models import Audit
@@ -10,14 +9,9 @@ from flask_restful import Resource
 from .router import Router
 from .utils import get_logger, app_path
 from .middleware import Middleware, error_handler
-from pprint import pformat
 from flask_caching import Cache as CacheService
 from simplecrypt import encrypt, decrypt
 from base64 import b64encode, b64decode
-
-
-def c_print(obj):
-    print(pformat(obj), file=sys.stderr)
 
 
 class Cache:

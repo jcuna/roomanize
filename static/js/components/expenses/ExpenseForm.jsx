@@ -52,7 +52,7 @@ export default class ExpenseForm extends React.Component {
 
                 this.props.dispatch(editExpense(expense.id, { nonce }, ({ token, id, domain }) => {
                     this.setState({ expense_id: id, token, domain });
-                    ws(EXPENSE_TOKEN_ADDED, `/expense-scans/${ token }/${ id }`, (re) => {
+                    ws(EXPENSE_TOKEN_ADDED, `/expense-scans/${ token }/${ id }`, () => {
                         this.props.dispatch(getExpense(id));
                     });
                 }));
@@ -83,7 +83,7 @@ export default class ExpenseForm extends React.Component {
 
         this.props.dispatch(createNewExpense(payload, ({ token, id, domain }) => {
             this.setState({ expense_id: id, token, domain });
-            ws(EXPENSE_TOKEN_ADDED, `/expense-scans/${ token }/${ id }`, (re) => {
+            ws(EXPENSE_TOKEN_ADDED, `/expense-scans/${ token }/${ id }`, () => {
                 this.props.dispatch(getExpense(id));
             });
         }));
@@ -200,18 +200,24 @@ export default class ExpenseForm extends React.Component {
         return list.length === 1 && list[0].signed_urls &&
             list[0].signed_urls.map((pic, i) =>
                 <div key={ i }>
-                    <img src={ pic } alt='recibo' className='receipt-scan'/>
-                    { canDelete && <FontAwesome type={ 'trash' } onClick={ this.deleteReceiptScan } data-id={ i }/> }
-                    { <FontAwesome type={ 'sync-alt' } onClick={ this.rotate } data-id={ i }/> }
+                    <img src={ pic } alt='recibo' onClick={ this.zoomImage } data-id={ i } className='receipt-scan'/>
+                    <div>
+                        { canDelete && <FontAwesome type={ 'trash' } onClick={ this.deleteReceiptScan } data-id={ i }/> }
+                        { <FontAwesome type={ 'sync' } onClick={ this.rotate } data-id={ i }/> }
+                    </div>
                 </div>
             );
     }
 
-    rotate( { target }) {
+    rotate({ target }) {
         console.log(target);
     }
 
     deleteReceiptScan({ target }) {
+        console.log(target);
+    }
+
+    zoomImage({ target }) {
         console.log(target);
     }
 
