@@ -2,7 +2,9 @@ SECRET_KEY = '~.\xb83\x9a\xb0F\xe7\xdd(\xfb\xcc\xef)\xa8\x00\xd4X\xdel\xe4\xe8%\
 SQLALCHEMY_DATABASE_URI = 'postgresql://test:test@postgres/roomanize'
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 SQLALCHEMY_POOL_RECYCLE = True
-APP_ENV = 'develop'
+
+APP_ENV = 'production'
+DEBUG = False
 
 # for dev, we use sendmail so use config like
 MAIL_MAILER = '/usr/sbin/ssmtp'

@@ -1,13 +1,14 @@
 import json
-import os
+import atexit
 import socket
 import struct
 import threading
+from time import sleep
 from flask import request
 from dal.models import Audit
 from flask_restful import Resource
 from .router import Router
-from .utils import get_logger, app_path
+from .utils import get_logger, app_path, app_logger
 from .middleware import Middleware, error_handler
 from flask_caching import Cache as CacheService
 from simplecrypt import encrypt, decrypt
@@ -42,6 +43,8 @@ class Cache:
 
 class API(Resource):
 
+    audit_tasks = []
+
     def dispatch_request(self, *args, **kwargs):
         output = super(Resource, self).dispatch_request(*args, **kwargs)
 
@@ -63,46 +66,63 @@ class API(Resource):
                 'all': request.get_data(as_text=True)
             })
         )
-
-        async_task = AsyncAuditor(audit=audit)
-        async_task.start()
+        self.audit_tasks.append(audit)
 
         return output
 
 
 class AsyncAuditor(threading.Thread):
 
-    def __init__(self, audit: tuple):
+    def __init__(self, tasks: list, stop: threading.Event):
         super().__init__()
-        self.audit = audit
+        self.tasks = tasks
+        self.stop_event = stop
 
     def run(self):
         from app import init_app
         from dal import db
 
         app = init_app(mode='sys')
+        app.logger.info('starting async audit thread')
 
         with app.app_context():
             try:
-                self.audit.payload = encryptor.encrypt(self.audit.payload)
-                self.audit.ip = struct.unpack("!I", socket.inet_aton(self.audit.ip))[0]
-                db.session.add(self.audit)
-                db.session.commit()
-            except Exception as e:
-                app.logger.exception(self.audit)
+                while not self.stop_event.is_set():
+                    if len(self.tasks) > 0:
+                        task: dict
+                        for task in self.tasks:
+                            app.logger.info(str(threading.current_thread()) + ' new audit record')
+                            task.payload = encryptor.encrypt(task.payload)
+                            task.ip = struct.unpack("!I", socket.inet_aton(task.ip))[0]
+                            db.session.add(task)
+                        self.tasks.clear()
+                        db.session.commit()
+                    sleep(2)
+                app.logger.info('exiting async audit thread')
+            except BaseException as e:
+                app.logger.exception('Exception')
 
 
-def runner(app):
+def runner():
+    # this is our cron job runner
+    from config.crons import cron_jobs
+    from apscheduler.schedulers.background import BackgroundScheduler
 
-    # if this is not a second spawn for auto reload worker
-    if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
-        from config.crons import cron_jobs
-        from apscheduler.schedulers.background import BackgroundScheduler
+    scheduler = BackgroundScheduler(timezone='utc')
+    scheduler.start()
+    for job in cron_jobs:
+        scheduler.add_job(**job)
 
-        scheduler = BackgroundScheduler(timezone='utc')
-        scheduler.start()
-        for job in cron_jobs:
-            scheduler.add_job(**job)
+    # this long running is used to perform after request auditing
+    stop_event = threading.Event()
+    async_task = AsyncAuditor(API.audit_tasks, stop_event)
+    async_task.start()
+
+    def exit_async_thread():
+        stop_event.set()
+        async_task.join()
+
+    atexit.register(exit_async_thread)
 
 
 class Encryptor:

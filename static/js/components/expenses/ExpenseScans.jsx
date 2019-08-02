@@ -50,9 +50,9 @@ export default class Expenses extends React.Component {
     }
 
     uploadReceipt({ target }) {
-        this.setState({ processing: true });
-        const file = target.files[0];
-        if (file.size > this.props.max_upload_size) {
+        if (target.files.length > 0) {
+            this.setState({ processing: true });
+            const file = target.files[0];
             const canvas = document.createElement('canvas');
             const img = new Image();
 
@@ -63,8 +63,6 @@ export default class Expenses extends React.Component {
                 });
             };
             img.src = URL.createObjectURL(file);
-        } else {
-            this.sendFileToServer(file, file.name);
         }
     }
 
@@ -74,6 +72,11 @@ export default class Expenses extends React.Component {
             this.props.match.params.expense_id,
             file, name, () => {
                 this.setState({ processing: false });
+            }, (err) => {
+                this.setState({ processing: false });
+                this.props.dispatch(notifications({
+                    type: ALERTS.DANGER, message: err.resp.error
+                }));
             }
         ));
     }

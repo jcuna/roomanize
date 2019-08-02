@@ -296,7 +296,11 @@ class Expense(db.Model, ModelIter):
     description = db.Column(db.String(512), nullable=False)
     input_date = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow)
     expense_date = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.utcnow)
-    receipt_scans = db.Column(MutableList.as_mutable(db.JSON))
+    receipt_scans = db.Column(
+        MutableList.as_mutable(db.JSON),
+        comment='A JSON schema of scanned receipts',
+        nullable=False,
+        server_default='[]')
 
     project = relationship(Project, uselist=False)
 

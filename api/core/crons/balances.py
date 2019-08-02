@@ -49,7 +49,7 @@ def process_agreements(agreements, logger):
     agreement: RentalAgreement
     for agreement in agreements:
         if len(agreement.balances) > 1:
-            logger.error('Invalid agreement was setup with more than two balances per cycle')
+            logger.error('Invalid agreement was setup with more than two balances per cycle ' + str(agreement.id))
 
         logger.info('Processing agreement id: ' + str(agreement.id))
 

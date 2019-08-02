@@ -14,6 +14,7 @@ class Storage(object):
 
     def __init__(self, bucket, resource='s3'):
         self.bucket = bucket
+        self.app_logger = get_logger('app')
 
         if 'session' not in self.session or self.session['expire'] < datetime.utcnow():
             with current_app.app_context():
@@ -52,7 +53,7 @@ class Storage(object):
         s3 = self.session.resource('s3')
         return s3.Bucket(bucket)
 
-    def sign_url(self, object_name, expiration=3600):
+    def sign_url(self, object_name, expiration=14400):
         """Generate a presigned URL to share an S3 object
 
         :param object_name: string
@@ -66,8 +67,7 @@ class Storage(object):
                 ExpiresIn=expiration
             )
         except ClientError as e:
-            app_logger = get_logger('app')
-            app_logger.error(e)
+            self.app_logger.error(e)
             return None
 
         # The response contains the presigned URL
@@ -83,6 +83,6 @@ class Storage(object):
         try:
             response = self.get_client().upload_file(file_name, self.bucket, object_name)
         except ClientError as e:
-            app_logger.error(e)
+            self.app_logger.error(e)
             return False
         return response

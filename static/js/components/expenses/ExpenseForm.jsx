@@ -191,6 +191,7 @@ export default class ExpenseForm extends React.Component {
                 <QRCode
                     value={ `${ domain }${ path }/${ token }/${ expense_id }` }
                 />
+                <hr/>
             </div>;
         }
         return null;

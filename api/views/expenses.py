@@ -4,7 +4,9 @@ from datetime import datetime
 import os
 from flask_socketio import emit
 from sqlalchemy.orm import joinedload
-from core import API
+from sqlalchemy.orm.attributes import flag_modified
+from config.constants import RECEIPT_STORAGE_PATH, RECEIPT_STORAGE_THUMBNAILS
+from core import API, Cache
 from flask import request, current_app
 from core.AWS import Storage
 from core.middleware import HttpException
@@ -13,6 +15,8 @@ from dal.models import UserToken, Expense, db
 from dal.shared import token_required, access_required, Paginator, row2dict
 from views import Result
 from mimetypes import guess_extension
+from io import BytesIO
+from PIL import Image
 
 
 class Expenses(API):
@@ -30,7 +34,9 @@ class Expenses(API):
                 row = row2dict(ex)
                 row['signed_urls'] = []
                 if ex.receipt_scans:
-                    [row['signed_urls'].append(s3.sign_url(url)) for url in ex.receipt_scans]
+                    [row['signed_urls'].append(
+                        Cache.remember(url, lambda: s3.sign_url(RECEIPT_STORAGE_THUMBNAILS + url), 14400)
+                    ) for url in ex.receipt_scans]
 
                 result = [row]
             else:
@@ -106,36 +112,33 @@ class ExpenseScans(API):
         self.validate_token(token, request)
 
         expense = Expense.query.filter_by(id=expense_id).first()
-        if not expense.receipt_scans:
-            expense.receipt_scans = []
 
         if not expense:
             raise HttpException('Invalid id')
 
         s3 = Storage(current_app.config['AWS_FILE_MANAGER_BUCKET_NAME'])
 
-        if len(request.files) > 0:
-            for file in request.files:
-                filename, extension = os.path.splitext(file)
-                key_name = 'receipts/' + hashlib.sha256(
-                    (str(datetime.utcnow().timestamp()) + filename + extension + token).encode('utf8')
-                ).hexdigest() + extension
+        filename, _ = os.path.splitext(request.form.get('name'))
+        content_type, base64_img = request.form.get('image').split(':')[1].split(';')
+        extension = guess_extension(content_type)
+        img = base64.decodebytes(base64_img.split(',')[1].encode('utf-8'))
+        key_name = hashlib.sha256(
+            (str(datetime.utcnow().timestamp()) + filename + extension + token).encode('utf8')
+        ).hexdigest() + extension
 
-                expense.receipt_scans.append(key_name)
+        bin_img = Image.open(BytesIO(img))
+        orig_width, orig_height = bin_img.size
+        thumb_width = 128
+        height = int(orig_height * thumb_width / orig_width)
+        size = thumb_width, height
+        thumb = bin_img.resize(size)
+        with BytesIO() as output:
+            thumb.save(output, extension.strip('.'))
+            s3.put_new(output.getvalue(), RECEIPT_STORAGE_THUMBNAILS + key_name, content_type)
+        s3.put_new(img, RECEIPT_STORAGE_PATH + key_name, content_type)
 
-                s3.put_new(request.files[file], key_name)
-        else:
-            filename, _ = os.path.splitext(request.form.get('name'))
-            content_type, base64_img = request.form.get('image').split(':')[1].split(';')
-            extension = guess_extension(content_type)
-            img = base64.decodebytes(base64_img.split(',')[1].encode('utf-8'))
-            key_name = 'receipts/' + hashlib.sha256(
-                (str(datetime.utcnow().timestamp()) + filename + extension + token).encode('utf8')
-            ).hexdigest() + extension
-
-            expense.receipt_scans.append(key_name)
-            s3.put_new(img, key_name, content_type)
-
+        expense.receipt_scans.append(key_name)
+        flag_modified(expense, 'receipt_scans')
         db.session.commit()
         emit(
             'EXPENSE_TOKEN_ADDED',
