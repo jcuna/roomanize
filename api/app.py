@@ -13,7 +13,7 @@ def init_app(mode='web') -> Flask:
     this_app.env = this_app.config['APP_ENV']
     # configure the app to log to a file.
     if len(this_app.logger.handlers) == 0:
-        this_app.logger.setLevel(logging.INFO if this_app.debug else logging.WARN)
+        this_app.logger.setLevel(logging.DEBUG if this_app.debug else logging.INFO)
         this_app.logger.addHandler(*app_logger.handlers)
         gunicorn_logger = logging.getLogger('gunicorn.error')
         gunicorn_logger.handlers = app_logger.handlers

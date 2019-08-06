@@ -1,5 +1,6 @@
 import json
 import atexit
+import os
 import socket
 import struct
 import threading
@@ -104,25 +105,27 @@ class AsyncAuditor(threading.Thread):
 
 
 def runner():
-    # this is our cron job runner
-    from config.crons import cron_jobs
-    from apscheduler.schedulers.background import BackgroundScheduler
+    # if this is not a second spawn for auto reload worker
+    if os.environ.get('APP_ENV') == 'production' or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+        # this is our cron job runner
+        from config.crons import cron_jobs
+        from apscheduler.schedulers.background import BackgroundScheduler
 
-    scheduler = BackgroundScheduler(timezone='utc')
-    scheduler.start()
-    for job in cron_jobs:
-        scheduler.add_job(**job)
+        scheduler = BackgroundScheduler(timezone='utc')
+        scheduler.start()
+        for job in cron_jobs:
+            scheduler.add_job(**job)
 
-    # this long running is used to perform after request auditing
-    stop_event = threading.Event()
-    async_task = AsyncAuditor(API.audit_tasks, stop_event)
-    async_task.start()
+        # this long running is used to perform after request auditing
+        stop_event = threading.Event()
+        async_task = AsyncAuditor(API.audit_tasks, stop_event)
+        async_task.start()
 
-    def exit_async_thread():
-        stop_event.set()
-        async_task.join()
+        def exit_async_thread():
+            stop_event.set()
+            async_task.join()
 
-    atexit.register(exit_async_thread)
+        atexit.register(exit_async_thread)
 
 
 class Encryptor:

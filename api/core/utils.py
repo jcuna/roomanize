@@ -8,13 +8,14 @@ import queue
 from logging.handlers import QueueHandler, QueueListener, RotatingFileHandler
 
 
-def get_logger(name='app'):
+def get_logger(name: str = 'app', level: int = logging.INFO):
     """
     return a logger with default settings
 
     :return: Logger
     """
     logger = logging.getLogger(name)
+    logger.setLevel(level)
     if len(logger.handlers) > 0:
         return logger
 
