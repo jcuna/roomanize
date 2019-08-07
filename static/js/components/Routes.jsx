@@ -66,7 +66,7 @@ export default class Routes extends React.Component {
                     render={ props => this.getComponent(AgreementEdit, props) }
                 />
 
-                <Route exact path={ `${ ep.RECEIPTS_URL }/:action(recibo|inquilino)?/:id([0-9]+)?` }
+                <Route exact path={ `${ ep.RECEIPTS_URL }/:action(recibo|inquilino|habitacion)?/:id([0-9]+)?` }
                     render={ (props) => this.getMiddleware(RequiresProject, Receipts, ep.RECEIPTS_URL, props) }
                 />
 

@@ -3,9 +3,22 @@ import os
 from datetime import datetime
 from pathlib import Path
 import pytz
-from flask import current_app
+from flask import current_app, Flask
 import queue
 from logging.handlers import QueueHandler, QueueListener, RotatingFileHandler
+
+
+def configure_loggers(app: Flask):
+    if len(app.logger.handlers) == 0 or isinstance(app.logger.handlers[0], logging.StreamHandler):
+        level = logging.DEBUG if app.debug else logging.INFO
+        app.logger.setLevel(level)
+        app.logger.handlers = app_logger.handlers
+        gunicorn_logger = logging.getLogger('gunicorn.error')
+        gunicorn_logger.setLevel(level)
+        gunicorn_logger.handlers = app_logger.handlers
+        db_logging = logging.getLogger('sqlalchemy.engine')
+        db_logging.setLevel(level)
+        db_logging.handlers = get_logger('sql', level).handlers
 
 
 def get_logger(name: str = 'app', level: int = logging.INFO):

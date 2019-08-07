@@ -47,7 +47,14 @@ export default class TenantHistory extends React.Component {
         </div>;
     }
 
-    static displayTenantHistory(history, onFinalize, newPayment, canProcessPayments, canUpdateAgreements, timeIntervals) {
+    static displayTenantHistory(
+        history,
+        onFinalize,
+        newPayment,
+        canProcessPayments,
+        canUpdateAgreements,
+        timeIntervals
+    ) {
         history.sort((a, b) => {
             const aDate = new Date(a.rental_agreement.entered_on);
             const bDate = new Date(b.rental_agreement.entered_on);
@@ -168,7 +175,6 @@ export default class TenantHistory extends React.Component {
                                     />
                                 </div>
                                 }
-                                { canProcessPayments &&
                                 <div className='col-4'>
                                     <Link
                                         className='btn btn-sm btn-success'
@@ -177,7 +183,6 @@ export default class TenantHistory extends React.Component {
                                         Ver recibos
                                     </Link>
                                 </div>
-                                }
                                 { canUpdateAgreements &&
                                 <div className='col-4'>
                                     <Button

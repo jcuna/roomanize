@@ -45,15 +45,7 @@ export default function agreementsReducer(state = initialData, action) {
         case AGREEMENT_CLEAR:
             return { ...state, agreement: { ...initialData.agreement }};
         case AGREEMENT_SET:
-            const agreement = { ...state.agreement };
-
-            Object.keys(initialData.agreement).forEach(key => {
-                if (typeof action.payload[key] !== 'undefined') {
-                    agreement[key] = { ...action.payload[key] };
-                }
-            });
-
-            return { ...state, agreement };
+            return { ...state, agreement: { ...initialData.agreement, ...action.payload }};
         case AGREEMENT_CREATED:
             return { ...state, agreement: { ...state.agreement, id: action.payload }};
         default:

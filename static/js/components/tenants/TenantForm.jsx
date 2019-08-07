@@ -131,7 +131,7 @@ export default class TenantForm extends React.Component {
                 /> }
             </section>
 
-            { editing && <div className='table-actions'>
+            { hasAccess(ENDPOINTS.AGREEMENTS_URL, ACCESS_TYPES.WRITE) && editing && <div className='table-actions'>
                 <button
                     onClick={ this.newAgreementRegistration }
                     className='btn btn-success'>
@@ -147,8 +147,7 @@ export default class TenantForm extends React.Component {
                     selectedTenant={ this.props.tenants.selectedTenant }
                     projects={ this.props.projects }
                     timeIntervals={ this.props.timeIntervals }
-                    canProcessPayments={ hasAccess(ENDPOINTS.AGREEMENTS_URL, ACCESS_TYPES.WRITE) &&
-                        hasAccess(ENDPOINTS.AGREEMENTS_URL, ACCESS_TYPES.READ) }
+                    canProcessPayments={ hasAccess(ENDPOINTS.BALANCE_PAYMENTS_URL, ACCESS_TYPES.WRITE) }
                     canUpdateAgreement={ hasAccess(ENDPOINTS.RECEIPTS_URL, ACCESS_TYPES.WRITE) }
                     history={ this.props.history }
                 />

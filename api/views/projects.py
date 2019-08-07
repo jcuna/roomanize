@@ -2,10 +2,10 @@ import json
 import sqlalchemy
 from datetime import datetime
 from flask import request, session
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, load_only
 from core import API
 from core.middleware import HttpException
-from dal.models import Project, TimeInterval, User, Room, PaymentType, RentalAgreement
+from dal.models import Project, TimeInterval, User, Room, PaymentType, RentalAgreement, TenantHistory
 from dal.shared import token_required, access_required, db, get_fillable, row2dict, Paginator
 from views import Result
 
@@ -198,18 +198,21 @@ class PaymentTypes(API):
 
 class RoomsHistory(API):
 
+    @token_required
+    @access_required
     def get(self, room_id):
 
         page = request.args.get('page') if 'page' in request.args else 1
 
-        sql_query = RentalAgreement.query.options(
-            joinedload('tenant_history'),
-            joinedload('tenant_history.tenant'),
+        query = db.session.query(RentalAgreement).options(
+            load_only('tenant_history_id'),
+            joinedload(RentalAgreement.tenant_history).load_only(TenantHistory.tenant_id).
+            joinedload(TenantHistory.tenant)
         ).filter_by(room_id=room_id)
 
         order_by = request.args.get('orderBy') if 'orderBy' in request.args else 'created_on'
         order_dir = request.args.get('orderDir') if 'orderDir' in request.args else 'desc'
-        paginator = Paginator(sql_query, int(page), order_by, order_dir)
+        paginator = Paginator(query, int(page), order_by, order_dir)
         total_pages = paginator.total_pages
 
         return Result.paginate(
@@ -218,8 +221,9 @@ class RoomsHistory(API):
 
     @staticmethod
     def deconstruct_room_history(row: RentalAgreement):
-        model = dict(row)
-        model['history'] = dict(row.tenant_history)
-        model['history']['tenant'] = dict(row.tenant_history.tenant)
-
-        return model
+        return {
+            'agreement_id': row.id,
+            'agreement_terminated_on': str(row.terminated_on) if row.terminated_on is not None else None,
+            'tenant_name': ' '.join([row.tenant_history.tenant.first_name, row.tenant_history.tenant.last_name]),
+            'tenant_id': row.tenant_history.tenant_id
+        }

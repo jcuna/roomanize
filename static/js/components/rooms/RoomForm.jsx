@@ -5,24 +5,46 @@
 import React, { Component } from 'react';
 import FormGenerator from '../../utils/FromGenerator';
 import PropTypes from 'prop-types';
-import { createRoom, editRoom, fetchRoom, fetchRooms, selectRoom } from '../../actions/roomActions';
+import { createRoom, editRoom, fetchRoom, fetchRoomHistory, fetchRooms, selectRoom } from '../../actions/roomActions';
 import { notifications } from '../../actions/appActions';
-import { ALERTS, ENDPOINTS, GENERIC_ERROR, STATUS } from '../../constants';
+import { ACCESS_TYPES, ALERTS, ENDPOINTS, GENERIC_ERROR, STATUS } from '../../constants';
 import Breadcrumbs from '../../utils/Breadcrumbs';
 import Spinner from '../../utils/Spinner';
+import Link from 'react-router-dom/es/Link';
+import Table from '../../utils/Table';
+import { formatDateEs } from '../../utils/helpers';
+import { hasAccess } from '../../utils/config';
+import Paginate from '../../utils/Paginate';
+import { getAgreementBalance } from '../../actions/receiptsActions';
 
 export default class RoomForm extends Component {
     constructor(props) {
         super(props);
-        this.state = { errors: true, ...RoomForm.getStateFromProps(props) };
+        this.state = {
+            errors: true,
+            ...RoomForm.getStateFromProps(props),
+            page: 1,
+        };
 
         this.handleSubmit = this.handleSubmit.bind(this);
         this.onInputChange = this.onInputChange.bind(this);
+        this.switchPage = this.switchPage.bind(this);
 
         if (typeof this.props.match.params.room_id !== 'undefined' && this.state.id === 0 &&
             this.props.rooms.status !== STATUS.TRANSMITTING) {
             this.props.dispatch(fetchRoom(this.props.match.params.room_id, () => {
                 this.props.history.push('/error/404');
+            }));
+        }
+        if (hasAccess(ENDPOINTS.ROOMS_HISTORY_URL, ACCESS_TYPES.READ)) {
+            this.props.dispatch(fetchRoomHistory(this.props.match.params.room_id, this.state.page, ({ list }) => {
+                if (hasAccess(ENDPOINTS.BALANCE_PAYMENTS_URL, ACCESS_TYPES.WRITE)) {
+                    list.forEach(agreement => {
+                        if (agreement.agreement_terminated_on === null) {
+                            this.props.dispatch(getAgreementBalance(agreement.agreement_id));
+                        }
+                    });
+                }
             }));
         }
     }
@@ -43,7 +65,8 @@ export default class RoomForm extends Component {
     }
 
     render() {
-        const creating = typeof this.props.match.params.room_id === 'undefined';
+        const { match, rooms, receipts } = this.props;
+        const creating = typeof match.params.room_id === 'undefined';
 
         if (!creating && this.state.id === 0) {
             return <Spinner/>;
@@ -77,8 +100,64 @@ export default class RoomForm extends Component {
                     ],
                     onSubmit: this.handleSubmit,
                 } }/>
+                <Link
+                    className='btn btn-sm btn-success'
+                    to={ `${ENDPOINTS.RECEIPTS_URL}/habitacion/${ match.params.room_id }` }
+                >Historial de Recibos</Link>
             </section>
+            { this.getRoomHistory(rooms.selectedRoom.rental_history, receipts) }
         </div>;
+    }
+
+    getPaginator(total_pages) {
+        return total_pages > 1 && <Paginate
+            total_pages={ total_pages }
+            onPageChange={ this.switchPage }
+            initialPage={ this.state.page }
+        />;
+    }
+
+    switchPage(number) {
+        this.setState({ page: number });
+    }
+
+    getRoomHistory({ list, total_pages }, { selectedBalance }) {
+        const canEditTenant = hasAccess(ENDPOINTS.TENANTS_URL, ACCESS_TYPES.WRITE);
+        return list.length > 0 && <section className='widget room-history'>
+            <h3>Historial de renta</h3>
+            { list.map((history, i) => {
+                const rows = [
+                    [
+                        'Inquilino',
+                        RoomForm.getTenantLine(history, canEditTenant, i)
+                    ],
+                    [
+                        'Estatus',
+                        history.agreement_terminated_on &&
+                        'Terminado el ' + formatDateEs(new Date(history.agreement_terminated_on)) ||
+                        <span className='success'>Activo</span>
+                    ]
+                ];
+                if (selectedBalance.agreement_id === history.agreement_id) {
+                    rows.push(['Proximo Pago', formatDateEs(new Date(selectedBalance.due_date))]);
+                }
+
+                return <section key={ i } className='room-tenant'>
+                    <Table numberedRows={ false } rows={ rows }/>
+                </section>;
+            })}
+            { this.getPaginator(total_pages) }
+        </section>;
+    }
+
+    static getTenantLine(tenant, canEdit, key) {
+        if (canEdit) {
+            return (
+                <Link
+                    key={ key } to={ `${ ENDPOINTS.TENANTS_URL }/editar/${ tenant.tenant_id }` }>{ tenant.tenant_name }
+                </Link>);
+        }
+        return tenant.tenant_name;
     }
 
     handleSubmit(event, validation) {
@@ -128,6 +207,9 @@ export default class RoomForm extends Component {
         if (prevProps.rooms.selectedRoom.id !== this.props.rooms.selectedRoom.id) {
             this.setState({ ...RoomForm.getStateFromProps(this.props) });
         }
+        if (prevState.page !== this.state.page) {
+            this.props.dispatch(fetchRoomHistory(this.props.match.params.room_id, this.state.page));
+        }
     }
 
     onInputChange(e, validation) {
@@ -153,5 +235,6 @@ export default class RoomForm extends Component {
         match: PropTypes.object,
         location: PropTypes.object,
         rooms: PropTypes.object,
+        receipts: PropTypes.object,
     };
 }

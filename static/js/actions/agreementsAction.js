@@ -41,21 +41,6 @@ export const updateAgreement = (data, resolve, reject) =>
         }, reject);
     };
 
-export const getAgreements = (page, orderBy, dir, resolve, reject) =>
-    (dispatch) => {
-        dispatch({ type: AGREEMENTS_PROCESSING });
-        token.through().then(header => {
-            api({
-                url: `/agreements?page=${ page }&orderBy=${ orderBy }&orderDir=${ dir }`,
-                method: 'GET',
-                headers: header,
-            }).then(resp => {
-                dispatch({ type: AGREEMENTS_FETCHED, payload: resp.data });
-                resolve && resolve();
-            }, reject);
-        }, reject);
-    };
-
 export const clearAgreement = () =>
     (dispatch) => dispatch({ type: AGREEMENT_CLEAR });
 

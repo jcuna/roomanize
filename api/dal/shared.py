@@ -146,6 +146,8 @@ class ModelIter(object):
                     yield column.name, str(attr)
                 elif isinstance(attr, datetime):
                     yield column.name, str(attr)
+                elif isinstance(attr, bool) or isinstance(attr, int):
+                    yield column.name, attr
                 elif not isinstance(attr, str):
                     yield column.name, str(attr) if attr is not None else None
                 else:

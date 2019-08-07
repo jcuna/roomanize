@@ -1,4 +1,4 @@
-import { RECEIPTS_FETCHED, RECEIPTS_FETCHING } from '../actions/receiptsActions';
+import { BALANCE_FETCHED, RECEIPTS_FETCHED, RECEIPTS_FETCHING } from '../actions/receiptsActions';
 
 const initialData = {
     processing: false,
@@ -7,6 +7,14 @@ const initialData = {
         total_pages: 1,
         list: [],
     },
+    selectedBalance: {
+        id: 0,
+        agreement_id: 0,
+        balance: 0,
+        previous_balance: 0,
+        created_on: null,
+        due_date: null,
+    }
 };
 
 export default function receiptsReducer(state = initialData, action) {
@@ -15,6 +23,8 @@ export default function receiptsReducer(state = initialData, action) {
             return { ...state, processing: true, data: { ...state.data, list: [] }};
         case RECEIPTS_FETCHED:
             return { ...state, processing: false, data: action.payload };
+        case BALANCE_FETCHED:
+            return { ...state, selectedBalance: action.payload };
         default:
             return state;
     }

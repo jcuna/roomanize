@@ -108,11 +108,11 @@ class BalancePayments(API):
 
         return Result.id(payment.id)
 
-    def delete(self, payment_id):
-        pass
-
-    def get(self, payment_id):
-        pass
+    @token_required
+    @access_required
+    def get(self, agreement_id):
+        return dict(Balance.query.filter_by(agreement_id=agreement_id).
+                    order_by(Balance.due_date.desc()).first())
 
 
 class Policies(API):
