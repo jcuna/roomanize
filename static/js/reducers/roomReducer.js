@@ -21,7 +21,19 @@ const initState = {
         total_pages: 1,
         list: [],
     },
-    selectedRoom: {}
+    selectedRoom: {
+        id: 0,
+        project_id: 0,
+        name: '',
+        description: '',
+        picture: null,
+        reserved: false,
+        rental_history: {
+            page: 1,
+            total_pages: 1,
+            list: [],
+        }
+    }
 };
 
 export default function roomReducer(state = initState, action) {
@@ -31,7 +43,11 @@ export default function roomReducer(state = initState, action) {
         case ROOMS_FETCHED:
             return { ...state, status: STATUS.COMPLETE, data: action.payload };
         case ROOM_SELECTED:
-            return { ...state, selectedRoom: action.payload, status: STATUS.COMPLETE };
+            return {
+                ...state,
+                selectedRoom: { ...initState.selectedRoom, ...action.payload },
+                status: STATUS.COMPLETE
+            };
         case ROOMS_SEARCHING:
             return { ...state, searchingBackEnd: true };
         case ROOMS_SEARCHED:

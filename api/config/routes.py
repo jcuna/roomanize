@@ -16,6 +16,7 @@ def register():
 
         'projects.Projects@projects_url': '/projects|/projects/|/projects/<int:project_id>',
         'projects.Rooms@rooms_url': '/rooms|/rooms/|/rooms/<int:room_id>',
+        'projects.RoomsHistory@rooms_history_url': '/rooms-history/|/rooms-history/<int:room_id>',
         'projects.TimeIntervals@time_intervals_url': '/time-intervals|/time-intervals/',
         'projects.PaymentTypes@payment_types_url': '/payment-types|/payment-types/',
 

@@ -146,8 +146,6 @@ class ModelIter(object):
                     yield column.name, str(attr)
                 elif isinstance(attr, datetime):
                     yield column.name, str(attr)
-                elif isinstance(attr, db.Model):
-                    return dict(attr)
                 elif not isinstance(attr, str):
                     yield column.name, str(attr) if attr is not None else None
                 else:

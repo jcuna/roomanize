@@ -103,12 +103,16 @@ class Rooms(API):
         project_id = request.user.attributes.preferences['default_project']
 
         if room_id:
-            room = Room.query.filter_by(id=room_id).filter_by(project_id=project_id).first()
+            room = Room.query.options(
+                joinedload('rental_agreement').load_only(RentalAgreement.id)
+            ).filter_by(id=room_id).filter_by(project_id=project_id).first()
 
             if not room:
                 raise HttpException('Not found', 404)
 
-            return Result.model(room)
+            room_dict = dict(room)
+            room_dict['reserved'] = room.rental_agreement is not None
+            return room_dict
 
         result = []
         page = request.args.get('page') if 'page' in request.args else 1
@@ -130,7 +134,7 @@ class Rooms(API):
 
         if rooms:
             for room in rooms:
-                room_dic = row2dict(room)
+                room_dic = dict(room)
                 room_dic['reserved'] = room.rental_agreement is not None
                 result.append(room_dic)
 
@@ -190,3 +194,32 @@ class PaymentTypes(API):
             result.append(row2dict(payment))
 
         return result
+
+
+class RoomsHistory(API):
+
+    def get(self, room_id):
+
+        page = request.args.get('page') if 'page' in request.args else 1
+
+        sql_query = RentalAgreement.query.options(
+            joinedload('tenant_history'),
+            joinedload('tenant_history.tenant'),
+        ).filter_by(room_id=room_id)
+
+        order_by = request.args.get('orderBy') if 'orderBy' in request.args else 'created_on'
+        order_dir = request.args.get('orderDir') if 'orderDir' in request.args else 'desc'
+        paginator = Paginator(sql_query, int(page), order_by, order_dir)
+        total_pages = paginator.total_pages
+
+        return Result.paginate(
+            list(map(self.deconstruct_room_history, paginator.get_result())), page, total_pages
+        )
+
+    @staticmethod
+    def deconstruct_room_history(row: RentalAgreement):
+        model = dict(row)
+        model['history'] = dict(row.tenant_history)
+        model['history']['tenant'] = dict(row.tenant_history.tenant)
+
+        return model
