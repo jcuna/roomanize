@@ -139,7 +139,7 @@ export default class RoomForm extends Component {
                     ]
                 ];
                 if (selectedBalance.agreement_id === history.agreement_id) {
-                    rows.push(['Proximo Pago', formatDateEs(new Date(selectedBalance.due_date))]);
+                    rows.push(['Dia De Pago', formatDateEs(new Date(selectedBalance.due_date))]);
                 }
 
                 return <section key={ i } className='room-tenant'>

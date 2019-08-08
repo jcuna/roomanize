@@ -35,7 +35,7 @@ def get_logger(name: str = 'app', level: int = logging.INFO):
     log_queue = queue.Queue(-1)
     queue_handler = QueueHandler(log_queue)
 
-    handler = RotatingFileHandler(log_path + name + '.log', maxBytes=100000, backupCount=1)
+    handler = RotatingFileHandler(log_path + name + '.log', maxBytes=1000000, backupCount=1)
     handler.setFormatter(log_formatter)
 
     # instantiate listener

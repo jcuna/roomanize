@@ -40,6 +40,7 @@ export default class Receipts extends React.Component {
         const customSearch = this.state.search.key !== '' && this.state.search.value !== '';
         const byReceipt = props.match.params.action === 'recibo';
         const byUser = props.match.params.action === 'inquilino';
+        const byRoom = props.match.params.action === 'habitacion';
         const id = props.match.params.id;
 
         if (!this.state.searching) {
@@ -55,6 +56,8 @@ export default class Receipts extends React.Component {
                 props.dispatch(searchReceipts('receipt', id, 'paid_date', 'desc', this.state.page));
             } else if (byUser) {
                 props.dispatch(searchReceipts('tenant', id, 'paid_date', 'desc', this.state.page));
+            } else if (byRoom) {
+                props.dispatch(searchReceipts('room', id, 'paid_date', 'desc', this.state.page));
             } else {
                 props.dispatch(getReceipts(this.state.page, 'paid_date', 'desc'));
             }

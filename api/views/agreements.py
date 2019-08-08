@@ -156,6 +156,8 @@ class Receipts(API):
             query = query.filter(Tenant.id == request.args.get('tenant'))
         elif 'receipt' in request.args:
             query = query.filter(Payment.id == request.args.get('receipt'))
+        elif 'room' in request.args:
+            query = query.filter(RentalAgreement.room_id == request.args.get('room'))
         elif 'paid_date' in request.args:
             day_start = request.args.get('paid_date') + ' 00:00:00'
             day_end = request.args.get('paid_date') + ' 23:59:59'
@@ -168,10 +170,10 @@ class Receipts(API):
 
         if receipts:
             for row in receipts:
-                receipt = row2dict(row)
-                receipt['user'] = row2dict(row.balances.agreement.tenant_history.tenant)
-                receipt['balance'] = row2dict(row.balances)
-                receipt['balance']['agreement'] = row2dict(row.balances.agreement)
+                receipt = dict(row)
+                receipt['user'] = dict(row.balances.agreement.tenant_history.tenant)
+                receipt['balance'] = dict(row.balances)
+                receipt['balance']['agreement'] = dict(row.balances.agreement)
                 result.append(receipt)
 
         return Result.paginate(result, page, total_pages)
