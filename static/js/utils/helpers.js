@@ -118,3 +118,22 @@ export const formatDecimal = ({ target }) => {
     }
     target.selectionEnd = position;
 };
+/**
+ * usage
+ * worker = inlineWorker(function() {..., etc)
+ * worker.onmessage = function(e) {
+ *     alert(done);
+ * };
+ * worker.postMessage('start');
+ *
+ * @param { Function } func
+ * @return {Worker}
+ */
+export const inlineWorker = function (func) {
+    if (typeof Worker === 'function') {
+        return new Worker(URL.createObjectURL(
+            new Blob([`onmessage = ${ func.toString() }`], { type: 'text/javascript' })
+        ));
+    }
+    return null;
+};

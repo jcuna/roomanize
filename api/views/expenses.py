@@ -105,6 +105,7 @@ class ExpenseScans(API):
         }
 
     def put(self, token, expense_id):
+        # TODO: allow image rotation
         pass
 
     def post(self, token, expense_id):

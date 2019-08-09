@@ -14,6 +14,7 @@ import { afterPause, searchArray } from '../../utils/helpers';
 import Paginate from '../../utils/Paginate';
 import FontAwesome from '../../utils/FontAwesome';
 import Breadcrumbs from '../../utils/Breadcrumbs';
+import Table from '../../utils/Table';
 
 export default class Room extends Component {
     constructor(props) {
@@ -136,37 +137,25 @@ export default class Room extends Component {
         const canEdit = hasAccess(ENDPOINTS.ROOMS_URL, ACCESS_TYPES.WRITE);
         const displayData = this.state.searching ? this.state.found : this.props.rooms.data.list;
 
-        return <table className='table table-striped'>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Nombre</th>
-                    <th>Notas</th>
-                    <th>Alquilado</th>
-                    <th>Editar</th>
-                </tr>
-            </thead>
-            <tbody>
-                { displayData.map((item, i) => {
-                    i++;
-                    return <tr key={ i }>
-                        <th scope='row'>{ i }</th>
-                        <td>{ item.name }</td>
-                        <td>{ item.description }</td>
-                        <td>
-                            { item.reserved ? String.fromCodePoint(0x2714) : String.fromCodePoint(0x1F6AB) }
-                        </td>
-                        <td>
-                            { canEdit &&
-                            <Link to={ `${ENDPOINTS.ROOMS_URL }/editar/${item.id}` } onClick={ this.selectRoom }>
-                                <FontAwesome type='edit' data-id={ item.id }/>
-                            </Link> ||
-                            <FontAwesome type='ban'/> }
-                        </td>
-                    </tr>;
-                }) }
-            </tbody>
-        </table>;
+        return <Table
+            headers={ ['Nombre', 'Descripción', 'Alquilado', 'Recibos', 'Editar'] }
+            rows={ displayData.map((item) => {
+                return [
+                    item.name,
+                    item.description,
+                    item.reserved ? String.fromCodePoint(0x2714) : String.fromCodePoint(0x1F6AB),
+                    <Link
+                        key={ 1 } to={ `${ENDPOINTS.RECEIPTS_URL }/habitacion/${item.id}` }
+                        onClick={ this.selectRoom }>
+                        <FontAwesome type='file-contract' data-id={ item.id }/>
+                    </Link>,
+                    canEdit &&
+                    <Link key={ 2 } to={ `${ENDPOINTS.ROOMS_URL }/editar/${item.id}` } onClick={ this.selectRoom }>
+                        <FontAwesome type='edit' data-id={ item.id }/>
+                    </Link> ||
+                    <FontAwesome key={ 2 } type='ban'/>
+                ];
+            }) }/>;
     }
 
     selectRoom({ target }) {

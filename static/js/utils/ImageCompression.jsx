@@ -1,11 +1,14 @@
 /**
  * @author Jon Garcia <jongarcia@sans.org>
  */
+import { inlineWorker } from './helpers';
 
 export class ImageCompression {
-    constructor(canvas, img) {
-        this.canvas = canvas;
+    constructor(img) {
         this.img = img;
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = this.img.width;
+        this.canvas.height = this.img.height;
 
         this.process1 = this.process1.bind(this);
         this.process2 = this.process2.bind(this);
@@ -31,8 +34,6 @@ export class ImageCompression {
         return new Promise((resolve, reject) => {
             try {
                 this.resolve = resolve;
-                this.canvas.width = this.img.width;
-                this.canvas.height = this.img.height;
                 this.canvas.style.display = 'none';
                 this.ctx = this.canvas.getContext('2d');
                 this.ctx.drawImage(this.img, 0, 0);
@@ -56,80 +57,104 @@ export class ImageCompression {
         });
     }
 
-    hermiteCompress(width) {
+    hermiteCompress(targetWith) {
         return new Promise((resolve, reject) => {
             try {
-                width = Math.round(width);
-                const W = this.img.width;
-                const H = this.img.height;
-                this.canvas.width = W;
-                this.canvas.height = H;
+                targetWith = Math.round(targetWith);
+                const imgWidth = this.img.width;
+                const imgHeight = this.img.height;
+                this.canvas.width = imgWidth;
+                this.canvas.height = imgHeight;
                 const ctx = this.canvas.getContext('2d');
-                const H2 = Math.round(this.img.height * width / this.img.width);
+                const targetHeight = Math.round(this.img.height * targetWith / this.img.width);
                 ctx.drawImage(this.img, 0, 0);
 
-                const img = this.canvas.getContext('2d').getImageData(0, 0, W, H);
-                const img2 = this.canvas.getContext('2d').getImageData(0, 0, width, H2);
-                const data = img.data;
-                const data2 = img2.data;
-                const ratio_w = W / width;
-                const ratio_h = H / H2;
-                const ratio_w_half = Math.ceil(ratio_w / 2);
-                const ratio_h_half = Math.ceil(ratio_h / 2);
-
-                for (let j = 0; j < H2; j++) {
-                    for (let i = 0; i < width; i++) {
-                        const x2 = (i + j * width) * 4;
-                        let weight = 0;
-                        let weights = 0;
-                        let weights_alpha = 0;
-                        let gx_r = 0;
-                        let gx_g = 0;
-                        let gx_b = 0;
-                        let gx_a = 0;
-                        const center_y = (j + 0.5) * ratio_h;
-                        for (let yy = Math.floor(j * ratio_h); yy < (j + 1) * ratio_h; yy++) {
-                            const dy = Math.abs(center_y - (yy + 0.5)) / ratio_h_half;
-                            const center_x = (i + 0.5) * ratio_w;
-                            const w0 = dy * dy; //pre-calc part of w
-                            for (let xx = Math.floor(i * ratio_w); xx < (i + 1) * ratio_w; xx++) {
-                                let dx = Math.abs(center_x - (xx + 0.5)) / ratio_w_half;
-                                const w = Math.sqrt(w0 + dx * dx);
-                                if (w >= -1 && w <= 1) {
-                                    //hermite filter
-                                    weight = 2 * w * w * w - 3 * w * w + 1;
-                                    if (weight > 0) {
-                                        dx = 4 * (xx + yy * W);
-                                        //alpha
-                                        gx_a += weight * data[dx + 3];
-                                        weights_alpha += weight;
-                                        //colors
-                                        if (data[dx + 3] < 255) {
-                                            weight = weight * data[dx + 3] / 250;
-                                        }
-                                        gx_r += weight * data[dx];
-                                        gx_g += weight * data[dx + 1];
-                                        gx_b += weight * data[dx + 2];
-                                        weights += weight;
-                                    }
-                                }
-                            }
-                        }
-                        data2[x2] = gx_r / weights;
-                        data2[x2 + 1] = gx_g / weights;
-                        data2[x2 + 2] = gx_b / weights;
-                        data2[x2 + 3] = gx_a / weights_alpha;
-                    }
+                const img = this.canvas.getContext('2d').getImageData(0, 0, imgWidth, imgHeight);
+                const img2 = this.canvas.getContext('2d').getImageData(0, 0, targetWith, targetHeight);
+                const worker = inlineWorker(this.hermiteWorker);
+                if (worker) {
+                    worker.onmessage = ({ data }) => {
+                        this.addToCanvas(data, imgWidth, targetWith, imgHeight, targetHeight, resolve);
+                        worker.terminate();
+                    };
+                    worker.postMessage({ img, img2, targetWith, targetHeight, imgWidth, imgHeight });
+                } else {
+                    this.hermiteWorker({ img, img2, targetWith, targetHeight, imgWidth, imgHeight });
+                    this.addToCanvas(img2, imgWidth, targetWith, imgHeight, targetHeight, resolve);
                 }
-                this.canvas.getContext('2d').clearRect(0, 0, Math.max(W, width), Math.max(H, H2));
-                this.canvas.width = width;
-                this.canvas.height = H2;
-                this.canvas.getContext('2d').putImageData(img2, 0, 0);
-                resolve(this.canvas);
             } catch (e) {
                 reject(e);
             }
         });
+    }
+
+    addToCanvas(data, imgWidth, targetWith, imgHeight, targetHeight, resolve) {
+        this.canvas.getContext('2d').clearRect(
+            0,
+            0,
+            Math.max(imgWidth, targetWith),
+            Math.max(imgHeight, targetHeight)
+        );
+        this.canvas.width = targetWith;
+        this.canvas.height = targetHeight;
+        this.canvas.getContext('2d').putImageData(data, 0, 0);
+        resolve(this.canvas);
+    }
+
+    hermiteWorker({ data }) {
+        const { img, img2, targetWith, targetHeight, imgWidth, imgHeight } = data;
+        const imgData = img.data;
+        const imgData2 = img2.data;
+        const ratio_w = imgWidth / targetWith;
+        const ratio_h = imgHeight / targetHeight;
+        const ratio_w_half = Math.ceil(ratio_w / 2);
+        const ratio_h_half = Math.ceil(ratio_h / 2);
+
+        for (let j = 0; j < targetHeight; j++) {
+            for (let i = 0; i < targetWith; i++) {
+                const x2 = (i + j * targetWith) * 4;
+                let weight = 0;
+                let weights = 0;
+                let weights_alpha = 0;
+                let gx_r = 0;
+                let gx_g = 0;
+                let gx_b = 0;
+                let gx_a = 0;
+                const center_y = (j + 0.5) * ratio_h;
+                for (let yy = Math.floor(j * ratio_h); yy < (j + 1) * ratio_h; yy++) {
+                    const dy = Math.abs(center_y - (yy + 0.5)) / ratio_h_half;
+                    const center_x = (i + 0.5) * ratio_w;
+                    const w0 = dy * dy; //pre-calc part of w
+                    for (let xx = Math.floor(i * ratio_w); xx < (i + 1) * ratio_w; xx++) {
+                        let dx = Math.abs(center_x - (xx + 0.5)) / ratio_w_half;
+                        const w = Math.sqrt(w0 + dx * dx);
+                        if (w >= -1 && w <= 1) {
+                            //hermite filter
+                            weight = 2 * w * w * w - 3 * w * w + 1;
+                            if (weight > 0) {
+                                dx = 4 * (xx + yy * imgWidth);
+                                //alpha
+                                gx_a += weight * imgData[dx + 3];
+                                weights_alpha += weight;
+                                //colors
+                                if (imgData[dx + 3] < 255) {
+                                    weight = weight * imgData[dx + 3] / 250;
+                                }
+                                gx_r += weight * imgData[dx];
+                                gx_g += weight * imgData[dx + 1];
+                                gx_b += weight * imgData[dx + 2];
+                                weights += weight;
+                            }
+                        }
+                    }
+                }
+                imgData2[x2] = gx_r / weights;
+                imgData2[x2 + 1] = gx_g / weights;
+                imgData2[x2 + 2] = gx_b / weights;
+                imgData2[x2 + 3] = gx_a / weights_alpha;
+            }
+        }
+        self.postMessage(img2);
     }
 
     process1(u) {

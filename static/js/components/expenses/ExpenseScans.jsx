@@ -53,12 +53,11 @@ export default class Expenses extends React.Component {
         if (target.files.length > 0) {
             this.setState({ processing: true });
             const file = target.files[0];
-            const canvas = document.createElement('canvas');
             const img = new Image();
 
             img.onload = () => {
-                const ic = new ImageCompression(canvas, img);
-                ic.hermiteCompress(600).then(() => {
+                const ic = new ImageCompression(img);
+                ic.hermiteCompress(600).then((canvas) => {
                     this.sendFileToServer(canvas.toDataURL(), file.name);
                 });
             };
