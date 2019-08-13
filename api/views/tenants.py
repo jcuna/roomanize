@@ -4,7 +4,7 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy.sql import functions
 from core import API
 from dal.models import Tenant, Balance, Payment, TenantHistory, RentalAgreement
-from dal.shared import token_required, access_required, db, get_fillable, Paginator, row2dict
+from dal.shared import token_required, access_required, db, get_fillable, Paginator
 from views import Result
 
 
@@ -35,7 +35,7 @@ class Tenants(API):
 
         if tenants:
             for tenant in tenants:
-                result.append(row2dict(tenant))
+                result.append(dict(tenant))
 
         return Result.paginate(result, page, total_pages)
 
@@ -113,6 +113,7 @@ class Tenants(API):
             Balance.agreement_id.label('agreement_id'),
             Payment.amount.label('amount'),
             functions.max(Payment.paid_date).label('paid_date')).join(Payment)\
+            .distinct('agreement_id')\
             .group_by('agreement_id', 'amount')\
             .filter(Balance.agreement_id.in_(rental_ids)).all()
 

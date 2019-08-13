@@ -73,13 +73,14 @@ export default class TenantHistory extends React.Component {
                 history.map((row, i) => {
                     const items = [];
                     let active = true;
+                    const date = new Date(row.rental_agreement.entered_on);
 
                     if (row.rental_agreement.terminated_on) {
                         active = false;
-                        const date = new Date(row.rental_agreement.terminated_on);
-                        items.push(['Contrato Terminado en:', date.toDateString()]);
+                        const end_date = new Date(row.rental_agreement.terminated_on);
+                        items.push(['Contrato iniciado:', formatDateEs(date)]);
+                        items.push(['Contrato Terminado:', formatDateEs(end_date)]);
                     } else {
-                        const date = new Date(row.rental_agreement.entered_on);
                         items.push(['En vigencia desde', formatDateEs(date)]);
                     }
 
@@ -102,57 +103,51 @@ export default class TenantHistory extends React.Component {
 
                     // balances are sorted in the back end desc by date, so the most recent balance will be at index 0
                     const { balance, last_payment } = row.rental_agreement;
-                    if (active) {
-                        if (balance.length > 0) {
-                            timeIntervals.length > 0 && items.push([
-                                'Ciclo de Pago',
-                                timeIntervals.filter(a => a.id === row.rental_agreement.time_interval_id)
-                                    .pop().interval
-                            ]);
+                    timeIntervals.length > 0 && items.push([
+                        'Ciclo de Pago',
+                        timeIntervals.filter(a => a.id === row.rental_agreement.time_interval_id)
+                            .pop().interval
+                    ]);
+                    if (balance.length > 0) {
+                        const last_pay = last_payment ? TenantHistory.createLastPaymentComponent(last_payment) :
+                            'Nunca';
 
-                            const last_pay = last_payment ? TenantHistory.createLastPaymentComponent(last_payment) :
-                                'Nunca';
-
-                            let credit = 0;
-                            let remaining_balance = Number(balance[0].balance);
-                            if (typeof balance[0].payments !== 'undefined') {
-                                balance[0].payments.forEach(payment => remaining_balance -= Number(payment.amount));
-                            }
-                            if (remaining_balance < 0) {
-                                credit = Math.abs(remaining_balance);
-                                remaining_balance = 0;
-                            }
-
-                            const nextPayDate = new Date(balance[0].due_date);
-                            const hadPreviousBalance = balance[0].previous_balance > 0;
-                            let nextPay = <span className='success'>{ formatDateEs(nextPayDate) }</span>;
-                            const today = new Date();
-                            today.setHours(0, 0, 0, 0);
-                            if (Number(nextPayDate) < Number(today)) {
-                                nextPay = <span className='urgent'>{ formatDateEs(nextPayDate) } - (Atrasado)</span>;
-                            }
-
-                            remaining_balance > 0 && items.push(
-                                ['Proximo Pago', nextPay]
-                            );
-                            items.push(['Arrendamiento', `RD$ ${row.rental_agreement.rate}`]);
-                            items.push(['Balance', `$RD ${ (remaining_balance.toFixed(2)) }`]);
-                            hadPreviousBalance &&
-                            items.push([
-                                'Deuda',
-                                <span
-                                    key={ balance[0].previous_balance }
-                                    className='urgent'>
-                                    $RD ${ balance[0].previous_balance }
-                                </span>
-                            ]);
-                            // hadPreviousBalance && remaining_balance > balance[0].previous_balance
-
-                            credit > 0 && items.push(['Credito', `$RD ${ credit }`]);
-                            items.push(['Ultimo Pago', last_pay]);
+                        let credit = 0;
+                        let remaining_balance = Number(balance[0].balance);
+                        balance[0].payments.forEach(payment => remaining_balance -= Number(payment.amount));
+                        if (remaining_balance < 0) {
+                            credit = Math.abs(remaining_balance);
+                            remaining_balance = 0;
                         }
-                    } else {
+
+                        const nextPayDate = new Date(balance[0].due_date);
+                        const hadPreviousBalance = balance[0].previous_balance > 0 &&
+                            remaining_balance > row.rental_agreement;
+                        let nextPay = <span className='success'>{ formatDateEs(nextPayDate) }</span>;
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        if (Number(nextPayDate) < Number(today)) {
+                            nextPay = <span className='urgent'>{ formatDateEs(nextPayDate) } - (Atrasado)</span>;
+                        }
+
+                        active && remaining_balance > 0 && items.push(
+                            ['Proximo Pago', nextPay]
+                        );
                         items.push(['Arrendamiento', `RD$ ${row.rental_agreement.rate}`]);
+                        items.push(['Balance', `$RD ${ (remaining_balance.toFixed(2)) }`]);
+                        hadPreviousBalance &&
+                        items.push([
+                            'Deuda',
+                            <span
+                                key={ balance[0].previous_balance }
+                                className='urgent'>
+                                $RD ${ balance[0].previous_balance }
+                            </span>
+                        ]);
+                        // hadPreviousBalance && remaining_balance > balance[0].previous_balance
+
+                        credit > 0 && items.push(['Credito', `$RD ${ credit }`]);
+                        items.push(['Ultimo Pago', last_pay]);
                     }
 
                     return (
