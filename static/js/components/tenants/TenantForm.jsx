@@ -15,6 +15,7 @@ import { ACCESS_TYPES, ALERTS, ENDPOINTS, GENERIC_ERROR } from '../../constants'
 import { notifications } from '../../actions/appActions';
 import TenantHistory from './TenantHistory';
 import { hasAccess } from '../../utils/config';
+import Link from 'react-router-dom/es/Link';
 
 export default class TenantForm extends React.Component {
     constructor(props) {
@@ -75,11 +76,12 @@ export default class TenantForm extends React.Component {
 
     render() {
         const editing = this.state.id !== null;
+        const { tenant_id } = this.props.match.params;
 
         return <div>
             <Breadcrumbs { ...this.props } title={ editing ? 'Editar' : 'Nuevo' }/>
             <section className='widget'>
-                { (!this.state.id && this.props.match.params.tenant_id) && <Spinner/> ||
+                { (!this.state.id && tenant_id) && <Spinner/> ||
                 <FormGenerator
                     formName={ 'new-tenant' }
                     inlineSubmit={ true }
@@ -131,12 +133,17 @@ export default class TenantForm extends React.Component {
                 /> }
             </section>
 
-            { hasAccess(ENDPOINTS.AGREEMENTS_URL, ACCESS_TYPES.WRITE) && editing && <div className='table-actions'>
-                <button
+            { editing && <div className='table-actions'>
+                { hasAccess(ENDPOINTS.AGREEMENTS_URL, ACCESS_TYPES.WRITE) && <button
                     onClick={ this.newAgreementRegistration }
                     className='btn btn-success'>
                     Nueva Registración
-                </button>
+                </button> }
+                <Link
+                    className='btn btn-success'
+                    to={ `${ ENDPOINTS.RECEIPTS_URL }/inquilino/${ tenant_id }` }>
+                    Ver recibos
+                </Link>
             </div> }
 
             {

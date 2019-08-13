@@ -180,7 +180,7 @@ class TimeIntervals(API):
     def get(self):
         result = []
         for interval in TimeInterval.query.all():
-            result.append(row2dict(interval))
+            result.append(dict(interval))
 
         return result
 

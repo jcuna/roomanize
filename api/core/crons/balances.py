@@ -31,9 +31,11 @@ def balances_cron():
                     Balance.query.options(
                         defer(Balance.id),
                         load_only(Balance.agreement_id)
-                    ).filter((Balance.due_date >= today)).subquery()))\
-                .join(Balance).filter(Balance.due_date.between(five_days_ago, yesterday))
-            # logger.info(agreements.statement.compile())
+                    ).filter(Balance.due_date >= today).subquery()))\
+                .join(Balance).filter(
+                (Balance.due_date.between(five_days_ago, yesterday)) &
+                (Balance.created_on < five_days_ago) | (Balance.init_processed.is_(False)))
+
             process_agreements(agreements, logger)
 
         except (sqlalchemy.exc.OperationalError, Exception) as e:
@@ -53,8 +55,10 @@ def process_agreements(agreements, logger):
 
         logger.info('Processing agreement id: ' + str(agreement.id))
 
-        cycle_balance: Balance
-        cycle_balance = agreement.balances[0]
+        cycle_balance: Balance = agreement.balances[0]
+        if not cycle_balance.init_processed:
+            cycle_balance.init_processed = True
+
         payments = sum(map(lambda b: b.amount, cycle_balance.payments))
 
         logger.info(str(len(cycle_balance.payments)) + ' Payments processed Total:' + str(payments))
@@ -75,7 +79,8 @@ def process_agreements(agreements, logger):
             agreement=agreement,
             balance=new_balance,
             previous_balance=previous_balance,
-            due_date=cycle_balance.due_date + delta
+            due_date=cycle_balance.due_date + delta,
+            init_processed=True,
         )
         logger.info('Agreement entered on: ' + str(agreement.entered_on))
         logger.info('Pay cycle: ' + agreement.interval.interval)

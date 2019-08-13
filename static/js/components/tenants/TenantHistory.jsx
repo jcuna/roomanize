@@ -10,7 +10,7 @@ import { ALERTS, ENDPOINTS, GENERIC_ERROR } from '../../constants';
 import Table from '../../utils/Table';
 import Link from 'react-router-dom/es/Link';
 import { updateAgreement } from '../../actions/agreementsAction';
-import { formatDateEs, formatPhone } from '../../utils/helpers';
+import { formatDateEs, formatDecimal, formatPhone } from '../../utils/helpers';
 import '../../../css/tenants/tenantform.scss';
 import FontAwesome from '../../utils/FontAwesome';
 import Button from '../../utils/Button';
@@ -101,7 +101,7 @@ export default class TenantHistory extends React.Component {
                     }
 
                     // balances are sorted in the back end desc by date, so the most recent balance will be at index 0
-                    const { balance } = row.rental_agreement;
+                    const { balance, last_payment } = row.rental_agreement;
                     if (active) {
                         if (balance.length > 0) {
                             timeIntervals.length > 0 && items.push([
@@ -110,15 +110,9 @@ export default class TenantHistory extends React.Component {
                                     .pop().interval
                             ]);
 
-                            let last_payment = 'Nunca';
+                            const last_pay = last_payment ? TenantHistory.createLastPaymentComponent(last_payment) :
+                                'Nunca';
 
-                            if (balance.length > 0) {
-                                if (balance[0].payments.length > 0) {
-                                    last_payment = TenantHistory.createLastPaymentComponent(balance[0].payments);
-                                } else if (typeof balance[1] !== 'undefined' && balance[1].payments.length > 0) {
-                                    last_payment = TenantHistory.createLastPaymentComponent(balance[1].payments);
-                                }
-                            }
                             let credit = 0;
                             let remaining_balance = Number(balance[0].balance);
                             if (typeof balance[0].payments !== 'undefined') {
@@ -131,9 +125,10 @@ export default class TenantHistory extends React.Component {
 
                             const nextPayDate = new Date(balance[0].due_date);
                             const hadPreviousBalance = balance[0].previous_balance > 0;
-                            let nextPay = formatDateEs(nextPayDate);
-                            if (Number(nextPayDate) < Number(new Date()) ||
-                                hadPreviousBalance && remaining_balance > balance[0].previous_balance) {
+                            let nextPay = <span className='success'>{ formatDateEs(nextPayDate) }</span>;
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            if (Number(nextPayDate) < Number(today)) {
                                 nextPay = <span className='urgent'>{ formatDateEs(nextPayDate) } - (Atrasado)</span>;
                             }
 
@@ -151,9 +146,10 @@ export default class TenantHistory extends React.Component {
                                     $RD ${ balance[0].previous_balance }
                                 </span>
                             ]);
+                            // hadPreviousBalance && remaining_balance > balance[0].previous_balance
 
                             credit > 0 && items.push(['Credito', `$RD ${ credit }`]);
-                            items.push(['Ultimo Pago', last_payment]);
+                            items.push(['Ultimo Pago', last_pay]);
                         }
                     } else {
                         items.push(['Arrendamiento', `RD$ ${row.rental_agreement.rate}`]);
@@ -165,7 +161,7 @@ export default class TenantHistory extends React.Component {
                             <hr/>
                             { balance.length > 0 && active && <div className='tenant-actions row'>
                                 { canProcessPayments &&
-                                <div className='col-4'>
+                                <div className='col-6'>
                                     <Button
                                         type='info'
                                         key={ row.id + 1 } data-id={ balance[0].id }
@@ -175,21 +171,13 @@ export default class TenantHistory extends React.Component {
                                     />
                                 </div>
                                 }
-                                <div className='col-4'>
-                                    <Link
-                                        className='btn btn-sm btn-success'
-                                        key={ row.id + row.tenant_id }
-                                        to={ `${ ENDPOINTS.RECEIPTS_URL }/inquilino/${ row.tenant_id }` }>
-                                        Ver recibos
-                                    </Link>
-                                </div>
                                 { canUpdateAgreements &&
-                                <div className='col-4'>
+                                <div className='col-6'>
                                     <Button
                                         type='warning'
                                         size='sm'
                                         key={ row.id }
-                                        data-id={ row.id }
+                                        data-id={ row.rental_agreement.id }
                                         onClick={ onFinalize }
                                         value='Terminar contrato'
                                     />
@@ -215,6 +203,11 @@ export default class TenantHistory extends React.Component {
         if (validate['last-date'].isValid) {
             this.setState({ lastDate: validate['last-date'] });
         }
+
+        if (e.target.getAttribute('name') === 'refund') {
+            formatDecimal(e);
+        }
+
         if (validate.refund.isValid) {
             this.setState({ refund: validate.refund });
         }
@@ -279,12 +272,11 @@ export default class TenantHistory extends React.Component {
         ));
     }
 
-    static createLastPaymentComponent(payments) {
-        const by_date = payments.sort((a, b) => new Date(b.paid_date) - new Date(a.paid_date));
+    static createLastPaymentComponent(lastPayment) {
         return (
             <span className='last-payment'>
-                <span>{ formatDateEs(new Date(by_date[0].paid_date)) }</span>
-                <span className='amount'>{ `($RD ${ by_date[0].amount })` }</span>
+                <span>{ formatDateEs(new Date(lastPayment.date)) }</span>
+                <span className='amount'>{ `($RD ${ lastPayment.amount })` }</span>
             </span>
         );
     }

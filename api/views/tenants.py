@@ -1,8 +1,9 @@
 import sqlalchemy
 from flask import request
 from sqlalchemy.orm import joinedload
+from sqlalchemy.sql import functions
 from core import API
-from dal.models import Tenant, Balance, Payment
+from dal.models import Tenant, Balance, Payment, TenantHistory, RentalAgreement
 from dal.shared import token_required, access_required, db, get_fillable, Paginator, row2dict
 from views import Result
 
@@ -75,34 +76,57 @@ class Tenants(API):
     @staticmethod
     def get_tenant(tenant_id):
 
-        tenant = Tenant.query.options(
-            joinedload('history'),
-            joinedload('history.rental_agreement'),
-            joinedload('history.rental_agreement.room'),
-        ).filter_by(id=tenant_id).first()
-        result = row2dict(tenant)
+        tenant: Tenant = Tenant.query.filter_by(id=tenant_id).first()
+        result = dict(tenant)
         result['history'] = []
         rental_ids = []
 
-        for stay in tenant.history:
-            history = row2dict(stay)
+        agreements = RentalAgreement.query.options(
+            joinedload('tenant_history'), joinedload('room')
+        ).join('tenant_history').join('room')\
+            .filter(TenantHistory.tenant_id == tenant_id)\
+            .order_by(RentalAgreement.created_on.desc()).limit(10).all()
+
+        agreement: RentalAgreement
+        for agreement in agreements:
+            history = dict(agreement.tenant_history)
             history['rental_agreement'] = {}
-            if stay.rental_agreement:
-                if not stay.rental_agreement.terminated_on:
-                    rental_ids.append(stay.rental_agreement.id)
-                history['rental_agreement'] = row2dict(stay.rental_agreement)
-                history['rental_agreement']['room'] = row2dict(stay.rental_agreement.room)
-                history['rental_agreement']['balance'] = []
+            rental_ids.append(agreement.id)
+            history['rental_agreement'] = dict(agreement)
+            history['rental_agreement']['last_payment'] = None
+            history['rental_agreement']['room'] = dict(agreement.room)
+            history['rental_agreement']['balance'] = []
             result['history'].append(history)
 
-        balances = Balance.query.options(joinedload('payments')).filter(Balance.agreement_id.in_(rental_ids)). \
-            group_by(Balance.id).order_by(Balance.due_date.desc()).limit(2)
+        sub_join = db.session.query(
+            Balance.id.label('id'),
+            functions.max(Balance.due_date).label('due_date')
+        ).distinct(Balance.agreement_id).group_by('agreement_id', 'id').subquery()
+
+        balances = Balance.query.options(joinedload('payments')).join(
+            sub_join,
+            Balance.id == sub_join.columns.id
+        ).filter(Balance.agreement_id.in_(rental_ids))\
+            .order_by(Balance.due_date.desc()).all()
+
+        last_payments = db.session.query(
+            Balance.agreement_id.label('agreement_id'),
+            Payment.amount.label('amount'),
+            functions.max(Payment.paid_date).label('paid_date')).join(Payment)\
+            .group_by('agreement_id', 'amount')\
+            .filter(Balance.agreement_id.in_(rental_ids)).all()
 
         for row in result['history']:
+            for last_pay in last_payments:
+                if last_pay.agreement_id == row['rental_agreement']['id']:
+                    row['rental_agreement']['last_payment'] = {
+                        'date': str(last_pay.paid_date),
+                        'amount': str(last_pay.amount)
+                    }
             for balance in balances:
-                if balance.agreement_id == int(row['rental_agreement']['id']):
-                    dict_balance = row2dict(balance)
-                    dict_balance['payments'] = list(map(lambda pay: row2dict(pay), balance.payments))
+                if balance.agreement_id == row['rental_agreement']['id']:
+                    dict_balance = dict(balance)
+                    dict_balance['payments'] = list(map(lambda pay: dict(pay), balance.payments))
                     row['rental_agreement']['balance'].append(dict_balance)
 
         return result

@@ -182,7 +182,7 @@ class Tenant(db.Model, ModelIter):
 
 
 class TenantHistory(db.Model, ModelIter):
-    __tablename__ = 'tenant_history'
+    __tablename__ = 'tenants_history'
 
     id = db.Column(db.BigInteger, primary_key=True)
     tenant_id = db.Column(db.BigInteger, db.ForeignKey('tenants.id'), index=True, nullable=False)
@@ -199,7 +199,7 @@ class RentalAgreement(db.Model, ModelIter):
     fillable = ['tenant_history_id', 'room_id', 'project_id', 'time_interval_id', 'rate', 'entered_on', 'deposit']
 
     id = db.Column(db.BigInteger, primary_key=True)
-    tenant_history_id = db.Column(db.BigInteger, db.ForeignKey('tenant_history.id'), index=True, nullable=False)
+    tenant_history_id = db.Column(db.BigInteger, db.ForeignKey('tenants_history.id'), index=True, nullable=False)
     room_id = db.Column(db.BigInteger, db.ForeignKey('rooms.id'), index=True, nullable=False)
     project_id = db.Column(db.BigInteger, db.ForeignKey('projects.id'), index=True, nullable=False)
     time_interval_id = db.Column(db.Integer, db.ForeignKey('time_intervals.id'), nullable=False)
@@ -258,6 +258,7 @@ class Balance(db.Model, ModelIter):
     previous_balance = db.Column(db.DECIMAL(10, 2), nullable=False)
     created_on = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.utcnow)
     due_date = db.Column(db.DateTime(), nullable=False, index=True)
+    init_processed = db.Column(db.Boolean(), nullable=False, default=False)
 
     agreement = relationship(RentalAgreement, uselist=False, backref='balances')
     payments = relationship('Payment', backref='balances')

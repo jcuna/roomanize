@@ -80,11 +80,12 @@ class Agreements(API):
 
         if data['refund']:
             # find current balance and deduct refund from it and make a negative payment
-            balance = Balance.query.options(joinedload('payments')).filter_by(agreement_id=agreement.id).order_by(Balance.due_date.desc()).first()
+            balance = Balance.query.options(joinedload('payments')).filter_by(agreement_id=agreement.id).order_by(
+                Balance.due_date.desc()
+            ).first()
             refund = Decimal(data['refund'])
             balance.balance -= refund
-            last_pay: Payment
-            last_pay = balance.payments[-1]
+            last_pay: Payment = balance.payments[-1]
             balance.payments.append(Payment(amount=-refund, payment_type_id=last_pay.payment_type_id))
 
         db.session.commit()

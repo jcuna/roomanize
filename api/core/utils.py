@@ -17,7 +17,7 @@ def configure_loggers(app: Flask):
         gunicorn_logger.setLevel(level)
         gunicorn_logger.handlers = app_logger.handlers
         db_logging = logging.getLogger('sqlalchemy.engine')
-        db_logging.setLevel(level)
+        db_logging.setLevel(logging.INFO)
         db_logging.handlers = get_logger('sql', level).handlers
 
 

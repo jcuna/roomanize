@@ -134,7 +134,7 @@ export default class RoomForm extends Component {
                     [
                         'Estatus',
                         history.agreement_terminated_on &&
-                        'Terminado el ' + formatDateEs(new Date(history.agreement_terminated_on)) ||
+                        'Terminado desde ' + formatDateEs(new Date(history.agreement_terminated_on)) ||
                         <span className='success'>Activo</span>
                     ]
                 ];
