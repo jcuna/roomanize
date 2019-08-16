@@ -6,7 +6,7 @@ from sqlalchemy.orm import joinedload, load_only
 from core import API
 from core.middleware import HttpException
 from dal.models import Project, TimeInterval, User, Room, PaymentType, RentalAgreement, TenantHistory
-from dal.shared import token_required, access_required, db, get_fillable, row2dict, Paginator
+from dal.shared import token_required, access_required, db, get_fillable, Paginator
 from views import Result
 
 
@@ -30,7 +30,7 @@ class Projects(API):
                     q = q.filter(Project.id.in_(pl))
 
         return {
-            'projects': list(map(lambda r: row2dict(r), q.all()))
+            'projects': list(map(lambda r: dict(r), q.all()))
         }
 
     @token_required
@@ -191,7 +191,7 @@ class PaymentTypes(API):
     def get(self):
         result = []
         for payment in PaymentType.query.all():
-            result.append(row2dict(payment))
+            result.append(dict(payment))
 
         return result
 

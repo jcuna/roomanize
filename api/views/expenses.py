@@ -12,7 +12,7 @@ from core.AWS import Storage
 from core.middleware import HttpException
 from core.utils import local_to_utc
 from dal.models import UserToken, Expense, db
-from dal.shared import token_required, access_required, Paginator, row2dict
+from dal.shared import token_required, access_required, Paginator
 from views import Result
 from mimetypes import guess_extension
 from io import BytesIO
@@ -31,7 +31,7 @@ class Expenses(API):
             ex = Expense.query.filter_by(id=expense_id).first()
             if ex:
                 s3 = Storage(current_app.config['AWS_FILE_MANAGER_BUCKET_NAME'])
-                row = row2dict(ex)
+                row = dict(ex)
                 row['signed_urls'] = []
                 if ex.receipt_scans:
                     [row['signed_urls'].append(

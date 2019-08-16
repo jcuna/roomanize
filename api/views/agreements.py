@@ -6,7 +6,7 @@ from core import API
 from core.middleware import HttpException
 from core.utils import local_to_utc
 from dal.models import RentalAgreement, TenantHistory, Room, TimeInterval, Policy, Balance, Payment, Tenant
-from dal.shared import token_required, access_required, db, get_fillable, Paginator, row2dict
+from dal.shared import token_required, access_required, db, get_fillable, Paginator
 from views import Result
 
 

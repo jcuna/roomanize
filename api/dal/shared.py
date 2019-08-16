@@ -126,7 +126,7 @@ class Paginator:
 
     def get_items(self) -> list:
         items = self.get_result()
-        return list(map(lambda row: row2dict(row), items))
+        return list(map(lambda row: dict(row), items))
 
     def get_result(self):
         return self.query.offset(self.offset).limit(self.per_page)
