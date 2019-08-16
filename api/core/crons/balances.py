@@ -36,7 +36,7 @@ def balances_cron():
                 (Balance.due_date.between(five_days_ago, yesterday)) &
                 (Balance.created_on < five_days_ago) | (Balance.init_processed.is_(False)))
 
-            process_agreements(agreements, logger)
+            process_agreements(agreements.all(), logger)
 
         except (sqlalchemy.exc.OperationalError, Exception) as e:
             logger.error('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')

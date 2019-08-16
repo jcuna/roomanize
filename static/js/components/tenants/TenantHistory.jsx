@@ -101,7 +101,6 @@ export default class TenantHistory extends React.Component {
                         items.push(['Referencia III', formatPhone(row.reference3_phone)]);
                     }
 
-                    // balances are sorted in the back end desc by date, so the most recent balance will be at index 0
                     const { balance, last_payment } = row.rental_agreement;
                     timeIntervals.length > 0 && items.push([
                         'Ciclo de Pago',
@@ -114,7 +113,9 @@ export default class TenantHistory extends React.Component {
 
                         let credit = 0;
                         let remaining_balance = Number(balance[0].balance);
-                        balance[0].payments.forEach(payment => remaining_balance -= Number(payment.amount));
+                        let payments = 0;
+                        balance[0].payments.forEach(payment => payments += Number(payment.amount));
+                        remaining_balance -= payments;
                         if (remaining_balance < 0) {
                             credit = Math.abs(remaining_balance);
                             remaining_balance = 0;
@@ -122,7 +123,7 @@ export default class TenantHistory extends React.Component {
 
                         const nextPayDate = new Date(balance[0].due_date);
                         const hadPreviousBalance = balance[0].previous_balance > 0 &&
-                            remaining_balance > row.rental_agreement;
+                            remaining_balance > Number(row.rental_agreement.rate);
                         let nextPay = <span className='success'>{ formatDateEs(nextPayDate) }</span>;
                         const today = new Date();
                         today.setHours(0, 0, 0, 0);
@@ -141,7 +142,7 @@ export default class TenantHistory extends React.Component {
                             <span
                                 key={ balance[0].previous_balance }
                                 className='urgent'>
-                                $RD ${ balance[0].previous_balance }
+                                $RD ${ balance[0].previous_balance - payments }
                             </span>
                         ]);
                         // hadPreviousBalance && remaining_balance > balance[0].previous_balance

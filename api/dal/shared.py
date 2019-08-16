@@ -145,7 +145,7 @@ class ModelIter(object):
                     getcontext().prec = 2
                     yield column.name, str(attr)
                 elif isinstance(attr, datetime):
-                    yield column.name, str(attr)
+                    yield column.name, str(attr.isoformat())
                 elif isinstance(attr, bool) or isinstance(attr, int):
                     yield column.name, attr
                 elif not isinstance(attr, str):

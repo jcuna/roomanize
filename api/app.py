@@ -32,5 +32,5 @@ def init_app(mode='web') -> Flask:
 if __name__ == '__main__':
     from flask_socketio import SocketIO
     app = init_app()
-    socketio = SocketIO(app)
+    socketio = SocketIO(app, logger=app.logger, engineio_logger=False)
     socketio.run(app, host='0.0.0.0', port=5000, debug=app.debug)

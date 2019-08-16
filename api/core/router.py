@@ -57,6 +57,7 @@ class Router:
                         and 'email' in data and data['email'] and 'password' in data and data['password']:
                     user_data = get_fillable(User, **data)
                     user = User(**user_data)
+                    user.email = user.email.lower()
                     user.hash_password()
 
                     user.attributes = UserAttributes(

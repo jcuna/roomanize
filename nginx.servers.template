@@ -68,7 +68,9 @@ server {
 
     location /ws {
 
-        proxy_set_header Host $host;
+        # !!!! IMPORTANT !!!! Next two lines should be changed to `proxy_set_header Host $host;` in production
+        proxy_set_header Host martires.localhost;
+        proxy_set_header Origin http://martires.localhost; ## remove this one in prod
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 

@@ -107,6 +107,8 @@ class UsersManager(API):
     def post(self):
         raw_data = request.get_json()
         user_data = get_fillable(User, **raw_data)
+        if 'email' in user_data:
+            user_data['email'] = user_data['email'].lower()
         user = User(**user_data)
         if 'password' in raw_data:
             user.hash_password()
@@ -190,7 +192,7 @@ class Session(API):
         if not auth or not auth.username or not auth.password:
             return Result.error('Could not verify')
 
-        user = User.query.filter_by(email=auth.username).first()
+        user = User.query.filter_by(email=auth.username.lower()).first()
 
         if not user:
             return Result.error('Could not verify')

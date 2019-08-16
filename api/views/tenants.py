@@ -101,7 +101,7 @@ class Tenants(API):
         sub_join = db.session.query(
             Balance.id.label('id'),
             functions.max(Balance.due_date).label('due_date')
-        ).distinct(Balance.agreement_id).group_by('agreement_id', 'id').subquery()
+        ).distinct(Balance.id).group_by('agreement_id', 'id').subquery()
 
         balances = Balance.query.options(joinedload('payments')).join(
             sub_join,

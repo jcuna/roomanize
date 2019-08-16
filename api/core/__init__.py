@@ -4,7 +4,8 @@ import os
 import socket
 import struct
 import threading
-from time import sleep
+from datetime import timedelta
+from time import sleep, time
 from flask import request
 from dal.models import Audit
 from flask_restful import Resource
@@ -75,7 +76,7 @@ class API(Resource):
 class AsyncAuditor(threading.Thread):
 
     def __init__(self, tasks: list, stop: threading.Event):
-        super().__init__()
+        super(AsyncAuditor, self).__init__(name='async-auditor')
         self.tasks = tasks
         self.stop_event = stop
 
@@ -90,14 +91,17 @@ class AsyncAuditor(threading.Thread):
             try:
                 while not self.stop_event.is_set():
                     if len(self.tasks) > 0:
+                        start = time()
                         task: dict
                         for task in self.tasks:
-                            app.logger.info(str(threading.current_thread()) + ' new audit record')
-                            task.payload = encryptor.encrypt(task.payload)
+                            app.logger.debug(threading.current_thread().name + ' new audit record')
+                            if is_prod:
+                                task.payload = encryptor.encrypt(task.payload)
                             task.ip = struct.unpack("!I", socket.inet_aton(task.ip))[0]
                             db.session.add(task)
                         self.tasks.clear()
                         db.session.commit()
+                        app.logger.debug('Took: ' + str(timedelta(seconds=(time() - start))))
                     sleep(2)
                 app.logger.info('exiting async audit thread')
             except BaseException as e:
@@ -106,15 +110,20 @@ class AsyncAuditor(threading.Thread):
 
 def runner():
     # if this is not a second spawn for auto reload worker
-    if os.environ.get('APP_ENV') == 'production' or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+    if is_prod or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
         # this is our cron job runner
         from config.crons import cron_jobs
+        from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
         from apscheduler.schedulers.background import BackgroundScheduler
 
-        scheduler = BackgroundScheduler(timezone='utc')
-        scheduler.start()
+        executors = {
+            'default': ProcessPoolExecutor(20) if is_prod else ThreadPoolExecutor(20)
+        }
+
+        scheduler = BackgroundScheduler(timezone='utc', executors=executors)
         for job in cron_jobs:
             scheduler.add_job(**job)
+        scheduler.start()
 
         # this long running is used to perform after request auditing
         stop_event = threading.Event()
@@ -141,5 +150,6 @@ class Encryptor:
 
 
 # auto exec
+is_prod = os.environ.get('APP_ENV') == 'production'
 cache = CacheService()
 encryptor = Encryptor()
