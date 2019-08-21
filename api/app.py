@@ -1,4 +1,4 @@
-from config.thread_patch import patched
+#from config.thread_patch import patched
 from flask import Flask
 from core.utils import configure_loggers
 from config import get_mail
@@ -9,7 +9,7 @@ import core
 def init_app(mode='web') -> Flask:
     this_app = Flask(__name__)
 
-    this_app.patched = patched
+    #this_app.patched = patched
     this_app.config.from_envvar('APP_SETTINGS_PATH')
     this_app.env = this_app.config['APP_ENV']
     # configure the app to log to a file.

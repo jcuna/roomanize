@@ -6,7 +6,7 @@ if [ ! -d "$APP_PATH/log" ]; then
     mkdir "$APP_PATH/log"
 fi
 
-if [ "$APP_ENV" = "develop" ]; then
+if [ "$APP_ENV" = "development" ]; then
     echo '' > "$APP_PATH/log/app.log"
     while true
     do
