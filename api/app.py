@@ -1,4 +1,3 @@
-#from config.thread_patch import patched
 from flask import Flask
 from core.utils import configure_loggers
 from config import get_mail
@@ -21,7 +20,6 @@ def init_app(mode='web') -> Flask:
         core.cache.init_app(this_app, config=this_app.config['CACHE_CONFIG'])
         this_app.wsgi_app = core.Middleware(this_app.wsgi_app, this_app.debug)
         core.Router(this_app)
-        core.runner()
 
     db.init_app(this_app)
     this_app.mail = get_mail(this_app)

@@ -114,5 +114,5 @@ node_modules/
 
 # development files
 db/*
-.develop
+docker/.develop
 sqlalchemy.bulk.py

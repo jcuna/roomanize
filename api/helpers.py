@@ -1,7 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from app import db, init_app
 from config.constants import *
-from dal.models import collation, TimeInterval, PaymentType
+from dal.models import TimeInterval, PaymentType
 
 app = init_app('sys')
 
@@ -31,8 +31,6 @@ def seed_payment_types(db: SQLAlchemy):
 
 def run_migration():
     with app.app_context():
-        # connection = db.engine.raw_connection()
-        # connection.cursor().execute("SET NAMES 'utf8mb4' COLLATE '" + collation + "'")
 
         db.create_all()
         db.session.commit()

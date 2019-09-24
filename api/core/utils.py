@@ -16,7 +16,7 @@ def configure_loggers(app: Flask):
         gunicorn_logger = logging.getLogger('gunicorn.error')
         gunicorn_logger.setLevel(level)
         gunicorn_logger.handlers = app_logger.handlers
-        db_logging = logging.getLogger('sqlalchemy.engine')
+        db_logging = logging.getLogger('sqlalchemy')
         db_logging.setLevel(logging.INFO)
         db_logging.handlers = get_logger('sql', level).handlers
 
@@ -35,7 +35,7 @@ def get_logger(name: str = 'app', level: int = logging.INFO):
     log_queue = queue.Queue(-1)
     queue_handler = QueueHandler(log_queue)
 
-    handler = RotatingFileHandler(log_path + name + '.log', maxBytes=1000000, backupCount=1)
+    handler = RotatingFileHandler(log_path + name + '.log', maxBytes=50000, backupCount=2)
     handler.setFormatter(log_formatter)
 
     # instantiate listener

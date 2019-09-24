@@ -108,6 +108,7 @@ class AsyncAuditor(threading.Thread):
                 app.logger.exception('Exception')
 
 
+#  TODO: manage with supervisord
 def runner():
     # if this is not a second spawn for auto reload worker
     if is_prod or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
@@ -125,6 +126,9 @@ def runner():
             scheduler.add_job(**job)
         scheduler.start()
 
+        # TODO: switch to use an independent async queue with socket communication
+        # TODO CONT: queue can be managed with supervisord and have send message and receive message endpoints
+        # TODO CONT: https://stackoverflow.com/questions/39598038/implementing-a-single-thread-server-daemon-python
         # this long running is used to perform after request auditing
         stop_event = threading.Event()
         async_task = AsyncAuditor(API.audit_tasks, stop_event)
