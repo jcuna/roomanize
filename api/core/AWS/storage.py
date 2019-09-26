@@ -1,9 +1,8 @@
 from datetime import datetime, timedelta
 import boto3
-from flask import current_app
 from botocore.exceptions import ClientError
 from core.utils import get_logger
-
+from app import configs
 
 class Storage(object):
     clients = {}
@@ -17,11 +16,11 @@ class Storage(object):
         self.app_logger = get_logger('app')
 
         if 'session' not in self.session or self.session['expire'] < datetime.utcnow():
-            with current_app.app_context():
-                self.session.update({'session': boto3.Session(
-                    aws_access_key_id=current_app.config['AWS_ACCESS_KEY_ID'],
-                    aws_secret_access_key=current_app.config['AWS_SECRET_ACCESS_KEY']
-                ), 'expire': datetime.utcnow() + timedelta(hours=1)})
+            self.session.update({'session':
+                boto3.Session(
+                    aws_access_key_id=configs.AWS_ACCESS_KEY_ID,
+                    aws_secret_access_key=configs.AWS_SECRET_ACCESS_KEY
+            ), 'expire': datetime.utcnow() + timedelta(hours=1)})
         if resource not in self.clients:
             self.clients.update({resource: self.session['session'].client(resource)})
 
@@ -42,15 +41,15 @@ class Storage(object):
         return self.get_client().put_object(Body=body, Bucket=self.bucket, Key=object_name, ContentType=content_type)
 
     def remove(self, name):
-        s3 = self.session.resource('s3')
+        s3 = self.session['session'].resource('s3')
         s3.Object(self.bucket, name).delete()
 
     def get_all_objects(self, prefix=''):
-        resources = self.session.client('s3').list_objects_v2(Bucket=self.bucket, Prefix=prefix)
+        resources = self.session['session'].client('s3').list_objects_v2(Bucket=self.bucket, Prefix=prefix)
         return resources['Contents']
 
     def get_bucket(self, bucket):
-        s3 = self.session.resource('s3')
+        s3 = self.session['session'].resource('s3')
         return s3.Bucket(bucket)
 
     def sign_url(self, object_name, expiration=14400):

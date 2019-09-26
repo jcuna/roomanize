@@ -3,8 +3,6 @@ from app import db, init_app
 from config.constants import *
 from dal.models import TimeInterval, PaymentType
 
-app = init_app('sys')
-
 
 def seed_time_intervals(db: SQLAlchemy):
     time_intervals = [
@@ -30,6 +28,7 @@ def seed_payment_types(db: SQLAlchemy):
 
 
 def run_migration():
+    app = init_app('sys')
     with app.app_context():
 
         db.create_all()

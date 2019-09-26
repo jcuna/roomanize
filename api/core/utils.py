@@ -3,13 +3,16 @@ import os
 from datetime import datetime
 from pathlib import Path
 import pytz
-from flask import current_app, Flask
+from flask import Flask
 import queue
 from logging.handlers import QueueHandler, QueueListener, RotatingFileHandler
+from config import configs
 
 
 def configure_loggers(app: Flask):
-    if len(app.logger.handlers) == 0 or isinstance(app.logger.handlers[0], logging.StreamHandler):
+    if hasattr(configs, 'TESTING') and configs.TESTING:
+        return
+    elif len(app.logger.handlers) == 0 or isinstance(app.logger.handlers[0], logging.StreamHandler):
         level = logging.DEBUG if app.debug else logging.INFO
         app.logger.setLevel(level)
         app.logger.handlers = app_logger.handlers
@@ -79,7 +82,7 @@ def local_to_utc(date: str) -> datetime:
     :return: datetime
     """
     date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
-    localized = pytz.timezone(current_app.config['TIME_ZONE']).localize(date)
+    localized = pytz.timezone(configs.TIME_ZONE).localize(date)
     return localized.astimezone(pytz.utc)
 
 
@@ -90,7 +93,7 @@ def utc_to_local(date: datetime) -> datetime:
     :param date: datetime
     :return: datetime
     """
-    return date.astimezone(pytz.timezone(current_app.config['TIME_ZONE']))
+    return date.astimezone(pytz.timezone(configs.TIME_ZONE))
 
 
 app_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))

@@ -24,7 +24,7 @@ services:
       - static
       - api
     labels:
-      - 'traefik.http.routers.martires.rule=Host(`martires.localhost`)'
+      - 'traefik.http.routers.roomanize.rule=Host(`roomanize.localhost`)'
 
   static:
     build:
@@ -42,9 +42,7 @@ services:
       - api
 
   api:
-    build:
-      context: ../api
-      dockerfile: ../docker/Dockerfile
+    image: ${API_IMG}
     volumes:
       - ../api:/usr/src/app
     environment:

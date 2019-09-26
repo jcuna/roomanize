@@ -1,7 +1,10 @@
-SECRET_KEY = '~.\xb83\x9a\xb0F\xe7\xdd(\xfb\xcc\xef)\xa8\x00\xd4X\xdel\xe4\xe8%\xb0'
-SQLALCHEMY_DATABASE_URI = 'postgresql://test:test@postgres/roomanize'
+SECRET_KEY = '{SecretKey}'
+SQLALCHEMY_DATABASE_URI = 'postgresql://{DbUser}:{DbPw}@{Db_EndPoint}/{DbName}'
 SQLALCHEMY_TRACK_MODIFICATIONS = False
-SQLALCHEMY_POOL_RECYCLE = True
+SQLALCHEMY_ENGINE_OPTIONS = {
+    'pool_recycle': True
+}
+DB_COLLATION = 'und-x-icu'
 
 APP_ENV = 'production'
 DEBUG = False
