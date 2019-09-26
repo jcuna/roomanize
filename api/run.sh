@@ -17,5 +17,5 @@ if [ "$APP_ENV" = "development" ]; then
     #gunicorn --worker-class eventlet --bind :5000 wsgi:app --reload --timeout 300 --log-level=debug --log-file=- >> "$APP_PATH/log/app.log" 2>&1
 else
     export APP_ENV='production'
-    gunicorn --worker-class eventlet --bind :5000 wsgi:app --log-level=info --log-file=- >> "$APP_PATH/log/app.log" 2>&1
+    gunicorn --worker-class eventlet --bind :5000 wsgi:app --log-level info
 fi

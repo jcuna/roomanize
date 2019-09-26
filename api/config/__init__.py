@@ -7,6 +7,11 @@ import hashlib
 import uuid
 from datetime import datetime
 from random import random
+import os
+from importlib.machinery import SourceFileLoader
+
+
+configs = SourceFileLoader('settings', os.environ.get('APP_SETTINGS_PATH')).load_module()
 
 
 def debug():
