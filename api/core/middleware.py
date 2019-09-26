@@ -1,6 +1,6 @@
 import sys
 import traceback
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from core.utils import app_logger
 
 
@@ -19,40 +19,27 @@ def error_handler(app: Flask):
     status_code = 500
 
     def handle_error_response(error: Exception):
+        app_logger.error(request.path)
+        app_logger.exception(error)
         _, _, tb = sys.exc_info()
         json_output = {
             'error': str(error),
-            'traceback': traceback.format_list(traceback.extract_tb(tb))
         }
+        if app.debug:
+            json_output['traceback'] = traceback.format_list(traceback.extract_tb(tb))
 
         response = jsonify(json_output)
 
         if hasattr(error, 'status_code'):
             response.status_code = error.status_code
+        elif hasattr(error, 'code') and isinstance(error.code, int):
+            response.status_code = error.code
         else:
             response.status_code = status_code
 
         return response
 
-    def handle_error_response_prod(error: Exception):
-        app_logger.exception(error)
-        json_output = {
-            'error': 'An unexpected error occurred',
-        }
-
-        response = jsonify(json_output)
-
-        if hasattr(error, 'status_code'):
-            response.status_code = error.status_code
-        else:
-            response.status_code = status_code
-
-        return response
-
-    if app.debug:
-        app.register_error_handler(Exception, handle_error_response)
-    else:
-        app.register_error_handler(Exception, handle_error_response_prod)
+    app.register_error_handler(Exception, handle_error_response)
 
 
 class HttpException(Exception):

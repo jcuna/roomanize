@@ -4,6 +4,7 @@ import os
 
 config = """
 TESTING = True
+DEBUG = False
 SQLALCHEMY_DATABASE_URI = 'sqlite:///%s'
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 SQLALCHEMY_ENGINE_OPTIONS = {
