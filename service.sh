@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [[ "$1" != "" && "$1" != "stop" && "$1" != "ssh" && "$1" != "build" && "$1" != "test" ]]; then
+if [[ "$1" != "" && "$1" != "stop" && "$1" != "ssh" && "$1" != "build" && "$1" != "test" && "$1" != "run" ]]; then
 
     printf "Bad argument ${1}.\n"
     printf "Options:\n"
@@ -9,6 +9,7 @@ if [[ "$1" != "" && "$1" != "stop" && "$1" != "ssh" && "$1" != "build" && "$1" !
     printf "\t<ssh>              -- Logs into containers bash console\n"
     printf "\t<build>            -- Builds a prod ready docker image\n"
     printf "\t<test>             -- Runs pytest on the api\n"
+    printf "\t<run>              -- Runs an arbitrary command in the api container\n"
     exit 1;
 fi
 
@@ -24,11 +25,16 @@ get_container_id() {
 
 if [[ "$1" = "test" ]]; then
     CONTAINER_ID=$(get_container_id ${API_IMG_NAME})
-    docker exec -ti ${CONTAINER_ID} bash -c \
-        "PYTHONDONTWRITEBYTECODE=1 APP_SETTINGS_PATH='/tmp/settings.py' pytest -ra $2 $3"
+    docker exec -ti "$CONTAINER_ID" bash -c \
+        "PYTHONDONTWRITEBYTECODE=1 APP_SETTINGS_PATH='/tmp/settings.py' pytest -ra" "${@:2}"
     exit $?
 fi
 
+if [[ "$1" = "run" ]]; then
+    CONTAINER_ID=$(get_container_id ${API_IMG_NAME})
+    docker exec -ti "$CONTAINER_ID" bash -c "${@:2}"
+    exit $?
+fi
 
 if [[ "$1" = "ssh" ]]; then
     if [[ "$2" = "" ]]; then
