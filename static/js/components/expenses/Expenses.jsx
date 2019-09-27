@@ -39,7 +39,7 @@ export default class Expenses extends React.Component {
             <div>
                 <Breadcrumbs { ...this.props }/>
                 <section className='widget'>
-                    <h2>Expenses</h2>
+                    <h2>Gastos</h2>
                     { canWrite && <div className='table-actions'>
                         <Link to={ `${ ENDPOINTS.EXPENSES_URL }/nuevo` }>
                             <button

@@ -1,35 +1,13 @@
 import pytest
-import os
+from tests import tear_files, init
 
-
-config = """
-TESTING = True
-DEBUG = False
-SQLALCHEMY_DATABASE_URI = 'sqlite:///%s'
-SQLALCHEMY_TRACK_MODIFICATIONS = False
-SQLALCHEMY_ENGINE_OPTIONS = {
-    'pool_recycle': True
-}
-DB_COLLATION = 'BINARY'
-APP_ENV = 'testing'
-SECRET_KEY = 'testing'
-CACHE_CONFIG = {
-    'CACHE_TYPE': 'simple',
-    'CACHE_KEY_PREFIX': 'local_dev'
-}
-""" % (os.path.dirname(os.environ['APP_SETTINGS_PATH']) + '/testdb')
-
-
-settings_fd = open(os.environ['APP_SETTINGS_PATH'], 'w+')
-settings_fd.write(config)
-settings_fd.close()
-
-
-@pytest.fixture
+@pytest.fixture(scope='module')
 def client():
     """
     Creates a new database for the unit test to use
     """
+    init()
+
     from app import db, init_app
     from helpers import run_migration
 
@@ -40,6 +18,19 @@ def client():
             db.session.commit()
             run_migration()
         yield client
+    tear_files()
 
-        os.unlink(os.path.dirname(os.environ['APP_SETTINGS_PATH']) + '/testdb')
-        os.unlink(os.environ['APP_SETTINGS_PATH'])
+
+@pytest.fixture
+def no_db_client():
+    """
+    Returns client with no db
+    """
+    init()
+
+    from app import init_app
+
+    app = init_app()
+    with app.test_client() as client:
+        yield client
+    tear_files()

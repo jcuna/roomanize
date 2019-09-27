@@ -110,15 +110,15 @@ export default class Users extends React.Component {
                     <thead>
                         <tr>
                             <th>
-                                ID <FontAwesome type={ `sort-numeric-${ dir }` } className='text-info'
+                                ID <FontAwesome type={ `sort-numeric-${ dir }` } className='text-info clicker'
                                     onClick={ () => this.orderBy('id') }/>
                             </th>
                             <th>
-                                Nombre <FontAwesome type={ `sort-alpha-${ dir }` } className='text-info'
+                                Nombre <FontAwesome type={ `sort-alpha-${ dir }` } className='text-info clicker'
                                     onClick={ () => this.orderBy('last_name') }/>
                             </th>
                             <th>
-                                Email <FontAwesome type={ `sort-alpha-${ dir }` } className='text-info'
+                                Email <FontAwesome type={ `sort-alpha-${ dir }` } className='text-info clicker'
                                     onClick={ () => this.orderBy('email') }/>
                             </th>
                             <th>

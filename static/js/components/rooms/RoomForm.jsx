@@ -30,18 +30,20 @@ export default class RoomForm extends Component {
         this.onInputChange = this.onInputChange.bind(this);
         this.switchPage = this.switchPage.bind(this);
 
-        if (typeof this.props.match.params.room_id !== 'undefined' && this.state.id === 0 &&
-            this.props.rooms.status !== STATUS.TRANSMITTING) {
-            this.props.dispatch(fetchRoom(this.props.match.params.room_id, () => {
-                this.props.history.push('/error/404');
+        const { params } = props.match;
+
+        if (typeof params.room_id !== 'undefined' && this.state.id === 0 &&
+            props.rooms.status !== STATUS.TRANSMITTING) {
+            props.dispatch(fetchRoom(params.room_id, () => {
+                props.history.push('/error/404');
             }));
         }
-        if (hasAccess(ENDPOINTS.ROOMS_HISTORY_URL, ACCESS_TYPES.READ)) {
-            this.props.dispatch(fetchRoomHistory(this.props.match.params.room_id, this.state.page, ({ list }) => {
+        if (typeof params.room_id !== 'undefined' && hasAccess(ENDPOINTS.ROOMS_HISTORY_URL, ACCESS_TYPES.READ)) {
+            props.dispatch(fetchRoomHistory(params.room_id, this.state.page, ({ list }) => {
                 if (hasAccess(ENDPOINTS.BALANCE_PAYMENTS_URL, ACCESS_TYPES.WRITE)) {
                     list.forEach(agreement => {
                         if (agreement.agreement_terminated_on === null) {
-                            this.props.dispatch(getAgreementBalance(agreement.agreement_id));
+                            props.dispatch(getAgreementBalance(agreement.agreement_id));
                         }
                     });
                 }

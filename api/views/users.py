@@ -2,8 +2,7 @@ import datetime
 import re
 from flask_socketio import emit
 import sqlalchemy
-from flask_restful import request
-from flask import session, json, current_app, render_template, url_for
+from flask import session, json, current_app, render_template, url_for, request
 from sqlalchemy.orm import joinedload
 from core import Cache, API
 from core.middleware import HttpException
@@ -21,11 +20,8 @@ class Users(API):
         if 'logged_in' in session:
             try:
                 user = User.query.filter_by(email=session['user_email']).first()
-            except Exception as ex:
-                if 'UndefinedTable' in ex.args[0]:
-                    return Result.error(ex.args, 501)
-                else:
-                    raise ex
+            except (sqlalchemy.exc.ProgrammingError, sqlalchemy.exc.OperationalError):
+                return Result.error('install', 501)
             if user:
                 return user_to_dict(user)
 
@@ -35,9 +31,8 @@ class Users(API):
                 # if table not exist we cache it to avoid multiple
                 # executions when a user is just logged out.
                 Cache.remember('users.count', User.query.count, 24 * 60 * 60)
-            except Exception as ex:
-                if 'UndefinedTable' in ex.args[0]:
-                    return Result.error('install', 501)
+            except (sqlalchemy.exc.ProgrammingError, sqlalchemy.exc.OperationalError):
+                return Result.error('install', 501)
 
         return Result.error('no session', 403)
 

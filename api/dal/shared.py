@@ -54,14 +54,14 @@ def token_required(f):
     def decorated(*args, **kwargs):
         token = None
 
-        if 'x-access-token' in request.headers:
-            token = request.headers['x-access-token']
+        if 'X-Access-Token' in request.headers:
+            token = request.headers['X-ACCESS-TOKEN']
 
         if not token:
             return Result.error('Token is missing!', 401)
 
         try:
-            data = jwt.decode(token, current_app.config['SECRET_KEY'])
+            data = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
             current_user = User.query.options(joinedload('roles')).filter_by(email=data['email']).first()
         except Exception:
             return Result.error('Token is invalid!', 401)

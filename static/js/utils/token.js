@@ -84,7 +84,7 @@ class Token {
      */
     get authHeaders() {
         return {
-            'x-access-token': this._data.token.value
+            'X-Access-Token': this._data.token.value
         };
     }
 }

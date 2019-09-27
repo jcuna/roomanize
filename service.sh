@@ -23,20 +23,29 @@ get_container_id() {
     echo $(docker ps -a -q --filter name="$IMAGE_NAME" --format="{{.ID}}")
 }
 
-if [[ "$1" = "test" ]]; then
+if [[ "$1" == "test" ]]; then
     CONTAINER_ID=$(get_container_id ${API_IMG_NAME})
+    FLAGS="-ra"
+    APPEND="${@:2}"
+    if [[ "$2" == "--flags" ]]; then
+      FLAGS="$FLAGS $3"
+      APPEND="${@:4}"
+    fi
+    COMMAND="pytest $FLAGS tests/$APPEND"
+    printf "%s\n" "$COMMAND"
+
     docker exec -ti "$CONTAINER_ID" bash -c \
-        "PYTHONDONTWRITEBYTECODE=1 APP_SETTINGS_PATH='/tmp/settings.py' pytest -ra" "${@:2}"
+        "PYTHONDONTWRITEBYTECODE=1 APP_SETTINGS_PATH='/tmp/settings.py' $COMMAND"
     exit $?
 fi
 
-if [[ "$1" = "run" ]]; then
+if [[ "$1" == "run" ]]; then
     CONTAINER_ID=$(get_container_id ${API_IMG_NAME})
     docker exec -ti "$CONTAINER_ID" bash -c "${@:2}"
     exit $?
 fi
 
-if [[ "$1" = "ssh" ]]; then
+if [[ "$1" == "ssh" ]]; then
     if [[ "$2" = "" ]]; then
         CONTAINER_SSH=$API_IMG_NAME
     else
@@ -54,7 +63,7 @@ if [[ "$1" = "ssh" ]]; then
     exit
 fi
 
-if [[ "$1" = "build" ]]; then
+if [[ "$1" == "build" ]]; then
   if [[ ! -f ./settings.prod.py ]]; then
     printf "No prod settings.prod.py file to build with config\n"
     exit 1
@@ -71,12 +80,12 @@ if [[ ! -f "./docker/docker-compose.yml" ]]; then
     exit 1
 fi
 
-if [[ "$1" = "stop" ]]; then
+if [[ "$1" == "stop" ]]; then
     API_IMG=${API_IMG_NAME}:${LATEST_API} docker-compose -f docker/docker-compose.yml down
     exit;
 fi
 
-if [[ "$1" = "" ]]; then
+if [[ "$1" == "" ]]; then
     API_IMG=${API_IMG_NAME}:${LATEST_API} docker-compose -f docker/docker-compose.yml down > /dev/null 2>&1
 
     if [[ "$(docker images -q "$API_IMG_NAME:$LATEST_API" 2> /dev/null)" = "" ]]; then

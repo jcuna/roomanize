@@ -1,6 +1,5 @@
 import json
 from sqlalchemy import UniqueConstraint, and_, Sequence
-from sqlalchemy.dialects.mysql import BIGINT
 from sqlalchemy.ext.mutable import MutableList
 from config import random_token
 from dal import db
@@ -11,6 +10,10 @@ import jwt
 from config.routes import default_access
 from dal.shared import ModelIter
 from config import configs
+from sqlalchemy.dialects import sqlite
+
+# sqlite is used for testing and it does not auto increment Big Int since there's no support
+BigInteger = db.BigInteger().with_variant(sqlite.INTEGER(), 'sqlite')
 
 admin_access = {
     'projects': '*'
@@ -20,9 +23,9 @@ admin_preferences = {}
 
 user_roles = db.Table(
     'user_roles',
-    db.Column('id', db.BigInteger, primary_key=True),
-    db.Column('user_id', db.BigInteger, db.ForeignKey('users.id'), index=True),
-    db.Column('role_id', db.BigInteger, db.ForeignKey('roles.id'), index=True)
+    db.Column('id', BigInteger, primary_key=True),
+    db.Column('user_id', BigInteger, db.ForeignKey('users.id'), index=True),
+    db.Column('role_id', BigInteger, db.ForeignKey('roles.id'), index=True)
 )
 
 
@@ -30,7 +33,7 @@ class User(db.Model, ModelIter):
     __tablename__ = 'users'
     fillable = ['password', 'email', 'first_name', 'last_name', 'deleted']
 
-    id = db.Column(db.BigInteger, primary_key=True)
+    id = db.Column(BigInteger, primary_key=True)
     email = db.Column(db.String(50, collation=configs.DB_COLLATION), nullable=False, unique=True)
     password = db.Column(db.String(80, collation=configs.DB_COLLATION), nullable=True)
     first_name = db.Column(db.String(50, collation=configs.DB_COLLATION), nullable=False, index=True)
@@ -51,7 +54,10 @@ class User(db.Model, ModelIter):
     def get_token(self):
         exp = datetime.utcnow() + timedelta(minutes=30)
         return {
-            'value': jwt.encode({'email': self.email, 'exp': exp}, configs.SECRET_KEY).decode('utf-8'),
+            'value': jwt.encode(
+                {'email': self.email, 'exp': exp},
+                configs.SECRET_KEY,
+                algorithm='HS256').decode('utf-8'),
             'expires': round(exp.timestamp())
         }
 
@@ -59,8 +65,8 @@ class User(db.Model, ModelIter):
 class UserAttributes(db.Model, ModelIter):
     __tablename__ = 'user_attributes'
 
-    ua_id = db.Column(db.BigInteger, primary_key=True)
-    user_id = db.Column(db.BigInteger, db.ForeignKey('users.id'), index=True)
+    ua_id = db.Column(BigInteger, primary_key=True)
+    user_id = db.Column(BigInteger, db.ForeignKey('users.id'), index=True)
     user_access = db.Column(
         db.Text(collation=configs.DB_COLLATION),
         comment='A JSON schema of table/rows access',
@@ -88,8 +94,8 @@ class UserAttributes(db.Model, ModelIter):
 class UserToken(db.Model, ModelIter):
     __tablename__ = 'user_tokens'
 
-    id = db.Column(db.BigInteger, primary_key=True)
-    user_id = db.Column(db.BigInteger, db.ForeignKey('users.id'), index=True)
+    id = db.Column(BigInteger, primary_key=True)
+    user_id = db.Column(BigInteger, db.ForeignKey('users.id'), index=True)
     token = db.Column(db.String(64, collation=configs.DB_COLLATION, ), unique=True, nullable=False)
     expires = db.Column(db.DateTime(), nullable=False)
     target = db.Column(
@@ -114,7 +120,7 @@ class UserToken(db.Model, ModelIter):
 class Role(db.Model, ModelIter):
     __tablename__ = 'roles'
 
-    id = db.Column(db.BigInteger, primary_key=True)
+    id = db.Column(BigInteger, primary_key=True)
     name = db.Column(db.String(30, collation=configs.DB_COLLATION), index=True)
     permissions = db.Column(db.Text(collation=configs.DB_COLLATION))
 
@@ -139,7 +145,7 @@ class Role(db.Model, ModelIter):
 class Project(db.Model, ModelIter):
     __tablename__ = 'projects'
 
-    id = db.Column(db.BigInteger, primary_key=True)
+    id = db.Column(BigInteger, primary_key=True)
     name = db.Column(db.String(30, collation=configs.DB_COLLATION), unique=True)
     address = db.Column(db.Text(collation=configs.DB_COLLATION))
     contact = db.Column(db.String(10, collation=configs.DB_COLLATION))
@@ -158,7 +164,7 @@ class Tenant(db.Model, ModelIter):
     __tablename__ = 'tenants'
     fillable = ['first_name', 'last_name', 'email', 'phone', 'identification_number']
 
-    id = db.Column(db.BigInteger, primary_key=True)
+    id = db.Column(BigInteger, primary_key=True)
     first_name = db.Column(db.String(30, collation=configs.DB_COLLATION), nullable=False)
     last_name = db.Column(db.String(30, collation=configs.DB_COLLATION), nullable=False, index=True)
     email = db.Column(db.String(50, collation=configs.DB_COLLATION), nullable=True, unique=True)
@@ -182,8 +188,8 @@ class Tenant(db.Model, ModelIter):
 class TenantHistory(db.Model, ModelIter):
     __tablename__ = 'tenants_history'
 
-    id = db.Column(db.BigInteger, primary_key=True)
-    tenant_id = db.Column(db.BigInteger, db.ForeignKey('tenants.id'), index=True, nullable=False)
+    id = db.Column(BigInteger, primary_key=True)
+    tenant_id = db.Column(BigInteger, db.ForeignKey('tenants.id'), index=True, nullable=False)
     reference1_phone = db.Column(db.String(10, collation=configs.DB_COLLATION), nullable=False)
     reference2_phone = db.Column(db.String(10, collation=configs.DB_COLLATION), nullable=True)
     reference3_phone = db.Column(db.String(10, collation=configs.DB_COLLATION), nullable=True)
@@ -196,10 +202,10 @@ class RentalAgreement(db.Model, ModelIter):
     __tablename__ = 'rental_agreements'
     fillable = ['tenant_history_id', 'room_id', 'project_id', 'time_interval_id', 'rate', 'entered_on', 'deposit']
 
-    id = db.Column(db.BigInteger, primary_key=True)
-    tenant_history_id = db.Column(db.BigInteger, db.ForeignKey('tenants_history.id'), index=True, nullable=False)
-    room_id = db.Column(db.BigInteger, db.ForeignKey('rooms.id'), index=True, nullable=False)
-    project_id = db.Column(db.BigInteger, db.ForeignKey('projects.id'), index=True, nullable=False)
+    id = db.Column(BigInteger, primary_key=True)
+    tenant_history_id = db.Column(BigInteger, db.ForeignKey('tenants_history.id'), index=True, nullable=False)
+    room_id = db.Column(BigInteger, db.ForeignKey('rooms.id'), index=True, nullable=False)
+    project_id = db.Column(BigInteger, db.ForeignKey('projects.id'), index=True, nullable=False)
     time_interval_id = db.Column(db.Integer, db.ForeignKey('time_intervals.id'), nullable=False)
     rate = db.Column(db.DECIMAL(10, 2), nullable=False)
     deposit = db.Column(db.DECIMAL(10, 2), nullable=False)
@@ -217,8 +223,8 @@ class Room(db.Model, ModelIter):
     __tablename__ = 'rooms'
     fillable = ['project_id', 'name', 'rent', 'time_interval_id', 'description', 'picture']
 
-    id = db.Column(db.BigInteger, primary_key=True)
-    project_id = db.Column(db.BigInteger, db.ForeignKey('projects.id'), index=True, nullable=False)
+    id = db.Column(BigInteger, primary_key=True)
+    project_id = db.Column(BigInteger, db.ForeignKey('projects.id'), index=True, nullable=False)
     name = db.Column(db.String(30, collation=configs.DB_COLLATION))
     description = db.Column(db.Text(collation=configs.DB_COLLATION))
     picture = db.Column(db.String(255, collation=configs.DB_COLLATION))
@@ -238,7 +244,7 @@ class Room(db.Model, ModelIter):
 class Policy(db.Model, ModelIter):
     __tablename__ = 'policies'
 
-    id = db.Column(db.BigInteger, primary_key=True)
+    id = db.Column(BigInteger, primary_key=True)
     title = db.Column(db.String(30, collation=configs.DB_COLLATION), index=True, nullable=False)
     text = db.Column(db.Text(collation=configs.DB_COLLATION))
     start_ttv = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.utcnow)
@@ -250,8 +256,8 @@ class Policy(db.Model, ModelIter):
 class Balance(db.Model, ModelIter):
     __tablename__ = 'balances'
 
-    id = db.Column(BIGINT(unsigned=True), primary_key=True)
-    agreement_id = db.Column(db.BigInteger, db.ForeignKey('rental_agreements.id'), index=True)
+    id = db.Column(BigInteger, primary_key=True)
+    agreement_id = db.Column(BigInteger, db.ForeignKey('rental_agreements.id'), index=True)
     balance = db.Column(db.DECIMAL(10, 2), nullable=False)
     previous_balance = db.Column(db.DECIMAL(10, 2), nullable=False)
     created_on = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.utcnow)
@@ -272,8 +278,8 @@ class Payment(db.Model, ModelIter):
     __tablename__ = 'payments'
     fillable = ['amount', 'payment_type_id']
 
-    id = db.Column(BIGINT(unsigned=True), Sequence('payments_id_seq', start=1000, increment=1), primary_key=True)
-    balance_id = db.Column(BIGINT(unsigned=True), db.ForeignKey('balances.id'), index=True)
+    id = db.Column(BigInteger, Sequence('payments_id_seq', start=1000, increment=1), primary_key=True)
+    balance_id = db.Column(BigInteger, db.ForeignKey('balances.id'), index=True)
     amount = db.Column(db.DECIMAL(10, 2), nullable=False)
     paid_date = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.utcnow)
     payment_type_id = db.Column(db.Integer, db.ForeignKey('payment_types.id'), nullable=False)
@@ -289,8 +295,8 @@ class Expense(db.Model, ModelIter):
     __tablename__ = 'expenses'
     fillable = ['amount', 'expense_date']
 
-    id = db.Column(BIGINT(unsigned=True), primary_key=True)
-    project_id = db.Column(db.BigInteger, db.ForeignKey('projects.id'), index=True, nullable=False)
+    id = db.Column(BigInteger, primary_key=True)
+    project_id = db.Column(BigInteger, db.ForeignKey('projects.id'), index=True, nullable=False)
     amount = db.Column(db.DECIMAL(10, 2), nullable=False)
     description = db.Column(db.String(512), nullable=False)
     input_date = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow)
@@ -307,10 +313,10 @@ class Expense(db.Model, ModelIter):
 class Audit(db.Model, ModelIter):
     __tablename__ = 'audits'
 
-    id = db.Column(BIGINT(unsigned=True), primary_key=True)
+    id = db.Column(BigInteger, primary_key=True)
     date = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.utcnow)
-    user_id = db.Column(db.BigInteger, db.ForeignKey('users.id'), index=True, nullable=True)
-    ip = db.Column(db.BigInteger, nullable=False)
+    user_id = db.Column(BigInteger, db.ForeignKey('users.id'), index=True, nullable=True)
+    ip = db.Column(BigInteger, nullable=False)
     endpoint = db.Column(db.String(255, collation=configs.DB_COLLATION), nullable=False)
     method = db.Column(db.String(7, collation=configs.DB_COLLATION), nullable=False)
     headers = db.Column(db.Text(collation=configs.DB_COLLATION))

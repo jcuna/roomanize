@@ -79,5 +79,7 @@ class Router:
                     db.session.commit()
 
                     return redirect('/')
+                else:
+                    return render_template('install.html', error='Invalid submission'), 400
 
-            return render_template('install.html')
+            return render_template('install.html', error=None)
