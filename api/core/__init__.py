@@ -97,7 +97,7 @@ class AsyncAuditor(threading.Thread):
                             app.logger.debug(threading.current_thread().name + ' new audit record')
                             if is_prod:
                                 task.payload = encryptor.encrypt(task.payload)
-                            task.ip = struct.unpack("!I", socket.inet_aton(task.ip))[0]
+                            task.ip = struct.unpack('!I', socket.inet_aton(task.ip))[0]
                             db.session.add(task)
                         self.tasks.clear()
                         db.session.commit()

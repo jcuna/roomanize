@@ -1,4 +1,5 @@
 import os
+from datetime import datetime, time
 
 config = """
 TESTING = True
@@ -31,3 +32,7 @@ def tear_files():
 
 def endpoint(uri):
     return '/v1.0' + uri
+
+
+def front_end_date(date: datetime = datetime.utcnow(), _time: str = str(time.min)):
+    return ' '.join([str(date.date()), _time])

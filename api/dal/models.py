@@ -46,7 +46,7 @@ class User(db.Model, ModelIter):
     audit = relationship('Audit')
 
     def hash_password(self):
-        self.password = generate_password_hash(str(self.password).encode("ascii"), method='sha256')
+        self.password = generate_password_hash(str(self.password).encode('ascii'), method='sha256')
 
     def password_correct(self, plain_password):
         return check_password_hash(self.password, plain_password)

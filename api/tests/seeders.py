@@ -1,6 +1,5 @@
 from flask.testing import FlaskClient
-
-from tests import endpoint
+from tests import endpoint, front_end_date
 
 admin_sample = {
     'first_name': 'Test',
@@ -11,9 +10,9 @@ admin_sample = {
 
 project_sample = {
     'active': True,
-    'address': "1500 Sample St. Sunnyside CA 98996",
-    'name': "Sample",
-    'phone': "1234567890",
+    'address': '1500 Sample St. Sunnyside CA 98996',
+    'name': 'Sample',
+    'phone': '1234567890',
 }
 
 tenant_sample = {
@@ -25,20 +24,20 @@ tenant_sample = {
 }
 
 room_sample = {
-    'description': "room number 1000",
-    'name': "MA-1000",
-    'picture': "",
+    'description': 'room number 1000',
+    'name': 'MA-1000',
+    'picture': '',
     'project_id': 1,
 }
 
 registration_sample = {
-    'date': "2019-09-26 20:18:36",
-    'deposit': "4400.00",
-    'interval': "100",
-    'rate': "1500.00",
-    'reference1': "5555555555",
-    'reference2': "",
-    'reference3': "",
+    'date': front_end_date(),
+    'deposit': '4400.00',
+    'interval': '100',
+    'rate': '1500.00',
+    'reference1': '5555555555',
+    'reference2': '',
+    'reference3': '',
     'room_id': 1,
     'tenant_id': 1
 }
