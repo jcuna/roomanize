@@ -207,13 +207,13 @@ class RentalAgreement(db.Model, ModelIter):
     room_id = db.Column(BigInteger, db.ForeignKey('rooms.id'), index=True, nullable=False)
     project_id = db.Column(BigInteger, db.ForeignKey('projects.id'), index=True, nullable=False)
     time_interval_id = db.Column(db.Integer, db.ForeignKey('time_intervals.id'), nullable=False)
-    rate = db.Column(db.DECIMAL(10, 2), nullable=False)
-    deposit = db.Column(db.DECIMAL(10, 2), nullable=False)
+    rate = db.Column(db.Numeric(10, 2), nullable=False)
+    deposit = db.Column(db.Numeric(10, 2), nullable=False)
     created_on = db.Column('created_on', db.DateTime(), nullable=False, default=datetime.utcnow)
     entered_on = db.Column(db.DateTime(), nullable=False)
     terminated_on = db.Column(db.DateTime())
 
-    tenant_history = relationship(TenantHistory, uselist=False, back_populates='rental_agreement')
+    tenant_history = relationship(TenantHistory, uselist=False, back_populates='rental_agreement', cascade='all, delete')
     room = relationship('Room', uselist=False)
     project = relationship(Project, uselist=False)
     interval = relationship(TimeInterval, uselist=False)
@@ -258,14 +258,13 @@ class Balance(db.Model, ModelIter):
 
     id = db.Column(BigInteger, primary_key=True)
     agreement_id = db.Column(BigInteger, db.ForeignKey('rental_agreements.id'), index=True)
-    balance = db.Column(db.DECIMAL(10, 2), nullable=False)
-    previous_balance = db.Column(db.DECIMAL(10, 2), nullable=False)
+    balance = db.Column(db.Numeric(10, 2), nullable=False)
+    previous_balance = db.Column(db.Numeric(10, 2), nullable=False)
     created_on = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.utcnow)
     due_date = db.Column(db.DateTime(), nullable=False, index=True)
-    init_processed = db.Column(db.Boolean(), nullable=False, default=False)
 
-    agreement = relationship(RentalAgreement, uselist=False, backref='balances')
-    payments = relationship('Payment', backref='balances')
+    agreement = relationship(RentalAgreement, uselist=False, backref='balances', cascade='all, delete')
+    payments = relationship('Payment', backref='balances', cascade='all, delete')
 
 
 class PaymentType(db.Model, ModelIter):
@@ -280,7 +279,7 @@ class Payment(db.Model, ModelIter):
 
     id = db.Column(BigInteger, Sequence('payments_id_seq', start=1000, increment=1), primary_key=True)
     balance_id = db.Column(BigInteger, db.ForeignKey('balances.id'), index=True)
-    amount = db.Column(db.DECIMAL(10, 2), nullable=False)
+    amount = db.Column(db.Numeric(10, 2), nullable=False)
     paid_date = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.utcnow)
     payment_type_id = db.Column(db.Integer, db.ForeignKey('payment_types.id'), nullable=False)
 
@@ -297,7 +296,7 @@ class Expense(db.Model, ModelIter):
 
     id = db.Column(BigInteger, primary_key=True)
     project_id = db.Column(BigInteger, db.ForeignKey('projects.id'), index=True, nullable=False)
-    amount = db.Column(db.DECIMAL(10, 2), nullable=False)
+    amount = db.Column(db.Numeric(10, 2), nullable=False)
     description = db.Column(db.String(512), nullable=False)
     input_date = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow)
     expense_date = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.utcnow)

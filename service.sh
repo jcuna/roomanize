@@ -13,7 +13,7 @@ if [[ "$1" != "" && "$1" != "stop" && "$1" != "ssh" && "$1" != "build" && "$1" !
     exit 1;
 fi
 
-LATEST_API=1.0
+LATEST_API=1.1
 API_IMG_NAME="roomanize-api"
 
 get_container_id() {
@@ -64,8 +64,8 @@ if [[ "$1" == "ssh" ]]; then
 fi
 
 if [[ "$1" == "build" ]]; then
-  if [[ ! -f ./settings.prod.py ]]; then
-    printf "No prod settings.prod.py file to build with config\n"
+  if [[ ! -f ./api/config/settings.py ]]; then
+    printf "No prod settings.py file to build with config\n"
     exit 1
   fi
 

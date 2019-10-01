@@ -31,9 +31,9 @@ room_sample = {
 }
 
 registration_sample = {
-    'date': front_end_date(),
+    'date': front_end_date(), # defaults to today
     'deposit': '4400.00',
-    'interval': '100',
+    'interval': '100', # weekly, 200 every two weeks and 400 monthly
     'rate': '1500.00',
     'reference1': '5555555555',
     'reference2': '',
@@ -52,33 +52,41 @@ def seed_project(client: FlaskClient, token: str):
     }
     return client.post(endpoint('/projects'), json=project_sample, headers=auth)
 
-def seed_room(client: FlaskClient, token: str, overrides: dict):
+def seed_room(client: FlaskClient, token: str, override=None):
     auth = {
         'X-Access-Token': token
     }
 
     data = {}
     data.update(room_sample)
-    data.update(overrides)
+    if override:
+        data.update(override)
 
     return client.post(endpoint('/rooms'), json=data, headers=auth)
 
 
-def seed_tenant(client: FlaskClient, token: str):
+def seed_tenant(client: FlaskClient, token: str, override=None):
     auth = {
         'X-Access-Token': token
     }
+    data = {}
+    data.update(tenant_sample)
+    if override:
+        data.update(override)
 
-    return client.post(endpoint('/tenants'), json=tenant_sample, headers=auth)
+    return client.post(endpoint('/tenants'), json=data, headers=auth)
 
 
-def seed_new_agreement(client: FlaskClient, token: str, overrides: dict):
+def seed_new_agreement(client: FlaskClient, token: str, override=None):
 
+    if override is None:
+        override = dict()
     auth = {
         'X-Access-Token': token
     }
     data = {}
     data.update(registration_sample)
-    data.update(overrides)
+    if override:
+        data.update(override)
 
     return client.post(endpoint('/agreements'), json=data, headers=auth)

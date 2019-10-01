@@ -1,8 +1,11 @@
 from datetime import datetime, timedelta, time as d_time
+from logging import Logger
 from time import time
 from dateutil.relativedelta import *
 import sqlalchemy
 from sqlalchemy.orm import joinedload, load_only, defer
+from sqlalchemy.sql import functions
+
 from config.constants import *
 from core import get_logger
 from dal import db
@@ -24,18 +27,13 @@ def balances_cron():
         yesterday = today - timedelta(days=1)
         five_days_ago = yesterday - timedelta(days=5)
 
-        try:
-            agreements = RentalAgreement.query.options(
-                joinedload('balances'), joinedload('balances.payments'), joinedload('interval')).filter(
-                RentalAgreement.terminated_on.is_(None)).filter(RentalAgreement.id.notin_(
-                    Balance.query.options(
-                        defer(Balance.id),
-                        load_only(Balance.agreement_id)
-                    ).filter(Balance.due_date >= today).subquery()))\
-                .join(Balance).filter(
-                (Balance.due_date.between(five_days_ago, yesterday)))
+        balances = Balance.query.options(joinedload('agreement'), joinedload('payments')).filter(
+            Balance.due_date.between(five_days_ago, yesterday),
+            Balance.id.in_(db.session.query(functions.max(Balance.id)).group_by(Balance.agreement_id).subquery())
+        )
 
-            process_agreements(agreements.all(), logger, yesterday, five_days_ago)
+        try:
+            process_agreements(balances.all(), logger, yesterday, five_days_ago)
 
         except (sqlalchemy.exc.OperationalError, Exception) as e:
             logger.error('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
@@ -45,57 +43,43 @@ def balances_cron():
         logger.info('Took: ' + str(timedelta(seconds=(time() - start))))
 
 
-def process_agreements(agreements, logger, yesterday: datetime, five_days_ago: datetime):
-    from config import debug
-    debug()
+def process_agreements(balances: list, logger: Logger, yesterday: datetime, five_days_ago: datetime):
+    # this should only contain distinct values
+    agreement_ids = []
+    cycle_balance: Balance
+    for cycle_balance in balances:
 
-    agreement: RentalAgreement
-    for agreement in agreements:
-        if len(agreement.balances) > 0:
+        assert cycle_balance.agreement_id not in agreement_ids
 
-            cycle_balance: Balance
-            for cycle_balance in agreement.balances:
+        logger.info('Processing agreement id: ' + str(cycle_balance.agreement_id))
 
-                if (cycle_balance.created_on >= five_days_ago and cycle_balance.init_processed) or \
-                   cycle_balance.due_date <= five_days_ago or cycle_balance.due_date > yesterday:
+        payments = sum(map(lambda b: b.amount, cycle_balance.payments))
 
-                    logger.info('Skipping balance ' + str(cycle_balance.id) + ' for aggrement ' + str(agreement.id) +
-                                ' since it was created within the last 5 days and has been init_processed.')
-                    continue
+        logger.info(str(len(cycle_balance.payments)) + ' Payments processed Total:' + str(payments))
 
-                logger.info('Processing agreement id: ' + str(agreement.id))
+        previous_balance = cycle_balance.balance - payments
+        new_balance = previous_balance + cycle_balance.agreement.rate
 
-                if not cycle_balance.init_processed:
-                    cycle_balance.init_processed = True
+        logger.info('Previous balance: ' + str(previous_balance) + ' | New balance: ' + str(new_balance))
 
-                payments = sum(map(lambda b: b.amount, cycle_balance.payments))
+        if cycle_balance.agreement.interval.interval == SEMANAL:
+            delta = timedelta(weeks=1)
+        elif cycle_balance.agreement.interval.interval == QUINCENAL:
+            delta = timedelta(days=14)
+        else:
+            delta = relativedelta(months=1)
 
-                logger.info(str(len(cycle_balance.payments)) + ' Payments processed Total:' + str(payments))
+        new_cycle_balance = Balance(
+            agreement=cycle_balance.agreement,
+            balance=new_balance,
+            previous_balance=previous_balance,
+            due_date=cycle_balance.due_date + delta,
+        )
+        logger.info('Agreement entered on: ' + str(cycle_balance.agreement.entered_on))
+        logger.info('Pay cycle: ' + cycle_balance.agreement.interval.interval)
+        logger.info('Last due date: ' + str(cycle_balance.due_date))
+        logger.info('Next due date: ' + str(new_cycle_balance.due_date))
 
-                previous_balance = cycle_balance.balance - payments
-                new_balance = previous_balance + agreement.rate
-
-                logger.info('Previous balance: ' + str(previous_balance) + ' | New balance: ' + str(new_balance))
-
-                if agreement.interval.interval == SEMANAL:
-                    delta = timedelta(weeks=1)
-                elif agreement.interval.interval == QUINCENAL:
-                    delta = timedelta(days=14)
-                else:
-                    delta = relativedelta(months=1)
-
-                new_cycle_balance = Balance(
-                    agreement=agreement,
-                    balance=new_balance,
-                    previous_balance=previous_balance,
-                    due_date=cycle_balance.due_date + delta,
-                    init_processed=True,
-                )
-                logger.info('Agreement entered on: ' + str(agreement.entered_on))
-                logger.info('Pay cycle: ' + agreement.interval.interval)
-                logger.info('Last due date: ' + str(cycle_balance.due_date))
-                logger.info('Next due date: ' + str(new_cycle_balance.due_date))
-
-                db.session.add(new_cycle_balance)
+        db.session.add(new_cycle_balance)
 
     db.session.commit()

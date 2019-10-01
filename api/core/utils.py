@@ -24,7 +24,7 @@ def configure_loggers(app: Flask):
         db_logging.handlers = get_logger('sql', level).handlers
 
 
-def get_logger(name: str = 'app', level: int = logging.INFO):
+def get_logger(name: str = 'app', level: int = logging.INFO) -> logging.Logger:
     """
     return a logger with default settings
 
@@ -52,26 +52,6 @@ def get_logger(name: str = 'app', level: int = logging.INFO):
 
     return logger
 
-
-class Lock:
-    """
-    handy class to create a lock file
-    use it like lock = Lock('file')
-    with lock:
-        # run things
-    """
-
-    def __init__(self, lock_file):
-        self.lock_file = lock_file
-        # raise exception if pid file exists and log it. remove if it's stale
-
-    def __enter__(self):
-        # write pid file
-        pass
-
-    def __exit__(self, type, value, traceback):
-        # remove pid file
-        pass
 
 
 def local_to_utc(date: str) -> datetime:
