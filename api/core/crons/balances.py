@@ -3,13 +3,12 @@ from logging import Logger
 from time import time
 from dateutil.relativedelta import *
 import sqlalchemy
-from sqlalchemy.orm import joinedload, load_only, defer
+from sqlalchemy.orm import joinedload
 from sqlalchemy.sql import functions
-
 from config.constants import *
 from core import get_logger
 from dal import db
-from dal.models import Balance, RentalAgreement
+from dal.models import Balance
 from app import init_app
 
 
@@ -33,7 +32,7 @@ def balances_cron():
         )
 
         try:
-            process_agreements(balances.all(), logger, yesterday, five_days_ago)
+            process_agreements(balances.all(), logger)
 
         except (sqlalchemy.exc.OperationalError, Exception) as e:
             logger.error('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
@@ -43,7 +42,7 @@ def balances_cron():
         logger.info('Took: ' + str(timedelta(seconds=(time() - start))))
 
 
-def process_agreements(balances: list, logger: Logger, yesterday: datetime, five_days_ago: datetime):
+def process_agreements(balances: list, logger: Logger):
     # this should only contain distinct values
     agreement_ids = []
     cycle_balance: Balance
