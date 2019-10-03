@@ -7,7 +7,10 @@ if [ ! -d "$APP_PATH/log" ]; then
 fi
 
 if [ "$APP_ENV" = "development" ]; then
-    echo '' > "$APP_PATH/log/app.log"
+    rm -rf log/*
+
+    supervisord
+
     while true
     do
         python3 app.py >> "$APP_PATH/log/app.log" 2>&1

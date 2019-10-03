@@ -24,7 +24,7 @@ tenant_sample = {
 }
 
 room_sample = {
-    'description': 'room number 1000',
+    'description': 'room number MA-1000',
     'name': 'MA-1000',
     'picture': '',
     'project_id': 1,
@@ -33,7 +33,7 @@ room_sample = {
 registration_sample = {
     'date': front_end_date(), # defaults to today
     'deposit': '4400.00',
-    'interval': '100', # weekly, 200 every two weeks and 400 monthly
+    'interval': '100',  # weekly, 200 every two weeks and 400 monthly
     'rate': '1500.00',
     'reference1': '5555555555',
     'reference2': '',
@@ -41,6 +41,7 @@ registration_sample = {
     'room_id': 1,
     'tenant_id': 1
 }
+
 
 def seed_admin(client: FlaskClient):
     return client.post('/install', data=admin_sample)
@@ -52,6 +53,7 @@ def seed_project(client: FlaskClient, token: str):
     }
     return client.post(endpoint('/projects'), json=project_sample, headers=auth)
 
+
 def seed_room(client: FlaskClient, token: str, override=None):
     auth = {
         'X-Access-Token': token
@@ -61,6 +63,7 @@ def seed_room(client: FlaskClient, token: str, override=None):
     data.update(room_sample)
     if override:
         data.update(override)
+        data.update({'description': 'Room number ' + data.get('name')})
 
     return client.post(endpoint('/rooms'), json=data, headers=auth)
 

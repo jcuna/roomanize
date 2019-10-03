@@ -19,6 +19,7 @@ CACHE_CONFIG = {
 TIME_ZONE = 'America/New_York'
 """ % (os.path.dirname(os.environ['APP_SETTINGS_PATH']) + '/testdb')
 
+
 def init():
     settings_fd = open(os.environ['APP_SETTINGS_PATH'], 'w+')
     settings_fd.write(config)

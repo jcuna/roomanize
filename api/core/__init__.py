@@ -112,19 +112,6 @@ class AsyncAuditor(threading.Thread):
 def runner():
     # if this is not a second spawn for auto reload worker
     if is_prod or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
-        # this is our cron job runner
-        from config.crons import cron_jobs
-        from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
-        from apscheduler.schedulers.background import BackgroundScheduler
-
-        executors = {
-            'default': ProcessPoolExecutor(20) if is_prod else ThreadPoolExecutor(20)
-        }
-
-        scheduler = BackgroundScheduler(timezone='utc', executors=executors)
-        for job in cron_jobs:
-            scheduler.add_job(**job)
-        scheduler.start()
 
         # TODO: switch to use an independent async queue with socket communication
         # TODO CONT: queue can be managed with supervisord and have send message and receive message endpoints

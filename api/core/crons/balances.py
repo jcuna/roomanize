@@ -49,6 +49,7 @@ def process_agreements(balances: list, logger: Logger):
     for cycle_balance in balances:
 
         assert cycle_balance.agreement_id not in agreement_ids
+        agreement_ids.append(cycle_balance.agreement_id)
 
         logger.info('Processing agreement id: ' + str(cycle_balance.agreement_id))
 

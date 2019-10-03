@@ -102,10 +102,10 @@ export default class RoomForm extends Component {
                     ],
                     onSubmit: this.handleSubmit,
                 } }/>
-                <Link
+                { match.params.room_id && <Link
                     className='btn btn-sm btn-success'
                     to={ `${ENDPOINTS.RECEIPTS_URL}/habitacion/${ match.params.room_id }` }
-                >Historial de Recibos</Link>
+                >Historial de Recibos</Link> }
             </section>
             { this.getRoomHistory(rooms.selectedRoom.rental_history, receipts) }
         </div>;
