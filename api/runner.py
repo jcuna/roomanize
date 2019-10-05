@@ -29,4 +29,9 @@ if job == 'scheduler':
     scheduler.start()
 
 else:
-    import_module(job)
+    if len(sys.argv) > 2:
+        mod = import_module(job)
+        meth = getattr(mod, sys.argv[2])
+        meth()
+    else:
+        import_module(job)

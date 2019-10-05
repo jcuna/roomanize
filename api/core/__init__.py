@@ -17,6 +17,13 @@ from simplecrypt import encrypt, decrypt
 from base64 import b64encode, b64decode
 
 
+ACTION_PUSH = 4
+ACTION_PULL = 6
+# TODO: add PID to file name to avoid collection when testing a live instance
+SERVER_ADDRESS = '/var/run/mem_queue.sock'
+DELIMITER = '~:~'
+
+
 class Cache:
 
     @staticmethod

@@ -53,7 +53,6 @@ def get_logger(name: str = 'app', level: int = logging.INFO) -> logging.Logger:
     return logger
 
 
-
 def local_to_utc(date: str) -> datetime:
     """
     Converts a date string to a utc aware datetime object
