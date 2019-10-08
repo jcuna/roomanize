@@ -86,7 +86,7 @@ def audit_runner():
     from app import init_app
     from dal import db
 
-    app = init_app(mode='sys')
+    app = init_app('sys')
     app.logger.info('starting async audit thread')
 
     with app.app_context():
@@ -116,7 +116,7 @@ class Encryptor:
         return b64encode(encrypt(self.password, string))
 
     def decrypt(self, string: str) -> str:
-        return b64decode(decrypt(self.password, string))
+        return decrypt(self.password, b64decode(string)).decode('utf8')
 
 
 # auto exec
