@@ -1,12 +1,9 @@
 import json
-import atexit
-import os
-import socket
-import struct
-import threading
+from socket import timeout
 from datetime import timedelta
 from time import sleep, time
 from flask import request
+from config import configs
 from dal.models import Audit
 from flask_restful import Resource
 from .router import Router
@@ -15,16 +12,14 @@ from .middleware import Middleware, error_handler
 from flask_caching import Cache as CacheService
 from simplecrypt import encrypt, decrypt
 from base64 import b64encode, b64decode
-
-
-ACTION_PUSH = 4
-ACTION_PULL = 6
-# TODO: add PID to file name to avoid collection when testing a live instance
-SERVER_ADDRESS = '/var/run/mem_queue.sock'
-DELIMITER = '~:~'
+from core.queue_worker import MaxMessageSizeExceededError
+from core import mem_queue
 
 
 class Cache:
+
+    def __init__(self):
+        raise Exception('Static use class only')
 
     @staticmethod
     def set(key, value, timeout=3600):
@@ -61,78 +56,55 @@ class API(Resource):
         if hasattr(request, 'user'):
             user_id = request.user.id
 
-        audit = Audit(
-            user_id=user_id,
-            ip=request.remote_addr,
-            endpoint=request.path,
-            headers=json.dumps([{key: request.environ[key]} for key in request.environ if 'HTTP_' in key]),
-            method=request.method,
-            response=json.dumps(output),
-            payload=json.dumps({
+        audit = {
+            'user_id': user_id,
+            'ip': request.remote_addr,
+            'endpoint': request.path,
+            'headers': json.dumps([{key: request.environ[key]} for key in request.environ if 'HTTP_' in key]),
+            'method': request.method,
+            'response': json.dumps(output),
+            'payload': json.dumps({
                 'json': request.get_json(silent=True),
                 'query': request.args.to_dict(),
                 'form': request.form.to_dict(),
                 'all': request.get_data(as_text=True)
             })
-        )
-        self.audit_tasks.append(audit)
+        }
+        # TODO: Identify if this is the best approach given that the
+        #  queue is not active on test unless running queue tests
+        if not hasattr(configs, 'TESTING'):
+            try:
+                mem_queue.send_msg(json.dumps(audit))
+            except (ConnectionRefusedError, MaxMessageSizeExceededError, FileNotFoundError, timeout):
+                get_logger().exception('message error')
 
         return output
 
 
-class AsyncAuditor(threading.Thread):
+def audit_runner():
+    # this long running is used to read from queue and save audit info from request
+    from app import init_app
+    from dal import db
 
-    def __init__(self, tasks: list, stop: threading.Event):
-        super(AsyncAuditor, self).__init__(name='async-auditor')
-        self.tasks = tasks
-        self.stop_event = stop
+    app = init_app(mode='sys')
+    app.logger.info('starting async audit thread')
 
-    def run(self):
-        from app import init_app
-        from dal import db
+    with app.app_context():
+        try:
+            while True:
+                msg = mem_queue.receive_msg()
+                if msg:
+                    start = time()
+                    task = Audit(**json.loads(msg))
 
-        app = init_app(mode='sys')
-        app.logger.info('starting async audit thread')
-
-        with app.app_context():
-            try:
-                while not self.stop_event.is_set():
-                    if len(self.tasks) > 0:
-                        start = time()
-                        task: dict
-                        for task in self.tasks:
-                            app.logger.debug(threading.current_thread().name + ' new audit record')
-                            if is_prod:
-                                task.payload = encryptor.encrypt(task.payload)
-                            task.ip = struct.unpack('!I', socket.inet_aton(task.ip))[0]
-                            db.session.add(task)
-                        self.tasks.clear()
-                        db.session.commit()
-                        app.logger.debug('Took: ' + str(timedelta(seconds=(time() - start))))
-                    sleep(2)
-                app.logger.info('exiting async audit thread')
-            except BaseException as e:
-                app.logger.exception('Exception')
-
-
-#  TODO: manage with supervisord
-def runner():
-    # if this is not a second spawn for auto reload worker
-    if is_prod or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
-
-        # TODO: switch to use an independent async queue with socket communication
-        # TODO CONT: queue can be managed with supervisord and have send message and receive message endpoints
-        # TODO CONT: https://stackoverflow.com/questions/39598038/implementing-a-single-thread-server-daemon-python
-        # this long running is used to perform after request auditing
-        stop_event = threading.Event()
-        async_task = AsyncAuditor(API.audit_tasks, stop_event)
-        async_task.start()
-
-        def exit_async_thread():
-            stop_event.set()
-            async_task.join()
-
-        atexit.register(exit_async_thread)
+                    app.logger.debug('new audit record')
+                    task.payload = encryptor.encrypt(task.payload)
+                    db.session.add(task)
+                    db.session.commit()
+                    app.logger.debug('Took: ' + str(timedelta(seconds=(time() - start))))
+                else: sleep(5)
+        except Exception:
+            app.logger.exception('Exception')
 
 
 class Encryptor:
@@ -148,6 +120,5 @@ class Encryptor:
 
 
 # auto exec
-is_prod = os.environ.get('APP_ENV') == 'production'
 cache = CacheService()
 encryptor = Encryptor()

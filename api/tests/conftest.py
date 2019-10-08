@@ -1,4 +1,6 @@
 from base64 import b64encode
+from multiprocessing import Process
+from time import sleep
 import pytest
 from tests import tear_files, init, endpoint
 from tests.seeders import seed_admin
@@ -54,3 +56,24 @@ def admin_login(client):
     assert 'token' in login_resp.json, 'token expected'
     assert login_resp.status_code == 200
     return login_resp.json
+
+
+@pytest.fixture(scope='module')
+def queue_process():
+    init()
+
+    from app import init_app
+    from core.queue_worker import run
+    app = init_app()
+
+    # run queue worker in different process
+    p = Process(target=run, name='mem_queue_worker')
+
+    with app.test_client() as client:
+        p.start()
+        sleep(0.1)
+        yield p
+
+    p.terminate()
+    tear_files()
+    p.join()

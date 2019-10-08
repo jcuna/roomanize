@@ -1,52 +1,106 @@
 import os
-import sys
+import struct
 import socket
+from config import configs
+from core import get_logger
 from queue import Queue, Empty
-from core import SERVER_ADDRESS, DELIMITER, ACTION_PUSH, ACTION_PULL
 import atexit
 
+LENGTH_INDICATOR_SIZE = 4
+MAX_MSG_LENGTH = 8192
+ACTION_PUSH = 1
+ACTION_PULL = 2
+SERVER_ADDRESS = configs.SOCKET_ADDRESS if hasattr(configs, 'SOCKET_ADDRESS') else '/var/run/mem_queue.sock'
+ACTION_QUEUE_DELIMITER = '~:~'
+MESSAGE_RECEIVED = b'ok'
+EMPTY_QUEUE = b'empty'
 
 socket_client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
 
-def exit_program(code=0):
-    print('Terminating service', file=sys.stderr)
+class MessageNotQueuedError(Exception):
+    pass
+
+
+class InvalidMessageLengthIndicator(Exception):
+    pass
+
+
+class InvalidMessageActionType(Exception):
+    pass
+
+
+class MaxMessageSizeExceededError(Exception):
+    pass
+
+
+def encode_message(message: bytes):
+    return struct.pack('>I', len(message)) + message
+
+
+def decode_message(message: bytes):
+    return struct.unpack('>I', message)[0]
+
+
+def terminate_worker(code=0):
+    logger = get_logger('queue')
+    logger.info('Terminating service')
     socket_client.close()
+    exit(code)
+
+
+def init_queue():
+    atexit.register(terminate_worker)
+    logger = get_logger('queue')
+    logger.info('Starting queue service')
     try:
         os.unlink(SERVER_ADDRESS)
     except OSError:
         if os.path.exists(SERVER_ADDRESS):
             raise
-    exit(code)
 
-
-atexit.register(exit_program)
+    socket_client.bind(SERVER_ADDRESS)
+    socket_client.listen(1)
+    return logger
 
 
 def run():
-    socket_client.bind(SERVER_ADDRESS)
-    socket_client.listen(1)
+    logger = init_queue()
     task_queue = Queue()
     while True:
-        print('waiting for a connection', file=sys.stderr)
+        logger.info('waiting for a connection')
         connection, client_address = socket_client.accept()
         try:
-            print('connection from', client_address, file=sys.stderr)
-            data = connection.recv(1024)
-            print('received "%s"' % data, file=sys.stderr)
+            logger.info('connection from %s' % client_address)
+            raw_msg_len = connection.recv(LENGTH_INDICATOR_SIZE)
+            if not raw_msg_len:
+                raise InvalidMessageLengthIndicator('Invalid message sent. Missing length information')
+            msg_len = decode_message(raw_msg_len)
+
+            data = connection.recv(msg_len).decode('utf8')
+
             if data:
-                action, msg = data.decode('utf8').split(DELIMITER)
+                action, msg = data.split(ACTION_QUEUE_DELIMITER)
+                user_msg_len = len(msg)
+                logger.info('received %s bytes of data' % user_msg_len)
+                if len(msg) > MAX_MSG_LENGTH:
+                    raise MaxMessageSizeExceededError(
+                        'Message length exceeded maximum size: actual size %s' % user_msg_len
+                    )
                 if int(action) == ACTION_PUSH:
-                    connection.sendall(b'OK')
-                    task_queue.put(data)
+                    connection.sendall(encode_message(MESSAGE_RECEIVED))
+                    task_queue.put(msg.encode('utf8'))
                 elif int(action) == ACTION_PULL:
                     try:
-                        msg = task_queue.get_nowait().decode('utf8')
-                        connection.sendall(msg)
+                        queue_msg = task_queue.get_nowait()
+                        connection.sendall(encode_message(queue_msg))
                     except Empty:
-                        connection.sendall(bytes())
-                raise RuntimeError('Invalid action type passed')
-
+                        connection.sendall(encode_message(EMPTY_QUEUE))
+                else:
+                    raise InvalidMessageActionType('Invalid action type passed')
+        except (InvalidMessageLengthIndicator, InvalidMessageActionType, MaxMessageSizeExceededError) as ex:
+            connection.sendall(encode_message(str(ex).encode('utf8')))
+            logger.exception(str(ex))
         finally:
-            print('Ended connection from', client_address, file=sys.stderr)
+            logger.info('Ended connection from %s' % client_address)
             connection.close()

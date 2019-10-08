@@ -32,7 +32,7 @@ def get_logger(name: str = 'app', level: int = logging.INFO) -> logging.Logger:
     """
     logger = logging.getLogger(name)
     logger.setLevel(level)
-    if len(logger.handlers) > 0:
+    if len(logger.handlers) > 0 or hasattr(configs, 'TESTING'):
         return logger
 
     log_queue = queue.Queue(-1)

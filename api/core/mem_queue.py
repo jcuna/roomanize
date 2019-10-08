@@ -1,35 +1,58 @@
 import sys
 import socket
-from time import sleep
-from select import select
-from core import SERVER_ADDRESS, DELIMITER, ACTION_PUSH, ACTION_PULL
+from core.queue_worker import \
+    SERVER_ADDRESS, ACTION_QUEUE_DELIMITER, ACTION_PUSH, ACTION_PULL, \
+    LENGTH_INDICATOR_SIZE, encode_message, decode_message, EMPTY_QUEUE, MESSAGE_RECEIVED, MessageNotQueuedError
 
 
 def send_msg(message: str):
     """
     we want this to return ASAP
     we trust that it went mostly OK
-    :param message:
-    :return:
+    :param message: str
+    :return bool:
     """
-    socket_client = get_reply(ACTION_PUSH, message)
+
+    socket_client = request_reply(ACTION_PUSH, message)
+    resp = True
+    msg_len = decode_message(socket_client.recv(LENGTH_INDICATOR_SIZE))
+    # Read the message data
+    if msg_len:
+        msg = socket_client.recv(msg_len)
+        if msg != MESSAGE_RECEIVED:
+            raise MessageNotQueuedError(msg)
+
     socket_client.close()
-    return True
+    return resp
 
 
 def receive_msg():
-    socket_client = get_reply(ACTION_PULL, '')
-    reply = socket_client.recv(1024)
+    """
+    Retrieves a message from queue and will return None if queue is empty
+    :return message: str|None
+    """
+    socket_client = request_reply(ACTION_PULL, '')
+
+    resp = None
+    msg_len = decode_message(socket_client.recv(LENGTH_INDICATOR_SIZE))
+    # Read the message data
+    if msg_len:
+        msg = socket_client.recv(msg_len)
+        if msg != EMPTY_QUEUE:
+            resp = msg.decode('utf8')
+
     socket_client.close()
-    return reply.decode('utf-8') if reply else None
+    return resp
 
 
-def get_reply(action, msg):
+def request_reply(action, msg):
     try:
-        encoded = (str(action) + DELIMITER + msg).encode('utf-8')
+        encoded = (str(action) + ACTION_QUEUE_DELIMITER + msg).encode('utf-8')
         socket_client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        socket_client.settimeout(1)
         socket_client.connect(SERVER_ADDRESS)
-        socket_client.sendall(bytes(encoded))
+
+        socket_client.sendall(encode_message(encoded))
         return socket_client
 
     except socket.error as err:

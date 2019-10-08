@@ -315,7 +315,7 @@ class Audit(db.Model, ModelIter):
     id = db.Column(BigInteger, primary_key=True)
     date = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.utcnow)
     user_id = db.Column(BigInteger, db.ForeignKey('users.id'), index=True, nullable=True)
-    ip = db.Column(BigInteger, nullable=False)
+    ip = db.Column(db.String(15), nullable=False)
     endpoint = db.Column(db.String(255, collation=configs.DB_COLLATION), nullable=False)
     method = db.Column(db.String(7, collation=configs.DB_COLLATION), nullable=False)
     headers = db.Column(db.Text(collation=configs.DB_COLLATION))

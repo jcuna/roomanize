@@ -45,14 +45,28 @@ services:
     image: ${API_IMG}
     volumes:
       - ../api:/usr/src/app
-      - ./supervisord.conf:/etc/supervisord.conf
+      - ./supervisord.queue.conf:/etc/supervisord.conf
     environment:
       - APP_SETTINGS_PATH=/usr/src/app/config/settings.py
       - APP_ENV=development
       - APP_PATH=/usr/src/app
     command: /bin/bash -c "./run.sh"
     labels:
-      - 'traefik.http.routers.supervisor.rule=Host(`supervisor.localhost`)'
+      - 'traefik.http.routers.queue.rule=Host(`supervisor.localhost`)'
+      - 'traefik.http.services.queue.loadbalancer.server.port=9001'
+
+  crons:
+    image: ${API_IMG}
+    volumes:
+      - ../api:/usr/src/app
+      - ./supervisord.crons.conf:/etc/supervisord.conf
+    environment:
+      - APP_SETTINGS_PATH=/usr/src/app/config/settings.py
+      - APP_ENV=development
+      - APP_PATH=/usr/src/app
+    command: /bin/bash -c "/usr/local/bin/supervisord -n"
+    labels:
+      - 'traefik.http.routers.supervisor.rule=Host(`crons.localhost`)'
       - 'traefik.http.services.supervisor.loadbalancer.server.port=9001'
 
   mailhog:
@@ -71,7 +85,7 @@ services:
       - 'traefik.http.services.portainer.loadbalancer.server.port=9000'
 
   traefik:
-    image: traefik
+    image: traefik:v2.0.1
     command:
       - --api.insecure=true
       - --providers.docker

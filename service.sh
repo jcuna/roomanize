@@ -15,6 +15,7 @@ fi
 
 LATEST_API=1.1
 API_IMG_NAME="roomanize-api"
+API_CONTAINER_NAME="docker_api_"
 
 get_container_id() {
 
@@ -24,7 +25,7 @@ get_container_id() {
 }
 
 if [[ "$1" == "test" ]]; then
-    CONTAINER_ID=$(get_container_id ${API_IMG_NAME})
+    CONTAINER_ID=$(get_container_id ${API_CONTAINER_NAME})
     FLAGS="-ra"
     APPEND="${@:2}"
     if [[ "$2" == "--flags" ]]; then
@@ -40,14 +41,14 @@ if [[ "$1" == "test" ]]; then
 fi
 
 if [[ "$1" == "run" ]]; then
-    CONTAINER_ID=$(get_container_id ${API_IMG_NAME})
+    CONTAINER_ID=$(get_container_id ${API_CONTAINER_NAME})
     docker exec -ti "$CONTAINER_ID" bash -c "${@:2}"
     exit $?
 fi
 
 if [[ "$1" == "ssh" ]]; then
     if [[ "$2" = "" ]]; then
-        CONTAINER_SSH=$API_IMG_NAME
+        CONTAINER_SSH=$API_CONTAINER_NAME
     else
         CONTAINER_SSH="$2"
     fi

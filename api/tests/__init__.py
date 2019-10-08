@@ -9,6 +9,7 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 SQLALCHEMY_ENGINE_OPTIONS = {
     'pool_recycle': True
 }
+SOCKET_ADDRESS = '/var/run/mem_queue-test.sock'
 DB_COLLATION = 'BINARY'
 APP_ENV = 'testing'
 SECRET_KEY = 'testing'
@@ -27,7 +28,11 @@ def init():
 
 
 def tear_files():
-    os.unlink(os.path.dirname(os.environ['APP_SETTINGS_PATH']) + '/testdb')
+    try:
+        os.unlink(os.path.dirname(os.environ['APP_SETTINGS_PATH']) + '/testdb')
+    except OSError:
+        if os.path.exists(os.path.dirname(os.environ['APP_SETTINGS_PATH']) + '/testdb'):
+            raise
     os.unlink(os.environ['APP_SETTINGS_PATH'])
 
 
