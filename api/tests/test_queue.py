@@ -16,7 +16,6 @@ def test_send_msg_to_queue(queue_process):
     assert send_msg('hey bro') is True
 
 
-
 def test_receive_msg_from_queue(queue_process):
     from core.mem_queue import receive_msg
 
@@ -51,7 +50,7 @@ def test_send_invalid_large_msg(queue_process):
 
     assert queue_process.name == 'mem_queue_worker'
 
-    chars = 'A a B b C c D d E e F f G g H h I i J j K k L M m N n O o P p Q q R r S s T t U u V v W w X x Y y Z z'\
+    chars = 'A a B b C c D d E e F f G g H h I i J j K k L M m N n O o P p Q q R r S s T t U u V v W w X x Y y Z z' \
         .split()
     msg = ''
     for i in range(1, 8200): msg += choice(chars)
