@@ -106,6 +106,7 @@ printf "\nhttp://roomanize.localhost/\n"
 printf "http://portainer.localhost/\n"
 printf "http://mailhog.localhost/\n"
 printf "http://supervisor.localhost/\n"
+printf "http://crons.localhost/\n"
 printf "http://localhost:8080/\n"
 
 exit 0

@@ -68,10 +68,10 @@ def run():
     logger = init_queue()
     task_queue = Queue()
     while True:
-        logger.info('waiting for a connection')
+        logger.debug('waiting for a connection')
         connection, client_address = socket_client.accept()
         try:
-            logger.info('connection from %s' % client_address)
+            logger.debug('connection from %s' % client_address)
             raw_msg_len = connection.recv(LENGTH_INDICATOR_SIZE)
             if not raw_msg_len:
                 raise InvalidMessageLengthIndicator('Invalid message sent. Missing length information')
@@ -82,15 +82,16 @@ def run():
             if data:
                 action, msg = data.split(ACTION_QUEUE_DELIMITER)
                 user_msg_len = len(msg)
-                logger.info('received %s bytes of data' % user_msg_len)
                 if len(msg) > MAX_MSG_LENGTH:
                     raise MaxMessageSizeExceededError(
                         'Message length exceeded maximum size: actual size %s' % user_msg_len
                     )
                 if int(action) == ACTION_PUSH:
+                    logger.info('received %s bytes of data' % user_msg_len)
                     connection.sendall(encode_message(MESSAGE_RECEIVED))
                     task_queue.put(msg.encode('utf8'))
                 elif int(action) == ACTION_PULL:
+                    logger.debug('received queue message request')
                     try:
                         queue_msg = task_queue.get_nowait()
                         connection.sendall(encode_message(queue_msg))
@@ -102,5 +103,5 @@ def run():
             connection.sendall(encode_message(str(ex).encode('utf8')))
             logger.exception(str(ex))
         finally:
-            logger.info('Ended connection from %s' % client_address)
+            logger.debug('Ended connection from %s' % client_address)
             connection.close()

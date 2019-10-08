@@ -20,7 +20,7 @@ if job == 'scheduler':
     # scheduled jobs
     sch_logger = logging.getLogger('apscheduler.scheduler')
     sch_logger.level = logging.INFO
-    sch_logger.handlers = get_logger('scheduler', logging.INFO).handlers
+    sch_logger.handlers = get_logger('scheduler').handlers
 
     scheduler = BlockingScheduler(timezone='utc', executors={'default': ProcessPoolExecutor(20)})
     for job in cron_jobs:

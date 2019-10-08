@@ -7,7 +7,7 @@ from config import configs
 from dal.models import Audit
 from flask_restful import Resource
 from .router import Router
-from .utils import get_logger, app_path, app_logger
+from .utils import get_logger, app_path
 from .middleware import Middleware, error_handler
 from flask_caching import Cache as CacheService
 from simplecrypt import encrypt, decrypt
@@ -90,6 +90,8 @@ def audit_runner():
     app.logger.info('starting async audit thread')
 
     with app.app_context():
+        # give queue time time to start
+        sleep(5)
         try:
             while True:
                 msg = mem_queue.receive_msg()
@@ -103,8 +105,8 @@ def audit_runner():
                     db.session.commit()
                     app.logger.debug('Took: ' + str(timedelta(seconds=(time() - start))))
                 else: sleep(5)
-        except Exception:
-            app.logger.exception('Exception')
+        except (ConnectionRefusedError, FileNotFoundError, timeout):
+            app.logger.exception('message error')
 
 
 class Encryptor:

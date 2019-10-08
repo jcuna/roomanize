@@ -1,7 +1,7 @@
 import sys
 import traceback
 from flask import Flask, jsonify, request
-from core.utils import app_logger
+from core import get_logger
 
 
 class Middleware:
@@ -17,6 +17,7 @@ class Middleware:
 
 def error_handler(app: Flask):
     status_code = 500
+    app_logger = get_logger()
 
     def handle_error_response(error: Exception):
         app_logger.error(request.path)
