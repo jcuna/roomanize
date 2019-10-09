@@ -83,11 +83,11 @@ class API(Resource):
 
 def audit_runner():
     # this long running is used to read from queue and save audit info from request
-    from app import init_app
-    from dal import db
+    from app import init_app, db
 
     app = init_app('sys')
-    app.logger.info('starting async audit thread')
+    logger = get_logger('audit_runner')
+    logger.info('starting async audit thread')
 
     with app.app_context():
         # give queue time time to start
@@ -98,15 +98,14 @@ def audit_runner():
                 if msg:
                     start = time()
                     task = Audit(**json.loads(msg))
-
-                    app.logger.debug('new audit record')
+                    logger.debug('new audit record')
                     task.payload = encryptor.encrypt(task.payload)
                     db.session.add(task)
                     db.session.commit()
-                    app.logger.debug('Took: ' + str(timedelta(seconds=(time() - start))))
+                    logger.debug('Took: ' + str(timedelta(seconds=(time() - start))))
                 else: sleep(5)
         except (ConnectionRefusedError, FileNotFoundError, timeout):
-            app.logger.exception('message error')
+            logger.exception('message error')
 
 
 class Encryptor:
