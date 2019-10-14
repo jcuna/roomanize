@@ -17,7 +17,7 @@ class Middleware:
 
 def error_handler(app: Flask):
     status_code = 500
-    app_logger = get_logger()
+    app_logger = get_logger('app')
 
     def handle_error_response(error: Exception):
         app_logger.error(request.path)

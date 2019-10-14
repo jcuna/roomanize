@@ -18,7 +18,7 @@ def configure_loggers(app: Flask):
 
         boto3.set_stream_logger('', level + logging.DEBUG)
 
-        app_logger = get_logger('app')
+        app_logger = get_logger('app', True)
 
         # combine these loggers into app/root loggers
         for logger in [app.logger, logging.getLogger('gunicorn')]:
@@ -29,10 +29,10 @@ def configure_loggers(app: Flask):
         db_logging = logging.getLogger('sqlalchemy')
         db_logging.propagate = False
         db_logging.setLevel(logging.INFO)
-        db_logging.addHandler(create_file_log_handler('sql'))
+        db_logging.handlers = get_logger('sql', True).handlers
 
 
-def get_logger(name: str = 'app') -> logging.Logger:
+def get_logger(name, non_blocking=False):
     """
     return a logger with default settings
 
@@ -46,23 +46,26 @@ def get_logger(name: str = 'app') -> logging.Logger:
     level = logging.DEBUG if configs.DEBUG else logging.INFO
     logger.setLevel(level)
 
-    handler = create_file_log_handler(name)
+    file_handler = create_file_log_handler(name)
 
-    # instantiate a listener
-    listener = QueueListener(log_queue, handler)
-
-    # attach custom handler to root logger
-    logger.addHandler(main_handler)
-
-    # start the listener
-    listener.start()
+    if non_blocking:
+        log_queue = queue.Queue(-1)
+        async_handler = QueueHandler(log_queue)
+        # instantiate a listener
+        listener = QueueListener(log_queue, file_handler)
+        # attach custom handler to root logger
+        logger.addHandler(async_handler)
+        # start the listener
+        listener.start()
+    else:
+        logger.addHandler(file_handler)
 
     return logger
 
 
 def create_file_log_handler(name):
-    handler = TimedRotatingFileHandler(log_path + name + '.log', when='D', backupCount=3)
-    handler.setFormatter(log_formatter)
+    handler = TimedRotatingFileHandler(log_path + name + '.log', when='midnight', backupCount=2)
+    handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
     return handler
 
 
@@ -90,10 +93,6 @@ def utc_to_local(date: datetime) -> datetime:
 
 app_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 log_path = app_path + '/log/'
-log_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-log_queue = queue.Queue(-1)
-main_handler = QueueHandler(log_queue)
 
 if not Path(log_path).is_dir():
     os.mkdir(log_path)

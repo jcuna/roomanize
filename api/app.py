@@ -9,11 +9,11 @@ def init_app(mode='web') -> Flask:
     this_app = Flask(__name__)
     this_app.config.from_object(configs)
     this_app.env = configs.APP_ENV
-    # configure the app to log to a file.
-    configure_loggers(this_app)
     core.Encryptor.password = configs.SECRET_KEY
 
     if mode == 'web':
+        # configure the app to log to a file.
+        configure_loggers(this_app)
         core.error_handler(this_app)
         core.cache.init_app(this_app, config=configs.CACHE_CONFIG)
         this_app.wsgi_app = core.Middleware(this_app.wsgi_app, this_app.debug)

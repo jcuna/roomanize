@@ -14,7 +14,8 @@ if [[ "$1" != "" && "$1" != "stop" && "$1" != "ssh" && "$1" != "build" && "$1" !
 fi
 
 LATEST_API=1.1
-API_IMG_NAME="roomanize-api"
+APP_NAME="roomanize"
+API_IMG_NAME="$APP_NAME-api"
 API_CONTAINER_NAME="docker_api_"
 
 get_container_id() {
@@ -23,6 +24,11 @@ get_container_id() {
     IMAGE_NAME=$(docker ps --format '{{.Names}} {{.Image}}' | grep $CONTAINER_SSH | grep -oE "^[1-9_a-zA-Z]+")
     echo $(docker ps -a -q --filter name="$IMAGE_NAME" --format="{{.ID}}")
 }
+
+if [[ ! -f "./docker/docker-compose.yml" ]]; then
+    printf "Call me from isc-api's root directory.\n"
+    exit 1
+fi
 
 if [[ "$1" == "test" ]]; then
     CONTAINER_ID=$(get_container_id ${API_CONTAINER_NAME})
@@ -76,18 +82,19 @@ if [[ "$1" == "build" ]]; then
 
 fi
 
-if [[ ! -f "./docker/docker-compose.yml" ]]; then
-    printf "Call me from isc-api's root directory.\n"
-    exit 1
+
+if [[ ! -d "db" ]]; then
+  mkdir -p 'db'
 fi
 
+
 if [[ "$1" == "stop" ]]; then
-    API_IMG=${API_IMG_NAME}:${LATEST_API} docker-compose -f docker/docker-compose.yml down
+    APP_NAME=$APP_NAME API_IMG=${API_IMG_NAME}:${LATEST_API} docker-compose -f docker/docker-compose.yml down
     exit;
 fi
 
 if [[ "$1" == "" ]]; then
-    API_IMG=${API_IMG_NAME}:${LATEST_API} docker-compose -f docker/docker-compose.yml down > /dev/null 2>&1
+    APP_NAME=$APP_NAME API_IMG=${API_IMG_NAME}:${LATEST_API} docker-compose -f docker/docker-compose.yml down > /dev/null 2>&1
 
     if [[ "$(docker images -q "$API_IMG_NAME:$LATEST_API" 2> /dev/null)" = "" ]]; then
         printf "New image version found! need to rebuild\n"
@@ -98,11 +105,11 @@ if [[ "$1" == "" ]]; then
     if [[ -f "docker/docker-compose-override.yml" ]]; then
         FILES="$FILES -f docker/docker-compose-override.yml"
     fi
-   API_IMG=${API_IMG_NAME}:${LATEST_API} docker-compose $(echo "$FILES up -d");
+   APP_NAME=$APP_NAME API_IMG=${API_IMG_NAME}:${LATEST_API} docker-compose $(echo "$FILES up -d");
 fi;
 
 
-printf "\nhttp://roomanize.localhost/\n"
+printf "\nhttp://%s.localhost/\n" $APP_NAME
 printf "http://portainer.localhost/\n"
 printf "http://mailhog.localhost/\n"
 printf "http://supervisor.localhost/\n"

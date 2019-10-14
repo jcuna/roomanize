@@ -3,7 +3,7 @@ import logging
 from importlib import import_module
 from apscheduler.executors.pool import ProcessPoolExecutor
 from apscheduler.schedulers.background import BlockingScheduler
-from core.utils import get_logger
+from core.utils import create_file_log_handler
 from core.crons.balances import balances_cron
 
 # schedule is UTC time so assume +4 hours while daylight savings
@@ -20,7 +20,7 @@ if job == 'scheduler':
     # scheduled jobs
     sch_logger = logging.getLogger('apscheduler.scheduler')
     sch_logger.level = logging.INFO
-    sch_logger.handlers = get_logger('scheduler').handlers
+    sch_logger.addHandler(create_file_log_handler('scheduler'))
 
     scheduler = BlockingScheduler(timezone='utc', executors={'default': ProcessPoolExecutor(20)})
     for job in cron_jobs:
@@ -28,10 +28,9 @@ if job == 'scheduler':
 
     scheduler.start()
 
+elif len(sys.argv) > 2:
+    mod = import_module(job)
+    meth = getattr(mod, sys.argv[2])
+    meth()
 else:
-    if len(sys.argv) > 2:
-        mod = import_module(job)
-        meth = getattr(mod, sys.argv[2])
-        meth()
-    else:
-        import_module(job)
+    import_module(job)

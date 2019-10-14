@@ -76,7 +76,7 @@ class API(Resource):
             try:
                 mem_queue.send_msg(json.dumps(audit))
             except (ConnectionRefusedError, MaxMessageSizeExceededError, FileNotFoundError, timeout):
-                get_logger().exception('message error')
+                get_logger('app').exception('message error')
 
         return output
 

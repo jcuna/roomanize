@@ -24,7 +24,7 @@ services:
       - static
       - api
     labels:
-      - 'traefik.http.routers.roomanize.rule=Host(`roomanize.localhost`)'
+      - 'traefik.http.routers.${APP_NAME}.rule=Host(`${APP_NAME}.localhost`)'
 
   static:
     build:
