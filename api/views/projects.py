@@ -30,7 +30,7 @@ class Projects(API):
                     q = q.filter(Project.id.in_(pl))
 
         return {
-            'projects': list(map(lambda r: dict(r), q.all()))
+            'projects': Result.model(q.all())
         }
 
     @token_required
@@ -115,7 +115,7 @@ class Rooms(API):
             return room_dict
 
         result = []
-        page = request.args.get('page') if 'page' in request.args else 1
+        page = request.args.get('page', 1)
         total_pages = 1
 
         if 'query' in request.args:
@@ -202,7 +202,7 @@ class RoomsHistory(API):
     @access_required
     def get(self, room_id):
 
-        page = request.args.get('page') if 'page' in request.args else 1
+        page = request.args.get('page', 1)
 
         query = db.session.query(RentalAgreement).options(
             load_only('tenant_history_id'),

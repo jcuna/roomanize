@@ -5,7 +5,10 @@ admin_sample = {
     'first_name': 'Test',
     'last_name': 'User',
     'email': 'testuser@testing.org',
-    'password': 'secured'
+    'password': 'secured',
+    'company_name': 'Green CRN',
+    'address': '1500 Sample St. Sunnyside CA 98996',
+    'contact': '5555555555',
 }
 
 project_sample = {
@@ -47,17 +50,11 @@ def seed_admin(client: FlaskClient):
     return client.post('/install', data=admin_sample)
 
 
-def seed_project(client: FlaskClient, token: str):
-    auth = {
-        'X-Access-Token': token
-    }
+def seed_project(client: FlaskClient, auth):
     return client.post(endpoint('/projects'), json=project_sample, headers=auth)
 
 
-def seed_room(client: FlaskClient, token: str, override=None):
-    auth = {
-        'X-Access-Token': token
-    }
+def seed_room(client: FlaskClient, auth, override=None):
 
     data = {}
     data.update(room_sample)
@@ -68,10 +65,7 @@ def seed_room(client: FlaskClient, token: str, override=None):
     return client.post(endpoint('/rooms'), json=data, headers=auth)
 
 
-def seed_tenant(client: FlaskClient, token: str, override=None):
-    auth = {
-        'X-Access-Token': token
-    }
+def seed_tenant(client: FlaskClient, auth, override=None):
     data = {}
     data.update(tenant_sample)
     if override:
@@ -80,13 +74,10 @@ def seed_tenant(client: FlaskClient, token: str, override=None):
     return client.post(endpoint('/tenants'), json=data, headers=auth)
 
 
-def seed_new_agreement(client: FlaskClient, token: str, override=None):
+def seed_new_agreement(client: FlaskClient, auth, override=None):
 
     if override is None:
         override = dict()
-    auth = {
-        'X-Access-Token': token
-    }
     data = {}
     data.update(registration_sample)
     if override:

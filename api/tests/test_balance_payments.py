@@ -9,15 +9,15 @@ from tests.seeders import seed_tenant, seed_new_agreement, seed_project, seed_ro
 
 def test_seeding_data(client: FlaskClient, admin_login: dict):
 
-    project_resp = seed_project(client, admin_login['token']['value'])
+    project_resp = seed_project(client, admin_login)
     assert 'id' in project_resp.json
     assert project_resp.status_code == 200
 
-    room_resp = seed_room(client, admin_login['token']['value'], {'project_id': project_resp.json['id']})
+    room_resp = seed_room(client, admin_login, {'project_id': project_resp.json['id']})
     assert 'id' in room_resp.json
     assert room_resp.status_code == 200
 
-    tenant_resp = seed_tenant(client, admin_login['token']['value'])
+    tenant_resp = seed_tenant(client, admin_login)
     assert 'id' in tenant_resp.json
     assert tenant_resp.status_code == 200
 
@@ -33,7 +33,7 @@ def test_agreement(client: FlaskClient, admin_login: dict):
 
     tenant_id = tenant.id
     # create a new agreement with a balance due today
-    agreement_resp = seed_new_agreement(client, admin_login['token']['value'], {'tenant_id': tenant_id})
+    agreement_resp = seed_new_agreement(client, admin_login, {'tenant_id': tenant_id})
     assert 'id' in agreement_resp.json
     assert agreement_resp.status_code == 200
 
@@ -70,7 +70,7 @@ def test_new_balance(client: FlaskClient, admin_login: dict):
     # create a new agreement with a balance due in the past so it generates a new balance
     start_date = datetime.utcnow() - timedelta(days=1)
     override = {'tenant_id': tenant_id, 'date': front_end_date(start_date)}
-    seed_new_agreement(client, admin_login['token']['value'], override)
+    seed_new_agreement(client, admin_login, override)
 
     # run balance generator
     balances_cron()
@@ -104,7 +104,7 @@ def test_tenant_balance_generation(client: FlaskClient, admin_login: dict):
         'phone': '5555555556'
     }
     # just positive testing for now. A scenario where a tenant with same id number, email or phone # should fail
-    tenant_resp = seed_tenant(client, admin_login['token']['value'], override)
+    tenant_resp = seed_tenant(client, admin_login, override)
     assert 'id' in tenant_resp.json
     assert tenant_resp.status_code == 200
     assert Tenant.query.count() == 2
@@ -114,7 +114,7 @@ def test_tenant_balance_generation(client: FlaskClient, admin_login: dict):
     project_id = Project.query.first().id
 
     # seed another room
-    room_resp = seed_room(client, admin_login['token']['value'], {'name': 'MA-1001', 'project_id': project_id})
+    room_resp = seed_room(client, admin_login, {'name': 'MA-1001', 'project_id': project_id})
 
     # create a new agreement with a balance due in the past so it generates a new balance
     start_date = datetime.utcnow() - timedelta(days=4)
@@ -127,7 +127,7 @@ def test_tenant_balance_generation(client: FlaskClient, admin_login: dict):
         'tenant_id': tenant_id
     }
 
-    agreement = seed_new_agreement(client, admin_login['token']['value'], override)
+    agreement = seed_new_agreement(client, admin_login, override)
     assert Balance.query.count() == 3, 'We should have thee balances, two from previous and one \
     from just inserted one'
     assert RentalAgreement.query.count() == 2, 'Should have two rental agreements now'
@@ -160,7 +160,7 @@ def test_tenant_balance_generation_with_payments(client: FlaskClient, admin_logi
         'phone': '555555' + str(int(_in))
     }
 
-    tenant = seed_tenant(client, admin_login['token']['value'], override)
+    tenant = seed_tenant(client, admin_login, override)
 
     assert 'id' in tenant.json
     assert tenant.status_code == 200
@@ -169,7 +169,7 @@ def test_tenant_balance_generation_with_payments(client: FlaskClient, admin_logi
     # seed another room
     room_resp = seed_room(
         client,
-        admin_login['token']['value'],
+        admin_login,
         {'name': 'MA-' + str(int(_in)), 'project_id': Project.query.first().id}
     )
     # create a new agreement with a balance due in the past so it generates a new balance
@@ -182,7 +182,7 @@ def test_tenant_balance_generation_with_payments(client: FlaskClient, admin_logi
         'room_id': room_resp.json['id'],
         'tenant_id': tenant.json['id']
     }
-    agreement_resp = seed_new_agreement(client, admin_login['token']['value'], override)
+    agreement_resp = seed_new_agreement(client, admin_login, override)
     agreement = RentalAgreement.query.filter(RentalAgreement.id == agreement_resp.json['id']).first()
     assert len(agreement.balances) == 1
     assert RentalAgreement.query.count() == c
@@ -190,7 +190,7 @@ def test_tenant_balance_generation_with_payments(client: FlaskClient, admin_logi
     payment = client.post(
         endpoint('/pay-balance'),
         json={'balance_id': agreement.balances[0].id, 'payment_type_id': 1, 'amount': _in},
-        headers={'X-Access-Token': admin_login['token']['value']}
+        headers=admin_login
     )
     assert 'id' in payment.json
     assert payment.status_code == 200
@@ -219,7 +219,7 @@ def test_tenant_balance_not_created(client: FlaskClient, admin_login: dict):
         'phone': '5555555558'
     }
 
-    tenant_resp = seed_tenant(client, admin_login['token']['value'], override)
+    tenant_resp = seed_tenant(client, admin_login, override)
     assert 'id' in tenant_resp.json
     assert tenant_resp.status_code == 200
     assert Tenant.query.count() == 6
@@ -227,7 +227,7 @@ def test_tenant_balance_not_created(client: FlaskClient, admin_login: dict):
     # seed another room
     room_resp = seed_room(
         client,
-        admin_login['token']['value'],
+        admin_login,
         {'name': 'MA-1004', 'project_id': Project.query.first().id}
     )
     # create a new agreement with a balance due in the past so it generates a new balance
@@ -241,7 +241,7 @@ def test_tenant_balance_not_created(client: FlaskClient, admin_login: dict):
         'tenant_id': tenant_resp.json['id']
     }
 
-    agreement_resp = seed_new_agreement(client, admin_login['token']['value'], override)
+    agreement_resp = seed_new_agreement(client, admin_login, override)
     assert Balance.query.count() == 11
     agreement = RentalAgreement.query.filter(RentalAgreement.id == agreement_resp.json['id']).first()
     assert len(agreement.balances) == 1

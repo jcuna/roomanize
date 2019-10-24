@@ -68,7 +68,7 @@ class UsersManager(API):
     @access_required
     def get(self):
 
-        page = request.args.get('page') if 'page' in request.args else 1
+        page = request.args.get('page', 1)
         total_pages = 1
         q = request.args.get('query')
         if q:

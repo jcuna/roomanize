@@ -17,7 +17,7 @@ class Tenants(API):
             return self.get_tenant(tenant_id)
 
         result = []
-        page = request.args.get('page') if 'page' in request.args else 1
+        page = request.args.get('page', 1)
         total_pages = 1
 
         q = request.args.get('query')

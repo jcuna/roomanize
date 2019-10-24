@@ -4,13 +4,15 @@ from datetime import timedelta
 from time import sleep, time
 from flask import request
 from config import configs
+from config.routes import no_permissions, default_access
 from dal.models import Audit
 from flask_restful import Resource
+from dal.shared import access_map
 from .router import Router
 from .utils import get_logger, app_path
 from .middleware import Middleware, error_handler
 from flask_caching import Cache as CacheService
-from simplecrypt import encrypt, decrypt
+from cryptography.fernet import Fernet
 from base64 import b64encode, b64decode
 from core.queue_worker import MaxMessageSizeExceededError
 from core import mem_queue
@@ -51,6 +53,11 @@ class API(Resource):
 
     def dispatch_request(self, *args, **kwargs):
         output = super(Resource, self).dispatch_request(*args, **kwargs)
+
+        view_name = '%s.%s' % (self.__class__.__module__, self.__class__.__name__)
+        if view_name in no_permissions or \
+                view_name in default_access and access_map[request.method.upper()] in default_access[view_name]:
+            return output
 
         user_id = None
         if hasattr(request, 'user'):
@@ -110,16 +117,16 @@ def audit_runner():
 
 class Encryptor:
 
-    password = 'password'
-    """ Make sure to change this in your app setup Encryptor.password = @configPW """
+    def __init__(self, password):
+        self.package = Fernet(password)
 
     def encrypt(self, string: str) -> str:
-        return b64encode(encrypt(self.password, string))
+        return b64encode(self.package.encrypt(string.encode('utf8')))
 
     def decrypt(self, string: str) -> str:
-        return decrypt(self.password, b64decode(string)).decode('utf8')
+        return self.package.decrypt(b64decode(string)).decode('utf8')
 
 
 # auto exec
 cache = CacheService()
-encryptor = Encryptor()
+encryptor = Encryptor(configs.SECRET_KEY)

@@ -151,7 +151,7 @@ class Receipts(API):
         ).join(Balance, (Balance.id == Payment.balance_id)).join(RentalAgreement).join(TenantHistory).options(
             Load(TenantHistory).load_only('id'),
         ).join(Tenant).filter(RentalAgreement.project_id == project_id)
-        page = request.args.get('page') if 'page' in request.args else 1
+        page = request.args.get('page', 1)
 
         if 'tenant' in request.args:
             query = query.filter(Tenant.id == request.args.get('tenant'))

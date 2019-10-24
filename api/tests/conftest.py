@@ -13,20 +13,18 @@ def client():
     """
     init()
 
-    from app import db, init_app
+    from app import init_app
     from helpers import run_migration
 
     app = init_app()
     with app.test_client() as client:
         with app.app_context():
-            db.create_all()
-            db.session.commit()
             run_migration()
         yield client
     tear_files()
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def no_db_client():
     """
     Returns client with no db
@@ -55,7 +53,9 @@ def admin_login(client):
     login_resp = client.post(endpoint('/login'), headers=auth)
     assert 'token' in login_resp.json, 'token expected'
     assert login_resp.status_code == 200
-    return login_resp.json
+    return {
+        'X-Access-Token': login_resp.json['token']['value']
+    }
 
 
 @pytest.fixture(scope='module')
@@ -71,7 +71,7 @@ def queue_process():
 
     with app.test_client() as client:
         p.start()
-        sleep(0.1)
+        sleep(0.4)
         yield p
 
     p.terminate()

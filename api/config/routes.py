@@ -13,6 +13,8 @@ def register():
         'users.Activate@user_activate_url': '/account/activate-pass',
         'users.Audit@audit_url': '/audit|/audit/<int:user_id>',
 
+        'company.Company@company_url': '/company',
+
         'projects.Projects@projects_url': '/projects|/projects/<int:project_id>',
         'projects.Rooms@rooms_url': '/rooms|/rooms/<int:room_id>',
         'projects.RoomsHistory@rooms_history_url': '/rooms-history/|/rooms-history/<int:room_id>',
@@ -45,4 +47,5 @@ no_permissions = [
 default_access = {
     'views.projects.Projects': ['read'],
     'views.agreements.Receipts': ['read'],
+    'views.company.Company': ['read'],
 }

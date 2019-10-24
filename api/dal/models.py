@@ -120,7 +120,7 @@ class UserToken(db.Model, ModelIter):
 class Role(db.Model, ModelIter):
     __tablename__ = 'roles'
 
-    id = db.Column(BigInteger, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30, collation=configs.DB_COLLATION), index=True)
     permissions = db.Column(db.Text(collation=configs.DB_COLLATION))
 
@@ -145,7 +145,7 @@ class Role(db.Model, ModelIter):
 class Project(db.Model, ModelIter):
     __tablename__ = 'projects'
 
-    id = db.Column(BigInteger, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30, collation=configs.DB_COLLATION), unique=True)
     address = db.Column(db.Text(collation=configs.DB_COLLATION))
     contact = db.Column(db.String(10, collation=configs.DB_COLLATION))
@@ -164,7 +164,7 @@ class Tenant(db.Model, ModelIter):
     __tablename__ = 'tenants'
     fillable = ['first_name', 'last_name', 'email', 'phone', 'identification_number']
 
-    id = db.Column(BigInteger, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(30, collation=configs.DB_COLLATION), nullable=False)
     last_name = db.Column(db.String(30, collation=configs.DB_COLLATION), nullable=False, index=True)
     email = db.Column(db.String(50, collation=configs.DB_COLLATION), nullable=True, unique=True)
@@ -188,8 +188,8 @@ class Tenant(db.Model, ModelIter):
 class TenantHistory(db.Model, ModelIter):
     __tablename__ = 'tenants_history'
 
-    id = db.Column(BigInteger, primary_key=True)
-    tenant_id = db.Column(BigInteger, db.ForeignKey('tenants.id'), index=True, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    tenant_id = db.Column(db.Integer, db.ForeignKey('tenants.id'), index=True, nullable=False)
     reference1_phone = db.Column(db.String(10, collation=configs.DB_COLLATION), nullable=False)
     reference2_phone = db.Column(db.String(10, collation=configs.DB_COLLATION), nullable=True)
     reference3_phone = db.Column(db.String(10, collation=configs.DB_COLLATION), nullable=True)
@@ -202,10 +202,10 @@ class RentalAgreement(db.Model, ModelIter):
     __tablename__ = 'rental_agreements'
     fillable = ['tenant_history_id', 'room_id', 'project_id', 'time_interval_id', 'rate', 'entered_on', 'deposit']
 
-    id = db.Column(BigInteger, primary_key=True)
-    tenant_history_id = db.Column(BigInteger, db.ForeignKey('tenants_history.id'), index=True, nullable=False)
-    room_id = db.Column(BigInteger, db.ForeignKey('rooms.id'), index=True, nullable=False)
-    project_id = db.Column(BigInteger, db.ForeignKey('projects.id'), index=True, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    tenant_history_id = db.Column(db.Integer, db.ForeignKey('tenants_history.id'), index=True, nullable=False)
+    room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'), index=True, nullable=False)
+    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'), index=True, nullable=False)
     time_interval_id = db.Column(db.Integer, db.ForeignKey('time_intervals.id'), nullable=False)
     rate = db.Column(db.Numeric(10, 2), nullable=False)
     deposit = db.Column(db.Numeric(10, 2), nullable=False)
@@ -213,7 +213,8 @@ class RentalAgreement(db.Model, ModelIter):
     entered_on = db.Column(db.DateTime(), nullable=False)
     terminated_on = db.Column(db.DateTime())
 
-    tenant_history = relationship(TenantHistory, uselist=False, back_populates='rental_agreement', cascade='all, delete')
+    tenant_history = relationship(TenantHistory, uselist=False, back_populates='rental_agreement',
+                                  cascade='all, delete')
     room = relationship('Room', uselist=False)
     project = relationship(Project, uselist=False)
     interval = relationship(TimeInterval, uselist=False)
@@ -223,8 +224,8 @@ class Room(db.Model, ModelIter):
     __tablename__ = 'rooms'
     fillable = ['project_id', 'name', 'rent', 'time_interval_id', 'description', 'picture']
 
-    id = db.Column(BigInteger, primary_key=True)
-    project_id = db.Column(BigInteger, db.ForeignKey('projects.id'), index=True, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'), index=True, nullable=False)
     name = db.Column(db.String(30, collation=configs.DB_COLLATION))
     description = db.Column(db.Text(collation=configs.DB_COLLATION))
     picture = db.Column(db.String(255, collation=configs.DB_COLLATION))
@@ -244,7 +245,7 @@ class Room(db.Model, ModelIter):
 class Policy(db.Model, ModelIter):
     __tablename__ = 'policies'
 
-    id = db.Column(BigInteger, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(30, collation=configs.DB_COLLATION), index=True, nullable=False)
     text = db.Column(db.Text(collation=configs.DB_COLLATION))
     start_ttv = db.Column(db.DateTime(), nullable=False, index=True, default=datetime.utcnow)
@@ -295,7 +296,7 @@ class Expense(db.Model, ModelIter):
     fillable = ['amount', 'expense_date']
 
     id = db.Column(BigInteger, primary_key=True)
-    project_id = db.Column(BigInteger, db.ForeignKey('projects.id'), index=True, nullable=False)
+    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'), index=True, nullable=False)
     amount = db.Column(db.Numeric(10, 2), nullable=False)
     description = db.Column(db.String(512), nullable=False)
     input_date = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow)
@@ -307,6 +308,17 @@ class Expense(db.Model, ModelIter):
         server_default='[]')
 
     project = relationship(Project, uselist=False)
+
+
+class CompanyProfile(db.Model, ModelIter):
+    __tablename__ = 'company_profile'
+    fillable = ['name', 'address', 'contact']
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(30, collation=configs.DB_COLLATION), unique=True, nullable=False)
+    address = db.Column(db.Text(collation=configs.DB_COLLATION), nullable=False)
+    contact = db.Column(db.String(10, collation=configs.DB_COLLATION), nullable=False)
+    logo = db.Column(db.LargeBinary)
 
 
 class Audit(db.Model, ModelIter):

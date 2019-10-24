@@ -5,9 +5,10 @@ import os
 from flask_socketio import emit
 from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.attributes import flag_modified
+from config import configs
 from config.constants import RECEIPT_STORAGE_PATH, RECEIPT_STORAGE_THUMBNAILS
 from core import API, Cache
-from flask import request, current_app
+from flask import request
 from core.AWS import Storage
 from core.middleware import HttpException
 from core.utils import local_to_utc
@@ -30,7 +31,7 @@ class Expenses(API):
         if expense_id:
             ex = Expense.query.filter_by(id=expense_id).first()
             if ex:
-                s3 = Storage(current_app.config['AWS_FILE_MANAGER_BUCKET_NAME'])
+                s3 = Storage(configs.AWS_FILE_MANAGER_BUCKET_NAME)
                 row = dict(ex)
                 row['signed_urls'] = []
                 if ex.receipt_scans:
@@ -82,7 +83,7 @@ class Expenses(API):
             raise HttpException('Invalid Request')
 
         if 'nonce' in data:
-            domain = current_app.config['EXTERNAL_DEV_URL'] if 'EXTERNAL_DEV_URL' in current_app.config else ''
+            domain = configs.EXTERNAL_DEV_URL if 'EXTERNAL_DEV_URL' in configs.config else ''
             ut = UserToken(user_id=request.user.id)
             ut.new_token(data['nonce'])
 
@@ -117,7 +118,7 @@ class ExpenseScans(API):
         if not expense:
             raise HttpException('Invalid id')
 
-        s3 = Storage(current_app.config['AWS_FILE_MANAGER_BUCKET_NAME'])
+        s3 = Storage(configs.AWS_FILE_MANAGER_BUCKET_NAME)
 
         filename, _ = os.path.splitext(request.form.get('name'))
         content_type, base64_img = request.form.get('image').split(':')[1].split(';')
