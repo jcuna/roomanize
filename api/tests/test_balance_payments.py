@@ -128,6 +128,7 @@ def test_tenant_balance_generation(client: FlaskClient, admin_login: dict):
     }
 
     agreement = seed_new_agreement(client, admin_login, override)
+    assert agreement.status_code == 200
     assert Balance.query.count() == 3, 'We should have thee balances, two from previous and one \
     from just inserted one'
     assert RentalAgreement.query.count() == 2, 'Should have two rental agreements now'
@@ -255,3 +256,43 @@ def test_tenant_balance_not_created(client: FlaskClient, admin_login: dict):
     assert len(agreement2.balances) == 1
     assert agreement2.balances[0].balance == Decimal(5000)
     assert agreement2.balances[0].due_date.date() == start_date.date()
+
+
+def test_cannot_create_agreement_older_than_5days(client: FlaskClient, admin_login: dict):
+    from dal.models import Tenant, RentalAgreement, Project, Balance
+    from core.crons.balances import balances_cron
+
+    override = {
+        'email': 'tenant13@tenant.com',
+        'first_name': 'Sample13',
+        'last_name': 'Tenant13',
+        'identification_number': '223-1234517-2',
+        'phone': '5555555152'
+    }
+    # just positive testing for now. A scenario where a tenant with same id number, email or phone # should fail
+    tenant_resp = seed_tenant(client, admin_login, override)
+    assert 'id' in tenant_resp.json
+    assert tenant_resp.status_code == 200
+    assert Tenant.query.count() == 7
+
+    tenant_id = tenant_resp.json['id']
+
+    project_id = Project.query.first().id
+
+    # seed another room
+    room_resp = seed_room(client, admin_login, {'name': 'MA-1243', 'project_id': project_id})
+
+    # create a new agreement with a balance due in the past so it generates a new balance
+    start_date = datetime.utcnow() - timedelta(days=7)
+    override = {
+        'date': front_end_date(start_date),
+        'deposit': '3000.00',
+        'interval': '400',
+        'rate': '3000.00',
+        'room_id': room_resp.json['id'],
+        'tenant_id': tenant_id
+    }
+
+    agreement = seed_new_agreement(client, admin_login, override)
+    assert agreement.status_code == 400
+    assert 'Invalid date' in agreement.json['error']

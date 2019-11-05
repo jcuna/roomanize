@@ -24,10 +24,9 @@ def balances_cron():
     with app.app_context():
         today = datetime.combine(datetime.utcnow().date(), d_time.max)
         yesterday = today - timedelta(days=1)
-        five_days_ago = yesterday - timedelta(days=5)
 
         balances = Balance.query.options(joinedload('agreement'), joinedload('payments')).filter(
-            Balance.due_date.between(five_days_ago, yesterday),
+            Balance.due_date <= yesterday,
             Balance.id.in_(db.session.query(functions.max(Balance.id)).group_by(Balance.agreement_id).subquery())
         )
 
