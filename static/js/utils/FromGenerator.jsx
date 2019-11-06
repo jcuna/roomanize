@@ -190,7 +190,7 @@ class FormGenerator extends React.Component {
         }
         children.push(React.createElement(
             formElement, {
-                key: 2,
+                key,
                 type: element.type,
                 name: element.name,
                 id: element.id,
@@ -391,7 +391,7 @@ class FormGenerator extends React.Component {
 
     getSecondParam(element) {
         return element.options.map((val, p) => {
-            if (Array.isArray(val)) {
+            if (typeof val === 'string' || typeof val === 'number') {
                 return React.createElement('option', { value: p, key: p }, val);
             }
             return React.createElement('option', { value: val.value, key: val.value }, val.label);

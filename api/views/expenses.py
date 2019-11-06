@@ -83,7 +83,7 @@ class Expenses(API):
             raise HttpException('Invalid Request')
 
         if 'nonce' in data:
-            domain = configs.EXTERNAL_DEV_URL if 'EXTERNAL_DEV_URL' in configs.config else ''
+            domain = configs.EXTERNAL_DEV_URL if hasattr(configs, 'EXTERNAL_DEV_URL') else ''
             ut = UserToken(user_id=request.user.id)
             ut.new_token(data['nonce'])
 
