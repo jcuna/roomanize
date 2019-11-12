@@ -259,8 +259,7 @@ def test_tenant_balance_not_created(client: FlaskClient, admin_login: dict):
 
 
 def test_cannot_create_agreement_older_than_5days(client: FlaskClient, admin_login: dict):
-    from dal.models import Tenant, RentalAgreement, Project, Balance
-    from core.crons.balances import balances_cron
+    from dal.models import Tenant, Project
 
     override = {
         'email': 'tenant13@tenant.com',
