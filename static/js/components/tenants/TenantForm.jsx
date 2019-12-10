@@ -15,7 +15,7 @@ import { ACCESS_TYPES, ALERTS, ENDPOINTS, GENERIC_ERROR } from '../../constants'
 import { notifications } from '../../actions/appActions';
 import TenantHistory from './TenantHistory';
 import { hasAccess } from '../../utils/config';
-import Link from 'react-router-dom/es/Link';
+import { Link } from 'react-router-dom';
 
 export default class TenantForm extends React.Component {
     constructor(props) {

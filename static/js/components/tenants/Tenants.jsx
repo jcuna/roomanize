@@ -13,7 +13,7 @@ import { hasAccess } from '../../utils/config';
 import FontAwesome from '../../utils/FontAwesome';
 import Paginate from '../../utils/Paginate';
 import { afterPause, formatPhone, searchArray } from '../../utils/helpers';
-import Link from 'react-router-dom/es/Link';
+import { Link } from 'react-router-dom';
 
 export default class Tenants extends React.Component {
     constructor(props) {

@@ -7,8 +7,7 @@ import PropTypes from 'prop-types';
 import { ACCESS_TYPES, ALERTS, ENDPOINTS, STATUS } from '../../constants';
 import Spinner from '../../utils/Spinner';
 import { notifications } from '../../actions/appActions';
-import Route from 'react-router-dom/es/Route';
-import Redirect from 'react-router-dom/es/Redirect';
+import { Route, Redirect } from 'react-router-dom';
 import { hasAccess } from '../../utils/config';
 import ErrorPage from '../ErrorPage';
 

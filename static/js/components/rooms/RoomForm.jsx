@@ -10,7 +10,7 @@ import { notifications } from '../../actions/appActions';
 import { ACCESS_TYPES, ALERTS, ENDPOINTS, GENERIC_ERROR, STATUS } from '../../constants';
 import Breadcrumbs from '../../utils/Breadcrumbs';
 import Spinner from '../../utils/Spinner';
-import Link from 'react-router-dom/es/Link';
+import { Link } from 'react-router-dom';
 import Table from '../../utils/Table';
 import { formatDateEs } from '../../utils/helpers';
 import { hasAccess } from '../../utils/config';

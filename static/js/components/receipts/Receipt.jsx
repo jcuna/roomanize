@@ -9,7 +9,7 @@ import { formatPhone, friendlyDateEs, toLocalTimezone } from '../../utils/helper
 import '../../../css/receipts/receipt.scss';
 import FontAwesome from '../../utils/FontAwesome';
 import { ENDPOINTS } from '../../constants';
-import Link from 'react-router-dom/es/Link';
+import { Link } from 'react-router-dom';
 
 export default class Receipt extends React.Component {
     constructor(props) {

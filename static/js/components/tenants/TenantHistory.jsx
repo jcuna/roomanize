@@ -8,7 +8,7 @@ import FormGenerator from '../../utils/FromGenerator';
 import { hideOverlay, notifications, showOverlay } from '../../actions/appActions';
 import { ALERTS, ENDPOINTS, GENERIC_ERROR } from '../../constants';
 import Table from '../../utils/Table';
-import Link from 'react-router-dom/es/Link';
+import { Link } from 'react-router-dom';
 import { updateAgreement } from '../../actions/agreementsAction';
 import { formatDateEs, formatDecimal, formatPhone } from '../../utils/helpers';
 import '../../../css/tenants/tenantform.scss';

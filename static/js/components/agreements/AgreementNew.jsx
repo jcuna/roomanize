@@ -9,7 +9,7 @@ import { notifications } from '../../actions/appActions';
 import AgreementForm from './AgreementForm';
 import Breadcrumbs from '../../utils/Breadcrumbs';
 import { createAgreement } from '../../actions/agreementsAction';
-import Link from 'react-router-dom/es/Link';
+import { Link } from 'react-router-dom';
 import { clearRooms } from '../../actions/roomActions';
 
 export default class AgreementNew extends React.Component {

@@ -9,7 +9,7 @@ import { notifications } from '../../actions/appActions';
 import { ACCESS_TYPES, ALERTS, ENDPOINTS, STATUS } from '../../constants';
 import { hasAccess } from '../../utils/config';
 import Spinner from '../../utils/Spinner';
-import Link from 'react-router-dom/es/Link';
+import { Link } from 'react-router-dom';
 import { afterPause, searchArray } from '../../utils/helpers';
 import Paginate from '../../utils/Paginate';
 import FontAwesome from '../../utils/FontAwesome';

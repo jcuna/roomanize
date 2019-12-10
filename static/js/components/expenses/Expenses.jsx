@@ -6,7 +6,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Breadcrumbs from '../../utils/Breadcrumbs';
 import { ACCESS_TYPES, ENDPOINTS } from '../../constants';
-import Link from 'react-router-dom/es/Link';
+import { Link } from 'react-router-dom';
 import { getExpenses } from '../../actions/expenseActions';
 import Spinner from '../../utils/Spinner';
 import Table from '../../utils/Table';

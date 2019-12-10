@@ -13,7 +13,7 @@ import {
     fetchProjects,
     updateProject,
 } from '../../actions/projectActions';
-import Link from 'react-router-dom/es/Link';
+import { Link } from 'react-router-dom';
 import { hasAccess } from '../../utils/config';
 import { hideOverlay, showOverlay } from '../../actions/appActions';
 import { ACCESS_TYPES, ENDPOINTS, STATUS } from '../../constants';
