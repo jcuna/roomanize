@@ -112,8 +112,24 @@ class BalancePayments(API):
     @token_required
     @access_required
     def get(self, agreement_id):
-        return dict(Balance.query.filter_by(agreement_id=agreement_id).
-                    order_by(Balance.due_date.desc()).first())
+        balance = Balance.query.filter_by(agreement_id=agreement_id)\
+            .options(joinedload(Balance.payments).load_only(Payment.amount))\
+            .order_by(Balance.due_date.desc()).first()
+
+        payments = sum(map(lambda b: b.amount, balance.payments))
+        rate = balance.balance - balance.previous_balance
+        remaining_balance = balance.balance - payments
+        amount_due = 0
+        if remaining_balance > rate:
+            amount_due = remaining_balance - rate
+
+        result = dict(balance)
+
+        result.update({
+            'balance': '{0:.2f}'.format(remaining_balance),
+            'amount_due': '{0:.2f}'.format(amount_due)
+        })
+        return result
 
 
 class Policies(API):

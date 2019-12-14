@@ -1,6 +1,6 @@
 from base64 import b64encode
 from datetime import datetime
-from decimal import Decimal, getcontext
+from decimal import Decimal
 from math import ceil
 from flask_sqlalchemy import SQLAlchemy, BaseQuery
 from sqlalchemy import orm
@@ -10,25 +10,6 @@ import jwt
 from views import Result
 
 db = SQLAlchemy()
-
-
-def row2dict(row):
-    d = {}
-
-    if row:
-        for column in row.__table__.columns:
-            attr = getattr(row, column.name)
-            if isinstance(attr, Decimal):
-                getcontext().prec = 2
-                d[column.name] = str(attr)
-            elif isinstance(attr, datetime):
-                d[column.name] = str(attr)
-            elif not isinstance(attr, str):
-                d[column.name] = str(attr) if attr is not None else ''
-            else:
-                d[column.name] = attr
-
-    return d
 
 
 def get_fillable(model: db.Model, get_attr_object=False, **kwargs):
@@ -151,8 +132,7 @@ class ModelIter(object):
                 if isinstance(attr, bool) or isinstance(attr, int) or isinstance(attr, float) or attr is None:
                     yield column.name, attr
                 elif isinstance(attr, Decimal):
-                    getcontext().prec = 2
-                    yield column.name, float(attr)
+                    yield column.name, '{0:.2f}'.format(attr)
                 elif isinstance(attr, datetime):
                     yield column.name, str(attr.isoformat())
                 elif isinstance(attr, bytes):

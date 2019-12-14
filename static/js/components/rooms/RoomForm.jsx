@@ -5,7 +5,15 @@
 import React, { Component } from 'react';
 import FormGenerator from '../../utils/FromGenerator';
 import PropTypes from 'prop-types';
-import { createRoom, editRoom, fetchRoom, fetchRoomHistory, fetchRooms, selectRoom } from '../../actions/roomActions';
+import {
+    clearSelectedRoom,
+    createRoom,
+    editRoom,
+    fetchRoom,
+    fetchRoomHistory,
+    fetchRooms,
+    selectRoom
+} from '../../actions/roomActions';
 import { notifications } from '../../actions/appActions';
 import { ACCESS_TYPES, ALERTS, ENDPOINTS, GENERIC_ERROR, STATUS } from '../../constants';
 import Breadcrumbs from '../../utils/Breadcrumbs';
@@ -63,7 +71,7 @@ export default class RoomForm extends Component {
     }
 
     componentWillUnmount() {
-        this.props.dispatch(selectRoom({}));
+        this.props.dispatch(clearSelectedRoom());
     }
 
     render() {
@@ -142,6 +150,10 @@ export default class RoomForm extends Component {
                 ];
                 if (selectedBalance.agreement_id === history.agreement_id) {
                     rows.push(['Dia De Pago', formatDateEs(new Date(selectedBalance.due_date))]);
+                    rows.push(['Ciclo de Pago', history.interval]);
+                    rows.push(['Arrendamiento', `$RD ${history.rate}`]);
+                    rows.push(['Balance', `$RD ${selectedBalance.balance}`]);
+                    rows.push(['Deuda', `$RD ${selectedBalance.amount_due}`]);
                 }
 
                 return <section key={ i } className='room-tenant'>

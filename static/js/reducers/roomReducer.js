@@ -4,6 +4,7 @@
 
 import { STATUS } from '../constants';
 import {
+    CLEAR_SELECTED_ROOM,
     ROOM_HISTORY_FETCHED,
     ROOM_SELECTED,
     ROOMS_CLEAR,
@@ -48,6 +49,10 @@ export default function roomReducer(state = initState, action) {
                 ...state,
                 selectedRoom: { ...initState.selectedRoom, ...action.payload },
                 status: STATUS.COMPLETE
+            };
+        case CLEAR_SELECTED_ROOM:
+            return {
+                ...state, selectedRoom: { ...initState.selectedRoom }
             };
         case ROOM_HISTORY_FETCHED:
             return {

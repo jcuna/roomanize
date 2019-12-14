@@ -40,36 +40,46 @@
   }
 }
 
-.receipts {
+.receipt-full, .receipts {
   text-align: center;
+
   > div {
+    position: relative;
+    margin: 10px;
+
+    div {
+      height: 40px;
       position: relative;
-      margin: 10px;
-      div {
-        height: 40px;
-        position: relative;
-        width: 120px;
-        margin: auto;
-        span {
-          position: absolute;
-          top: 0;
-          font-size: 28px;
-          cursor: pointer;
-          :hover {
-            opacity: 0.6;
-          }
-        }
-        span:first-child {
-          left: 0;
-        }
-        span:nth-child(2) {
-          right: 0;
+      width: 120px;
+      margin: auto;
+
+      span {
+        position: absolute;
+        top: 0;
+        font-size: 28px;
+        cursor: pointer;
+
+        :hover {
+          opacity: 0.6;
         }
       }
 
-      img {
-        height: 100px;
-        cursor: pointer;
+      span:first-child {
+        left: 0;
       }
+
+      span:nth-child(2) {
+        right: 0;
+      }
+    }
+  }
+  img.receipt-scan {
+    height: 100px;
+    cursor: pointer;
+  }
+  .img-processing {
+    img, span, svg {
+      cursor: wait;
+    }
   }
 }

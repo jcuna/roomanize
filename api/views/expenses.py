@@ -25,8 +25,7 @@ class Expenses(API):
     @token_required
     @access_required
     def get(self, expense_id=None):
-        page = int(request.args.get('page')) if 'page' in request.args else 1
-        total_pages = 1
+        page = int(request.args.get('page', 1))
 
         if expense_id:
             ex = Expense.query.filter_by(id=expense_id).first()
@@ -35,11 +34,22 @@ class Expenses(API):
                 row = dict(ex)
                 row['signed_urls'] = []
                 if ex.receipt_scans:
-                    [row['signed_urls'].append(
-                        Cache.remember(url, lambda: s3.sign_url(RECEIPT_STORAGE_THUMBNAILS + url), 14400)
-                    ) for url in ex.receipt_scans]
+                    [row['signed_urls'].append({
+                        'object': obj_key,
+                        'thumbnail': Cache.remember(
+                            't_%s' % obj_key,
+                            lambda: s3.sign_url(RECEIPT_STORAGE_THUMBNAILS + obj_key),
+                            14400
+                        ),
+                        'full': Cache.remember(
+                            'f_%s' % obj_key,
+                            lambda: s3.sign_url(RECEIPT_STORAGE_PATH + obj_key),
+                            14400
+                        )
+                    }
+                    ) for obj_key in ex.receipt_scans]
 
-                result = [row]
+                return row
             else:
                 raise HttpException('Not found')
 
@@ -106,8 +116,58 @@ class ExpenseScans(API):
         }
 
     def put(self, token, expense_id):
-        # TODO: allow image rotation
-        pass
+
+        self.validate_token(token, request)
+        expense = Expense.query.filter_by(id=expense_id).first()
+
+        if not expense:
+            raise HttpException('Invalid id')
+
+        obj_key = request.get_json()['object_name']
+        s3 = Storage(configs.AWS_FILE_MANAGER_BUCKET_NAME)
+
+
+        b_full = s3.get_file(RECEIPT_STORAGE_PATH + obj_key)
+        b_thumb = s3.get_file(RECEIPT_STORAGE_THUMBNAILS + obj_key)
+
+        if not b_full or not b_thumb:
+            raise HttpException('Invalid object name')
+
+        full = Image.open(BytesIO(b_full))
+        thumb = Image.open(BytesIO(b_thumb))
+        full_out = full.rotate(-90, Image.NEAREST, expand = 1)
+        thumb_out = thumb.rotate(-90, Image.NEAREST, expand = 1)
+
+        with BytesIO() as output1:
+            full_out.save(output1, 'png')
+            s3.put_new(output1.getvalue(), RECEIPT_STORAGE_PATH + obj_key)
+
+        with BytesIO() as output2:
+            thumb_out.save(output2, 'png')
+            s3.put_new(output2.getvalue(), RECEIPT_STORAGE_THUMBNAILS + obj_key)
+
+        return Result.success()
+
+
+    def delete(self, token, expense_id):
+
+        self.validate_token(token, request)
+        expense = Expense.query.filter_by(id=expense_id).first()
+
+        if not expense:
+            raise HttpException('Invalid id')
+
+        obj_key = request.get_json()['object_name']
+        s3 = Storage(configs.AWS_FILE_MANAGER_BUCKET_NAME)
+
+        s3.remove(RECEIPT_STORAGE_PATH + obj_key)
+        s3.remove(RECEIPT_STORAGE_THUMBNAILS + obj_key)
+        expense.receipt_scans.remove(obj_key)
+
+        db.session.commit()
+
+        return Result.success()
+
 
     def post(self, token, expense_id):
         # uploads new scan

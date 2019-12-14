@@ -16,6 +16,7 @@ import FontAwesome from '../../utils/FontAwesome';
 import Button from '../../utils/Button';
 import PaymentForm from '../payments/PaymentForm';
 import { getTenant } from '../../actions/tenantsAction';
+import { clearRooms } from '../../actions/roomActions';
 
 export default class TenantHistory extends React.Component {
     constructor(props) {
@@ -122,7 +123,7 @@ export default class TenantHistory extends React.Component {
                         }
 
                         const nextPayDate = new Date(balance[0].due_date);
-                        const hadPreviousBalance = balance[0].previous_balance > 0 &&
+                        const hadPreviousBalance = Number(balance[0].previous_balance) > 0 &&
                             remaining_balance > Number(row.rental_agreement.rate);
                         let nextPay = <span className='success'>{ formatDateEs(nextPayDate) }</span>;
                         const today = new Date();
@@ -135,17 +136,16 @@ export default class TenantHistory extends React.Component {
                             ['Proximo Pago', nextPay]
                         );
                         items.push(['Arrendamiento', `RD$ ${row.rental_agreement.rate}`]);
-                        items.push(['Balance', `$RD ${ (remaining_balance.toFixed(2)) }`]);
+                        items.push(['Balance', `$RD ${(remaining_balance.toFixed(2))}`]);
                         hadPreviousBalance &&
                         items.push([
                             'Deuda',
                             <span
                                 key={ balance[0].previous_balance }
                                 className='urgent'>
-                                $RD ${ balance[0].previous_balance - payments }
+                                $RD ${ (Number(balance[0].previous_balance) - payments).toFixed(2) }
                             </span>
                         ]);
-                        // hadPreviousBalance && remaining_balance > balance[0].previous_balance
 
                         credit > 0 && items.push(['Credito', `$RD ${ credit }`]);
                         items.push(['Ultimo Pago', last_pay]);
@@ -232,6 +232,7 @@ export default class TenantHistory extends React.Component {
                             type: ALERTS.SUCCESS, message: 'Contrato terminado correctamente'
                         }));
                         this.props.dispatch(getTenant(this.props.match.params.tenant_id));
+                        this.props.dispatch(clearRooms());
                     }, err => {
                         this.props.dispatch(hideOverlay());
                         this.props.dispatch(notifications({

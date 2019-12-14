@@ -1,4 +1,5 @@
 import {
+    EXPENSES_FETCHED,
     EXPENSE_FETCHED,
     EXPENSE_FETCHING,
     EXPENSE_CREATED,
@@ -15,16 +16,19 @@ const initialData = {
         total_pages: 1,
         list: [],
     },
+    selected: { signed_urls: [] }
 };
 
 export default function receiptsReducer(state = initialData, { type, payload }) {
     switch (type) {
         case EXPENSE_FETCHING:
-            return { ...state, processing: true, data: { ...state.data, list: [] }};
+            return { ...state, processing: true, data: { ...initialData.data }, selected: { ...initialData.selected }};
         case EXPENSE_CREATING:
             return { ...state, processing: true };
-        case EXPENSE_FETCHED:
+        case EXPENSES_FETCHED:
             return { ...state, processing: false, data: payload };
+        case EXPENSE_FETCHED:
+            return { ...state, processing: false, selected: payload };
         case EXPENSE_CREATED:
             return { ...state, processing: false, domain: payload.domain, token: payload.token };
         case CLEAR_EXPENSES:

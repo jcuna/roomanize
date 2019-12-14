@@ -1,11 +1,14 @@
 import json
-import sqlalchemy
 from datetime import datetime
+
+import sqlalchemy
 from flask import request, session
+
 from sqlalchemy.orm import joinedload, load_only
 from core import API
 from core.middleware import HttpException
-from dal.models import Project, TimeInterval, User, Room, PaymentType, RentalAgreement, TenantHistory
+from dal.models import Project, TimeInterval, User, Room, PaymentType, RentalAgreement, TenantHistory, Tenant, Balance, \
+    Payment
 from dal.shared import token_required, access_required, db, get_fillable, Paginator
 from views import Result
 
@@ -103,9 +106,7 @@ class Rooms(API):
         project_id = request.user.attributes.preferences['default_project']
 
         if room_id:
-            room = Room.query.options(
-                joinedload('rental_agreement').load_only(RentalAgreement.id)
-            ).filter_by(id=room_id).filter_by(project_id=project_id).first()
+            room = Room.query.filter_by(id=room_id).filter_by(project_id=project_id).first()
 
             if not room:
                 raise HttpException('Not found', 404)
@@ -205,9 +206,12 @@ class RoomsHistory(API):
         page = request.args.get('page', 1)
 
         query = db.session.query(RentalAgreement).options(
-            load_only('tenant_history_id'),
-            joinedload(RentalAgreement.tenant_history).load_only(TenantHistory.tenant_id).
-            joinedload(TenantHistory.tenant)
+            load_only(RentalAgreement.terminated_on, RentalAgreement.rate),
+            joinedload(RentalAgreement.tenant_history)
+                .load_only(TenantHistory.tenant_id)
+                .joinedload(TenantHistory.tenant)
+                .load_only(Tenant.first_name, Tenant.last_name),
+            joinedload(RentalAgreement.interval).load_only(TimeInterval.interval)
         ).filter_by(room_id=room_id)
 
         order_by = request.args.get('orderBy') if 'orderBy' in request.args else 'created_on'
@@ -223,7 +227,9 @@ class RoomsHistory(API):
     def deconstruct_room_history(row: RentalAgreement):
         return {
             'agreement_id': row.id,
+            'rate': '{0:.2f}'.format(row.rate),
             'agreement_terminated_on': str(row.terminated_on) if row.terminated_on is not None else None,
             'tenant_name': ' '.join([row.tenant_history.tenant.first_name, row.tenant_history.tenant.last_name]),
-            'tenant_id': row.tenant_history.tenant_id
+            'tenant_id': row.tenant_history.tenant_id,
+            'interval': row.interval.interval
         }

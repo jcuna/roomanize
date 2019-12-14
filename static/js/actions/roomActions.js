@@ -3,6 +3,7 @@ import token from '../utils/token';
 
 export const ROOM_CREATED = 'ROOM_CREATED';
 export const ROOM_SELECTED = 'ROOM_SELECTED';
+export const CLEAR_SELECTED_ROOM = 'CLEAR_SELECTED_ROOM';
 export const ROOMS_FETCHING = 'ROOMS_FETCHING';
 export const ROOMS_SEARCHING = 'ROOMS_SEARCHING';
 export const ROOMS_SEARCHED = 'ROOMS_SEARCHED';
@@ -47,6 +48,10 @@ export const fetchRooms = (page, reject) =>
 
 export const selectRoom = (room) => {
     return { type: ROOM_SELECTED, payload: room };
+};
+
+export const clearSelectedRoom = () => {
+    return { type: CLEAR_SELECTED_ROOM };
 };
 
 export const fetchRoom = (rom_id, reject) =>

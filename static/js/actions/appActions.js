@@ -72,7 +72,7 @@ export const clickedContent = () => {
  * @param {Object} actionButton
  * @returns {object}
  */
-export const showOverlay = (childComponent, title, closeButton = false, actionButton = null) => {
+export const showOverlay = (childComponent, title = '', closeButton = false, actionButton = null) => {
     return {
         type: OVERLAY_SHOW, payload: {
             component: childComponent,

@@ -12,7 +12,7 @@ import { formatDecimal, generateNonce, toDatePicker, toLocalTimezone } from '../
 import {
     EXPENSE_TOKEN_ADDED,
     createNewExpense,
-    getExpense, editExpense, clearExpenses, expireToken
+    getExpense, editExpense, clearExpenses, expireToken, rotateReceipt, deleteReceipt
 } from '../../actions/expenseActions';
 import ws from '../../utils/ws';
 import { ACCESS_TYPES, ENDPOINTS } from '../../constants';
@@ -20,6 +20,7 @@ import { hasAccess } from '../../utils/config';
 import Spinner from '../../utils/Spinner';
 import Table from '../../utils/Table';
 import FontAwesome from '../../utils/FontAwesome';
+import { hideOverlay, showOverlay } from '../../actions/appActions';
 
 export default class ExpenseForm extends React.Component {
     constructor(props) {
@@ -27,14 +28,17 @@ export default class ExpenseForm extends React.Component {
 
         this.onInputChange = this.onInputChange.bind(this);
         this.onButtonContinue = this.onButtonContinue.bind(this);
+        this.rotate = this.rotate.bind(this);
         this.deleteReceiptScan = this.deleteReceiptScan.bind(this);
+        this.zoomImage = this.zoomImage.bind(this);
+        this.refreshExpense = this.refreshExpense.bind(this);
         const nonce = generateNonce();
         const editing = this.props.match.params.action === 'editar';
 
         if (editing) {
             this.props.dispatch(getExpense(this.props.match.params.expense_id, () => {
-                const expense = this.props.expenses.data.list[0];
-                if (typeof expense === 'undefined') {
+                const expense = this.props.expenses.selected;
+                if (typeof expense.id !== 'number') {
                     this.props.history.push(ENDPOINTS.NOT_FOUND);
                 }
                 let d = '';
@@ -69,7 +73,26 @@ export default class ExpenseForm extends React.Component {
             nonce,
             token: null,
             expense_id: null,
+            processing_imgs: [],
         };
+    }
+
+    markImgProcessing(idx) {
+        const processing_imgs = this.state.processing_imgs.slice(0);
+        processing_imgs.push(idx);
+        this.setState({
+            processing_imgs
+        });
+    }
+
+    refreshExpense(idx) {
+        this.props.dispatch(getExpense(this.props.expenses.selected.id, () => {
+            const imgs = this.state.processing_imgs.slice(0);
+            imgs.splice(imgs.indexOf(idx), 1);
+            this.setState({
+                processing_imgs: []
+            });
+        }));
     }
 
     onButtonContinue(e, validate) {
@@ -91,11 +114,16 @@ export default class ExpenseForm extends React.Component {
 
     componentDidUpdate(prevProps, prevState) {
         const { inputsValid, amount, description, date } = this.state;
+        const { expenses } = this.props;
         if (prevState.inputsValid !== inputsValid || inputsValid && (
             prevState.amount !== amount || prevState.description !== description || prevState.date !== date)) {
             this.setState({
                 button: { ...this.state.button, disabled: !this.state.inputsValid }
             });
+        }
+        if (expenses.selected.signed_urls[0] && prevProps.expenses.selected.signed_urls.length > 0 &&
+            expenses.selected.signed_urls[0] !== prevProps.expenses.selected.signed_urls[0]) {
+            this.forceUpdate();
         }
     }
 
@@ -111,7 +139,7 @@ export default class ExpenseForm extends React.Component {
                     { this.getForm(canWrite, this.state.editing) }
                     { this.renderQR() }
                     <div className='receipts'>
-                        { this.renderReceiptPic(this.props.expenses.data, canWrite) }
+                        { this.renderReceiptPics(this.props.expenses.selected, canWrite) }
                     </div>
                 </section>
             </div>
@@ -197,29 +225,53 @@ export default class ExpenseForm extends React.Component {
         return null;
     }
 
-    renderReceiptPic({ list }, canDelete) {
-        return list.length === 1 && list[0].signed_urls &&
-            list[0].signed_urls.map((pic, i) =>
-                <div key={ i }>
-                    <img src={ pic } alt='recibo' onClick={ this.zoomImage } data-id={ i } className='receipt-scan'/>
-                    <div>
-                        { canDelete && <FontAwesome type={ 'trash' } onClick={ this.deleteReceiptScan } data-id={ i }/> }
-                        { <FontAwesome type={ 'sync' } onClick={ this.rotate } data-id={ i }/> }
-                    </div>
+    renderReceiptPics({ signed_urls }, canDelete) {
+        return signed_urls.map(({ thumbnail }, i) =>
+            <div key={ i } className={ this.state.processing_imgs.includes(i) ? 'img-processing' : '' }>
+                <img src={ thumbnail } alt='recibo' onClick={ this.zoomImage } data-id={ i } className='receipt-scan'/>
+                <div>
+                    { canDelete && <FontAwesome type={ 'trash' } onClick={ this.deleteReceiptScan } data-id={ i }/> }
+                    { <FontAwesome type={ 'sync' } onClick={ this.rotate } data-id={ i }/> }
                 </div>
-            );
+            </div>
+        );
     }
 
     rotate({ target }) {
-        console.log(target);
+        this.props.dispatch(hideOverlay());
+        const index = Number(target.getAttribute('data-id'));
+        this.markImgProcessing(index);
+        const obj = this.props.expenses.selected.signed_urls[index].object;
+        this.props.dispatch(rotateReceipt(this.state.token, this.state.expense_id, obj, () => {
+            this.refreshExpense(index);
+        }));
     }
 
     deleteReceiptScan({ target }) {
-        console.log(target);
+        this.props.dispatch(hideOverlay());
+        const index = Number(target.getAttribute('data-id'));
+        this.markImgProcessing(index);
+        const obj = this.props.expenses.selected.signed_urls[index].object;
+        this.props.dispatch(deleteReceipt(this.state.token, this.state.expense_id, obj, () => {
+            this.refreshExpense(index);
+        }));
     }
 
     zoomImage({ target }) {
-        console.log(target);
+        const index = Number(target.getAttribute('data-id'));
+        const canDelete = hasAccess(ENDPOINTS.EXPENSES_URL, ACCESS_TYPES.WRITE);
+        const src = this.props.expenses.selected.signed_urls[index].full;
+        this.props.dispatch(showOverlay(
+            <section className={ 'receipt-full' }>
+                <div>
+                    <img src={ src } alt='recibo' onError={ this.refreshExpense }/>
+                    <div>
+                        { canDelete && <FontAwesome type={ 'trash' } onClick={ this.deleteReceiptScan } data-id={ index }/> }
+                        { <FontAwesome type={ 'sync' } onClick={ this.rotate } data-id={ index }/> }
+                    </div>
+                </div>
+            </section>
+        ));
     }
 
     static propTypes = {
