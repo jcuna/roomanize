@@ -113,12 +113,12 @@ export const uploadReceipt = (user_token, expense_id, file, name, resolve, rejec
         }, reject);
     };
 
-export const rotateReceipt = (user_token, expense_id, object_name, resolve, reject) =>
+export const rotateReceipt = (user_token, expense_id, data, resolve, reject) =>
     (dispatch) =>
         api({
             url: `${ BACKEND_URLS.EXPENSE_SCANS }/${ user_token }/${ expense_id }`,
             method: 'PUT'
-        }, { object_name, action: 'rotate' }).then(() => {
+        }, data).then(() => {
             dispatch({ type: EXPENSE_RECEIPT_ROTATED });
             resolve && resolve();
         }, reject);

@@ -231,16 +231,26 @@ export default class ExpenseForm extends React.Component {
         return signed_urls.map(({ thumbnail }, i) =>
             <div key={ i } className={ this.state.processing_imgs.includes(i) ? 'img-processing' : '' }>
                 <img src={ thumbnail } alt='recibo' onClick={ this.zoomImage } data-id={ i } className='receipt-scan'/>
-                <div>
-                    { canDelete && <FontAwesome type={ 'trash' } onClick={ this.deleteReceiptScan } data-id={ i }/> }
-                    { <FontAwesome type={ 'sync' } onClick={ this.rotate } data-id={ i }/> }
-                </div>
+                <ul>
+                    <li><FontAwesome type={ 'sync' } onClick={ this.rotate } data-id={ i }/></li>
+                    <li>
+                        { canDelete && <FontAwesome type={ 'trash' } onClick={ this.deleteReceiptScan } data-id={ i }/> }
+                    </li>
+                    <li className='mirror'>
+                        <FontAwesome type={ 'sync' } onClick={ this.rotate } data-id={ i }/>
+                    </li>
+                </ul>
             </div>
         );
     }
 
     rotate(e) {
         e.persist();
+        let dir = 'right';
+        if (e.target.parentElement.parentElement.classList.contains('mirror')) {
+            dir = 'left';
+        }
+
         const el = document.getElementsByClassName('receipt-full')[0];
         if (this.props.overlay.display) {
             el.classList.add('img-loading');
@@ -248,8 +258,11 @@ export default class ExpenseForm extends React.Component {
         const { target } = e;
         const index = Number(target.getAttribute('data-id'));
         this.markImgProcessing(index);
-        const obj = this.props.expenses.selected.signed_urls[index].object;
-        this.props.dispatch(rotateReceipt(this.state.token, this.state.expense_id, obj, () => {
+        const data = {
+            object_name: this.props.expenses.selected.signed_urls[index].object,
+            dir
+        };
+        this.props.dispatch(rotateReceipt(this.state.token, this.state.expense_id, data, () => {
             if (this.props.overlay.display) {
                 this.zoomImage(e);
             }
@@ -289,7 +302,6 @@ export default class ExpenseForm extends React.Component {
             <section className={ 'receipt-full img-loading' } key={ Math.floor(Math.random() * 100) }>
                 <div>
                     <img
-                        style={ { maxWidth: '708px' } }
                         src={ selected.signed_urls[index].full } alt='recibo'
                         onError={ this.refreshExpense }
                         onLoad={ () => {
@@ -297,10 +309,15 @@ export default class ExpenseForm extends React.Component {
                             el.classList.remove('img-loading');
                         } }
                     />
-                    <div>
-                        { canDelete && <FontAwesome type={ 'trash' } onClick={ this.deleteReceiptScan } data-id={ index }/> }
-                        { <FontAwesome type={ 'sync' } onClick={ this.rotate } data-id={ index }/> }
-                    </div>
+                    <ul>
+                        <li><FontAwesome type={ 'sync' } onClick={ this.rotate } data-id={ index }/></li>
+                        <li>
+                            { canDelete && <FontAwesome type={ 'trash' } onClick={ this.deleteReceiptScan } data-id={ index }/> }
+                        </li>
+                        <li className='mirror'>
+                            <FontAwesome type={ 'sync' } onClick={ this.rotate } data-id={ index }/>
+                        </li>
+                    </ul>
                 </div>
             </section>, '', false, null, this.returnMobileMenuDefault
         ));

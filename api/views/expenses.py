@@ -126,6 +126,7 @@ class ExpenseScans(API):
             raise HttpException('Invalid id')
 
         obj_key = request.get_json()['object_name']
+        dir = -90 if request.get_json()['dir'] == 'right' else 90
         ext = obj_key.split('.')[1]
         s3 = Storage(configs.AWS_FILE_MANAGER_BUCKET_NAME)
 
@@ -135,7 +136,7 @@ class ExpenseScans(API):
             raise HttpException('Invalid object name')
 
         thumb = Image.open(BytesIO(b_thumb['Body'].read()))
-        thumb_out = thumb.rotate(-90, Image.NEAREST, expand = 1)
+        thumb_out = thumb.rotate(dir, Image.NEAREST, expand = 1)
 
         with BytesIO() as output2:
             thumb_out.save(output2, ext)
@@ -143,7 +144,7 @@ class ExpenseScans(API):
 
         b_full = s3.get_file(RECEIPT_STORAGE_PATH + obj_key)
         full = Image.open(BytesIO(b_full['Body'].read()))
-        full_out = full.rotate(-90, Image.NEAREST, expand = 1)
+        full_out = full.rotate(dir, Image.NEAREST, expand = 1)
         with BytesIO() as output1:
             full_out.save(output1, ext)
             s3.put_new(output1.getvalue(), RECEIPT_STORAGE_PATH + obj_key)

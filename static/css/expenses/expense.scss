@@ -47,29 +47,24 @@
     position: relative;
     margin: 10px;
 
-    div {
-      height: 40px;
+    ul {
+      height: 50px;
       position: relative;
-      width: 120px;
+      width: 165px;
       margin: auto;
+      padding: 0;
+      list-style: none;
 
-      span {
-        position: absolute;
+      li {
         top: 0;
-        font-size: 28px;
+        font-size: 34px;
         cursor: pointer;
+        display: inline-block;
+        margin: 10px;
 
         :hover {
           opacity: 0.6;
         }
-      }
-
-      span:first-child {
-        left: 0;
-      }
-
-      span:nth-child(2) {
-        right: 0;
       }
     }
   }
@@ -81,5 +76,11 @@
     img, span, svg {
       cursor: wait;
     }
+  }
+}
+
+.receipt-full {
+  img {
+    width: 100%;
   }
 }
