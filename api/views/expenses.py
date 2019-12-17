@@ -1,23 +1,26 @@
+import os
 import base64
 import hashlib
+import threading
 from datetime import datetime
-import os
+from io import BytesIO
+from mimetypes import guess_all_extensions
+
 from flask_socketio import emit
 from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.attributes import flag_modified
+from flask import request
+from PIL import Image, ExifTags, ImageOps
+
 from config import configs
 from config.constants import RECEIPT_STORAGE_PATH, RECEIPT_STORAGE_THUMBNAILS
 from core import API, Cache
-from flask import request
 from core.AWS import Storage
 from core.middleware import HttpException
 from core.utils import local_to_utc
 from dal.models import UserToken, Expense, db
 from dal.shared import token_required, access_required, Paginator
 from views import Result
-from mimetypes import guess_extension
-from io import BytesIO
-from PIL import Image
 
 
 class Expenses(API):
@@ -116,7 +119,6 @@ class ExpenseScans(API):
         }
 
     def put(self, token, expense_id):
-
         self.validate_token(token, request)
         expense = Expense.query.filter_by(id=expense_id).first()
 
@@ -124,27 +126,27 @@ class ExpenseScans(API):
             raise HttpException('Invalid id')
 
         obj_key = request.get_json()['object_name']
+        ext = obj_key.split('.')[1]
         s3 = Storage(configs.AWS_FILE_MANAGER_BUCKET_NAME)
 
-
-        b_full = s3.get_file(RECEIPT_STORAGE_PATH + obj_key)
         b_thumb = s3.get_file(RECEIPT_STORAGE_THUMBNAILS + obj_key)
 
-        if not b_full or not b_thumb:
+        if not b_thumb:
             raise HttpException('Invalid object name')
 
-        full = Image.open(BytesIO(b_full))
-        thumb = Image.open(BytesIO(b_thumb))
-        full_out = full.rotate(-90, Image.NEAREST, expand = 1)
+        thumb = Image.open(BytesIO(b_thumb['Body'].read()))
         thumb_out = thumb.rotate(-90, Image.NEAREST, expand = 1)
 
-        with BytesIO() as output1:
-            full_out.save(output1, 'png')
-            s3.put_new(output1.getvalue(), RECEIPT_STORAGE_PATH + obj_key)
-
         with BytesIO() as output2:
-            thumb_out.save(output2, 'png')
+            thumb_out.save(output2, ext)
             s3.put_new(output2.getvalue(), RECEIPT_STORAGE_THUMBNAILS + obj_key)
+
+        b_full = s3.get_file(RECEIPT_STORAGE_PATH + obj_key)
+        full = Image.open(BytesIO(b_full['Body'].read()))
+        full_out = full.rotate(-90, Image.NEAREST, expand = 1)
+        with BytesIO() as output1:
+            full_out.save(output1, ext)
+            s3.put_new(output1.getvalue(), RECEIPT_STORAGE_PATH + obj_key)
 
         return Result.success()
 
@@ -170,7 +172,6 @@ class ExpenseScans(API):
 
 
     def post(self, token, expense_id):
-        # uploads new scan
         self.validate_token(token, request)
 
         expense = Expense.query.filter_by(id=expense_id).first()
@@ -178,27 +179,39 @@ class ExpenseScans(API):
         if not expense:
             raise HttpException('Invalid id')
 
+        img_handler = request.files.get('image')
+
+        if not img_handler:
+            raise HttpException('Missing image')
+
         s3 = Storage(configs.AWS_FILE_MANAGER_BUCKET_NAME)
 
-        filename, _ = os.path.splitext(request.form.get('name'))
-        content_type, base64_img = request.form.get('image').split(':')[1].split(';')
-        extension = guess_extension(content_type)
-        img = base64.decodebytes(base64_img.split(',')[1].encode('utf-8'))
+        filename = img_handler.filename
+        ext = max(guess_all_extensions(img_handler.mimetype), key=len)
         key_name = hashlib.sha256(
-            (str(datetime.utcnow().timestamp()) + filename + extension + token).encode('utf8')
-        ).hexdigest() + extension
+            (str(datetime.utcnow().timestamp()) + filename + ext + token).encode('utf8')
+        ).hexdigest() + ext
 
-        bin_img = Image.open(BytesIO(img))
-        orig_width, orig_height = bin_img.size
+        img_obj = Image.open(img_handler)
+        try:
+            img_obj = ImageOps.exif_transpose(img_obj)
+        except TypeError: # bug with PIL.image forces me to do this. https://github.com/python-pillow/Pillow/pull/3980
+            pass
+
+        orig_width, orig_height = img_obj.size
         thumb_width = 128
         height = int(orig_height * thumb_width / orig_width)
         size = thumb_width, height
-        thumb = bin_img.resize(size)
-        with BytesIO() as output:
-            thumb.save(output, extension.strip('.'))
-            s3.put_new(output.getvalue(), RECEIPT_STORAGE_THUMBNAILS + key_name, content_type)
-        s3.put_new(img, RECEIPT_STORAGE_PATH + key_name, content_type)
+        thumb = img_obj.resize(size)
 
+        with BytesIO() as output:
+            thumb.save(output, ext.strip('.'), optimize=True)
+            s3.put_new(output.getvalue(), RECEIPT_STORAGE_THUMBNAILS + key_name, img_handler.content_type)
+
+        with BytesIO() as output_full:
+            img_obj.save(output_full, ext.strip('.'), optimize=True, quality=70)
+            s3.put_new(output_full.getvalue(), RECEIPT_STORAGE_PATH + key_name, img_handler.content_type)
+        img_obj.close()
         expense.receipt_scans.append(key_name)
         flag_modified(expense, 'receipt_scans')
         db.session.commit()

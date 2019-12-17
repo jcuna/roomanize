@@ -35,7 +35,7 @@ export default class Routes extends React.Component {
                 <Route
                     exact path={ `${ ep.ROOMS_URL }/:action(nuevo|editar)/:room_id([0-9]+)?` }
                     render={ (props) => this.getMiddleware(
-                        RequiresProject, RoomForm, ep.ROOMS_URL, props, ACCESS_TYPES.WRITE,
+                        RequiresProject, RoomForm, ep.ROOMS_URL, props, ACCESS_TYPES.READ,
                     ) }
                 />
 

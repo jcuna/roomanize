@@ -31,7 +31,7 @@ class Storage(object):
         return self.clients[resource]
 
     def get_file(self, object_name):
-        return self.get_client().get_object(Bucket=self.bucket, Key=object_name)['Body'].read()
+        return self.get_client().get_object(Bucket=self.bucket, Key=object_name)
 
     def put_new(self, body, object_name, content_type=None):
         if hasattr(body, 'content_type'):

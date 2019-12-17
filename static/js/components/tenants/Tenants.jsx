@@ -38,7 +38,7 @@ export default class Tenants extends React.Component {
 
     render() {
         const { tenants } = this.props;
-        const canEdit = hasAccess(ENDPOINTS.TENANTS_URL, ACCESS_TYPES.WRITE);
+        const canView = hasAccess(ENDPOINTS.TENANTS_URL, ACCESS_TYPES.READ);
         let data = [];
 
         if (!tenants.processing && !this.state.searching) {
@@ -54,7 +54,7 @@ export default class Tenants extends React.Component {
                 item.identification_number,
             ];
 
-            if (canEdit) {
+            if (canView) {
                 row.push(
                     <Link to={ `${ ENDPOINTS.TENANTS_URL }/editar/${ item.id }` }>
                         <FontAwesome
@@ -67,8 +67,8 @@ export default class Tenants extends React.Component {
         });
 
         const header = ['Nombre', 'Email', 'Telefono', 'Cedula'];
-        if (canEdit) {
-            header.push('Editar');
+        if (canView) {
+            header.push('Ver/Editar');
         }
 
         return <div>

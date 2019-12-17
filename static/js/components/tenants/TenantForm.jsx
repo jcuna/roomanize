@@ -77,12 +77,13 @@ export default class TenantForm extends React.Component {
     render() {
         const editing = this.state.id !== null;
         const { tenant_id } = this.props.match.params;
+        const canEdit = hasAccess(ENDPOINTS.TENANTS_URL, ACCESS_TYPES.WRITE);
 
         return <div>
             <Breadcrumbs { ...this.props } title={ editing ? 'Editar' : 'Nuevo' }/>
             <section className='widget'>
                 { (!this.state.id && tenant_id) && <Spinner/> ||
-                <FormGenerator
+                canEdit && <FormGenerator
                     formName={ 'new-tenant' }
                     inlineSubmit={ true }
                     onSubmit={ this.formSubmit }
@@ -130,7 +131,18 @@ export default class TenantForm extends React.Component {
                         },
                     ] }
                     button={ this.state.button }
-                /> }
+                /> ||
+                    <div className='card text-center'>
+                        <div className="card-header">
+                            Inquilino
+                        </div>
+                        <div className='card-body'>
+                            <h3 className='card-title'>{ `${this.state.first_name} ${this.state.last_name}` }</h3>
+                            <p>{ this.state.email }</p>
+                            <p>{ this.state.identification_number }</p>
+                        </div>
+                    </div>
+                }
             </section>
 
             { editing && <div className='table-actions'>

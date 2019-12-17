@@ -113,6 +113,25 @@ html {
       }
     }
 
+    .modal-enter > .modal-dialog {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    .modal-enter-active > .modal-dialog {
+      opacity: 1;
+      transform: translateX(0);
+      transition: opacity 300ms, transform 300ms;
+    }
+    .modal-exit > .modal-dialog {
+      opacity: 1;
+    }
+    .modal-exit-active > .modal-dialog {
+      opacity: 0;
+      transform: scale(0.9);
+      transition: opacity 300ms, transform 300ms;
+    }
+
+
     @media screen and (max-width: 1280px) {
       .menu-short {
         width: 80%;
@@ -236,7 +255,7 @@ form {
 }
 
 .loading-list,
-.loading-button {
+.loading-button, .img-loading {
   position: relative;
   cursor: progress!important;
   &:before {
@@ -479,4 +498,16 @@ a {
 .success {
   color: $bootstrapGreen;
   font-weight: bold;
+}
+
+.img-loading {
+  text-align: center;
+  img {
+    display: none;
+  }
+  &:before {
+    position: relative;
+    margin: 10px;
+    padding: 50px;
+  }
 }

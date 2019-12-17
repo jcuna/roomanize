@@ -134,11 +134,12 @@ export default class Room extends Component {
         if (this.props.rooms.status === STATUS.PENDING || this.props.rooms.searchingBackEnd) {
             return <Spinner/>;
         }
-        const canEdit = hasAccess(ENDPOINTS.ROOMS_URL, ACCESS_TYPES.WRITE);
+        const canEditOrView = hasAccess(ENDPOINTS.ROOMS_URL, ACCESS_TYPES.WRITE) ||
+            hasAccess(ENDPOINTS.ROOMS_URL, ACCESS_TYPES.READ);
         const displayData = this.state.searching ? this.state.found : this.props.rooms.data.list;
 
         return <Table
-            headers={ ['Nombre', 'Descripción', 'Alquilado', 'Recibos', 'Editar'] }
+            headers={ ['Nombre', 'Descripción', 'Alquilado', 'Recibos', 'Ver/Editar'] }
             rows={ displayData.map((item) => {
                 return [
                     item.name,
@@ -149,7 +150,7 @@ export default class Room extends Component {
                         onClick={ this.selectRoom }>
                         <FontAwesome type='file-contract' data-id={ item.id }/>
                     </Link>,
-                    canEdit &&
+                    canEditOrView &&
                     <Link key={ 2 } to={ `${ENDPOINTS.ROOMS_URL }/editar/${item.id}` } onClick={ this.selectRoom }>
                         <FontAwesome type='edit' data-id={ item.id }/>
                     </Link> ||

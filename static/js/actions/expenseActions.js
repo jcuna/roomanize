@@ -104,7 +104,6 @@ export const uploadReceipt = (user_token, expense_id, file, name, resolve, rejec
     (dispatch) => {
         const formData = new FormData();
         formData.append('image', file);
-        formData.append('name', name);
         api({
             url: `${ BACKEND_URLS.EXPENSE_SCANS }/${ user_token }/${ expense_id }`,
             method: 'POST',

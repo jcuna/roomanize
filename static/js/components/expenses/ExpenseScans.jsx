@@ -8,7 +8,6 @@ import { clearExpenses, uploadReceipt, validateExpenseToken } from '../../action
 import { ALERTS } from '../../constants';
 import '../../../css/expenses/expense.scss';
 import FontAwesome from '../../utils/FontAwesome';
-import { ImageCompression } from '../../utils/ImageCompression';
 import { notifications } from '../../actions/appActions';
 
 export default class Expenses extends React.Component {
@@ -53,23 +52,15 @@ export default class Expenses extends React.Component {
         if (target.files.length > 0) {
             this.setState({ processing: true });
             const file = target.files[0];
-            const img = new Image();
-
-            img.onload = () => {
-                const ic = new ImageCompression(img);
-                ic.hermiteCompress(600).then((canvas) => {
-                    this.sendFileToServer(canvas.toDataURL(), file.name);
-                });
-            };
-            img.src = URL.createObjectURL(file);
+            this.sendFileToServer(file);
         }
     }
 
-    sendFileToServer(file, name) {
+    sendFileToServer(file) {
         this.props.dispatch(uploadReceipt(
             this.props.match.params.token,
             this.props.match.params.expense_id,
-            file, name, () => {
+            file, () => {
                 this.setState({ processing: false });
             }, (err) => {
                 this.setState({ processing: false });

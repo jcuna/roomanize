@@ -20,7 +20,7 @@ import { hasAccess } from '../../utils/config';
 import Spinner from '../../utils/Spinner';
 import Table from '../../utils/Table';
 import FontAwesome from '../../utils/FontAwesome';
-import { hideOverlay, showOverlay } from '../../actions/appActions';
+import { hideOverlay, showOverlay, toggleMobileMenu } from '../../actions/appActions';
 
 export default class ExpenseForm extends React.Component {
     constructor(props) {
@@ -32,6 +32,8 @@ export default class ExpenseForm extends React.Component {
         this.deleteReceiptScan = this.deleteReceiptScan.bind(this);
         this.zoomImage = this.zoomImage.bind(this);
         this.refreshExpense = this.refreshExpense.bind(this);
+        this.returnMobileMenuDefault = this.returnMobileMenuDefault.bind(this);
+
         const nonce = generateNonce();
         const editing = this.props.match.params.action === 'editar';
 
@@ -237,41 +239,76 @@ export default class ExpenseForm extends React.Component {
         );
     }
 
-    rotate({ target }) {
-        this.props.dispatch(hideOverlay());
+    rotate(e) {
+        e.persist();
+        const el = document.getElementsByClassName('receipt-full')[0];
+        if (this.props.overlay.display) {
+            el.classList.add('img-loading');
+        }
+        const { target } = e;
         const index = Number(target.getAttribute('data-id'));
         this.markImgProcessing(index);
         const obj = this.props.expenses.selected.signed_urls[index].object;
         this.props.dispatch(rotateReceipt(this.state.token, this.state.expense_id, obj, () => {
+            if (this.props.overlay.display) {
+                this.zoomImage(e);
+            }
             this.refreshExpense(index);
         }));
     }
 
     deleteReceiptScan({ target }) {
-        this.props.dispatch(hideOverlay());
-        const index = Number(target.getAttribute('data-id'));
-        this.markImgProcessing(index);
-        const obj = this.props.expenses.selected.signed_urls[index].object;
-        this.props.dispatch(deleteReceipt(this.state.token, this.state.expense_id, obj, () => {
-            this.refreshExpense(index);
-        }));
+        const button = <button
+            type='button' onClick={ () => {
+                this.props.dispatch(showOverlay(<section className='img-loading'><div/></section>));
+                const index = Number(target.getAttribute('data-id'));
+                this.markImgProcessing(index);
+                const obj = this.props.expenses.selected.signed_urls[index].object;
+                this.props.dispatch(deleteReceipt(this.state.token, this.state.expense_id, obj, () => {
+                    this.props.dispatch(hideOverlay());
+                    this.refreshExpense(index);
+                    this.props.dispatch(this.returnMobileMenuDefault());
+                }));
+            } } className='btn btn-danger'>Confirmar</button>;
+
+        this.props.dispatch(showOverlay(
+            <div className='panel'>Estas seguro que borrar la imagen seleccionada?</div>,
+            <div className='warning-prompt'><FontAwesome type='exclamation-triangle'/> Advertencia...</div>,
+            true,
+            button, this.returnMobileMenuDefault),
+        );
     }
 
     zoomImage({ target }) {
         const index = Number(target.getAttribute('data-id'));
         const canDelete = hasAccess(ENDPOINTS.EXPENSES_URL, ACCESS_TYPES.WRITE);
-        const src = this.props.expenses.selected.signed_urls[index].full;
+        const { expenses: { selected }} = this.props;
+
         this.props.dispatch(showOverlay(
-            <section className={ 'receipt-full' }>
+            // adding a key to ensure rendering upon actions.
+            <section className={ 'receipt-full img-loading' } key={ Math.floor(Math.random() * 100) }>
                 <div>
-                    <img src={ src } alt='recibo' onError={ this.refreshExpense }/>
+                    <img
+                        style={ { maxWidth: '708px' } }
+                        src={ selected.signed_urls[index].full } alt='recibo'
+                        onError={ this.refreshExpense }
+                        onLoad={ () => {
+                            const el = document.getElementsByClassName('receipt-full')[0];
+                            el.classList.remove('img-loading');
+                        } }
+                    />
                     <div>
                         { canDelete && <FontAwesome type={ 'trash' } onClick={ this.deleteReceiptScan } data-id={ index }/> }
                         { <FontAwesome type={ 'sync' } onClick={ this.rotate } data-id={ index }/> }
                     </div>
                 </div>
-            </section>
+            </section>, '', false, null, this.returnMobileMenuDefault
         ));
+    }
+
+    returnMobileMenuDefault() {
+        const showMobile = this.props.user.attributes.preferences.showMobileMenu;
+        showMobile && this.props.dispatch(toggleMobileMenu(showMobile));
     }
 
     static propTypes = {
@@ -279,5 +316,7 @@ export default class ExpenseForm extends React.Component {
         expenses: PropTypes.object,
         match: PropTypes.object,
         history: PropTypes.object,
+        overlay: PropTypes.object,
+        user: PropTypes.object,
     };
 }

@@ -74,6 +74,51 @@ export default class RoomForm extends Component {
         this.props.dispatch(clearSelectedRoom());
     }
 
+    getRoomsForm() {
+        return <FormGenerator { ...{
+            className: 'form-group row',
+            formName: 'new-room',
+            button: this.state.button,
+            elements: [
+                {
+                    className: 'col-6',
+                    type: 'text',
+                    placeholder: 'Numero/Nombre de Habitación',
+                    onChange: this.onInputChange,
+                    name: 'room-name',
+                    defaultValue: this.state.name,
+                    validate: 'required',
+                },
+                {
+                    className: 'col-6',
+                    type: 'text',
+                    placeholder: 'Notas',
+                    onChange: this.onInputChange,
+                    name: 'notes',
+                    defaultValue: this.state.description,
+                },
+            ],
+            onSubmit: this.handleSubmit,
+        } }/>;
+    }
+
+    getMainRender() {
+        const canEditRoom = hasAccess(ENDPOINTS.ROOMS_URL, ACCESS_TYPES.WRITE);
+        if (canEditRoom) {
+            return this.getRoomsForm();
+        }
+
+        return <div className='card text-center'>
+            <div className="card-header">
+                Habitacion
+            </div>
+            <div className='card-body'>
+                <h3 className='card-title'>{ this.state.name }</h3>
+                <p>{ this.state.description }</p>
+            </div>
+        </div>;
+    }
+
     render() {
         const { match, rooms, receipts } = this.props;
         const creating = typeof match.params.room_id === 'undefined';
@@ -85,31 +130,7 @@ export default class RoomForm extends Component {
         return <div>
             <Breadcrumbs { ...this.props } title={ creating ? 'Nuevo' : 'Editar' }/>
             <section className='widget'>
-                <FormGenerator { ...{
-                    className: 'form-group row',
-                    formName: 'new-room',
-                    button: this.state.button,
-                    elements: [
-                        {
-                            className: 'col-6',
-                            type: 'text',
-                            placeholder: 'Numero/Nombre de Habitación',
-                            onChange: this.onInputChange,
-                            name: 'room-name',
-                            defaultValue: this.state.name,
-                            validate: 'required',
-                        },
-                        {
-                            className: 'col-6',
-                            type: 'text',
-                            placeholder: 'Notas',
-                            onChange: this.onInputChange,
-                            name: 'notes',
-                            defaultValue: this.state.description,
-                        },
-                    ],
-                    onSubmit: this.handleSubmit,
-                } }/>
+                { this.getMainRender() }
                 { match.params.room_id && <Link
                     className='btn btn-sm btn-success'
                     to={ `${ENDPOINTS.RECEIPTS_URL}/habitacion/${ match.params.room_id }` }
@@ -132,7 +153,7 @@ export default class RoomForm extends Component {
     }
 
     getRoomHistory({ list, total_pages }, { selectedBalance }) {
-        const canEditTenant = hasAccess(ENDPOINTS.TENANTS_URL, ACCESS_TYPES.WRITE);
+        const canEditTenant = hasAccess(ENDPOINTS.TENANTS_URL, ACCESS_TYPES.READ);
         return list.length > 0 && <section className='widget room-history'>
             <h3>Historial de renta</h3>
             { list.map((history, i) => {
@@ -149,11 +170,15 @@ export default class RoomForm extends Component {
                     ]
                 ];
                 if (selectedBalance.agreement_id === history.agreement_id) {
+                    const due_cn = Number(selectedBalance.amount_due) > 0 ? 'urgent' : 'success';
                     rows.push(['Dia De Pago', formatDateEs(new Date(selectedBalance.due_date))]);
                     rows.push(['Ciclo de Pago', history.interval]);
                     rows.push(['Arrendamiento', `$RD ${history.rate}`]);
                     rows.push(['Balance', `$RD ${selectedBalance.balance}`]);
-                    rows.push(['Deuda', `$RD ${selectedBalance.amount_due}`]);
+                    rows.push([
+                        'Deuda',
+                        <span key={ i } className={ due_cn }>{ `$RD ${selectedBalance.amount_due}` }</span>
+                    ]);
                 }
 
                 return <section key={ i } className='room-tenant'>

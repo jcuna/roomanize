@@ -12,7 +12,7 @@ services:
       - '5432:5432'
 
   ngix:
-    image: nginx:1.15-alpine
+    image: nginx:1.17-alpine
     restart: always
     volumes:
       - ../static:/usr/share/nginx/html
