@@ -112,9 +112,10 @@ class Tenants(API):
         last_payments = db.session.query(
             Balance.agreement_id.label('agreement_id'),
             Payment.amount.label('amount'),
-            functions.max(Payment.paid_date).label('paid_date')).join(Payment)\
-            .distinct('agreement_id')\
-            .group_by('agreement_id', 'amount')\
+            Payment.paid_date).join(Payment) \
+            .distinct('agreement_id') \
+            .group_by('agreement_id', 'amount', 'paid_date') \
+            .order_by(Balance.agreement_id.asc(), Payment.paid_date.desc()) \
             .filter(Balance.agreement_id.in_(rental_ids)).all()
 
         for row in result['history']:
