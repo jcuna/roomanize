@@ -1,6 +1,17 @@
 @import "../vars";
 
 .receipt-wrapper {
+  position: relative;
+
+  #continuous-spinner {
+    position: absolute;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    transform: translateX(-50%);
+    top: 175px;
+    z-index: 5;
+  }
+
   .receipt {
     margin-bottom: 20px;
     position: relative;

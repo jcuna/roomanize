@@ -28,7 +28,7 @@ def get_mail(app_instance: Flask):
     # needed so it can parse config
     smtp_mail = Mail(app_instance)
 
-    if app_instance.debug:
+    if 'MAIL_WITH_OS' in app_instance.config:
         sendmail = Sendmail(app_instance)
         return sendmail.sendmail
 
@@ -54,9 +54,8 @@ class Sendmail:
     @staticmethod
     def get_message(message):
 
-        if message.html:
-            msg = MIMEText(message.html, 'html', message.charset)
-        elif message.body:
+        msg = MIMEText(message.html, 'html', message.charset)
+        if message.body:
             msg = MIMEText(message.body, 'plain', message.charset)
 
         msg['Subject'] = message.subject

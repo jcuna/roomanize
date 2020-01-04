@@ -6,9 +6,7 @@ WORKDIR /usr/src/app
 
 RUN python -m pip install --upgrade pip
 
-RUN apk add --no-cache bash ssmtp jpeg-dev zlib-dev \
-    && sed -i 's/^\(mailhub=\).*$/\1mailhog:1025/' /etc/ssmtp/ssmtp.conf \
-    && echo "FromLineOverride=YES" >> /etc/ssmtp/ssmtp.conf
+RUN apk add --no-cache bash jpeg-dev zlib-dev
 
 RUN apk add --no-cache postgresql-libs \
     && apk add --no-cache --virtual .build-deps gcc libffi-dev musl-dev postgresql-dev \

@@ -37,6 +37,7 @@ export const ENDPOINTS = {
     EXPENSE_SCANS_URL: '/escanear-recibo',
     ROOMS_HISTORY_URL: '/rooms-history',
     BALANCE_PAYMENTS_URL: '/pay-balance',
+    EMAILS_URL: '/email',
     NOT_FOUND: '/error/404',
     NO_ACCESS: '/error/403',
 };
