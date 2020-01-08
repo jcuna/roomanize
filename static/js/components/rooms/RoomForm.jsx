@@ -129,13 +129,15 @@ export default class RoomForm extends Component {
 
         return <div>
             <Breadcrumbs { ...this.props } title={ creating ? 'Nuevo' : 'Editar' }/>
-            <section className='widget'>
-                { this.getMainRender() }
-                { match.params.room_id && <Link
-                    className='btn btn-sm btn-success'
-                    to={ `${ENDPOINTS.RECEIPTS_URL}/habitacion/${ match.params.room_id }` }
-                >Historial de Recibos</Link> }
-            </section>
+            <div className='widget'>
+                <section className='widget-child'>
+                    { this.getMainRender() }
+                    { match.params.room_id && <Link
+                        className='btn btn-sm btn-success'
+                        to={ `${ENDPOINTS.RECEIPTS_URL}/habitacion/${ match.params.room_id }` }
+                    >Historial de Recibos</Link> }
+                </section>
+            </div>
             { this.getRoomHistory(rooms.selectedRoom.rental_history, receipts) }
         </div>;
     }
@@ -154,7 +156,7 @@ export default class RoomForm extends Component {
 
     getRoomHistory({ list, total_pages }, { selectedBalance }) {
         const canEditTenant = hasAccess(ENDPOINTS.TENANTS_URL, ACCESS_TYPES.READ);
-        return list.length > 0 && <section className='widget room-history'>
+        return list.length > 0 && <div className='widget'><section className='widget-child room-history'>
             <h3>Historial de renta</h3>
             { list.map((history, i) => {
                 const rows = [
@@ -186,7 +188,7 @@ export default class RoomForm extends Component {
                 </section>;
             })}
             { this.getPaginator(total_pages) }
-        </section>;
+        </section></div>;
     }
 
     static getTenantLine(tenant, canEdit, key) {

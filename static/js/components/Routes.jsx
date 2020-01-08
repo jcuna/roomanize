@@ -14,7 +14,7 @@ import { hasAccess } from '../utils/config';
 import PropTypes from 'prop-types';
 import RequiresProject from './projects/RequiresProject';
 import Project from './projects/Project';
-import Account from './user/Account';
+import Profile from './user/Profile';
 import RoomForm from './rooms/RoomForm';
 import { ACCESS_TYPES, ENDPOINTS } from '../constants';
 import Tenants from './tenants/Tenants';
@@ -87,7 +87,7 @@ export default class Routes extends React.Component {
                 />
 
                 <Route exact path={ ep.ACCOUNT_PROFILE } render={ props =>
-                    this.getComponent(Account, props, true) }
+                    this.getComponent(Profile, props, true) }
                 />
 
                 <Route path={ ep.NOT_FOUND } component={ ErrorPage } type={ 404 }/>

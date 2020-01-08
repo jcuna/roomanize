@@ -68,46 +68,48 @@ export default class Receipts extends React.Component {
         const { receipts } = this.props;
         return <div>
             <Breadcrumbs { ...this.props } title='Recibos'/>
-            <section className='widget'>
-                <h1>Recibos</h1>
-                <div className='form-row'>
-                    <div className='form-group col-md-6'>
-                        <label htmlFor='receipt'>Buscar por numero de recibo</label>
-                        <input
-                            name='receipt'
-                            placeholder='Buscar: # Recibo'
-                            onChange={ this.search }
-                            className='form-control'
-                        />
+            <div className='widget'>
+                <section className='widget-child'>
+                    <h1>Recibos</h1>
+                    <div className='form-row'>
+                        <div className='form-group col-md-6'>
+                            <label htmlFor='receipt'>Buscar por numero de recibo</label>
+                            <input
+                                name='receipt'
+                                placeholder='Buscar: # Recibo'
+                                onChange={ this.search }
+                                className='form-control'
+                            />
+                        </div>
+                        <div className='form-group col-md-6'>
+                            <label htmlFor='paid_date'>Buscar por Fecha</label>
+                            <input
+                                type='date'
+                                name='paid_date'
+                                placeholder='Fecha'
+                                onChange={ this.search }
+                                className='form-control'
+                            />
+                        </div>
                     </div>
-                    <div className='form-group col-md-6'>
-                        <label htmlFor='paid_date'>Buscar por Fecha</label>
-                        <input
-                            type='date'
-                            name='paid_date'
-                            placeholder='Fecha'
-                            onChange={ this.search }
-                            className='form-control'
-                        />
-                    </div>
-                </div>
-                { receipts.data.list.map(r =>
-                    <Receipt
-                        key={ r.id }
-                        receipt={ r }
-                        project={ Receipts.getActiveProject(this.props) }
-                        timeIntervals={ this.props.projects.timeIntervals }
-                        paymentTypes={ this.props.projects.paymentTypes }
-                        dispatch={ this.props.dispatch }
-                        id={ this.state.toPrint.id === Number(r.id) && 'printing' || '' }
-                        onPrint={ this.print }
-                    />) }
-                { receipts.processing && <Spinner/> }
-                {receipts.data.total_pages > 1 &&
-                <Paginate total_pages={ receipts.data.total_pages } initialPage={ receipts.data.page }
-                    onPageChange={ (newPage) => this.setState({ page: newPage }) }
-                /> }
-            </section>
+                    { receipts.data.list.map(r =>
+                        <Receipt
+                            key={ r.id }
+                            receipt={ r }
+                            project={ Receipts.getActiveProject(this.props) }
+                            timeIntervals={ this.props.projects.timeIntervals }
+                            paymentTypes={ this.props.projects.paymentTypes }
+                            dispatch={ this.props.dispatch }
+                            id={ this.state.toPrint.id === Number(r.id) && 'printing' || '' }
+                            onPrint={ this.print }
+                        />) }
+                    { receipts.processing && <Spinner/> }
+                    {receipts.data.total_pages > 1 &&
+                    <Paginate total_pages={ receipts.data.total_pages } initialPage={ receipts.data.page }
+                        onPageChange={ (newPage) => this.setState({ page: newPage }) }
+                    /> }
+                </section>
+            </div>
         </div>;
     }
 

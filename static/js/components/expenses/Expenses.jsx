@@ -38,19 +38,21 @@ export default class Expenses extends React.Component {
         return (
             <div>
                 <Breadcrumbs { ...this.props }/>
-                <section className='widget'>
-                    <h2>Gastos</h2>
-                    { canWrite && <div className='table-actions'>
-                        <Link to={ `${ ENDPOINTS.EXPENSES_URL }/nuevo` }>
-                            <button
-                                disabled={ false }
-                                className='btn btn-success'>
-                                Agregar gasto
-                            </button>
-                        </Link>
-                    </div> }
-                    { this.getExpenses(expenses) }
-                </section>
+                <div className='widget'>
+                    <section className='widget-child'>
+                        <h2>Gastos</h2>
+                        { canWrite && <div className='table-actions'>
+                            <Link to={ `${ ENDPOINTS.EXPENSES_URL }/nuevo` }>
+                                <button
+                                    disabled={ false }
+                                    className='btn btn-success'>
+                                    Agregar gasto
+                                </button>
+                            </Link>
+                        </div> }
+                        { this.getExpenses(expenses) }
+                    </section>
+                </div>
             </div>
         );
     }

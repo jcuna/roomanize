@@ -136,14 +136,16 @@ export default class ExpenseForm extends React.Component {
         return (
             <div>
                 <Breadcrumbs { ...this.props } title={ title }/>
-                <section className='widget'>
-                    <h2>{ title }</h2>
-                    { this.getForm(canWrite, this.state.editing) }
-                    { this.renderQR() }
-                    <div className='receipts'>
-                        { this.renderReceiptPics(this.props.expenses.selected, canWrite) }
-                    </div>
-                </section>
+                <div className='widget'>
+                    <section className='widget-child'>
+                        <h2>{ title }</h2>
+                        { this.getForm(canWrite, this.state.editing) }
+                        { this.renderQR() }
+                        <div className='receipts'>
+                            { this.renderReceiptPics(this.props.expenses.selected, canWrite) }
+                        </div>
+                    </section>
+                </div>
             </div>
         );
     }

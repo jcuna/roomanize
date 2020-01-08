@@ -32,6 +32,8 @@ export const ENDPOINTS = {
     TENANTS_URL: '/inquilinos',
     ROLES_URL: '/roles',
     USERS_MANAGER_URL: '/usuarios',
+    USER_TOKENS_URL: '/account/activate',
+    USER_PASSWORDS_URL: '/users/reset-password',
     PROJECTS_URL: '/proyectos',
     EXPENSES_URL: '/gastos',
     EXPENSE_SCANS_URL: '/escanear-recibo',

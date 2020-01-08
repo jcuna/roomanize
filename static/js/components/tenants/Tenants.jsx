@@ -73,29 +73,31 @@ export default class Tenants extends React.Component {
 
         return <div>
             <Breadcrumbs { ...this.props } title='Inquilinos'/>
-            <section className='widget'>
-                <h1>Inquilinos</h1>
-                <div className='table-actions'>
-                    <input
-                        placeholder='Buscar: Cedula/Email/Telefono'
-                        onChange={ this.search }
-                        className='form-control'
-                    />
-                    <Link to={ `${ ENDPOINTS.TENANTS_URL }/nuevo` }>
-                        <button
-                            disabled={ false }
-                            className='btn btn-success'>
-                            Nuevo Inquilino
-                        </button>
-                    </Link>
-                </div>
-                <Table headers={ header } rows={ list }/>
-                { (tenants.processing || this.state.searching) && <Spinner/> }
-                {tenants.data.total_pages > 1 &&
-                <Paginate total_pages={ tenants.data.total_pages } initialPage={ tenants.data.page }
-                    onPageChange={ (newPage) => this.setState({ page: newPage }) }
-                /> }
-            </section>
+            <div className='widget'>
+                <section className='widget-child'>
+                    <h1>Inquilinos</h1>
+                    <div className='table-actions'>
+                        <input
+                            placeholder='Buscar: Cedula/Email/Telefono'
+                            onChange={ this.search }
+                            className='form-control'
+                        />
+                        <Link to={ `${ ENDPOINTS.TENANTS_URL }/nuevo` }>
+                            <button
+                                disabled={ false }
+                                className='btn btn-success'>
+                                Nuevo Inquilino
+                            </button>
+                        </Link>
+                    </div>
+                    <Table headers={ header } rows={ list }/>
+                    { (tenants.processing || this.state.searching) && <Spinner/> }
+                    {tenants.data.total_pages > 1 &&
+                    <Paginate total_pages={ tenants.data.total_pages } initialPage={ tenants.data.page }
+                        onPageChange={ (newPage) => this.setState({ page: newPage }) }
+                    /> }
+                </section>
+            </div>
         </div>;
     }
 

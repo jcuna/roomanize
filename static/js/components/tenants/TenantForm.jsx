@@ -81,69 +81,71 @@ export default class TenantForm extends React.Component {
 
         return <div>
             <Breadcrumbs { ...this.props } title={ editing ? 'Editar' : 'Nuevo' }/>
-            <section className='widget'>
-                { (!this.state.id && tenant_id) && <Spinner/> ||
-                canEdit && <FormGenerator
-                    formName={ 'new-tenant' }
-                    inlineSubmit={ true }
-                    onSubmit={ this.formSubmit }
-                    className={ 'form-group row' }
-                    elements={ [
-                        {
-                            className: 'col-6',
-                            name: 'first_name',
-                            placeholder: 'Nombre',
-                            defaultValue: this.state.first_name,
-                            validate: 'required',
-                            onChange: this.onInputChange,
-                        },
-                        {
-                            className: 'col-6',
-                            name: 'last_name',
-                            placeholder: 'Apellidos',
-                            defaultValue: this.state.last_name,
-                            validate: 'required',
-                            onChange: this.onInputChange,
-                        },
-                        {
-                            className: 'col-6',
-                            name: 'email',
-                            placeholder: 'Email',
-                            defaultValue: this.state.email,
-                            validate: 'email',
-                            onChange: this.onInputChange,
-                        },
-                        {
-                            className: 'col-6',
-                            name: 'phone',
-                            placeholder: 'Telefono',
-                            defaultValue: this.state.phone,
-                            validate: ['phone', 'required'],
-                            onChange: this.onInputChange,
-                        },
-                        {
-                            className: 'col-6',
-                            name: 'identification_number',
-                            placeholder: 'Cedula (000-0000000-1)',
-                            defaultValue: this.state.identification_number,
-                            validate: ['required', 'regex:^[0-9]{3}-[0-9]{7}-[0-9]'],
-                            onChange: this.onInputChange,
-                        },
-                    ] }
-                    button={ this.state.button }
-                /> ||
-                    <div className='card text-center'>
-                        <div className="card-header">
-                            Inquilino
+            <div className='widget'>
+                <section className='widget-child'>
+                    { (!this.state.id && tenant_id) && <Spinner/> ||
+                    canEdit && <FormGenerator
+                        formName={ 'new-tenant' }
+                        inlineSubmit={ true }
+                        onSubmit={ this.formSubmit }
+                        className={ 'form-group row' }
+                        elements={ [
+                            {
+                                className: 'col-6',
+                                name: 'first_name',
+                                placeholder: 'Nombre',
+                                defaultValue: this.state.first_name,
+                                validate: 'required',
+                                onChange: this.onInputChange,
+                            },
+                            {
+                                className: 'col-6',
+                                name: 'last_name',
+                                placeholder: 'Apellidos',
+                                defaultValue: this.state.last_name,
+                                validate: 'required',
+                                onChange: this.onInputChange,
+                            },
+                            {
+                                className: 'col-6',
+                                name: 'email',
+                                placeholder: 'Email',
+                                defaultValue: this.state.email,
+                                validate: 'email',
+                                onChange: this.onInputChange,
+                            },
+                            {
+                                className: 'col-6',
+                                name: 'phone',
+                                placeholder: 'Telefono',
+                                defaultValue: this.state.phone,
+                                validate: ['phone', 'required'],
+                                onChange: this.onInputChange,
+                            },
+                            {
+                                className: 'col-6',
+                                name: 'identification_number',
+                                placeholder: 'Cedula (000-0000000-1)',
+                                defaultValue: this.state.identification_number,
+                                validate: ['required', 'regex:^[0-9]{3}-[0-9]{7}-[0-9]'],
+                                onChange: this.onInputChange,
+                            },
+                        ] }
+                        button={ this.state.button }
+                    /> ||
+                        <div className='card text-center'>
+                            <div className="card-header">
+                                Inquilino
+                            </div>
+                            <div className='card-body'>
+                                <h3 className='card-title'>{ `${this.state.first_name} ${this.state.last_name}` }</h3>
+                                <p>{ this.state.email }</p>
+                                <p>{ this.state.identification_number }</p>
+                            </div>
                         </div>
-                        <div className='card-body'>
-                            <h3 className='card-title'>{ `${this.state.first_name} ${this.state.last_name}` }</h3>
-                            <p>{ this.state.email }</p>
-                            <p>{ this.state.identification_number }</p>
-                        </div>
-                    </div>
-                }
-            </section>
+                    }
+                </section>
+            </div>
 
             { editing && <div className='table-actions'>
                 { hasAccess(ENDPOINTS.AGREEMENTS_URL, ACCESS_TYPES.WRITE) && <button

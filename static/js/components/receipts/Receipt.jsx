@@ -36,7 +36,7 @@ export default class Receipt extends React.Component {
         return (
             <div id={ id || receipt.id } className={ `receipt-wrapper` + (this.state.showSpinner ? ' blocking' : '') }>
                 { this.state.showSpinner && <Spinner/> }
-                <section className='widget receipt'>
+                <section className='receipt'>
                     { !renderEmail && <div>
                         <FontAwesome
                             className='print-button'

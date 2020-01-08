@@ -6,6 +6,7 @@ def register():
     return {
         'users.Users@users_url': '/user',
         'users.UsersManager@users_manager_url': '/users|/users/<int:user_id>',
+        'users.UserPasswords@user_passwords_url': '/users/reset-password',
         'users.Session@login_url': '/login',
         'users.Roles@roles_url': '/roles',
         'users.Permissions@permissions_url': '/permissions',
@@ -41,6 +42,7 @@ no_permissions = [
     'views.users.UserTokens',
     'views.users.Permissions',
     'views.users.Activate',
+    'views.users.UserPasswords',
     'views.projects.TimeIntervals',
     'views.projects.PaymentTypes',
     'views.expenses.ExpenseScans',

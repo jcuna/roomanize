@@ -4,12 +4,12 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { clearUserToken, updatePassword, validateUserToken } from '../../actions/userActions';
+import { clearUserToken, logout, updatePassword, validateUserToken } from '../../actions/userActions';
 import { ALERTS, ENDPOINTS, STATUS } from '../../constants';
 import Spinner from '../../utils/Spinner';
-import { Redirect } from 'react-router-dom';
-import { notifications } from '../../actions/appActions';
+import { notifications, toggleMobileMenu } from '../../actions/appActions';
 import FormGenerator from '../../utils/FromGenerator';
+import ErrorPage from '../ErrorPage';
 
 export default class Account extends React.Component {
     constructor(props) {
@@ -25,7 +25,14 @@ export default class Account extends React.Component {
         const hasToken = typeof props.match.params.user_token !== 'undefined';
 
         if (hasToken) {
-            this.props.dispatch(validateUserToken(props.match.params.user_token));
+            this.props.dispatch(validateUserToken(props.match.params.user_token, () => {
+                props.dispatch(toggleMobileMenu(false));
+            }, () => this.props.dispatch(
+                notifications({
+                    type: ALERTS.WARNING,
+                    message: 'El token no es valido o ha expirado'
+                })))
+            );
         }
 
         this.validateFields = this.validateFields.bind(this);
@@ -39,30 +46,22 @@ export default class Account extends React.Component {
             if (user.userToken.status === STATUS.PENDING) {
                 return <Spinner/>;
             } else if (user.userToken.status === STATUS.COMPLETE) {
-                if (user.status === STATUS.UNPROCESSED && user.userToken.isValid) {
+                if (user.userToken.isValid) {
                     return this.getForm();
                 }
             }
-            return <Redirect to="/"/>;
         }
-
-        return <h2>{ user.first_name }</h2>;
+        return <ErrorPage type={ 400 }/>;
     }
 
     componentWillUnmount() {
         this.props.dispatch(clearUserToken());
-        if (this.props.user.userToken.status === STATUS.COMPLETE &&
-            !this.props.user.userToken.isValid) {
-            this.props.dispatch(notifications({
-                type: ALERTS.WARNING, message: 'El token no es valido o ha expirado'
-            }));
-        }
     }
 
     getForm() {
         return (
             <div>
-                <h2>Debes crear una contraseña</h2>
+                <h2>Crea tu contraseña</h2>
                 <div className="card mb-3">
                     <div className="card-header">
                         Usa 6 o más caracteres con una combinación de letras, números y símbolos
@@ -121,14 +120,14 @@ export default class Account extends React.Component {
                 pw2: this.state.pw2
             },
             () => {
+                this.props.dispatch(logout());
                 this.props.history.push(ENDPOINTS.ACCOUNT_LOGIN);
                 this.props.dispatch(notifications(
-                    { type: ALERTS.SUCCESS, message: 'Cuenta ha sido activada.' })
+                    { type: ALERTS.SUCCESS, message: 'Listo para inicia sesión' })
                 );
             },
             () => {
-                this.props.dispatch(notifications(this.props.updatePasswordError),
-                );
+                this.props.dispatch(notifications(this.props.updatePasswordError));
             }
         ));
     }

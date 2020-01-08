@@ -38,24 +38,26 @@ export default class Roles extends React.Component {
         return (
             <div>
                 <Breadcrumbs { ...this.props } title='Roles'/>
-                <section className='widget'>
-                    <h2>Roles de Accesso</h2>
-                    { this.rolesTable }
-                    <FormGenerator { ...{
-                        formName: 'roles-form',
-                        button: this.state.button,
-                        onSubmit: this.submit,
-                        elements: [
-                            {
-                                type: 'input',
-                                placeholder: 'Role',
-                                onChange: this.toggleButtonDisabled,
-                                name: 'role',
-                                validate: 'required',
-                            },
-                        ],
-                    } }/>
-                </section>
+                <div className='widget'>
+                    <section className='widget-child'>
+                        <h2>Roles de Accesso</h2>
+                        { this.rolesTable }
+                        <FormGenerator { ...{
+                            formName: 'roles-form',
+                            button: this.state.button,
+                            onSubmit: this.submit,
+                            elements: [
+                                {
+                                    type: 'input',
+                                    placeholder: 'Role',
+                                    onChange: this.toggleButtonDisabled,
+                                    name: 'role',
+                                    validate: 'required',
+                                },
+                            ],
+                        } }/>
+                    </section>
+                </div>
             </div>
         );
     }

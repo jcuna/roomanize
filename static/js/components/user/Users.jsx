@@ -91,90 +91,90 @@ export default class Users extends React.Component {
 
         return <div>
             <Breadcrumbs { ...this.props }/>
-            <section className='widget'>
-                <h2>Usuarios</h2>
-                <div className='table-actions'>
-                    <input
-                        placeholder='Buscar: Nombre/Email'
-                        onChange={ this.search }
-                        className='form-control'
+            <div className='widget'>
+                <section className='widget-child'>
+                    <h2>Usuarios</h2>
+                    <div className='table-actions'>
+                        <input
+                            placeholder='Buscar: Nombre/Email'
+                            onChange={ this.search }
+                            className='form-control'
+                        />
+                        <button
+                            disabled={ this.props.roles.assigned.length === 0 }
+                            onClick={ () => this.openUserManager() }
+                            className='btn btn-success'>
+                            Nuevo Usuario
+                        </button>
+                    </div>
+                    <table className='table table-striped'>
+                        <thead>
+                            <tr>
+                                <th>
+                                    ID <FontAwesome type={ `sort-numeric-${ dir }` } className='text-info clicker'
+                                        onClick={ () => this.orderBy('id') }/>
+                                </th>
+                                <th>
+                                    Nombre <FontAwesome type={ `sort-alpha-${ dir }` } className='text-info clicker'
+                                        onClick={ () => this.orderBy('last_name') }/>
+                                </th>
+                                <th>
+                                    Email <FontAwesome type={ `sort-alpha-${ dir }` } className='text-info clicker'
+                                        onClick={ () => this.orderBy('email') }/>
+                                </th>
+                                <th>
+                                    Roles
+                                </th>
+                                <th>
+                                    Editar
+                                </th>
+                                <th>
+                                    Borrar
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            { displayData.map((userFromList, i) => {
+                                const rolesCount = userFromList.roles.length;
+                                const canEdit = hasAccess(ENDPOINTS.USERS_MANAGER_URL, ACCESS_TYPES.WRITE) &&
+                                    userFromList.email !== user.email;
+                                const canDelete = hasAccess(ENDPOINTS.USERS_MANAGER_URL, ACCESS_TYPES.DELETE) &&
+                                    userFromList.email !== user.email;
+                                return <tr key={ i }>
+                                    <td>{ userFromList.id }</td>
+                                    <td>{ userFromList.name }</td>
+                                    <td>{ userFromList.email }</td>
+                                    <td>
+                                        { userFromList.roles.map((obj, r) => r < rolesCount - 1 ? `${obj.name}, ` : obj.name) }
+                                    </td>
+                                    <td>
+                                        <FontAwesome type={ canEdit ? 'user-edit' : 'ban' } className='text-info'
+                                            onClick={ canEdit ? () => {
+                                                this.openUserManager({
+                                                    ...userFromList,
+                                                    roles: userFromList.roles.slice(),
+                                                });
+                                            } : null }/>
+                                    </td>
+                                    <td>
+                                        <FontAwesome type={ canDelete ? 'trash' : 'ban' } className='text-danger'
+                                            onClick={ canDelete ? () => this.deleteUser(userFromList.id) : null }/>
+                                    </td>
+                                </tr>;
+                            })}
+                        </tbody>
+                    </table>
+                    { user.list.users.length === 0 || user.list.searching &&
+                    <div style={ { position: 'absolute', left: '50%' } }><Spinner/></div> }
+                    { user.list.total_pages > 1 && !this.state.searching &&
+                    <Paginate
+                        total_pages={ user.list.total_pages }
+                        onPageChange={ this.switchPage }
+                        initialPage={ this.state.page }
                     />
-                    <button
-                        disabled={ this.props.roles.assigned.length === 0 }
-                        onClick={ () => this.openUserManager() }
-                        className='btn btn-success'>
-                        Nuevo Usuario
-                    </button>
-                </div>
-                <table className='table table-striped'>
-                    <thead>
-                        <tr>
-                            <th>
-                                ID <FontAwesome type={ `sort-numeric-${ dir }` } className='text-info clicker'
-                                    onClick={ () => this.orderBy('id') }/>
-                            </th>
-                            <th>
-                                Nombre <FontAwesome type={ `sort-alpha-${ dir }` } className='text-info clicker'
-                                    onClick={ () => this.orderBy('last_name') }/>
-                            </th>
-                            <th>
-                                Email <FontAwesome type={ `sort-alpha-${ dir }` } className='text-info clicker'
-                                    onClick={ () => this.orderBy('email') }/>
-                            </th>
-                            <th>
-                                Roles
-                            </th>
-                            <th>
-                                Editar
-                            </th>
-                            <th>
-                                Borrar
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        { displayData.map((userFromList, i) => {
-                            const rolesCount = userFromList.roles.length;
-                            const canEdit = hasAccess(ENDPOINTS.USERS_MANAGER_URL, ACCESS_TYPES.WRITE) &&
-                                userFromList.email !== user.email;
-                            const canDelete = hasAccess(ENDPOINTS.USERS_MANAGER_URL, ACCESS_TYPES.DELETE) &&
-                                userFromList.email !== user.email;
-                            return <tr key={ i }>
-                                <td>{ userFromList.id }</td>
-                                <td>{ userFromList.name }</td>
-                                <td>{ userFromList.email }</td>
-                                <td>
-                                    { userFromList.roles.map((obj, r) => r < rolesCount - 1 ? `${obj.name}, ` : obj.name) }
-                                </td>
-                                <td>
-                                    <FontAwesome type={ canEdit ? 'user-edit' : 'ban' } className='text-info'
-                                        onClick={ canEdit ? () => {
-                                            this.openUserManager({
-                                                ...userFromList,
-                                                roles: userFromList.roles.slice(),
-                                            });
-                                        } : null }/>
-                                </td>
-                                <td>
-                                    <FontAwesome type={ canDelete ? 'trash' : 'ban' } className='text-danger'
-                                        onClick={ canDelete ? () => this.deleteUser(userFromList.id) : null }/>
-                                </td>
-                            </tr>;
-                        })}
-                    </tbody>
-                </table>
-                { user.list.users.length === 0 || user.list.searching &&
-                <div style={ { position: 'absolute', left: '50%' } }><Spinner/></div> }
-
-                { user.list.total_pages > 1 && !this.state.searching &&
-                <Paginate
-                    total_pages={ user.list.total_pages }
-                    onPageChange={ this.switchPage }
-                    initialPage={ this.state.page }
-                />
-                }
-
-            </section>
+                    }
+                </section>
+            </div>
         </div>;
     }
 

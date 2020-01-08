@@ -6,7 +6,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { clearExpenses, uploadReceipt, validateExpenseToken } from '../../actions/expenseActions';
 import { ALERTS } from '../../constants';
-import '../../../css/expenses/expense.scss';
+// import '../../../css/expenses/expense.scss';
 import FontAwesome from '../../utils/FontAwesome';
 import { notifications } from '../../actions/appActions';
 
@@ -37,12 +37,14 @@ export default class Expenses extends React.Component {
 
     render() {
         return (
-            <div>
-                <section className='widget'>
+            <div className='widget expense-scan-wrapper'>
+                <section className='widget-child'>
                     <h2>Escaneo de Recibos</h2>
-                    <h4 className='scan-user'>{ this.state.user }</h4>
-                    { this.state.processing && <h1><FontAwesome spin={ true } type={ 'spinner' }/></h1> }
-                    { !this.state.invalid && this.getScanInput() }
+                    <div>
+                        <h4 className='scan-user'>{ this.state.user }</h4>
+                        { this.state.processing && <h1><FontAwesome spin={ true } type={ 'spinner' }/></h1> }
+                        { !this.state.invalid && this.getScanInput() }
+                    </div>
                 </section>
             </div>
         );

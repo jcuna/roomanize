@@ -17,8 +17,8 @@ class Result:
         return {'list': result, 'page': page, 'total_pages': total_pages}, 200
 
     @staticmethod
-    def custom(result: dict):
-        return result, 200
+    def custom(result: dict, code=200):
+        return result, code
 
     @staticmethod
     def model(data):

@@ -12,6 +12,8 @@ from dal.models import User, db, Role, UserToken, UserAttributes
 from flask_mail import Message
 from views import Result
 
+ACTION_RESET_PW = 'reset-password'
+
 
 class Users(API):
 
@@ -123,18 +125,7 @@ class UsersManager(API):
         db.session.commit()
 
         if not user.password:
-            ut = UserToken(target=request.host_url.rstrip('/') + url_for('user_activate_url'))
-            ut.new_token(user.email)
-            user.tokens.append(ut)
-            db.session.commit()
-            msg = Message('Verifica Tu Cuenta', recipients=[user.email])
-            msg.html = render_template(
-                'email/account_activate.html',
-                name=user.first_name,
-                url=request.host_url,
-                token='account/activate/' + ut.token
-            )
-            current_app.mail(msg)
+            send_user_token_email(user, 'Verifica Tu Cuenta', 'email/account_activate.html')
 
         return dict(id=user.id)
 
@@ -286,9 +277,9 @@ class UserTokens(API):
         time = datetime.datetime.utcnow()
 
         if jwt and jwt.expires > time:
-            return {'isValid': True}
+            return Result.custom({'isValid': True}, 200)
 
-        return {'isValid': False}
+        return Result.custom({'isValid': False}, 400)
 
 
 class Activate(API):
@@ -316,6 +307,34 @@ class Activate(API):
 
         return Result.success()
 
+
+class UserPasswords(API):
+    def put(self):
+        data = request.get_json()
+        if data is None or 'email' not in data:
+            raise HttpException('Missing email')
+
+        user = User.query.filter_by(email=data['email']).first()
+        if user is not None:
+            send_user_token_email(user, 'Actualiza tu contraseña', 'email/change_password.html')
+
+        # for security reasons, even if user does not exist, we return a success call
+        return Result.success()
+
+
+def send_user_token_email(user: User, mail_subject, template):
+    ut = UserToken(target=request.host_url.rstrip('/') + url_for('user_activate_url'))
+    ut.new_token(user.email)
+    user.tokens.append(ut)
+    db.session.commit()
+    msg = Message(mail_subject, recipients=[user.email])
+    msg.html = render_template(
+        template,
+        name=user.first_name,
+        url=request.host_url,
+        token='account/activate/' + ut.token
+    )
+    current_app.mail(msg)
 
 class Audit(API):
 

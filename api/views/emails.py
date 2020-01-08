@@ -1,4 +1,5 @@
 import base64
+import re
 from datetime import datetime
 from io import BytesIO
 import pytz
@@ -18,6 +19,7 @@ from views import Result
 
 ACTION_PDF = 'pdf'
 ACTION_HTML = 'html'
+TAG_RE = re.compile(r'<[^>]+>')
 
 class Email(API):
 
@@ -79,4 +81,5 @@ def email_html(email: str, body, template, title=''):
         template,
         body=Markup('<h3>%s</h3>%s' % (title, body))
     )
+    msg.body = '%s\n' % title + TAG_RE.sub('\n', body)
     current_app.mail(msg)

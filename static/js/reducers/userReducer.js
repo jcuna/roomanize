@@ -16,7 +16,7 @@ import {
     USERS_FETCHING,
     USER_DELETE_SUCCESS,
     USER_UPDATE_SUCCESS,
-    USER_TOKEN_CLEAR, USER_TOKEN_FETCHED, USERS_SEARCHING, USERS_SEARCHED,
+    USER_TOKEN_CLEAR, USER_TOKEN_FETCHED, USERS_SEARCHING, USERS_SEARCHED, USER_TOKEN_FAILED,
 } from '../actions/userActions';
 import { STATUS } from '../constants';
 
@@ -123,7 +123,11 @@ export default function userReducer(state = initialData, action) {
                 status: STATUS.COMPLETE,
                 isValid: action.payload.isValid
             }}};
-
+        case USER_TOKEN_FAILED:
+            return { ...state, user: { ...state.user, userToken: {
+                status: STATUS.FAILED,
+                isValid: false
+            }}};
         case USERS_SEARCHING:
             return { ...state, user: { ...state.user, list: { ...state.user.list, searching: true }}};
         case USERS_SEARCHED:

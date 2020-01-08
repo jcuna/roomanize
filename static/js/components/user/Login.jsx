@@ -8,18 +8,20 @@ import FormGenerator from '../../utils/FromGenerator';
 import { login } from '../../actions/userActions';
 import Spinner from '../../utils/Spinner';
 import { clearLandingPage } from '../../actions/appActions';
-import { INVALID_LANDING_PAGES, STATUS } from '../../constants';
+import { ENDPOINTS, INVALID_LANDING_PAGES, STATUS } from '../../constants';
+import { Link } from 'react-router-dom';
 
 export default class Login extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            button: { value: 'Login', disabled: true }
+            button: { value: 'Login', disabled: true },
         };
 
         this.handleSubmit = this.handleSubmit.bind(this);
         this.validateFields = this.validateFields.bind(this);
+        this.forgotPassword = this.forgotPassword.bind(this);
     }
 
     static getDerivedStateFromProps({ history, user, landingPage, dispatch }, state) {
@@ -43,29 +45,40 @@ export default class Login extends React.Component {
             return <Spinner/>;
         }
 
-        return <FormGenerator { ...{
-            formName: 'login-form',
-            button: this.state.button,
-            elements: [
-                {
-                    type: 'text',
-                    placeholder: 'Email',
-                    onChange: this.validateFields,
-                    name: 'email',
-                    defaultValue: email,
-                    validate: ['required', 'email']
-                },
-                {
-                    type: 'password',
-                    placeholder: 'Contraseña',
-                    onChange: this.validateFields,
-                    name: 'password',
-                    defaultValue: password,
-                    validate: 'required',
-                }
-            ],
-            onSubmit: this.handleSubmit,
-        } }/>;
+        return <section>
+            <FormGenerator { ...{
+                formName: 'login-form',
+                button: this.state.button,
+                elements: [
+                    {
+                        type: 'text',
+                        placeholder: 'Email',
+                        onChange: this.validateFields,
+                        name: 'email',
+                        defaultValue: email,
+                        validate: ['required', 'email']
+                    },
+                    {
+                        type: 'password',
+                        placeholder: 'Contraseña',
+                        onChange: this.validateFields,
+                        name: 'password',
+                        defaultValue: password,
+                        validate: 'required',
+                    }
+                ],
+                onSubmit: this.handleSubmit,
+            } }/>
+            <div style={ { textAlign: 'center', margin: '5px' } }>
+                <Link to={ `${ENDPOINTS.ACCOUNT_PROFILE}/forgot-password` }>
+                    ¿Olvidaste tu cuenta?
+                </Link>
+            </div>
+        </section>;
+    }
+
+    forgotPassword() {
+        console.log('hi');
     }
 
     validateFields(event, validation) {

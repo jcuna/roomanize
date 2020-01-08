@@ -53,32 +53,34 @@ export default class Room extends Component {
         return (
             <div>
                 <Breadcrumbs { ...this.props } />
-                <section className='widget'>
-                    <h2>Habitaciones</h2>
-                    { hasAccess(history.location.pathname, ACCESS_TYPES.WRITE) &&
-                    <div className='table-actions'>
-                        <input
-                            placeholder='Buscar: Nombre'
-                            onChange={ this.search }
-                            className='form-control'
+                <div className='widget'>
+                    <section className='widget-child'>
+                        <h2>Habitaciones</h2>
+                        { hasAccess(history.location.pathname, ACCESS_TYPES.WRITE) &&
+                        <div className='table-actions'>
+                            <input
+                                placeholder='Buscar: Nombre'
+                                onChange={ this.search }
+                                className='form-control'
+                            />
+                            <Link to={ `${ ENDPOINTS.ROOMS_URL }/nuevo` }>
+                                <button
+                                    className='btn btn-success'>
+                                    Nueva Habitación
+                                </button>
+                            </Link>
+                        </div>
+                        }
+                        { this.getList() }
+                        { rooms.data.total_pages > 1 && !this.state.searching &&
+                        <Paginate
+                            total_pages={ rooms.data.total_pages }
+                            onPageChange={ this.switchPage }
+                            initialPage={ this.state.page }
                         />
-                        <Link to={ `${ ENDPOINTS.ROOMS_URL }/nuevo` }>
-                            <button
-                                className='btn btn-success'>
-                                Nueva Habitación
-                            </button>
-                        </Link>
-                    </div>
-                    }
-                    { this.getList() }
-                    { rooms.data.total_pages > 1 && !this.state.searching &&
-                    <Paginate
-                        total_pages={ rooms.data.total_pages }
-                        onPageChange={ this.switchPage }
-                        initialPage={ this.state.page }
-                    />
-                    }
-                </section>
+                        }
+                    </section>
+                </div>
             </div>
         );
     }

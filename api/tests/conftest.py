@@ -5,6 +5,11 @@ import pytest
 from tests import tear_files, init, endpoint
 from tests.seeders import seed_admin
 
+class MockMail:
+    mails = []
+
+    def mail(self, msg):
+        self.mails.append(msg)
 
 @pytest.fixture(scope='module')
 def client():
@@ -19,6 +24,7 @@ def client():
     app = init_app()
     with app.test_client() as client:
         with app.app_context():
+            app.mail = MockMail().mail
             run_migration()
         yield client
     tear_files()
@@ -47,7 +53,7 @@ def admin_login(client):
     assert admin_resp.status_code == 302
 
     auth = {
-        'Authorization': 'Basic ' + b64encode(b'testuser@testing.org:' + b'secured').decode()
+        'Authorization': 'Basic ' + b64encode(b'testuser@testing.org:secured').decode()
     }
     # create a session
     login_resp = client.post(endpoint('/login'), headers=auth)

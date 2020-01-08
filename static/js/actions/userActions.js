@@ -2,7 +2,7 @@ import api from '../utils/api';
 import token from '../utils/token';
 import { clearNotifications, needInstall, notifications, toggleMobileMenu } from './appActions';
 import ws from '../utils/ws';
-import { ALERTS, GENERIC_ERROR } from '../constants';
+import { ALERTS, ENDPOINTS, GENERIC_ERROR } from '../constants';
 
 export const USER_LOGGING_IN = 'USER_LOGGING_IN';
 export const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS';
@@ -28,6 +28,7 @@ export const USER_UPDATE_DISPATCHED = 'USER_UPDATE_DISPATCHED';
 export const USER_UPDATE_SUCCESS = 'USER_UPDATE_SUCCESS';
 export const USER_UPDATE_FAIL = 'USER_UPDATE_FAIL';
 export const USER_TOKEN_FETCHED = 'USER_TOKEN_FETCHED';
+export const USER_TOKEN_FAILED = 'USER_TOKEN_FAILED';
 export const USER_TOKEN_CLEAR = 'USER_TOKEN_CLEAR';
 export const USER_WS_CHANGED = 'USER_WS_CHANGED';
 
@@ -221,11 +222,17 @@ export const editUser = (data, success, fail) =>
         );
     };
 
-export const validateUserToken = (userToken) =>
+export const validateUserToken = (userToken, resolve, reject) =>
     (dispatch) => api({
         url: `/user-tokens/${userToken}`,
         method: 'GET'
-    }).then(resp => dispatch({ type: USER_TOKEN_FETCHED, payload: resp.data }));
+    }).then(resp => {
+        dispatch({ type: USER_TOKEN_FETCHED, payload: resp.data });
+        resolve && resolve();
+    }, (err) => {
+        reject && reject(err);
+        dispatch({ type: USER_TOKEN_FAILED, payload: err });
+    });
 
 export const clearUserToken = () =>
     (dispatch) => dispatch({ type: USER_TOKEN_CLEAR });
@@ -272,3 +279,10 @@ export const updateMyUser = (data, success, failed) =>
         method: 'PUT',
         headers: header,
     }, data).then(success, failed), failed);
+
+export const requestPasswordChange = (email, resolve, reject) =>
+    () =>
+        api({
+            url: ENDPOINTS.USER_PASSWORDS_URL,
+            method: 'PUT',
+        }, { email }).then(resolve, reject);
