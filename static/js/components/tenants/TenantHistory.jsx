@@ -10,7 +10,7 @@ import { ALERTS, ENDPOINTS, GENERIC_ERROR } from '../../constants';
 import Table from '../../utils/Table';
 import { Link } from 'react-router-dom';
 import { updateAgreement } from '../../actions/agreementsAction';
-import { formatDateEs, formatDecimal, formatPhone } from '../../utils/helpers';
+import { formatDateEs, formatDecimal, formatPhone, numberWithCommas } from '../../utils/helpers';
 import '../../../css/tenants/tenantform.scss';
 import FontAwesome from '../../utils/FontAwesome';
 import Button from '../../utils/Button';
@@ -79,8 +79,14 @@ export default class TenantHistory extends React.Component {
                     if (row.rental_agreement.terminated_on) {
                         active = false;
                         const end_date = new Date(row.rental_agreement.terminated_on);
-                        items.push(['Contrato iniciado:', formatDateEs(date)]);
-                        items.push(['Contrato Terminado:', formatDateEs(end_date)]);
+                        items.push([
+                            'Contrato iniciado:',
+                            formatDateEs(date)
+                        ]);
+                        items.push([
+                            'Contrato Terminado:',
+                            <span key={ date } className='urgent'>{ formatDateEs(end_date) }</span>
+                        ]);
                     } else {
                         items.push(['En vigencia desde', formatDateEs(date)]);
                     }
@@ -135,15 +141,15 @@ export default class TenantHistory extends React.Component {
                         active && remaining_balance > 0 && items.push(
                             ['Proximo Pago', nextPay]
                         );
-                        items.push(['Arrendamiento', `RD$ ${row.rental_agreement.rate}`]);
-                        items.push(['Balance', `$RD ${(remaining_balance.toFixed(2))}`]);
+                        items.push(['Arrendamiento', `RD$ ${numberWithCommas(row.rental_agreement.rate)}`]);
+                        items.push(['Balance', `$RD ${(numberWithCommas(remaining_balance.toFixed(2)))}`]);
                         hadPreviousBalance &&
                         items.push([
                             'Deuda',
                             <span
                                 key={ balance[0].previous_balance }
                                 className='urgent'>
-                                $RD ${ (Number(balance[0].previous_balance) - payments).toFixed(2) }
+                                $RD ${ numberWithCommas((Number(balance[0].previous_balance) - payments).toFixed(2)) }
                             </span>
                         ]);
 
@@ -273,7 +279,7 @@ export default class TenantHistory extends React.Component {
         return (
             <span className='last-payment'>
                 <span>{ formatDateEs(new Date(lastPayment.date)) }</span>
-                <span className='amount'>{ `($RD ${ lastPayment.amount })` }</span>
+                <span className='amount'>{ `($RD ${numberWithCommas(lastPayment.amount)})` }</span>
             </span>
         );
     }

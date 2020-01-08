@@ -86,11 +86,11 @@ export const searchRooms = (q, resolve, reject) =>
             method: 'GET',
             headers: header,
         }).then(resp => {
-            resolve(resp.data);
+            resolve && resolve(resp.data);
             dispatch({ type: ROOMS_SEARCHED });
         }, (err) => {
             dispatch({ type: ROOMS_SEARCHED });
-            reject(err);
+            reject && reject(err);
         }), reject);
     };
 

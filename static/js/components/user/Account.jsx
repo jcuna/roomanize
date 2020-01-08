@@ -113,21 +113,24 @@ export default class Account extends React.Component {
     }
 
     handleSubmit() {
-        this.props.dispatch(updatePassword(
+        const { user, match, dispatch, history, updatePasswordError } = this.props;
+        dispatch(updatePassword(
             {
-                token: this.props.match.params.user_token,
+                token: match.params.user_token,
                 pw: this.state.pw,
                 pw2: this.state.pw2
             },
             () => {
-                this.props.dispatch(logout());
-                this.props.history.push(ENDPOINTS.ACCOUNT_LOGIN);
-                this.props.dispatch(notifications(
+                if (user.status === STATUS.PROCESSED) {
+                    dispatch(logout());
+                }
+                history.push(ENDPOINTS.ACCOUNT_LOGIN);
+                dispatch(notifications(
                     { type: ALERTS.SUCCESS, message: 'Listo para inicia sesión' })
                 );
             },
             () => {
-                this.props.dispatch(notifications(this.props.updatePasswordError));
+                dispatch(notifications(updatePasswordError));
             }
         ));
     }

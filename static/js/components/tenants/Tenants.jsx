@@ -82,6 +82,7 @@ export default class Tenants extends React.Component {
                             onChange={ this.search }
                             className='form-control'
                         />
+                        { hasAccess(ENDPOINTS.TENANTS_URL, ACCESS_TYPES.WRITE) &&
                         <Link to={ `${ ENDPOINTS.TENANTS_URL }/nuevo` }>
                             <button
                                 disabled={ false }
@@ -89,6 +90,7 @@ export default class Tenants extends React.Component {
                                 Nuevo Inquilino
                             </button>
                         </Link>
+                        }
                     </div>
                     <Table headers={ header } rows={ list }/>
                     { (tenants.processing || this.state.searching) && <Spinner/> }

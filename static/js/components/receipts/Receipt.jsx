@@ -5,14 +5,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Table from '../../utils/Table';
-import { b64EncodeUnicode, formatPhone, friendlyDateEs, toLocalTimezone } from '../../utils/helpers';
+import { b64EncodeUnicode, formatPhone, friendlyDateEs, numberWithCommas, toLocalTimezone } from '../../utils/helpers';
 import '../../../css/receipts/receipt.scss';
 import FontAwesome from '../../utils/FontAwesome';
-import { ENDPOINTS } from '../../constants';
+import { ACCESS_TYPES, ENDPOINTS } from '../../constants';
 import { Link } from 'react-router-dom';
 import { sendEmailHtml } from '../../actions/emailActions';
 import ReactDOMServer from 'react-dom/server';
 import Spinner from '../../utils/Spinner';
+import { hasAccess } from '../../utils/config';
 
 export default class Receipt extends React.Component {
     constructor(props) {
@@ -70,8 +71,8 @@ export default class Receipt extends React.Component {
                         ],
                         ['-----------', '-----------'],
                         ['Fecha De Pago', friendlyDateEs(paidDate)],
-                        ['Balance Ciclo Anterior', receipt.balance.previous_balance],
-                        ['Pago en ' + paymentType, receipt.amount],
+                        ['Balance Ciclo Anterior', numberWithCommas(receipt.balance.previous_balance)],
+                        ['Pago en ' + paymentType, numberWithCommas(receipt.amount)],
                     ] }/></div>
                 </section>
             </div>
@@ -79,7 +80,7 @@ export default class Receipt extends React.Component {
     }
 
     getNameComponent(receipt) {
-        if (this.props.renderEmail) {
+        if (this.props.renderEmail || !hasAccess(ENDPOINTS.TENANTS_URL, ACCESS_TYPES.READ)) {
             return <div key={ receipt.user.phone }>{ receipt.user.first_name + ' ' + receipt.user.last_name }</div>;
         }
         return (

@@ -12,6 +12,7 @@ import Spinner from '../../utils/Spinner';
 import Table from '../../utils/Table';
 import FontAwesome from '../../utils/FontAwesome';
 import { hasAccess } from '../../utils/config';
+import { numberWithCommas } from '../../utils/helpers';
 
 export default class Expenses extends React.Component {
     constructor(props) {
@@ -74,7 +75,7 @@ export default class Expenses extends React.Component {
     formatRows({ list }) {
         const canView = hasAccess(ENDPOINTS.EXPENSES_URL, ACCESS_TYPES.READ);
         const rows = list.map((a, k) => {
-            const row = [a.amount, a.description, a.input_date];
+            const row = [numberWithCommas(a.amount), a.description, a.input_date];
             if (canView) {
                 row.push(<Link key={ k } to={ `${ENDPOINTS.EXPENSES_URL}/editar/${ a.id }` }>
                     <FontAwesome type='edit'/>

@@ -6,7 +6,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { clearExpenses, uploadReceipt, validateExpenseToken } from '../../actions/expenseActions';
 import { ALERTS } from '../../constants';
-// import '../../../css/expenses/expense.scss';
+import '../../../css/expenses/expense.scss';
 import FontAwesome from '../../utils/FontAwesome';
 import { notifications } from '../../actions/appActions';
 

@@ -71,9 +71,13 @@ export default class Receipts extends React.Component {
             <div className='widget'>
                 <section className='widget-child'>
                     <h1>Recibos</h1>
+                </section>
+            </div>
+            <div className='widget'>
+                <section className='widget-child'>
+                    <h3>Buscar: # Recibo</h3>
                     <div className='form-row'>
-                        <div className='form-group col-md-6'>
-                            <label htmlFor='receipt'>Buscar por numero de recibo</label>
+                        <div className='form-group col-md-12'>
                             <input
                                 name='receipt'
                                 placeholder='Buscar: # Recibo'
@@ -81,8 +85,12 @@ export default class Receipts extends React.Component {
                                 className='form-control'
                             />
                         </div>
-                        <div className='form-group col-md-6'>
-                            <label htmlFor='paid_date'>Buscar por Fecha</label>
+                    </div>
+                </section>
+                <section className='widget-child'>
+                    <h4>Buscar por Fecha</h4>
+                    <div className='form-row'>
+                        <div className='form-group col-md-12'>
                             <input
                                 type='date'
                                 name='paid_date'
@@ -92,24 +100,24 @@ export default class Receipts extends React.Component {
                             />
                         </div>
                     </div>
-                    { receipts.data.list.map(r =>
-                        <Receipt
-                            key={ r.id }
-                            receipt={ r }
-                            project={ Receipts.getActiveProject(this.props) }
-                            timeIntervals={ this.props.projects.timeIntervals }
-                            paymentTypes={ this.props.projects.paymentTypes }
-                            dispatch={ this.props.dispatch }
-                            id={ this.state.toPrint.id === Number(r.id) && 'printing' || '' }
-                            onPrint={ this.print }
-                        />) }
-                    { receipts.processing && <Spinner/> }
-                    {receipts.data.total_pages > 1 &&
-                    <Paginate total_pages={ receipts.data.total_pages } initialPage={ receipts.data.page }
-                        onPageChange={ (newPage) => this.setState({ page: newPage }) }
-                    /> }
                 </section>
             </div>
+            { receipts.data.list.map(r =>
+                <Receipt
+                    key={ r.id }
+                    receipt={ r }
+                    project={ Receipts.getActiveProject(this.props) }
+                    timeIntervals={ this.props.projects.timeIntervals }
+                    paymentTypes={ this.props.projects.paymentTypes }
+                    dispatch={ this.props.dispatch }
+                    id={ this.state.toPrint.id === Number(r.id) && 'printing' || '' }
+                    onPrint={ this.print }
+                />) }
+            { receipts.processing && <Spinner/> }
+            {receipts.data.total_pages > 1 &&
+            <Paginate total_pages={ receipts.data.total_pages } initialPage={ receipts.data.page }
+                onPageChange={ (newPage) => this.setState({ page: newPage }) }
+            /> }
         </div>;
     }
 

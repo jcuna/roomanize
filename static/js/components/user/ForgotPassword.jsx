@@ -65,7 +65,7 @@ export default class ForgotPassword extends React.Component {
                 this.props.dispatch(
                     showOverlay(
                         <div>
-                            <p>En unos momentos recibira un correo con instrucciones de como cambiar su contraseña</p>
+                            <p>En unos momentos recibira un correo con instrucciones de como recuperar su contraseña</p>
                         </div>,
                         <FontAwesome type='thumbs-up'/>,
                         false,

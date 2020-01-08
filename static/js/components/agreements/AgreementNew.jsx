@@ -31,21 +31,23 @@ export default class AgreementNew extends React.Component {
         return (
             <div>
                 <Breadcrumbs { ...this.props } title='Registración'/>
-                <section className='widget transparent'>
-                    <h2>Nuevo Contrato/Registracion</h2>
-                    <div className="card text-center">
-                        <div className="card-header">Inquilino</div>
-                        <div className="card-body">
-                            <h4 className="card-title">
-                                <Link to={ `${ ENDPOINTS.TENANTS_URL}/editar/${agreement.tenant.id }` }>
-                                    { agreement.tenant.name }
-                                </Link>
-                            </h4>
-                            <p className='sticky-top'>{ (agreement.tenant.identification_number) }</p>
+                <div className='widget'>
+                    <section className='widget-child transparent'>
+                        <h2>Nuevo Contrato/Registracion</h2>
+                        <div className="card text-center">
+                            <div className="card-header">Inquilino</div>
+                            <div className="card-body">
+                                <h4 className="card-title">
+                                    <Link to={ `${ ENDPOINTS.TENANTS_URL}/editar/${agreement.tenant.id }` }>
+                                        { agreement.tenant.name }
+                                    </Link>
+                                </h4>
+                                <p className='sticky-top'>{ (agreement.tenant.identification_number) }</p>
+                            </div>
                         </div>
-                    </div>
-                    <AgreementForm { ...this.props } onSubmit={ this.onSubmit }/>
-                </section>
+                        <AgreementForm { ...this.props } onSubmit={ this.onSubmit }/>
+                    </section>
+                </div>
             </div>);
     }
 
