@@ -48,8 +48,14 @@
           cursor: pointer;
           position: relative;
           text-transform: uppercase;
+          height: 50px;
+          width: 48px;
           &:hover {
             opacity: 0.8;
+          }
+
+          > span {
+            position: absolute;
           }
 
         }

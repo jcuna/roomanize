@@ -1,10 +1,12 @@
 from datetime import datetime, timedelta, time as d_time
 from logging import Logger
 from time import time
-from dateutil.relativedelta import *
+
+from dateutil.relativedelta import relativedelta
 import sqlalchemy
 from sqlalchemy.orm import joinedload
 from sqlalchemy.sql import functions
+
 from config.constants import *
 from core import get_logger
 from dal import db

@@ -1,34 +1,16 @@
-from datetime import datetime, timedelta
-import boto3
 from botocore.exceptions import ClientError
+
+from core.AWS.base import Base
 from core.utils import get_logger
-from app import configs
 
-class Storage(object):
-    clients = {}
-    """Clients dictionary"""
-
-    session = {}
-    """Session dictionary"""
+class Storage(Base):
 
     def __init__(self, bucket, resource='s3'):
+        super().__init__()
         self.bucket = bucket
         self.app_logger = get_logger('app')
-
-        if 'session' not in self.session or self.session['expire'] < datetime.utcnow():
-            self.session.update({'session':
-                boto3.Session(
-                    aws_access_key_id=configs.AWS_ACCESS_KEY_ID,
-                    aws_secret_access_key=configs.AWS_SECRET_ACCESS_KEY
-            ), 'expire': datetime.utcnow() + timedelta(hours=1)})
         if resource not in self.clients:
             self.clients.update({resource: self.session['session'].client(resource)})
-
-    def get_client(self, resource='s3'):
-        if resource not in self.clients:
-            self.clients[resource] = self.session.client(resource)
-
-        return self.clients[resource]
 
     def get_file(self, object_name):
         return self.get_client().get_object(Bucket=self.bucket, Key=object_name)

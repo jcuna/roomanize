@@ -169,7 +169,7 @@ class Header extends React.Component {
     getUserInitials() {
         const { user } = this.props;
 
-        return user.first_name.charAt(0) + user.last_name.charAt(0);
+        return <span>{ user.first_name.charAt(0) + user.last_name.charAt(0) }</span>;
     }
 
     static propTypes = {

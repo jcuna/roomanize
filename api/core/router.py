@@ -5,6 +5,8 @@ from flask_restful import Api
 import json
 from config.routes import register, no_permissions
 import re
+
+from core.AWS import Resource
 from dal import db
 from dal.models import User, Role, UserAttributes, admin_access, admin_preferences, CompanyProfile
 from dal.shared import get_fillable
@@ -94,8 +96,35 @@ def install():
 
             db.session.commit()
 
+            create_dynamo_db_table()
+
             return redirect('/')
         else:
             return render_template('install.html', error='Invalid submission'), 400
 
     return render_template('install.html', error=None)
+
+
+def create_dynamo_db_table():
+    r = Resource()
+    from config import configs
+
+    table = r.get_client('dynamodb').create_table(
+        TableName=configs.AWS_MONTHLY_REPORT_TABLE,
+        KeySchema=[
+            {
+                'AttributeName': 'date',
+                'KeyType': 'HASH'  #Partition key
+            },
+        ],
+        AttributeDefinitions=[
+            {
+                'AttributeName': 'date',
+                'AttributeType': 'S'
+            },
+        ],
+        ProvisionedThroughput={
+            'ReadCapacityUnits': 10,
+            'WriteCapacityUnits': 10
+        }
+    )

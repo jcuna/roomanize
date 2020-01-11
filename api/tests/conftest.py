@@ -1,9 +1,27 @@
+import sys
 from base64 import b64encode
+from importlib import import_module
 from multiprocessing import Process
 from time import sleep
+
 import pytest
+from sqlalchemy import func
+
 from tests import tear_files, init, endpoint
+from tests.injectors import resources
 from tests.seeders import seed_admin
+
+
+injector = import_module('tests.injectors')
+del sys.modules['boto3']
+sys.modules['boto3'] = injector
+sys.modules['boto3.dynamodb'] = injector
+sys.modules['boto3.dynamodb.conditions'] = injector
+sys.modules['psycopg2'] = injector
+
+#  sqlite has no support for sysdate
+func.sysdate = func.now
+
 
 class MockMail:
     mails = []
@@ -83,3 +101,17 @@ def queue_process():
     p.terminate()
     tear_files()
     p.join()
+
+
+@pytest.fixture(scope='module')
+def aws():
+    """
+    Creates a new database for the unit test to use
+    """
+    init()
+    from app import init_app
+
+    app = init_app()
+    with app.test_client():
+        yield resources
+    tear_files()

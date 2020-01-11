@@ -81,9 +81,9 @@ export default class Project extends React.Component {
                     <section className='widget-child'>
                         <h2>Proyectos</h2>
                         { notEditing && this.getProjects() }
-                        { (projects.projects.length < 10 && canCreate || !notEditing) && this.getForm(this.props) }
                     </section>
                 </div>
+                { (projects.projects.length < 10 && canCreate || !notEditing) && this.getForm(this.props) }
             </div>
         );
     }
@@ -100,46 +100,51 @@ export default class Project extends React.Component {
             return <Spinner/>;
         }
 
-        return <div><hr/><h5>{`${title} Proyecto`}</h5><FormGenerator { ...{
-            formName: 'project',
-            button: this.state.button,
-            elements: [
-                {
-                    type: 'text',
-                    placeholder: 'Nombre Del Proyecto',
-                    onChange: this.validateFields,
-                    name: 'name',
-                    defaultValue: projects.editing.name,
-                    validate: 'required',
-                },
-                {
-                    type: 'tel',
-                    placeholder: 'Telefono',
-                    onChange: this.validateFields,
-                    name: 'phone',
-                    defaultValue: projects.editing.contact,
-                    validate: ['required', 'phone'],
-                },
-                {
-                    type: 'text',
-                    placeholder: 'Direccion',
-                    onChange: this.validateFields,
-                    name: 'address',
-                    defaultValue: projects.editing.address,
-                    validate: 'required',
-                },
-                {
-                    type: 'checkbox',
-                    placeholder: 'Activar',
-                    onChange: this.validateFields,
-                    id: 'active',
-                    name: 'active',
-                    label: 'Activar',
-                    checked: projects.editing.id === user.attributes.preferences.default_project
-                },
-            ],
-            onSubmit: this.handleSubmit,
-        } }/></div>;
+        return <div className='widget'>
+            <section className='widget-child'>
+                <hr/>
+                <h5>{ `${ title } Proyecto` }</h5>
+                <FormGenerator { ...{
+                    formName: 'project',
+                    button: this.state.button,
+                    elements: [
+                        {
+                            type: 'text',
+                            placeholder: 'Nombre Del Proyecto',
+                            onChange: this.validateFields,
+                            name: 'name',
+                            defaultValue: projects.editing.name,
+                            validate: 'required',
+                        },
+                        {
+                            type: 'tel',
+                            placeholder: 'Telefono',
+                            onChange: this.validateFields,
+                            name: 'phone',
+                            defaultValue: projects.editing.contact,
+                            validate: ['required', 'phone'],
+                        },
+                        {
+                            type: 'text',
+                            placeholder: 'Direccion',
+                            onChange: this.validateFields,
+                            name: 'address',
+                            defaultValue: projects.editing.address,
+                            validate: 'required',
+                        },
+                        {
+                            type: 'checkbox',
+                            placeholder: 'Activar',
+                            onChange: this.validateFields,
+                            id: 'active',
+                            name: 'active',
+                            label: 'Activar',
+                            checked: projects.editing.id === user.attributes.preferences.default_project
+                        },
+                    ],
+                    onSubmit: this.handleSubmit,
+                } }/></section>
+        </div>;
     }
 
     getProjects() {

@@ -19,6 +19,11 @@ CACHE_CONFIG = {
     'CACHE_KEY_PREFIX': 'local_dev'
 }
 TIME_ZONE = 'America/New_York'
+AWS_ACCESS_KEY_ID = 'A1234'
+AWS_SECRET_ACCESS_KEY = '1234A'
+AWS_REGION = 'us-east-1'
+AWS_FILE_MANAGER_BUCKET_NAME = 'uploads'
+AWS_MONTHLY_REPORT_TABLE = 'monthly_report'
 """ % (os.path.dirname(os.environ['APP_SETTINGS_PATH']) + '/testdb', Fernet.generate_key().decode())
 
 
@@ -48,3 +53,7 @@ def endpoint(uri):
 
 def front_end_date(date: datetime = datetime.utcnow(), _time: str = str(time.min)):
     return ' '.join([str(date.date()), _time])
+
+
+class Mock(object):
+    pass

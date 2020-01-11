@@ -87,7 +87,7 @@ class Expenses(API):
             expense = Expense(
                 amount=data['amount'],
                 project_id=request.user.attributes.preferences['default_project'],
-                input_date=local_to_utc(data['date']),
+                expense_date=local_to_utc(data['date']),
                 description=data['description']
             )
             db.session.add(expense)

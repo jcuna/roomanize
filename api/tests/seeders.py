@@ -50,8 +50,13 @@ def seed_admin(client: FlaskClient):
     return client.post('/install', data=admin_sample)
 
 
-def seed_project(client: FlaskClient, auth):
-    return client.post(endpoint('/projects'), json=project_sample, headers=auth)
+def seed_project(client: FlaskClient, auth, override=None):
+    data = {}
+    data.update(project_sample)
+    if override:
+        data.update(override)
+
+    return client.post(endpoint('/projects'), json=data, headers=auth)
 
 
 def seed_room(client: FlaskClient, auth, override=None):
