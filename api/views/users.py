@@ -6,9 +6,10 @@ from flask import session, json, current_app, render_template, url_for, request
 from sqlalchemy.orm import joinedload
 from core import Cache, API
 from core.middleware import HttpException
+from core.notifications import send_notification
 from core.router import permissions
-from dal.shared import get_fillable, token_required, access_required, Paginator
-from dal.models import User, db, Role, UserToken, UserAttributes
+from dal.shared import get_fillable, token_required, access_required, Paginator, system_call
+from dal.models import User, db, Role, UserToken, UserAttributes, Notification
 from flask_mail import Message
 from views import Result
 
@@ -18,7 +19,6 @@ ACTION_RESET_PW = 'reset-password'
 class Users(API):
 
     def get(self):
-
         if 'logged_in' in session:
             try:
                 user = User.query.filter_by(email=session['user_email']).first()
@@ -335,6 +335,29 @@ def send_user_token_email(user: User, mail_subject, template):
         token='account/activate/' + ut.token
     )
     current_app.mail(msg)
+
+
+class Notifications(API):
+    @token_required
+    def get(self):
+        total_unread = Notification.query.filter_by(user_id=request.user.id, read=False).count()
+        page = request.args.get('page', 1)
+        paginator = Paginator(
+            Notification.query.filter_by(user_id=request.user.id),
+            int(page),
+            request.args.get('orderBy', 'date'),
+            request.args.get('orderDir', 'desc')
+        )
+        total_pages = paginator.total_pages
+
+        return Result.custom(
+            {'list': paginator.get_items(), 'page': page, 'total_pages': total_pages, 'total_unread': total_unread}
+        )
+
+    @system_call
+    def post(self):
+        send_notification(**request.json)
+        return Result.success()
 
 class Audit(API):
 

@@ -16,7 +16,12 @@ import {
     USERS_FETCHING,
     USER_DELETE_SUCCESS,
     USER_UPDATE_SUCCESS,
-    USER_TOKEN_CLEAR, USER_TOKEN_FETCHED, USERS_SEARCHING, USERS_SEARCHED, USER_TOKEN_FAILED,
+    USER_TOKEN_CLEAR,
+    USER_TOKEN_FETCHED,
+    USERS_SEARCHING,
+    USERS_SEARCHED,
+    USER_TOKEN_FAILED,
+    USER_NOTIFICATION_FETCHING, USER_NOTIFICATION_FETCHED, USER_NOTIFICATION_NEW,
 } from '../actions/userActions';
 import { STATUS } from '../constants';
 
@@ -40,6 +45,13 @@ const initialData = {
         attributes: {
             preferences: {},
             access: {}
+        },
+        notifications: {
+            status: STATUS.pending,
+            list: [],
+            page: 1,
+            total_pages: 1,
+            total_unread: 0,
         }
     },
     // jwt session token, expires regularly
@@ -132,6 +144,25 @@ export default function userReducer(state = initialData, action) {
             return { ...state, user: { ...state.user, list: { ...state.user.list, searching: true }}};
         case USERS_SEARCHED:
             return { ...state, user: { ...state.user, list: { ...state.user.list, searching: false }}};
+        case USER_NOTIFICATION_FETCHING:
+            return {
+                ...state,
+                user: { ...state.user, notifications: { ...state.user.notifications, status: STATUS.TRANSMITTING }}
+            };
+        case USER_NOTIFICATION_FETCHED:
+            return {
+                ...state,
+                user: { ...state.user, notifications: action.payload.data }
+            };
+        case USER_NOTIFICATION_NEW:
+            const list = [...state.user.notifications.list];
+            list.unshift(action.payload.data);
+            return {
+                ...state,
+                user: { ...state.user, notifications: {
+                    ...state.user.notifications, list, total_unread: state.user.notifications.total_unread + 1 }
+                }
+            };
         default:
             return state;
     }

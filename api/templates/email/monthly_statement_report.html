@@ -1,0 +1,13 @@
+{% extends "header.html" %}
+{% block content %}
+
+<br/>
+<h3>Su reporte mensual de {{ project }} para el mes de {{ month }}</h3>
+<br/>
+<p>Hola, {{ name }}</p>
+<hr/>
+<h5>Periodo del reporte</h5>
+<p>{{ start_date }} - {{ end_date }}</p>
+<hr/>
+<a href="{{ url }}">Ver o descargar</a>
+{% endblock %}

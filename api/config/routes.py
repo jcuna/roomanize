@@ -13,6 +13,7 @@ def register():
         'users.UserTokens@user_tokens_url': '/user-tokens|/user-tokens/<user_token>',
         'users.Activate@user_activate_url': '/account/activate-pass',
         'users.Audit@audit_url': '/audit|/audit/<int:user_id>',
+        'users.Notifications@notifications_url': '/notifications',
 
         'company.Company@company_url': '/company',
 
@@ -21,6 +22,7 @@ def register():
         'projects.RoomsHistory@rooms_history_url': '/rooms-history/|/rooms-history/<int:room_id>',
         'projects.TimeIntervals@time_intervals_url': '/time-intervals',
         'projects.PaymentTypes@payment_types_url': '/payment-types',
+        'projects.Report@reports_url': '/reports|/reports/<string:date>',
 
         'agreements.Agreements@agreements_url': '/agreements|/agreements/<int:agreement_id>',
         'agreements.Policies@policies_url': '/policies|/policies/<int:policy_id>',
@@ -43,6 +45,7 @@ no_permissions = [
     'views.users.Permissions',
     'views.users.Activate',
     'views.users.UserPasswords',
+    'views.users.Notifications',
     'views.projects.TimeIntervals',
     'views.projects.PaymentTypes',
     'views.expenses.ExpenseScans',

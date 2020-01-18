@@ -9,7 +9,7 @@ import '../../css/header.scss';
 import { toggleMobileMenu } from '../actions/appActions';
 import { API_PREFIX, ENDPOINTS, STATUS } from '../constants';
 import { listenRoleChanges } from '../actions/roleActions';
-import { listenUserChanges, updateMyUser } from '../actions/userActions';
+import { listenUserChanges, listenUserNotifications, updateMyUser } from '../actions/userActions';
 import FontAwesome from '../utils/FontAwesome';
 
 class Header extends React.Component {
@@ -19,15 +19,25 @@ class Header extends React.Component {
         this.toggleMenu = this.toggleMenu.bind(this);
         this.toggleUserMenu = this.toggleUserMenu.bind(this);
         this.state = {
-            userNameClass: this.props.initialClass,
             dispatchedRolesWS: false,
             dispatchedUserWS: false
         };
+
+        this.userMenus = [
+            React.createRef(),
+            React.createRef(),
+        ];
     }
 
     componentDidUpdate({ clickedContent, appState }) {
-        if (Header.userMenuIsShowing(this.state.userNameClass) && this.props.clickedContent !== clickedContent) {
-            this.hideUserMenu();
+        if (this.props.clickedContent !== clickedContent) {
+            this.userMenus.forEach((el) => {
+                const child = el.current.querySelector('.dropdown-menu');
+                if (child.classList.contains(this.props.showMenuClass)) {
+                    child.classList.remove(this.props.showMenuClass);
+                    el.current.classList.remove(this.props.menuNipsClass);
+                }
+            });
         }
         const { user, dispatch } = this.props;
 
@@ -44,11 +54,16 @@ class Header extends React.Component {
                     dispatchedUserWS: true,
                 });
                 dispatch(listenUserChanges(user.id));
+                dispatch(listenUserNotifications(user.id, this.newNotification));
             }
         }
         if (appState === 1 && this.props.appState === 0) {
             window.location.href = `${API_PREFIX}install`;
         }
+    }
+
+    newNotification(data) {
+        console.log(data);
     }
 
     getFetchRolesOptions(user) {
@@ -66,10 +81,6 @@ class Header extends React.Component {
         });
 
         return options;
-    }
-
-    static userMenuIsShowing(userNameClass) {
-        return userNameClass.includes(Header.defaultProps.extraClass);
     }
 
     getSelectedProject({ projects }, { attributes }) {
@@ -97,10 +108,8 @@ class Header extends React.Component {
 
                     { loggedIn &&
                         <ul className="super-menu">
-                            <li className="user-icon" onClick={ this.toggleUserMenu }>
-                                { this.getUserIcon() }
-                                { this.userMenu() }
-                            </li>
+                            { this.userMenu() }
+                            { this.getNotificationsMenu() }
                             <li className="navPanelToggle" onClick={ this.toggleMenu }>
                                 <FontAwesome className='menu-grid' type="th"/>
                             </li>
@@ -115,6 +124,35 @@ class Header extends React.Component {
         );
     }
 
+    getNotificationsMenu() {
+        const { notifications: { list, total_unread }} = this.props.user;
+
+        let toggle = this.toggleUserMenu;
+        if (this.props.user.notifications.total_unread === 0) {
+            toggle = () => {};
+        }
+
+        return <li className='notifications-menu' ref={ this.userMenus[1] } onClick={ toggle }>
+            <div className='menu-grid'>
+                <FontAwesome type='bell'/>
+                { total_unread > 0 &&
+                <div className='notification-bubble'><span>{total_unread > 99 ? '99+' : total_unread}</span></div>}
+            </div>
+            <div className={ this.props.initialClass }>
+                <ul>
+                    { list.map((a, b) =>
+                        <li key={ b }>
+                            <Link
+                                className={ (!a.read ? 'unread' : 'read') }
+                                to={ `${ENDPOINTS.NOTIFICATIONS_URL}/${a.id}` }>{ a.subject }
+                            </Link>
+                        </li>
+                    ) }
+                </ul>
+            </div>
+        </li>;
+    }
+
     toggleMenu() {
         this.props.dispatch(toggleMobileMenu(!this.props.showMobileMenu));
         this.props.dispatch(updateMyUser({
@@ -125,50 +163,46 @@ class Header extends React.Component {
     }
 
     userMenu() {
+        const { user } = this.props;
         const menu = [
             { name: 'Perfil', link: ENDPOINTS.ACCOUNT_PROFILE },
             { name: 'Logout', link: ENDPOINTS.ACCOUNT_LOGOUT }
         ];
-
-        return (
-            <div className={ this.state.userNameClass }>
-                <ul>
-                    { menu.map((a, b) => <li key={ b }><Link to={ a.link }>{ a.name }</Link><hr/></li>) }
-                </ul>
-            </div>
-        );
-    }
-
-    getUserIcon() {
-        const { user } = this.props;
-
-        return (
+        return <li className="user-icon" ref={ this.userMenus[0] } onClick={ this.toggleUserMenu }>
             <div
                 className="user-pic">{ user.pic && <img src={ user.pic }/> || this.getUserInitials() }
             </div>
-        );
+            <div className={ this.props.initialClass }>
+                <ul>
+                    { menu.map((a, b) => <li key={ b }>
+                        <Link to={ a.link }>{ a.name }</Link>
+                    </li>) }
+                </ul>
+            </div>
+        </li>;
     }
 
     toggleUserMenu(e) {
         e.stopPropagation();
-        if (Header.userMenuIsShowing(this.state.userNameClass)) {
-            this.hideUserMenu();
-        } else {
-            this.setState({
-                userNameClass: this.props.initialClass + ' ' + this.props.extraClass
-            });
-        }
-    }
-
-    hideUserMenu() {
-        this.setState({
-            userNameClass: this.props.initialClass
+        this.userMenus.forEach((el) => {
+            const child = el.current.querySelector('.dropdown-menu');
+            if (el.current === e.currentTarget) {
+                if (child.classList.contains(this.props.showMenuClass)) {
+                    el.current.classList.remove(this.props.menuNipsClass);
+                    child.classList.remove(this.props.showMenuClass);
+                } else {
+                    el.current.classList.add(this.props.menuNipsClass);
+                    child.classList.add(this.props.showMenuClass);
+                }
+            } else if (child.classList.contains(this.props.showMenuClass)) {
+                el.current.classList.remove(this.props.menuNipsClass);
+                child.classList.remove(this.props.showMenuClass);
+            }
         });
     }
 
     getUserInitials() {
         const { user } = this.props;
-
         return <span>{ user.first_name.charAt(0) + user.last_name.charAt(0) }</span>;
     }
 
@@ -177,7 +211,8 @@ class Header extends React.Component {
         showMobileMenu: PropTypes.bool,
         user: PropTypes.object,
         initialClass: PropTypes.string,
-        extraClass: PropTypes.string,
+        showMenuClass: PropTypes.string,
+        menuNipsClass: PropTypes.string,
         clickedContent: PropTypes.bool,
         projects: PropTypes.object,
         history: PropTypes.object,
@@ -186,8 +221,9 @@ class Header extends React.Component {
 }
 
 Header.defaultProps = {
-    initialClass: 'user-menu',
-    extraClass: 'user-menu-display'
+    initialClass: 'dropdown-menu',
+    showMenuClass: 'dropdown-menu-display',
+    menuNipsClass: 'menu-nips'
 };
 
 export default Header;

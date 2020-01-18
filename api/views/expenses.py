@@ -1,7 +1,4 @@
-import os
-import base64
 import hashlib
-import threading
 from datetime import datetime
 from io import BytesIO
 from mimetypes import guess_all_extensions

@@ -6,7 +6,7 @@ import React from 'react';
 import Layout from './Layout.jsx';
 import { BrowserRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { fetchUser } from '../actions/userActions';
+import { fetchUser, fetchUserNotifications } from '../actions/userActions';
 import token from '../utils/token';
 import Spinner from '../utils/Spinner';
 import { fetchPermissions } from '../actions/roleActions';
@@ -30,6 +30,7 @@ class App extends React.Component {
 
         if (user.status === STATUS.PENDING) {
             dispatch(fetchUser(data => {
+                dispatch(fetchUserNotifications());
                 //the first time we load, we want to make sure we keep current preferences.
                 data.user.attributes.preferences.showMobileMenu &&
                 this.props.dispatch(toggleMobileMenu(data.user.attributes.preferences.showMobileMenu));

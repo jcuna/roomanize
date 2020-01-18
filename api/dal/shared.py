@@ -44,7 +44,7 @@ def token_required(f):
         token = None
 
         if 'X-Access-Token' in request.headers:
-            token = request.headers['X-ACCESS-TOKEN']
+            token = request.headers.get('X-ACCESS-TOKEN')
 
         if not token:
             return Result.error('Token is missing!', 401)
@@ -56,6 +56,29 @@ def token_required(f):
             return Result.error('Token is invalid!', 401)
 
         request.user = current_user
+        return f(*args, **kwargs)
+
+    return decorated
+
+
+def system_call(f):
+    """
+    meant to be called from within server instance, this is a temporary solution until an API key system is created
+    :param f:
+    :return:
+    """
+    from flask import current_app, request
+
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+
+        if 'X-System-Token' in request.headers:
+            token = request.headers.get('X-SYSTEM-TOKEN')
+
+        if not token or token != current_app.config['SECRET_KEY']:
+            return Result.error('Token is missing!', 401)
+
         return f(*args, **kwargs)
 
     return decorated

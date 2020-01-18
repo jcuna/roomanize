@@ -160,10 +160,10 @@ class Receipts(API):
         result = []
 
         query = Payment.query.options(
-            joinedload('balances'),
-            joinedload('balances.agreement'),
-            joinedload('balances.agreement.tenant_history'),
-            joinedload('balances.agreement.tenant_history.tenant'),
+            joinedload('balance'),
+            joinedload('balance.agreement'),
+            joinedload('balance.agreement.tenant_history'),
+            joinedload('balance.agreement.tenant_history.tenant'),
         ).join(Balance, (Balance.id == Payment.balance_id)).join(RentalAgreement).join(TenantHistory).options(
             Load(TenantHistory).load_only('id'),
         ).join(Tenant).filter(RentalAgreement.project_id == project_id)
@@ -188,9 +188,9 @@ class Receipts(API):
         if receipts:
             for row in receipts:
                 receipt = dict(row)
-                receipt['user'] = dict(row.balances.agreement.tenant_history.tenant)
-                receipt['balance'] = dict(row.balances)
-                receipt['balance']['agreement'] = dict(row.balances.agreement)
+                receipt['user'] = dict(row.balance.agreement.tenant_history.tenant)
+                receipt['balance'] = dict(row.balance)
+                receipt['balance']['agreement'] = dict(row.balance.agreement)
                 result.append(receipt)
 
         return Result.paginate(result, page, total_pages)

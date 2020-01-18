@@ -5,6 +5,7 @@ from multiprocessing import Process
 from time import sleep
 
 import pytest
+from flask_socketio import SocketIO
 from sqlalchemy import func
 
 from tests import tear_files, init, endpoint
@@ -18,16 +19,12 @@ sys.modules['boto3'] = injector
 sys.modules['boto3.dynamodb'] = injector
 sys.modules['boto3.dynamodb.conditions'] = injector
 sys.modules['psycopg2'] = injector
+sys.modules['flask_mail'] = injector
+sys.modules['urllib'] = injector
 
 #  sqlite has no support for sysdate
 func.sysdate = func.now
 
-
-class MockMail:
-    mails = []
-
-    def mail(self, msg):
-        self.mails.append(msg)
 
 @pytest.fixture(scope='module')
 def client():
@@ -40,9 +37,9 @@ def client():
     from helpers import run_migration
 
     app = init_app()
+    app.extensions['socketio'] = SocketIO(app)
     with app.test_client() as client:
         with app.app_context():
-            app.mail = MockMail().mail
             run_migration()
         yield client
     tear_files()

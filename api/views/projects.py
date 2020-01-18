@@ -6,9 +6,9 @@ from flask import request, session
 
 from sqlalchemy.orm import joinedload, load_only
 from core import API
+from core.AWS import Resource
 from core.middleware import HttpException
-from dal.models import Project, TimeInterval, User, Room, PaymentType, RentalAgreement, TenantHistory, Tenant, Balance, \
-    Payment
+from dal.models import Project, TimeInterval, User, Room, PaymentType, RentalAgreement, TenantHistory, Tenant
 from dal.shared import token_required, access_required, db, get_fillable, Paginator
 from views import Result
 
@@ -233,3 +233,19 @@ class RoomsHistory(API):
             'tenant_id': row.tenant_history.tenant_id,
             'interval': row.interval.interval
         }
+
+class Report(API):
+
+    @token_required
+    @access_required
+    def get(self, date):
+        project_id = request.user.attributes.preferences['default_project']
+        y, m, d = date.split('-')
+        date = datetime(year=int(y), month=int(m), day=int(d)).replace(day=1).date()
+        r = Resource()
+        resp = r.query(r.get_monthly_reports_table(), 'uid', '%s-%s' % (project_id, date))
+
+        if len(resp['Items']) > 0:
+            return resp['Items'][0]
+
+        return Result.error('Not Found', 404)

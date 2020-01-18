@@ -24,9 +24,7 @@ class Resource(Base):
 
     def insert_monthly_report(self, value: dict):
         client = self.get_client('dynamodb')
-        client.put_item(
+        return client.put_item(
             TableName=self.monthly_report_table,
-            Item={
-                value['from_date']: value
-            }
+            Item=value
         )

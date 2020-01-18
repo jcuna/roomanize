@@ -40,6 +40,7 @@ export const ENDPOINTS = {
     ROOMS_HISTORY_URL: '/rooms-history',
     BALANCE_PAYMENTS_URL: '/pay-balance',
     EMAILS_URL: '/email',
+    NOTIFICATIONS_URL: '/notificaciones',
     NOT_FOUND: '/error/404',
     NO_ACCESS: '/error/403',
 };

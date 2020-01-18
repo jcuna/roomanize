@@ -3,12 +3,15 @@ import logging
 from importlib import import_module
 from apscheduler.executors.pool import ProcessPoolExecutor
 from apscheduler.schedulers.background import BlockingScheduler
+
+from core.crons.monthly_report import generate_all_reports
 from core.utils import create_file_log_handler
 from core.crons.balances import balances_cron
 
 # schedule is UTC time so assume +4 hours while daylight savings
 cron_jobs = [
-    {'func': balances_cron, 'trigger': 'cron', 'day': '*', 'hour': 5}
+    {'func': balances_cron, 'trigger': 'cron', 'day': '*', 'hour': 5, 'coalesce': True},
+    {'func': generate_all_reports, 'trigger': 'cron', 'day': '1', 'hour': 8, 'coalesce': True},
 ]
 
 if len(sys.argv) < 2:
@@ -22,7 +25,7 @@ if job == 'scheduler':
     sch_logger.level = logging.INFO
     sch_logger.addHandler(create_file_log_handler('scheduler'))
 
-    scheduler = BlockingScheduler(timezone='utc', executors={'default': ProcessPoolExecutor(20)})
+    scheduler = BlockingScheduler(timezone='utc', executors={'default': ProcessPoolExecutor(6)})
     for job in cron_jobs:
         scheduler.add_job(**job)
 

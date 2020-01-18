@@ -1,14 +1,16 @@
-from datetime import datetime, time as d_time
+from datetime import datetime, time as d_time, timedelta
 
 import pytz
 from flask.testing import FlaskClient
 
 from tests import front_end_date, endpoint, Mock
+from tests.injectors import resources
 from tests.seeders import seed_project, seed_room, seed_tenant, seed_new_agreement
-
 
 project = Mock()
 project.id = None
+project.id2 = None
+
 
 def test_report_format(client: FlaskClient, aws, admin_login):
     from core.crons.monthly_report import generate_report
@@ -19,29 +21,31 @@ def test_report_format(client: FlaskClient, aws, admin_login):
     assert resp.status_code == 200
     project_id = resp.json['id']
 
-    generate_report(from_date, project_id)
+    generate_report(from_date, project_id, 'America/New_York')
 
     assert 'monthly_report' in aws.dynamo
     assert len(aws.dynamo['monthly_report']) == 1
 
-    from_date_adjusted = str(
-        datetime.combine(from_date, d_time.min).astimezone(pytz.timezone('America/New_York')).date()
-    )
+    key = '%s-%s' % \
+          (project_id, from_date)
 
-    assert from_date_adjusted in aws.dynamo['monthly_report']
-    assert 'project' in aws.dynamo['monthly_report'][from_date_adjusted]
-    assert 'address' in aws.dynamo['monthly_report'][from_date_adjusted]
+    assert 'uid' in aws.dynamo['monthly_report'][0]
+    assert key in aws.dynamo['monthly_report'][0]['uid']['S']
+    assert 'project' in aws.dynamo['monthly_report'][0]
+    assert 'project_id' in aws.dynamo['monthly_report'][0]
+    assert 'address' in aws.dynamo['monthly_report'][0]
 
-    assert aws.dynamo['monthly_report'][from_date_adjusted]['project'] == 'ProjectName'
-    assert aws.dynamo['monthly_report'][from_date_adjusted]['address'] == '123 Micksburg St'
+    assert aws.dynamo['monthly_report'][0]['project']['S'] == 'ProjectName'
+    assert aws.dynamo['monthly_report'][0]['address']['S'] == '123 Micksburg St'
 
-    assert 'report_day' in aws.dynamo['monthly_report'][from_date_adjusted]
-    assert 'expenses' in aws.dynamo['monthly_report'][from_date_adjusted]
-    assert 'income' in aws.dynamo['monthly_report'][from_date_adjusted]
-    assert 'from_date' in aws.dynamo['monthly_report'][from_date_adjusted]
-    assert 'to_date' in aws.dynamo['monthly_report'][from_date_adjusted]
-    assert 'total_income' in aws.dynamo['monthly_report'][from_date_adjusted]
-    assert 'total_expenses' in aws.dynamo['monthly_report'][from_date_adjusted]
+    assert 'report_day' in aws.dynamo['monthly_report'][0]
+    assert 'expenses' in aws.dynamo['monthly_report'][0]
+    assert 'income' in aws.dynamo['monthly_report'][0]
+    assert 'from_date' in aws.dynamo['monthly_report'][0]
+    assert 'to_date' in aws.dynamo['monthly_report'][0]
+    assert 'total_income' in aws.dynamo['monthly_report'][0]
+    assert 'total_expenses' in aws.dynamo['monthly_report'][0]
+    assert 'revenue' in aws.dynamo['monthly_report'][0]
 
 
 def test_seed_monthly_data(client: FlaskClient, admin_login):
@@ -74,7 +78,7 @@ def test_seed_monthly_data(client: FlaskClient, admin_login):
     tenant_id2 = seed_tenant(client, admin_login, tenant_override2).json['id']
 
     registration_override1 = {
-        'date': front_end_date(), # defaults to today
+        'date': front_end_date(),  # defaults to today
         'deposit': '3000.00',
         'interval': '100',  # weekly, 200 every two weeks and 400 monthly
         'rate': '1500.00',
@@ -85,7 +89,7 @@ def test_seed_monthly_data(client: FlaskClient, admin_login):
         'tenant_id': tenant_id
     }
     registration_override2 = {
-        'date': front_end_date(), # defaults to today
+        'date': front_end_date(),  # defaults to today
         'deposit': '3000.00',
         'interval': '200',  # weekly, 200 every two weeks and 400 monthly
         'rate': '2000.00',
@@ -107,63 +111,243 @@ def test_seed_monthly_data(client: FlaskClient, admin_login):
         json={'balance_id': balance1, 'payment_type_id': 1, 'amount': 500},
         headers=admin_login
     )
+    assert payment_a1_1.status_code == 200
 
     payment_a1_2 = client.post(
         endpoint('/pay-balance'),
         json={'balance_id': balance1, 'payment_type_id': 1, 'amount': 2500},
         headers=admin_login
     )
+    assert payment_a1_2.status_code == 200
 
     payment_a2_1 = client.post(
         endpoint('/pay-balance'),
         json={'balance_id': balance2, 'payment_type_id': 1, 'amount': 800},
         headers=admin_login
     )
+    assert payment_a2_1.status_code == 200
 
     payment_a2_2 = client.post(
         endpoint('/pay-balance'),
         json={'balance_id': balance2, 'payment_type_id': 1, 'amount': 5000},
         headers=admin_login
     )
+    assert payment_a2_2.status_code == 200
+
+    payment_a2_4 = client.post(
+        endpoint('/pay-balance'),
+        json={'balance_id': balance2, 'payment_type_id': 1, 'amount': 225.25},
+        headers=admin_login
+    )
+    assert payment_a2_4.status_code == 200
+    assert 'id' in payment_a2_4.json
 
     payment_a2_3 = client.post(
         endpoint('/pay-balance'),
         json={'balance_id': balance2, 'payment_type_id': 1, 'amount': -1000},
         headers=admin_login
     )
+    assert payment_a2_3.status_code == 200
+    assert 'id' in payment_a2_3.json
 
     expense1 = client.post(endpoint('/expenses'), json={
         'nonce': "randome1234",
         'amount': "600.00",
         'description': "Something",
         'date': front_end_date(),
-    })
+    }, headers=admin_login)
+    assert expense1.status_code == 200
 
     expense2 = client.post(endpoint('/expenses'), json={
         'nonce': "random54321",
         'amount': "1500.00",
         'description': "Another expense",
         'date': front_end_date(),
-    })
+    }, headers=admin_login)
+    assert expense2.status_code == 200
 
     expense3 = client.post(endpoint('/expenses'), json={
         'nonce': "random94932",
         'amount': "620.00",
         'description': "A thrid expense",
         'date': front_end_date(),
-    })
+    }, headers=admin_login)
+
+    assert expense3.status_code == 200
+    assert 'token' in expense3.json
+    assert 'domain' in expense3.json
+    assert 'id' in expense3.json
 
 
-def test_report_generated(client: FlaskClient, admin_login: dict, aws):
+def test_report_generated(aws):
     from core.crons.monthly_report import generate_report
 
     from_date = datetime.utcnow().astimezone(pytz.timezone('America/New_York')).date().replace(day=1)
-
-    generate_report(from_date, project.id)
+    generate_report(from_date, project.id, 'America/New_York')
 
     # if from_date is the same, then report gets overwritten
-    assert len(aws.dynamo['monthly_report']) == 1
+    assert len(aws.dynamo['monthly_report']) == 2
 
-    from_date_adjusted = str(
-        datetime.combine(from_date, d_time.min).astimezone(pytz.timezone('America/New_York')).date()
+    key = '%s-%s' % \
+          (project.id, datetime.combine(from_date, d_time.min).astimezone(pytz.utc).date())
+
+    assert 'expenses' in aws.dynamo['monthly_report'][1]
+    assert 'income' in aws.dynamo['monthly_report'][1]
+    assert 'total_income' in aws.dynamo['monthly_report'][1]
+    assert 'total_expenses' in aws.dynamo['monthly_report'][1]
+    assert 'revenue' in aws.dynamo['monthly_report'][1]
+
+    assert aws.dynamo['monthly_report'][1]['uid']['S'] == key
+    assert len(aws.dynamo['monthly_report'][1]['expenses']['L']) == 3
+    assert aws.dynamo['monthly_report'][1]['total_expenses']['N'] == '2720.00'
+
+    assert len(aws.dynamo['monthly_report'][1]['income']['L']) == 6
+    assert aws.dynamo['monthly_report'][1]['total_income']['N'] == '8025.25'
+
+    assert aws.dynamo['monthly_report'][1]['revenue']['N'] == '5305.25'
+
+
+def test_seed_second_project(client: FlaskClient, admin_login):
+    from dal.models import RentalAgreement
+
+    resp2 = seed_project(client, admin_login, {'name': 'ProjectName2', 'address': '555 Beverly Bottoms St'})
+
+    assert resp2.status_code == 200
+    project.id2 = resp2.json['id']
+
+    change_proj = client.put(endpoint('/projects/%s' % project.id2), json={
+        'id': project.id2,
+        'active': True,
+    }, headers=admin_login)
+
+    assert change_proj.status_code == 200
+
+    tenant_override3 = {
+        'email': 'tenant8@tenant.com',
+        'first_name': 'Sample8',
+        'last_name': 'Tenant8',
+        'identification_number': '888-1234567-8',
+        'phone': '775555888'
+    }
+    tenant_id3 = seed_tenant(client, admin_login, tenant_override3).json['id']
+
+    resp_room3 = seed_room(client, admin_login, {'project_id': project.id2, 'name': 'RM-404'}).json['id']
+
+    registration_override3 = {
+        'date': front_end_date(),  # defaults to today
+        'deposit': '3000.00',
+        'interval': '400',  # weekly, 200 every two weeks and 400 monthly
+        'rate': '4000.00',
+        'reference1': '8293429565',
+        'reference2': '8095645542',
+        'reference3': '8095023124',
+        'room_id': resp_room3,
+        'tenant_id': tenant_id3
+    }
+
+    r3 = seed_new_agreement(client, admin_login, registration_override3)
+
+    balance3 = RentalAgreement.query.filter(RentalAgreement.id == r3.json['id']).first().balances[0].id
+
+    expense4 = client.post(endpoint('/expenses'), json={
+        'nonce': "randome9656",
+        'amount': "600.00",
+        'description': "Something for project 2",
+        'date': front_end_date(),
+    }, headers=admin_login)
+
+    assert expense4.status_code == 200
+
+    payment_a3_1 = client.post(
+        endpoint('/pay-balance'),
+        json={'balance_id': balance3, 'payment_type_id': 1, 'amount': 4000},
+        headers=admin_login
     )
+    assert payment_a3_1.status_code == 200
+    assert 'id' in payment_a3_1.json
+
+
+def test_project_2_monthly_report(aws):
+    from core.crons.monthly_report import generate_report
+
+    from_date = datetime.utcnow().astimezone(pytz.timezone('America/New_York')).date().replace(day=1)
+    generate_report(from_date, project.id2, 'America/New_York')
+
+    # if from_date is the same, then report gets overwritten
+    assert len(aws.dynamo['monthly_report']) == 3
+
+    key2 = '%s-%s' % \
+           (project.id2, datetime.combine(from_date, d_time.min).astimezone(pytz.utc).date())
+
+    assert 'uid' in aws.dynamo['monthly_report'][2]
+    assert aws.dynamo['monthly_report'][2]['uid']['S'] == key2
+    assert 'expenses' in aws.dynamo['monthly_report'][2]
+    assert 'income' in aws.dynamo['monthly_report'][2]
+    assert 'total_income' in aws.dynamo['monthly_report'][2]
+    assert 'total_expenses' in aws.dynamo['monthly_report'][2]
+    assert 'revenue' in aws.dynamo['monthly_report'][2]
+
+    assert len(aws.dynamo['monthly_report'][2]['expenses']['L']) == 1
+    assert aws.dynamo['monthly_report'][2]['total_expenses']['N'] == '600.00'
+
+    assert len(aws.dynamo['monthly_report'][2]['income']['L']) == 1
+    assert aws.dynamo['monthly_report'][2]['total_income']['N'] == '4000.00'
+
+    assert aws.dynamo['monthly_report'][2]['revenue']['N'] == '3400.00'
+
+    assert 'balance' in aws.dynamo['monthly_report'][2]['income']['L'][0]['M']
+    assert 'agreement' in aws.dynamo['monthly_report'][2]['income']['L'][0]['M']['balance']['M']
+
+
+def test_generate_all_from_last_month(aws):
+    from core.crons.monthly_report import generate_all_reports
+    generate_all_reports()
+
+    this_month_first = datetime.utcnow().date().replace(day=1)
+    last_month_first = (this_month_first - timedelta(days=1)).replace(day=1)
+
+    assert len(aws.dynamo['monthly_report']) == 6
+    assert 'uid' in aws.dynamo['monthly_report'][3]
+    assert 'uid' in aws.dynamo['monthly_report'][4]
+    assert 'uid' in aws.dynamo['monthly_report'][5]
+
+    key = '%s-%s' % \
+          (project.id, datetime.combine(last_month_first, d_time.min).astimezone(pytz.utc).date())
+
+    assert 'uid' in aws.dynamo['monthly_report'][4]
+    assert aws.dynamo['monthly_report'][4]['uid']['S'] == key
+
+    key2 = '%s-%s' % \
+           (project.id2, datetime.combine(last_month_first, d_time.min).astimezone(pytz.utc).date())
+
+    assert 'uid' in aws.dynamo['monthly_report'][5]
+    assert aws.dynamo['monthly_report'][5]['uid']['S'] == key2
+
+
+def test_api_get_project_report(client: FlaskClient, aws, admin_login: dict):
+    this_month_first = datetime.utcnow().date().replace(day=1)
+    future_month = (this_month_first + timedelta(days=31)).replace(day=1)
+    last_month_first = (this_month_first - timedelta(days=1)).replace(day=1)
+    prior_to_last_month_first = (last_month_first - timedelta(days=1)).replace(day=1)
+    three_months_ago = (last_month_first - timedelta(days=1)).replace(day=1)
+
+    resp = client.get(endpoint('/reports/%s' % prior_to_last_month_first), headers=admin_login)
+    assert resp.status_code == 404
+
+    resp = client.get(endpoint('/reports/%s' % three_months_ago), headers=admin_login)
+    assert resp.status_code == 404
+
+    resp = client.get(endpoint('/reports/%s' % last_month_first), headers=admin_login)
+    assert resp.status_code == 200
+
+    resp = client.get(endpoint('/reports/%s' % this_month_first), headers=admin_login)
+    assert resp.status_code == 200
+
+    resp = client.get(endpoint('/reports/%s' % future_month), headers=admin_login)
+    assert resp.status_code == 404
+
+
+def test_user_email_sent():
+    assert len(resources.mails) == 3, 'it should have sent every user with access an email for each report generated'
+
+    assert len(resources.requests) == 3

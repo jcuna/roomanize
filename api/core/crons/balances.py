@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta, time as d_time
 from logging import Logger
-from time import time
 
 from dateutil.relativedelta import relativedelta
 import sqlalchemy
@@ -9,38 +8,35 @@ from sqlalchemy.sql import functions
 
 from config.constants import *
 from core import get_logger
+from core.utils import TimeLogger
 from dal import db
 from dal.models import Balance
 from app import init_app
 
 
 def balances_cron():
-    start = time()
 
     logger = get_logger('balances_cron')
     logger.info('')
     logger.info('Initiating daily balance creator')
 
     app = init_app('sys')
+    with TimeLogger(logger):
+        with app.app_context():
+            today = datetime.combine(datetime.utcnow().date(), d_time.max)
+            yesterday = today - timedelta(days=1)
 
-    with app.app_context():
-        today = datetime.combine(datetime.utcnow().date(), d_time.max)
-        yesterday = today - timedelta(days=1)
+            balances = Balance.query.options(joinedload('agreement'), joinedload('payments')).filter(
+                Balance.due_date <= yesterday,
+                Balance.id.in_(db.session.query(functions.max(Balance.id)).group_by(Balance.agreement_id).subquery())
+            )
+            try:
+                process_agreements(balances.all(), logger)
 
-        balances = Balance.query.options(joinedload('agreement'), joinedload('payments')).filter(
-            Balance.due_date <= yesterday,
-            Balance.id.in_(db.session.query(functions.max(Balance.id)).group_by(Balance.agreement_id).subquery())
-        )
-
-        try:
-            process_agreements(balances.all(), logger)
-
-        except (sqlalchemy.exc.OperationalError, Exception) as e:
-            logger.error('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
-            logger.error('View exception below')
-            logger.exception('Error: ')
-
-        logger.info('Took: ' + str(timedelta(seconds=(time() - start))))
+            except (sqlalchemy.exc.OperationalError, Exception) as e:
+                logger.error('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
+                logger.error('View exception below')
+                logger.exception('Error: ')
 
 
 def process_agreements(balances: list, logger: Logger):

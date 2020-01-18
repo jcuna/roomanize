@@ -43,6 +43,7 @@ class User(db.Model, ModelIter):
     roles = relationship('Role', secondary=user_roles, lazy='joined', backref=db.backref('users', lazy='dynamic'))
     tokens = relationship('UserToken', back_populates='user')
     attributes = relationship('UserAttributes', back_populates='user', lazy='joined', uselist=False)
+    notifications = relationship('Notification', back_populates='user')
     audit = relationship('Audit')
 
     def hash_password(self):
@@ -265,7 +266,7 @@ class Balance(db.Model, ModelIter):
     due_date = db.Column(db.DateTime(), nullable=False, index=True)
 
     agreement = relationship(RentalAgreement, uselist=False, backref='balances', cascade='all, delete')
-    payments = relationship('Payment', backref='balances', cascade='all, delete')
+    payments = relationship('Payment', backref='balance', cascade='all, delete')
 
 
 class PaymentType(db.Model, ModelIter):
@@ -333,5 +334,18 @@ class Audit(db.Model, ModelIter):
     headers = db.Column(db.Text(collation=configs.DB_COLLATION))
     payload = db.Column(db.Text(collation=configs.DB_COLLATION))
     response = db.Column(db.Text(collation=configs.DB_COLLATION))
+
+    user = relationship(User, uselist=False)
+
+
+class Notification(db.Model, ModelIter):
+    __tablename__ = 'notifications'
+
+    id = db.Column(BigInteger, primary_key=True)
+    user_id = db.Column(BigInteger, db.ForeignKey('users.id'), index=True, nullable=True)
+    date = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow)
+    read = db.Column(db.Boolean, nullable=False, index=True, server_default='0')
+    subject = db.Column(db.String(255, collation=configs.DB_COLLATION), nullable=False)
+    message = db.Column(db.Text(collation=configs.DB_COLLATION))
 
     user = relationship(User, uselist=False)

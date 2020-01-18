@@ -31,6 +31,11 @@ export const USER_TOKEN_FETCHED = 'USER_TOKEN_FETCHED';
 export const USER_TOKEN_FAILED = 'USER_TOKEN_FAILED';
 export const USER_TOKEN_CLEAR = 'USER_TOKEN_CLEAR';
 export const USER_WS_CHANGED = 'USER_WS_CHANGED';
+export const USER_WS_NOTIFICATION = 'USER_WS_NOTIFICATION';
+export const USER_NOTIFICATION_FETCHING = 'USER_NOTIFICATION_FETCHING';
+export const USER_NOTIFICATION_FETCHED = 'USER_NOTIFICATION_FETCHED';
+export const USER_NOTIFICATION_NEW = 'USER_NOTIFICATION_NEW';
+export const USER_NOTIFICATION_FETCH_FAILED = 'USER_NOTIFICATION_FETCH_FAILED';
 
 export const login = (email, password) => {
     return (dispatch) => {
@@ -243,6 +248,13 @@ export const listenUserChanges = (userId) =>
             dispatch(fetchUser());
         });
 
+export const listenUserNotifications = (userId) =>
+    (dispatch) => {
+        ws(USER_WS_NOTIFICATION, `/notifications/${ userId }`, resp => {
+            dispatch({ type: USER_NOTIFICATION_NEW, payload: resp });
+        });
+    };
+
 export const updatePassword = (passwordObj, success, failed) =>
     () => api({
         url: '/account/activate-pass',
@@ -286,3 +298,15 @@ export const requestPasswordChange = (email, resolve, reject) =>
             url: ENDPOINTS.USER_PASSWORDS_URL,
             method: 'PUT',
         }, { email }).then(resolve, reject);
+
+export const fetchUserNotifications = () =>
+    (dispatch) => {
+        dispatch({ type: USER_NOTIFICATION_FETCHING });
+        token.through().then(header => api({
+            url: '/notifications',
+            method: 'GET',
+            headers: header
+        })).then(resp => dispatch({ type: USER_NOTIFICATION_FETCHED, payload: resp }),
+            (err) => dispatch({ type: USER_NOTIFICATION_FETCH_FAILED, payload: err })
+        );
+    };

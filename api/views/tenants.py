@@ -76,6 +76,8 @@ class Tenants(API):
     @staticmethod
     def get_tenant(tenant_id):
 
+        project_id = request.user.attributes.preferences['default_project']
+
         tenant: Tenant = Tenant.query.filter_by(id=tenant_id).first()
         result = dict(tenant)
         result['history'] = []
@@ -84,7 +86,7 @@ class Tenants(API):
         agreements = RentalAgreement.query.options(
             joinedload('tenant_history'), joinedload('room')
         ).join('tenant_history').join('room')\
-            .filter(TenantHistory.tenant_id == tenant_id)\
+            .filter(RentalAgreement.project_id == project_id, TenantHistory.tenant_id == tenant_id)\
             .order_by(RentalAgreement.created_on.desc()).limit(10).all()
 
         agreement: RentalAgreement

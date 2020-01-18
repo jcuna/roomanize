@@ -42,3 +42,5 @@ AWS_REGION = 'us-east-1'
 # format is projectname-bucket
 AWS_FILE_MANAGER_BUCKET_NAME = '{FILE_MANAGER_BUCKET}'
 AWS_MONTHLY_REPORT_TABLE = '{MONTHLY_REPORT_TABLE}'
+
+DOMAIN_URL = '${Domain}'

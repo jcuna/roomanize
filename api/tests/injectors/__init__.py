@@ -1,16 +1,19 @@
 from boto3 import Session as _Session
+
 from tests import Mock
+from flask_mail import Message as _Message, Mail as _Mail
 
 resources = Mock()
 resources.buckets = {}
 resources.sqs_messages = {}
 resources.queries = []
 resources.dynamo = {}
+resources.mails = []
+resources.socketio = []
+resources.requests = []
 
 
 class Session(_Session):
-
-    table_response = []
 
     def __init__(self, **kwargs):
         self.parent = super(Session, self)
@@ -47,11 +50,13 @@ class Session(_Session):
             table.name = name
 
             def query(**kwargs):
-                _query = Mock()
-                table.query = _query
-                for key, value in kwargs.items():
-                    setattr(_query, key, value)
-                return {'Items': Session.table_response}
+                if table.name in resources.dynamo:
+                    if 'KeyConditionExpression' in kwargs:
+                        return {
+                            'Items': list(filter(lambda x: x[kwargs['KeyConditionExpression'].name]['S'] == kwargs[
+                                'KeyConditionExpression'].value, resources.dynamo[table.name]))
+                        }
+                return {'Items': []}
 
             table.query = query
             return table
@@ -91,10 +96,13 @@ class Session(_Session):
             resources.buckets[Bucket][log_type][batch].append({Key: Body})
 
         def dynamo_put_item(TableName, Item):
-            key = list(Item.keys())[0]
-            update_dict(resources.dynamo, TableName, key)
-            resources.dynamo[TableName][key] = Item[key]
-
+            if TableName not in resources.dynamo:
+                resources.dynamo[TableName] = []
+            if 'uid' in Item:
+                for i in range(len(resources.dynamo[TableName])):
+                    if resources.dynamo[TableName][i]['uid']['S'] == Item['uid']['S']:
+                        del resources.dynamo[TableName][i]
+            resources.dynamo[TableName].append(Item)
 
         if client.name == 's3':
             client.list_objects_v2 = s3list_objects_v2
@@ -122,6 +130,8 @@ def Key(name):
 
     def eq(value):
         obj.value = value
+        return obj
+
     obj.eq = eq
     return obj
 
@@ -170,3 +180,46 @@ class DB(Mock):
 
 def connect(**kwargs):
     return DB(**kwargs)
+
+
+class Mail(_Mail):
+    def __init__(self, app):
+        super().__init__(app)
+        resources.mails.clear()
+
+    def send(self, msg: _Message):
+        resources.mails.append(msg)
+
+
+Message = _Message
+
+
+def _request():
+    class MockRequest:
+
+        def Request(*args, **kwargs):
+            fly = {}
+            k = 1
+            for item in args:
+                fly.update({k: item})
+                k += 1
+            fly.update(kwargs)
+            resources.requests.append(fly)
+
+        def urlencode(self, dict_obj):
+            return str(dict_obj)
+
+        def getcode(self):
+            return 200
+
+        def info(self):
+            return {}
+
+        def urlopen(self, req):
+            return self
+
+    return MockRequest()
+
+
+request = _request()
+parse = request

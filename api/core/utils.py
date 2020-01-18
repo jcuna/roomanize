@@ -1,13 +1,17 @@
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
+from decimal import Decimal
 from pathlib import Path
+from time import time
+
 import boto3
 import pytz
 from flask import Flask
 import queue
 from logging.handlers import QueueHandler, QueueListener, TimedRotatingFileHandler
 from config import configs
+from dal.shared import ModelIter
 
 
 def configure_loggers(app: Flask):
@@ -63,6 +67,18 @@ def get_logger(name, non_blocking=False):
     return logger
 
 
+class TimeLogger:
+
+    def __init__(self, logger: logging.Logger):
+        self.logger = logger
+
+    def __enter__(self):
+        self.start = time()
+
+    def __exit__(self, *args):
+        self.logger.info('Took: %s' % timedelta(seconds=(time() - self.start)))
+
+
 def create_file_log_handler(name):
     handler = TimedRotatingFileHandler(log_path + name + '.log', when='midnight', backupCount=2)
     handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
@@ -96,3 +112,22 @@ log_path = app_path + '/log/'
 
 if not Path(log_path).is_dir():
     os.mkdir(log_path)
+
+
+def dynamo_db_encode(input_data):
+    if isinstance(input_data, ModelIter):
+        return dynamo_db_encode(dict(input_data))
+    elif isinstance(input_data, str):
+        return {'S': input_data}
+    elif isinstance(input, bool):
+        return {'BOOL': str(input_data)}
+    elif input_data is None:
+        return {'NULL': True}
+    elif isinstance(input_data, int) or isinstance(input_data, float):
+        return {'N': str(input_data)}
+    elif isinstance(input_data, Decimal):
+        return {'N': '{0:.2f}'.format(input_data)}
+    elif isinstance(input_data, dict):
+        return {'M': {key: dynamo_db_encode(val) for key, val in input_data.items()}}
+    elif isinstance(input_data, list):
+        return {'L': list(map(lambda x: dynamo_db_encode(x), input_data))}
