@@ -4,8 +4,8 @@
 
 import 'whatwg-fetch';
 import { API_PREFIX, API_VERSION } from '../constants';
-const fetchJsonp = require('fetch-jsonp');
-const urlEncode = require('query-string');
+import fetchJsonp from 'fetch-jsonp';
+import urlEncode from 'query-string';
 
 /**
  *

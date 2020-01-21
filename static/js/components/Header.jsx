@@ -32,6 +32,9 @@ class Header extends React.Component {
     componentDidUpdate({ clickedContent, appState }) {
         if (this.props.clickedContent !== clickedContent) {
             this.userMenus.forEach((el) => {
+                if (el.current === null) {
+                    return;
+                }
                 const child = el.current.querySelector('.dropdown-menu');
                 if (child.classList.contains(this.props.showMenuClass)) {
                     child.classList.remove(this.props.showMenuClass);
@@ -109,7 +112,7 @@ class Header extends React.Component {
                     { loggedIn &&
                         <ul className="super-menu">
                             { this.userMenu() }
-                            { this.getNotificationsMenu() }
+                            { this.getMessagesMenu() }
                             <li className="navPanelToggle" onClick={ this.toggleMenu }>
                                 <FontAwesome className='menu-grid' type="th"/>
                             </li>
@@ -124,19 +127,20 @@ class Header extends React.Component {
         );
     }
 
-    getNotificationsMenu() {
-        const { notifications: { list, total_unread }} = this.props.user;
+    getMessagesMenu() {
+        const { messages: { list, total_unread }} = this.props.user;
 
         let toggle = this.toggleUserMenu;
-        if (this.props.user.notifications.total_unread === 0) {
+        if (list.length === 0) {
             toggle = () => {};
         }
 
-        return <li className='notifications-menu' ref={ this.userMenus[1] } onClick={ toggle }>
+        return <li className='messages-menu' ref={ this.userMenus[1] } onClick={ toggle }>
             <div className='menu-grid'>
                 <FontAwesome type='bell'/>
-                { total_unread > 0 &&
-                <div className='notification-bubble'><span>{total_unread > 99 ? '99+' : total_unread}</span></div>}
+                { total_unread > 0 && <div className='messages-bubble'>
+                    <span>{total_unread > 99 ? '99+' : total_unread}</span>
+                </div>}
             </div>
             <div className={ this.props.initialClass }>
                 <ul>
@@ -144,11 +148,12 @@ class Header extends React.Component {
                         <li key={ b }>
                             <Link
                                 className={ (!a.read ? 'unread' : 'read') }
-                                to={ `${ENDPOINTS.NOTIFICATIONS_URL}/${a.id}` }>{ a.subject }
+                                to={ `${ENDPOINTS.MESSAGES_URL}/${a.id}` }>{ a.subject }
                             </Link>
                         </li>
                     ) }
                 </ul>
+                <Link className='read read-all' to={ ENDPOINTS.MESSAGES_URL }>Todos los mensajes</Link>
             </div>
         </li>;
     }

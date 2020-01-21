@@ -1,5 +1,6 @@
 import api from '../utils/api';
 import token from '../utils/token';
+import urlEncode from 'query-string';
 export const PROJECT_UPDATING = 'PROJECT_UPDATING';
 export const PROJECT_UPDATED = 'PROJECT_UPDATED';
 export const PROJECT_CREATING = 'PROJECT_CREATING';
@@ -13,6 +14,11 @@ export const PROJECT_EDITING_CLEAR = 'PROJECT_EDITING_CLEAR';
 export const TIME_INTERVALS_FETCHED = 'TIME_INTERVALS_FETCHED';
 export const PAYMENT_TYPES_FETCHED = 'PAYMENT_TYPES_FETCHED';
 export const PAYMENT_TYPES_FETCHED_FAILED = 'PAYMENT_TYPES_FETCHED_FAILED';
+export const REPORT_FETCHING = 'REPORT_FETCHING';
+export const REPORT_FETCHED = 'REPORT_FETCHED';
+export const REPORTS_FETCHED = 'REPORTS_FETCHED';
+export const REPORTS_FETCH_FAILED = 'REPORTS_FETCH_FAILED';
+export const REPORT_CLEAR = 'REPORTS_FETCH_FAILED';
 
 export const fetchProjects = (fail) =>
     (dispatch) => {
@@ -96,3 +102,45 @@ export const fetchPaymentTypes = (fail) =>
             })
         );
     };
+
+export const fetchReportByUid = (uid) =>
+    (dispatch) => {
+        dispatch({ type: REPORT_FETCHING });
+        token.through().then(header =>
+            api({
+                url: `/reports/${uid}`,
+                method: 'GET',
+                headers: header
+            }).then((resp) => {
+                dispatch({ type: REPORT_FETCHED, payload: resp.data });
+            }, err => {
+                dispatch({ type: REPORTS_FETCH_FAILED, payload: err });
+            })
+        );
+    };
+
+export const fetchReports = (project_id, uid) =>
+    (dispatch) => {
+        dispatch({ type: REPORT_FETCHING });
+        const q = { project_id };
+        if (uid) {
+            q.uid = uid;
+        }
+        token.through().then(header =>
+            api({
+                url: `/reports?${urlEncode.stringify(q)}`,
+                method: 'GET',
+                headers: header
+            }).then((resp) => {
+                dispatch({ type: REPORTS_FETCHED, payload: resp.data });
+            }, err => {
+                dispatch({ type: REPORTS_FETCH_FAILED, payload: err });
+            })
+        );
+    };
+
+export const setCurrentReport = (report) =>
+    () => ({ type: REPORT_FETCHED, payload: report });
+
+export const currentReportClear = () =>
+    () => ({ type: REPORT_CLEAR });

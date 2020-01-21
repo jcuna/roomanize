@@ -16,7 +16,7 @@ import {
 import { Link } from 'react-router-dom';
 import { hasAccess } from '../../utils/config';
 import { hideOverlay, showOverlay } from '../../actions/appActions';
-import { ACCESS_TYPES, ENDPOINTS, STATUS } from '../../constants';
+import { ACCESS_TYPES, ENDPOINTS, MAX_PROJECT_LENGTH, STATUS } from '../../constants';
 import Spinner from '../../utils/Spinner';
 import Breadcrumbs from '../../utils/Breadcrumbs';
 import { fetchUser } from '../../actions/userActions';
@@ -31,7 +31,7 @@ export default class Project extends React.Component {
         this.state = { button: { value: 'Agregar', disabled: true }, project: {}};
 
         if (typeof props.match.params.project_id !== 'undefined' && props.projects.status === STATUS.COMPLETE) {
-            const project = this.getEditingProject(props);
+            const project = Project.getEditingProject(props);
 
             if (project) {
                 props.dispatch(editProject(project));
@@ -53,7 +53,7 @@ export default class Project extends React.Component {
             Number(projects.editing.id) !== Number(this.props.match.params.project_id)) ||
             (typeof this.props.match.params.project_id !== 'undefined' && projects.status === STATUS.PENDING &&
             this.props.projects.status === STATUS.COMPLETE)) {
-            const project = this.getEditingProject(this.props);
+            const project = Project.getEditingProject(this.props);
 
             if (project) {
                 dispatch(editProject(project));
@@ -83,12 +83,12 @@ export default class Project extends React.Component {
                         { notEditing && this.getProjects() }
                     </section>
                 </div>
-                { (projects.projects.length < 10 && canCreate || !notEditing) && this.getForm(this.props) }
+                { (projects.projects.length < MAX_PROJECT_LENGTH && canCreate || !notEditing) && this.getForm(this.props) }
             </div>
         );
     }
 
-    getEditingProject({ projects, match }) {
+    static getEditingProject({ projects, match }) {
         return projects.projects.find(a => Number(a.id) === Number(match.params.project_id));
     }
 
@@ -153,6 +153,7 @@ export default class Project extends React.Component {
         let warn = null;
 
         const canEdit = hasAccess(ENDPOINTS.PROJECTS_URL, ACCESS_TYPES.WRITE);
+        const canSeeReports = hasAccess(ENDPOINTS.REPORTS_URL, ACCESS_TYPES.READ);
 
         if (projects.projects && projects.projects.length === 0) {
             return <div className="alert alert-warning">Aun no se ha creado ningun proyecto.</div>;
@@ -171,6 +172,7 @@ export default class Project extends React.Component {
                             <th>Contacto</th>
                             <th>Direccion</th>
                             <th>Editar</th>
+                            { canSeeReports && <th>Reportes</th> }
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -180,12 +182,15 @@ export default class Project extends React.Component {
                                 <th scope='row'>{ i + 1 }</th>
                                 <td>{ project.name }</td>
                                 <td>{ formatPhone(project.contact) }</td>
-                                <td>{ project.address }</td>
+                                <td className='horizontal-limit' style={ { maxWidth: '100px' } }>{ project.address }</td>
                                 <td>
                                     { canEdit && <Link to={ `${ENDPOINTS.PROJECTS_URL}/${project.id}` }>
                                         <FontAwesome type='edit'/></Link> ||
                                     <FontAwesome type='ban'/> }
                                 </td>
+                                { canSeeReports &&
+                                    <td><Link to={ `${ENDPOINTS.REPORTS_URL}/${project.id}` }><FontAwesome type='chart-line'/></Link></td>
+                                }
                                 <td>{ this.getCheckbox(project, canEdit, this.props.user) }</td>
                             </tr>
                         )}

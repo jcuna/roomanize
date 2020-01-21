@@ -8,6 +8,7 @@ export const OVERLAY_HIDE = 'OVERLAY_HIDE';
 export const CLICKED_CONTENT = 'CLICKED_CONTENT';
 export const ONLINE_STATUS = 'ONLINE_STATUS';
 export const APP_NEED_INSTALL = 'APP_NEED_INSTALL';
+export const TOGGLE_CONTAINER = 'TOGGLE_CONTAINER';
 
 export const toggleMobileMenu = (updatedValue) => {
     return function (dispatch) {
@@ -90,3 +91,6 @@ export const updateOnlineStatus = (isOffline) =>
 
 export const needInstall = () =>
     ({ type: APP_NEED_INSTALL });
+
+export const toggleContainer = () =>
+    (dispatch) => dispatch({ type: TOGGLE_CONTAINER });

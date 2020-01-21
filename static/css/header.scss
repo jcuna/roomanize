@@ -1,12 +1,17 @@
 @import "vars";
 
+.container {
+  #header {
+    margin-bottom: 10px;
+  }
+}
 #header {
   color: $semiWhite;
   font-size: 20px;
   height: $headerHeight;
-  margin-bottom: 10px;
-  -webkit-box-shadow: 0 0 40px 0 rgba(82,63,105,0.1);
-  box-shadow: 0 0 40px 0 rgba(82,63,105,0.1);
+  -webkit-box-shadow: 0 0 40px 0 rgba(82, 63, 105, 0.1);
+  box-shadow: 0 0 40px 0 rgba(82, 63, 105, 0.1);
+
   .logo {
     color: #ffffff;
     line-height: inherit;
@@ -16,6 +21,7 @@
     left: 0;
     top: 0;
     height: 100%;
+
     img {
       height: 100%;
     }
@@ -23,7 +29,7 @@
 
   .dropdown-menu {
     width: 120%;
-    float:none;
+    float: none;
     border: $fontMenus solid 1px;
     position: absolute;
     padding: 0;
@@ -35,42 +41,50 @@
     border-spacing: 0;
     max-height: 269px;
     overflow: scroll;
+
     ul {
       margin: 0;
       padding: 0;
       list-style: none;
+
       li:first-child {
         a {
           border-top: none;
           border-radius: 4px 4px 0 0;
         }
       }
-      li:last-child a {
-          border-radius: 0 0 4px 4px;
+    }
+
+    a.read {
+      background-color: $semiWhite;
+      color: $blue;
+      &:hover {
+        text-decoration: underline;
       }
-      li {
-        a.read {
-          background-color: $semiWhite;
-          color: $blue;
-        }
-        a {
-          &:hover {
-            opacity: 0.9;
-          }
-          border-top: 1px solid $borderColor;
-          background-color: $blue;
-          padding: 10px 8px;
-          display: block;
-          color: $semiWhite;
-          text-decoration: none;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
+    }
+
+    a {
+      &:hover {
+        opacity: 0.9;
       }
 
+      border-top: 1px solid $borderColor;
+      background-color: $blue;
+      padding: 10px 8px;
+      display: block;
+      color: $semiWhite;
+      text-decoration: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    a.read-all {
+      border-radius: 0 0 4px 4px;
+      text-align: center;
+      border-top: 4px double $borderColor;
     }
   }
+
   .dropdown-menu-display {
     display: block;
   }
@@ -87,6 +101,7 @@
       right: 0;
       margin: 0;
       padding: 0;
+
       > li {
         display: inline-block;
         vertical-align: top;
@@ -105,6 +120,7 @@
           text-transform: uppercase;
           height: 50px;
           width: 48px;
+
           &:hover {
             opacity: 0.8;
           }
@@ -126,6 +142,7 @@
       font-size: 46px;
       cursor: pointer;
       padding: 6px;
+
       &:hover {
         color: rgba(255, 255, 255, 0.6);
       }
@@ -148,7 +165,7 @@
   }
 }
 
-.notification-bubble {
+.messages-bubble {
   position: relative;
 
   > span {

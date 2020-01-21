@@ -26,7 +26,7 @@ export default class UserManager extends React.Component {
 
             props.projects.projects.forEach(project => {
                 if (typeof props.editingUser.attributes.access.projects !== 'undefined' &&
-                    props.editingUser.attributes.access.projects.includes(project.id)) {
+                    props.editingUser.attributes.access.projects.includes(String(project.id))) {
                     projectsCheckboxes[project.name] = true;
                     projects.push(project.id);
                 }

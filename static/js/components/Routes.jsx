@@ -25,6 +25,9 @@ import AgreementEdit from './agreements/AgreementEdit';
 import Receipts from './receipts/Receipts';
 import Expenses from './expenses/Expenses';
 import ExpenseForm from './expenses/ExpenseForm';
+import Messages from './messages/Messages';
+import Reports from './projects/reports/Reports';
+import Report from './projects/reports/Report';
 
 export default class Routes extends React.Component {
     render() {
@@ -88,6 +91,20 @@ export default class Routes extends React.Component {
 
                 <Route exact path={ ep.ACCOUNT_PROFILE } render={ props =>
                     this.getComponent(Profile, props, true) }
+                />
+
+                <Route exact path={ `${ep.MESSAGES_URL}/:message_id([0-9]+)?` } render={ props =>
+                    this.getComponent(Messages, props, true) }
+                />
+
+                <Route
+                    exact path={ `${ep.REPORTS_URL}/:project_id([0-9]+)?` }
+                    render={ (props) => this.getMiddleware(RequiresProject, Reports, ep.REPORTS_URL, props) }
+                />
+
+                <Route
+                    exact path={ `${ep.REPORTS_URL}/:project_id([0-9]+)/:report_uid([0-9-]+)` }
+                    render={ (props) => this.getMiddleware(RequiresProject, Report, ep.REPORTS_URL, props) }
                 />
 
                 <Route path={ ep.NOT_FOUND } component={ ErrorPage } type={ 404 }/>

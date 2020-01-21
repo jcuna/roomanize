@@ -5,14 +5,14 @@
 import json
 from datetime import datetime, time as d_time, timedelta
 from typing import List
-from urllib import request, parse
+from urllib import request
 
 import pytz
 
 from dateutil.relativedelta import relativedelta
 from flask import render_template
 from flask_mail import Message
-from sqlalchemy.orm import joinedload, defer, lazyload, sessionmaker, scoped_session
+from sqlalchemy.orm import joinedload, defer, lazyload
 
 from app import init_app
 from config.constants import MONTHS_SPANISH
@@ -46,11 +46,10 @@ def send_notifications(project: Project, from_date: datetime.date, to_date: date
 
     user: User
     for user in db.session.query(User).filter_by(deleted=False).join(UserAttributes).options(lazyload('*')).yield_per(50):
-        if 'projects' in user.attributes.access and \
-                (user.attributes.access['projects'] == '*' or project.id in user.attributes.access['projects']):
+        if user.is_subscribed_to_reports(project):
             body = render_template(
                 'email/monthly_statement_report.html',
-                url='http://hi.cm',
+                url='%s/proyectos/reportes/%s/%s-%s' % (app.config['DOMAIN_URL'], project.id, project.id, from_date),
                 name=user.first_name,
                 month=MONTHS_SPANISH[from_date.month],
                 start_date=from_date.strftime('%m-%d-%Y'),
@@ -70,7 +69,7 @@ def send_notifications(project: Project, from_date: datetime.date, to_date: date
             }
             headers = {'X-System-Token': app.config['SECRET_KEY'], 'Content-Type': 'application/json'}
             req = request.Request(
-                '%s/notifications' % app.config['DOMAIN_URL'],
+                '%s/messages' % app.config['BACKEND_URL'],
                 method='POST',
                 data=json.dumps(data).encode(),
                 headers=headers
@@ -81,7 +80,7 @@ def send_notifications(project: Project, from_date: datetime.date, to_date: date
                 logger.error(str(op.info()))
 
 
-def generate_report(first_date: datetime.date, project_id: int, tz: str):
+def generate_report(first_date: datetime.date, project_id: int):
     assert first_date.day == 1
 
     from_date = datetime.combine(first_date, d_time.min)
@@ -105,7 +104,7 @@ def generate_report(first_date: datetime.date, project_id: int, tz: str):
     rsrc = Resource()
     rsrc.insert_monthly_report({
         'uid': {'S': '%s-%s' % (project.id, from_date.date())},
-        'project_id': {'N': str(project.id)},
+        'project_id': {'S': str(project.id)},
         'project': {'S': project.name},
         'address': {'S': project.address},
         'report_day': {'S': str(datetime.utcnow().date())},
@@ -113,9 +112,9 @@ def generate_report(first_date: datetime.date, project_id: int, tz: str):
         'to_date': {'S': str(to_date.date())},
         'expenses': dynamo_db_encode(expenses),
         'income': dynamo_db_encode(income),
-        'total_income': {'N': '{0:.2f}'.format(total_income)},
-        'total_expenses': {'N': '{0:.2f}'.format(total_expenses)},
-        'revenue': {'N': '{0:.2f}'.format(total_income - total_expenses)},
+        'total_income': {'S': '{0:.2f}'.format(total_income)},
+        'total_expenses': {'S': '{0:.2f}'.format(total_expenses)},
+        'revenue': {'S': '{0:.2f}'.format(total_income - total_expenses)},
     })
     return project, from_date, to_date
 
@@ -135,7 +134,7 @@ def generate_all_reports():
             for project_id in db.session.query().add_columns(Project.id).all():
                 try:
                     logger.info('processing report for project id: %s' % project_id.id)
-                    project, from_date, to_date = generate_report(last_month_first, project_id.id, app.config['TIME_ZONE'])
+                    project, from_date, to_date = generate_report(last_month_first, project_id.id)
                     send_notifications(project, from_date, to_date, app, logger)
                 except Exception as e:
                     logger.exception(str(e))

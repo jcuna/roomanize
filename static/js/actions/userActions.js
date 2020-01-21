@@ -31,11 +31,13 @@ export const USER_TOKEN_FETCHED = 'USER_TOKEN_FETCHED';
 export const USER_TOKEN_FAILED = 'USER_TOKEN_FAILED';
 export const USER_TOKEN_CLEAR = 'USER_TOKEN_CLEAR';
 export const USER_WS_CHANGED = 'USER_WS_CHANGED';
-export const USER_WS_NOTIFICATION = 'USER_WS_NOTIFICATION';
-export const USER_NOTIFICATION_FETCHING = 'USER_NOTIFICATION_FETCHING';
-export const USER_NOTIFICATION_FETCHED = 'USER_NOTIFICATION_FETCHED';
-export const USER_NOTIFICATION_NEW = 'USER_NOTIFICATION_NEW';
-export const USER_NOTIFICATION_FETCH_FAILED = 'USER_NOTIFICATION_FETCH_FAILED';
+export const USER_WS_MESSAGE = 'USER_WS_MESSAGE';
+export const USER_MESSAGES_FETCHING = 'USER_MESSAGES_FETCHING';
+export const USER_MESSAGES_FETCHED = 'USER_MESSAGES_FETCHED';
+export const USER_MESSAGES_NEW = 'USER_MESSAGES_NEW';
+export const USER_MESSAGES_FETCH_FAILED = 'USER_MESSAGES_FETCH_FAILED';
+export const USER_MESSAGES_MARKED_READ = 'USER_MESSAGES_MARKED_READ';
+export const USER_MESSAGES_MARKED_READ_FAILED = 'USER_MESSAGES_MARKED_READ_FAILED';
 
 export const login = (email, password) => {
     return (dispatch) => {
@@ -250,8 +252,8 @@ export const listenUserChanges = (userId) =>
 
 export const listenUserNotifications = (userId) =>
     (dispatch) => {
-        ws(USER_WS_NOTIFICATION, `/notifications/${ userId }`, resp => {
-            dispatch({ type: USER_NOTIFICATION_NEW, payload: resp });
+        ws(USER_WS_MESSAGE, `/messages/${ userId }`, resp => {
+            dispatch({ type: USER_MESSAGES_NEW, payload: resp });
         });
     };
 
@@ -299,14 +301,30 @@ export const requestPasswordChange = (email, resolve, reject) =>
             method: 'PUT',
         }, { email }).then(resolve, reject);
 
-export const fetchUserNotifications = () =>
+export const fetchUserMessages = () =>
     (dispatch) => {
-        dispatch({ type: USER_NOTIFICATION_FETCHING });
+        dispatch({ type: USER_MESSAGES_FETCHING });
         token.through().then(header => api({
-            url: '/notifications',
+            url: '/messages',
             method: 'GET',
             headers: header
-        })).then(resp => dispatch({ type: USER_NOTIFICATION_FETCHED, payload: resp }),
-            (err) => dispatch({ type: USER_NOTIFICATION_FETCH_FAILED, payload: err })
+        })).then(resp => dispatch({ type: USER_MESSAGES_FETCHED, payload: resp }),
+            (err) => dispatch({ type: USER_MESSAGES_FETCH_FAILED, payload: err })
         );
+    };
+
+export const markMessageRead = (message_id, resolve, reject) =>
+    (dispatch) => {
+        dispatch({ type: USER_MESSAGES_FETCHING });
+        token.through().then(header => api({
+            url: `/messages/${message_id}`,
+            method: 'PUT',
+            headers: header
+        })).then(() => {
+            dispatch({ type: USER_MESSAGES_MARKED_READ, payload: message_id });
+            resolve && resolve();
+        }, (err) => {
+            dispatch({ type: USER_MESSAGES_MARKED_READ_FAILED, payload: err });
+            reject && reject(err);
+        });
     };

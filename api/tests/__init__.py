@@ -27,6 +27,7 @@ AWS_REGION = 'us-east-1'
 AWS_FILE_MANAGER_BUCKET_NAME = 'uploads'
 AWS_MONTHLY_REPORT_TABLE = 'monthly_report'
 DOMAIN_URL = 'http://localhost:9001'
+BACKEND_URL = 'http://localhost:9001'
 """ % (os.path.dirname(os.environ['APP_SETTINGS_PATH']) + '/testdb', secret_key)
 
 

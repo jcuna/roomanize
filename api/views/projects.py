@@ -124,8 +124,8 @@ class Rooms(API):
             rooms = Room.query.filter((Room.name.like('%' + q + '%'))).filter_by(project_id=project_id).all()
 
         else:
-            sql_query = Room.query.options(joinedload('rental_agreement').load_only(RentalAgreement.id))\
-                .filter_by(project_id=project_id)\
+            sql_query = Room.query.options(joinedload('rental_agreement').load_only(RentalAgreement.id)) \
+                .filter_by(project_id=project_id) \
                 .outerjoin(RentalAgreement, RentalAgreement.room_id == Room.id)
 
             order_by = request.args.get('orderBy') if 'orderBy' in request.args else 'id'
@@ -202,7 +202,6 @@ class RoomsHistory(API):
     @token_required
     @access_required
     def get(self, room_id):
-
         page = request.args.get('page', 1)
 
         query = db.session.query(RentalAgreement).options(
@@ -234,18 +233,58 @@ class RoomsHistory(API):
             'interval': row.interval.interval
         }
 
-class Report(API):
+
+class Reports(API):
 
     @token_required
     @access_required
-    def get(self, date):
-        project_id = request.user.attributes.preferences['default_project']
-        y, m, d = date.split('-')
-        date = datetime(year=int(y), month=int(m), day=int(d)).replace(day=1).date()
+    def get(self, report_uid = None):
+
         r = Resource()
-        resp = r.query(r.get_monthly_reports_table(), 'uid', '%s-%s' % (project_id, date))
+
+        if report_uid is not None:
+            return self.get_by_uid(r, report_uid)
+
+        project_id = request.args.get('project_id')
+
+        if project_id is not None and \
+                (request.user.attributes.access['projects'] != '*' and
+                 str(project_id) not in request.user.attributes.access['projects']):
+            raise HttpException('No access to project', 401)
+
+
+        if project_id is None:
+            project_id = request.user.attributes.preferences['default_project']
+            if project_id is None:
+                raise HttpException('No default project')
+
+        start_key = None
+
+        start_key_uid = request.args.get('uid')
+        start_key_project_id = request.args.get('project_id')
+        if start_key_project_id is not None and start_key_uid is not None:
+            start_key = {'uid': start_key_uid, 'project_id': start_key_project_id}
+
+        resp = r.scan(
+            r.get_monthly_reports_table(),
+            'project_id', project_id,
+            start_key=start_key
+        )
+
+        if len(resp['Items']) > 0:
+            return {'items': resp['Items'], 'end_key': resp['LastEvaluatedKey'] if 'LastEvaluatedKey' in resp else {}}
+
+        return Result.error('Not Found', 404)
+
+    @staticmethod
+    def get_by_uid(resource, report_uid):
+        project_id = report_uid.split('-')[0]
+        if request.user.attributes.access['projects'] != '*' and \
+                project_id not in request.user.attributes.access['projects']:
+            raise HttpException('No access to project', 401)
+
+        resp = resource.query(resource.get_monthly_reports_table(), 'uid', report_uid)
 
         if len(resp['Items']) > 0:
             return resp['Items'][0]
-
         return Result.error('Not Found', 404)

@@ -21,7 +21,7 @@ def test_report_format(client: FlaskClient, aws, admin_login):
     assert resp.status_code == 200
     project_id = resp.json['id']
 
-    generate_report(from_date, project_id, 'America/New_York')
+    generate_report(from_date, project_id)
 
     assert 'monthly_report' in aws.dynamo
     assert len(aws.dynamo['monthly_report']) == 1
@@ -183,7 +183,7 @@ def test_report_generated(aws):
     from core.crons.monthly_report import generate_report
 
     from_date = datetime.utcnow().astimezone(pytz.timezone('America/New_York')).date().replace(day=1)
-    generate_report(from_date, project.id, 'America/New_York')
+    generate_report(from_date, project.id)
 
     # if from_date is the same, then report gets overwritten
     assert len(aws.dynamo['monthly_report']) == 2
@@ -199,12 +199,12 @@ def test_report_generated(aws):
 
     assert aws.dynamo['monthly_report'][1]['uid']['S'] == key
     assert len(aws.dynamo['monthly_report'][1]['expenses']['L']) == 3
-    assert aws.dynamo['monthly_report'][1]['total_expenses']['N'] == '2720.00'
+    assert aws.dynamo['monthly_report'][1]['total_expenses']['S'] == '2720.00'
 
     assert len(aws.dynamo['monthly_report'][1]['income']['L']) == 6
-    assert aws.dynamo['monthly_report'][1]['total_income']['N'] == '8025.25'
+    assert aws.dynamo['monthly_report'][1]['total_income']['S'] == '8025.25'
 
-    assert aws.dynamo['monthly_report'][1]['revenue']['N'] == '5305.25'
+    assert aws.dynamo['monthly_report'][1]['revenue']['S'] == '5305.25'
 
 
 def test_seed_second_project(client: FlaskClient, admin_login):
@@ -271,7 +271,7 @@ def test_project_2_monthly_report(aws):
     from core.crons.monthly_report import generate_report
 
     from_date = datetime.utcnow().astimezone(pytz.timezone('America/New_York')).date().replace(day=1)
-    generate_report(from_date, project.id2, 'America/New_York')
+    generate_report(from_date, project.id2)
 
     # if from_date is the same, then report gets overwritten
     assert len(aws.dynamo['monthly_report']) == 3
@@ -288,12 +288,12 @@ def test_project_2_monthly_report(aws):
     assert 'revenue' in aws.dynamo['monthly_report'][2]
 
     assert len(aws.dynamo['monthly_report'][2]['expenses']['L']) == 1
-    assert aws.dynamo['monthly_report'][2]['total_expenses']['N'] == '600.00'
+    assert aws.dynamo['monthly_report'][2]['total_expenses']['S'] == '600.00'
 
     assert len(aws.dynamo['monthly_report'][2]['income']['L']) == 1
-    assert aws.dynamo['monthly_report'][2]['total_income']['N'] == '4000.00'
+    assert aws.dynamo['monthly_report'][2]['total_income']['S'] == '4000.00'
 
-    assert aws.dynamo['monthly_report'][2]['revenue']['N'] == '3400.00'
+    assert aws.dynamo['monthly_report'][2]['revenue']['S'] == '3400.00'
 
     assert 'balance' in aws.dynamo['monthly_report'][2]['income']['L'][0]['M']
     assert 'agreement' in aws.dynamo['monthly_report'][2]['income']['L'][0]['M']['balance']['M']
@@ -331,19 +331,19 @@ def test_api_get_project_report(client: FlaskClient, aws, admin_login: dict):
     prior_to_last_month_first = (last_month_first - timedelta(days=1)).replace(day=1)
     three_months_ago = (last_month_first - timedelta(days=1)).replace(day=1)
 
-    resp = client.get(endpoint('/reports/%s' % prior_to_last_month_first), headers=admin_login)
+    resp = client.get(endpoint('/reports/%s-%s' % (project.id, prior_to_last_month_first)), headers=admin_login)
     assert resp.status_code == 404
 
-    resp = client.get(endpoint('/reports/%s' % three_months_ago), headers=admin_login)
+    resp = client.get(endpoint('/reports/%s-%s' % (project.id, three_months_ago)), headers=admin_login)
     assert resp.status_code == 404
 
-    resp = client.get(endpoint('/reports/%s' % last_month_first), headers=admin_login)
+    resp = client.get(endpoint('/reports/%s-%s' % (project.id, last_month_first)), headers=admin_login)
     assert resp.status_code == 200
 
-    resp = client.get(endpoint('/reports/%s' % this_month_first), headers=admin_login)
+    resp = client.get(endpoint('/reports/%s-%s' % (project.id, this_month_first)), headers=admin_login)
     assert resp.status_code == 200
 
-    resp = client.get(endpoint('/reports/%s' % future_month), headers=admin_login)
+    resp = client.get(endpoint('/reports/%s-%s' % (project.id, future_month)), headers=admin_login)
     assert resp.status_code == 404
 
 
@@ -351,3 +351,11 @@ def test_user_email_sent():
     assert len(resources.mails) == 3, 'it should have sent every user with access an email for each report generated'
 
     assert len(resources.requests) == 3
+
+def test_get_reports_by_projects(client: FlaskClient, admin_login):
+
+    resp = client.get(endpoint('/reports?project_id=%s' % project.id), headers=admin_login)
+    assert resp.status_code == 200
+
+    assert 'items' in resp.json
+    assert len(resp.json['items']) == 2

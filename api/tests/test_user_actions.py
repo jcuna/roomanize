@@ -152,11 +152,11 @@ def test_user_changes_password(client: FlaskClient):
     assert login_resp.status_code == 200
 
 
-def test_sending_notifications(client: FlaskClient):
-    from dal.models import Notification
+def test_sending_messages(client: FlaskClient):
+    from dal.models import UserMessage
 
     resp = client.post(
-        endpoint('/notifications'),
+        endpoint('/messages'),
         json={
             'user_id': user.id,
             'subject': 'testing a subject',
@@ -168,7 +168,7 @@ def test_sending_notifications(client: FlaskClient):
     assert resp.status_code == 401
 
     resp = client.post(
-        endpoint('/notifications'),
+        endpoint('/messages'),
         json={
             'user_id': user.id,
             'subject': 'testing a subject',
@@ -179,25 +179,25 @@ def test_sending_notifications(client: FlaskClient):
 
     assert resp.status_code == 200
 
-    notifications = Notification.query.all()
+    messages = UserMessage.query.all()
 
-    assert len(notifications) == 1
+    assert len(messages) == 1
 
-    assert notifications[0].user_id == user.id
-    assert notifications[0].read == False
-    assert notifications[0].subject == 'testing a subject'
-    assert notifications[0].message == '<h1>Hello test</h1><p>This is the body</p>'
+    assert messages[0].user_id == user.id
+    assert messages[0].read == False
+    assert messages[0].subject == 'testing a subject'
+    assert messages[0].message == '<h1>Hello test</h1><p>This is the body</p>'
 
 
-def test_get_user_notifications(client: FlaskClient, admin_login):
-    from core.notifications import send_notification
+def test_get_user_messages(client: FlaskClient, admin_login):
+    from core.messages import send_message
     from dal.models import User
 
     admin = User.query.filter_by(email='testuser@testing.org').first()
 
-    send_notification(admin.id, 'testing a subject', '<h1>Hello test</h1><p>This is the body</p>')
+    send_message(admin.id, 'testing a subject', '<h1>Hello test</h1><p>This is the body</p>')
 
-    resp = client.get(endpoint('/notifications'), headers=admin_login)
+    resp = client.get(endpoint('/messages'), headers=admin_login)
     assert resp.status_code == 200
     assert 'list' in resp.json
     assert len(resp.json['list']) == 1
@@ -206,3 +206,18 @@ def test_get_user_notifications(client: FlaskClient, admin_login):
     assert 'message' in resp.json['list'][0]
     assert 'read' in resp.json['list'][0]
     assert 'date' in resp.json['list'][0]
+    assert resp.json['list'][0]['read'] == False
+
+
+def test_mark_notification_read(client: FlaskClient, admin_login):
+
+    resp = client.get(endpoint('/messages'), headers=admin_login)
+    _id = resp.json['list'][0]['id']
+
+    resp = client.put(endpoint('/messages/%s' % _id))
+
+    assert resp.status_code == 200
+
+    resp = client.get(endpoint('/messages'), headers=admin_login)
+    assert 'read' in resp.json['list'][0]
+    assert resp.json['list'][0]['read'] == True

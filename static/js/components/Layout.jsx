@@ -23,12 +23,16 @@ export default class Layout extends React.Component {
         return (
             <Route render = { props => {
                 props = { ...this.props, ...props };
+                let className = 'content-area';
+                if (props.app.useContainer) {
+                    className += ' container';
+                }
                 return (
                     <div>
                         <Menu { ...props }/>
                         <div className={ this.getClassName() }>
                             <Header { ...props }/>
-                            <div className='content-area container'>
+                            <div className={ className }>
                                 <FlashMessages { ...this.props }/>
                                 <Switch>
                                     <Route path={ ENDPOINTS.ACCOUNT_LOGIN } render={ (props2) =>
@@ -52,7 +56,7 @@ export default class Layout extends React.Component {
                                     </RequiresLogin>
                                 </Switch>
                             </div>
-                            <Footer/>
+                            { props.app.useContainer && <Footer/> }
                         </div>
                         <Overlay { ...props }/>
                     </div>
@@ -71,6 +75,7 @@ export default class Layout extends React.Component {
     }
 
     static propTypes = {
-        showMobileMenu: PropTypes.bool
+        showMobileMenu: PropTypes.bool,
+        app: PropTypes.object,
     };
 }

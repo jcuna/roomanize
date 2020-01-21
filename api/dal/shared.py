@@ -94,17 +94,7 @@ def access_required(f):
         if not request.user:
             return Result.error('Invalid user', 401)
 
-        has_access = False
-
-        for role in request.user.roles:
-            for name, grant in role.get_permissions.items():
-                if name == permissions[request.endpoint]:
-                    for access in grant:
-                        if access == access_map[request.method]:
-                            has_access = True
-                            break
-
-        if not has_access:
+        if not has_access(request.user.roles, request.endpoint, request.method, permissions):
             return Result.error('Access denied', 403)
 
         return f(*args, **kwargs)
@@ -119,6 +109,18 @@ access_map = {
     'DELETE': 'delete'
 }
 
+def has_access(roles, endpoint, method, permissions):
+    access = False
+
+    for role in roles:
+        for name, grant in role.get_permissions.items():
+            if name == permissions[endpoint]:
+                for access in grant:
+                    if access == access_map[method]:
+                        access = True
+                        break
+
+    return access
 
 class Paginator:
     per_page = 20

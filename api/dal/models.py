@@ -1,16 +1,18 @@
+from datetime import datetime, timedelta
 import json
+
 from sqlalchemy import UniqueConstraint, and_, Sequence
 from sqlalchemy.ext.mutable import MutableList
+from sqlalchemy.orm import relationship
+from sqlalchemy.dialects import sqlite
+import jwt
+from werkzeug.security import generate_password_hash, check_password_hash
+
 from config import random_token
 from dal import db
-from sqlalchemy.orm import relationship
-from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime, timedelta
-import jwt
 from config.routes import default_access
-from dal.shared import ModelIter
+from dal.shared import ModelIter, has_access
 from config import configs
-from sqlalchemy.dialects import sqlite
 
 # sqlite is used for testing and it does not auto increment Big Int since there's no support
 BigInteger = db.BigInteger().with_variant(sqlite.INTEGER(), 'sqlite')
@@ -28,6 +30,17 @@ user_roles = db.Table(
     db.Column('role_id', BigInteger, db.ForeignKey('roles.id'), index=True)
 )
 
+class Project(db.Model, ModelIter):
+    __tablename__ = 'projects'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(30, collation=configs.DB_COLLATION), unique=True)
+    address = db.Column(db.Text(collation=configs.DB_COLLATION))
+    contact = db.Column(db.String(10, collation=configs.DB_COLLATION))
+    deleted = db.Column(db.DateTime(), nullable=True, index=True)
+
+    rooms = relationship('Room', back_populates='project')
+
 
 class User(db.Model, ModelIter):
     __tablename__ = 'users'
@@ -43,7 +56,7 @@ class User(db.Model, ModelIter):
     roles = relationship('Role', secondary=user_roles, lazy='joined', backref=db.backref('users', lazy='dynamic'))
     tokens = relationship('UserToken', back_populates='user')
     attributes = relationship('UserAttributes', back_populates='user', lazy='joined', uselist=False)
-    notifications = relationship('Notification', back_populates='user')
+    messages = relationship('UserMessage', back_populates='user')
     audit = relationship('Audit')
 
     def hash_password(self):
@@ -61,6 +74,11 @@ class User(db.Model, ModelIter):
                 algorithm='HS256').decode('utf-8'),
             'expires': round(exp.timestamp())
         }
+
+    def is_subscribed_to_reports(self, project: Project):
+        return 'projects' in self.attributes.access and \
+               (self.attributes.access['projects'] == '*' or str(project.id) in self.attributes.access['projects']) \
+               and has_access(self.roles, 'reports_url', 'GET', {'reports_url': 'views.projects.Reports'})
 
 
 class UserAttributes(db.Model, ModelIter):
@@ -141,18 +159,6 @@ class Role(db.Model, ModelIter):
                 combined_permissions.update({key: userGrants})
 
         return combined_permissions
-
-
-class Project(db.Model, ModelIter):
-    __tablename__ = 'projects'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(30, collation=configs.DB_COLLATION), unique=True)
-    address = db.Column(db.Text(collation=configs.DB_COLLATION))
-    contact = db.Column(db.String(10, collation=configs.DB_COLLATION))
-    deleted = db.Column(db.DateTime(), nullable=True, index=True)
-
-    rooms = relationship('Room', back_populates='project')
 
 
 class TimeInterval(db.Model, ModelIter):
@@ -338,8 +344,8 @@ class Audit(db.Model, ModelIter):
     user = relationship(User, uselist=False)
 
 
-class Notification(db.Model, ModelIter):
-    __tablename__ = 'notifications'
+class UserMessage(db.Model, ModelIter):
+    __tablename__ = 'user_messages'
 
     id = db.Column(BigInteger, primary_key=True)
     user_id = db.Column(BigInteger, db.ForeignKey('users.id'), index=True, nullable=True)

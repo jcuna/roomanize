@@ -128,7 +128,7 @@ def create_dynamo_db_table():
             },
             {
                 'AttributeName': 'project_id',
-                'AttributeType': 'N'
+                'AttributeType': 'S'
             },
         ],
         ProvisionedThroughput={

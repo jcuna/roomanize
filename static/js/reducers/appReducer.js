@@ -11,7 +11,7 @@ import {
     OVERLAY_SHOW,
     OVERLAY_HIDE,
     CLICKED_CONTENT,
-    ONLINE_STATUS, APP_NEED_INSTALL,
+    ONLINE_STATUS, APP_NEED_INSTALL, TOGGLE_CONTAINER,
 } from '../actions/appActions';
 
 export default function appReducer(state = {
@@ -21,6 +21,7 @@ export default function appReducer(state = {
     notifications: [],
     landingPage: '',
     clickedContent: false,
+    useContainer: true,
     overlay: {
         menuIsOn: false,
         display: false,
@@ -79,6 +80,8 @@ export default function appReducer(state = {
                 };
             }
             return { ...state };
+        case TOGGLE_CONTAINER:
+            return { ...state, useContainer: !state.useContainer };
         default:
             return state;
     }

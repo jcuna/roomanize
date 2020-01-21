@@ -1,4 +1,4 @@
-from boto3.dynamodb.conditions import Key
+from boto3.dynamodb.conditions import Key, Attr
 
 from core.AWS.base import Base
 from config import configs
@@ -16,8 +16,18 @@ class Resource(Base):
     @staticmethod
     def query(table, key, value):
         return table.query(
-            KeyConditionExpression=Key(key).eq(str(value))
+            KeyConditionExpression=Key(key).eq(str(value)),
         )
+
+    @staticmethod
+    def scan(table, key, value, limit=20, start_key=None):
+        args = {
+            'FilterExpression': Attr(key).eq(str(value)),
+            'Limit': limit,
+        }
+        if start_key is not None:
+            args['ExclusiveStartKey'] = start_key
+        return table.scan(**args)
 
     def select_monthly_report(self, value):
         return self.query(self.get_monthly_reports_table(), 'date', value)

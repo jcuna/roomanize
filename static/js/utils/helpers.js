@@ -56,21 +56,32 @@ export const toDatePicker = (date) => {
     return date.getFullYear() + '-' + ('0' + month.slice(-2)) + '-' + (('0' + date.getDate()).slice(-2));
 };
 
+export const formatAMPM = (date) => {
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours %= 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? '0' + minutes : minutes;
+    return hours + ':' + minutes + ' ' + ampm;
+};
+
 /**
  * This formats dates only. time is depreciated.
  * @param {Date} date
+ * @param {boolean} showTime
  * @returns {string}
  */
-export const formatDateEs = date => {
+export const formatDateEs = (date, showTime = false) => {
     toLocalTimezone(date);
-    date = new Date(date.toDateString());
+    const to_date_format = new Date(date.toDateString());
     const today = new Date(new Date().toDateString());
-    const delta = Math.round(Number(today - date) / 1000);
+    const delta = Math.round(Number(today - to_date_format) / 1000);
     const day = 60 * 60 * 24; // in seconds
 
     switch (delta) {
         case 0:
-            return 'Hoy';
+            return showTime ? formatAMPM(date) : 'Hoy';
         case -day:
             return 'Mañana';
         case -(day * 2):
@@ -80,7 +91,7 @@ export const formatDateEs = date => {
         case day * 2:
             return 'Antes De Ayer';
         default:
-            return friendlyDateEs(date);
+            return friendlyDateEs(to_date_format);
     }
 };
 

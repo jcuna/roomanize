@@ -6,10 +6,10 @@ from flask import session, json, current_app, render_template, url_for, request
 from sqlalchemy.orm import joinedload
 from core import Cache, API
 from core.middleware import HttpException
-from core.notifications import send_notification
+from core.messages import send_message
 from core.router import permissions
 from dal.shared import get_fillable, token_required, access_required, Paginator, system_call
-from dal.models import User, db, Role, UserToken, UserAttributes, Notification
+from dal.models import User, db, Role, UserToken, UserAttributes, UserMessage
 from flask_mail import Message
 from views import Result
 
@@ -337,13 +337,13 @@ def send_user_token_email(user: User, mail_subject, template):
     current_app.mail(msg)
 
 
-class Notifications(API):
+class Messages(API):
     @token_required
     def get(self):
-        total_unread = Notification.query.filter_by(user_id=request.user.id, read=False).count()
+        total_unread = UserMessage.query.filter_by(user_id=request.user.id, read=False).count()
         page = request.args.get('page', 1)
         paginator = Paginator(
-            Notification.query.filter_by(user_id=request.user.id),
+            UserMessage.query.filter_by(user_id=request.user.id),
             int(page),
             request.args.get('orderBy', 'date'),
             request.args.get('orderDir', 'desc')
@@ -356,8 +356,15 @@ class Notifications(API):
 
     @system_call
     def post(self):
-        send_notification(**request.json)
+        send_message(**request.json)
         return Result.success()
+
+    def put(self, message_id):
+        message = UserMessage.query.filter_by(id=message_id).first()
+        message.read = True
+        db.session.commit()
+        return Result.success()
+
 
 class Audit(API):
 

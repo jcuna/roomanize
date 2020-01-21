@@ -124,9 +124,9 @@ def dynamo_db_encode(input_data):
     elif input_data is None:
         return {'NULL': True}
     elif isinstance(input_data, int) or isinstance(input_data, float):
-        return {'N': str(input_data)}
+        return {'S': str(input_data)}
     elif isinstance(input_data, Decimal):
-        return {'N': '{0:.2f}'.format(input_data)}
+        return {'S': '{0:.2f}'.format(input_data)}
     elif isinstance(input_data, dict):
         return {'M': {key: dynamo_db_encode(val) for key, val in input_data.items()}}
     elif isinstance(input_data, list):

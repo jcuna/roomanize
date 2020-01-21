@@ -58,7 +58,17 @@ class Session(_Session):
                         }
                 return {'Items': []}
 
+            def scan(**kwargs):
+                if table.name in resources.dynamo:
+                    if 'FilterExpression' in kwargs:
+                        return {
+                            'Items': list(filter(lambda x: x[kwargs['FilterExpression'].name]['S'] == kwargs[
+                                'FilterExpression'].value, resources.dynamo[table.name]))
+                        }
+                return {'Items': []}
+
             table.query = query
+            table.scan = scan
             return table
 
         resource.get_queue_by_name = queue
@@ -135,6 +145,7 @@ def Key(name):
     obj.eq = eq
     return obj
 
+Attr = Key
 
 class QueueMessage(Mock):
     attributes = {'ApproximateReceiveCount': 0}

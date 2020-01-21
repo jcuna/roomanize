@@ -1,6 +1,14 @@
 @import 'vars';
 @import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700");
 
+html, body {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently */
+}
 html {
   -webkit-font-smoothing: subpixel-antialiased;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, ".SFNSText-Regular", sans-serif;
@@ -8,8 +16,9 @@ html {
   position: relative;
   background-color: $backgroundColor;
   body {
+    height: 100%;
     background-color: $backgroundColor;
-    margin-bottom: $height-footer + $headerHeight + 36;
+    //margin-bottom: $height-footer + $headerHeight + 36;
     overflow-x: hidden;
     .footer {
       width: 100%;
@@ -25,7 +34,6 @@ html {
     -webkit-transition: all 1s ease;
     -moz-transition: all 1s ease;
     -o-transition: all 1s ease;
-    -ms-transition: all 1s ease;
     transition: all 1s ease;
     & .alert {
       & span {
@@ -40,43 +48,6 @@ html {
 
     & .content-area {
       min-height: 100%;
-
-      .widget {
-        height: 100%;
-        padding: 0;
-        margin: 0;
-        display: -webkit-box;
-        display: -moz-box;
-        display: -ms-flexbox;
-        display: -webkit-flex;
-        display: flex;
-        justify-content: center;
-        flex-direction: row;
-
-        @media screen and (max-width: 1040px) {
-          flex-direction: column;
-        }
-
-        .widget-child {
-          width: 100%;
-          -webkit-box-shadow: 0 0 13px 0 rgba(82, 63, 105, 0.05);
-          box-shadow: 0 0 13px 0 rgba(82, 63, 105, 0.05);
-          background-color: #FFFFFF;
-          margin: 0 4px 20px;
-          border-radius: 4px;
-          padding: 8px;
-
-          h5, h4, h3, h2, h1 {
-            text-align: center;
-            color: $clearBlue;
-          }
-        }
-
-        .transparent {
-          background-color: transparent;
-          padding: 0;
-        }
-      }
     }
 
     form {
@@ -569,4 +540,52 @@ a {
   position: absolute;
   z-index: 1000;
   bottom: 0;
+}
+
+
+.widget {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+
+  @media screen and (max-width: 1040px) {
+    flex-direction: column;
+  }
+
+  .widget-child {
+    width: 100%;
+    -webkit-box-shadow: 0 0 13px 0 rgba(82, 63, 105, 0.05);
+    box-shadow: 0 0 13px 0 rgba(82, 63, 105, 0.05);
+    background-color: #FFFFFF;
+    margin: 0 4px 20px;
+    border-radius: 4px;
+    padding: 8px;
+
+    h5, h4, h3, h2, h1 {
+      text-align: center;
+      color: $clearBlue;
+    }
+  }
+
+  .transparent {
+    background-color: transparent;
+    padding: 0;
+  }
+}
+.column {
+  flex-direction: column;
+}
+
+.horizontal-limit {
+  word-spacing: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

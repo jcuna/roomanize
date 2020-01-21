@@ -21,7 +21,7 @@ import {
     USERS_SEARCHING,
     USERS_SEARCHED,
     USER_TOKEN_FAILED,
-    USER_NOTIFICATION_FETCHING, USER_NOTIFICATION_FETCHED, USER_NOTIFICATION_NEW,
+    USER_MESSAGES_FETCHING, USER_MESSAGES_FETCHED, USER_MESSAGES_NEW, USER_MESSAGES_MARKED_READ,
 } from '../actions/userActions';
 import { STATUS } from '../constants';
 
@@ -46,7 +46,7 @@ const initialData = {
             preferences: {},
             access: {}
         },
-        notifications: {
+        messages: {
             status: STATUS.pending,
             list: [],
             page: 1,
@@ -144,23 +144,39 @@ export default function userReducer(state = initialData, action) {
             return { ...state, user: { ...state.user, list: { ...state.user.list, searching: true }}};
         case USERS_SEARCHED:
             return { ...state, user: { ...state.user, list: { ...state.user.list, searching: false }}};
-        case USER_NOTIFICATION_FETCHING:
+        case USER_MESSAGES_FETCHING:
             return {
                 ...state,
-                user: { ...state.user, notifications: { ...state.user.notifications, status: STATUS.TRANSMITTING }}
+                user: { ...state.user, messages: { ...state.user.messages, status: STATUS.TRANSMITTING }}
             };
-        case USER_NOTIFICATION_FETCHED:
+        case USER_MESSAGES_FETCHED:
             return {
                 ...state,
-                user: { ...state.user, notifications: action.payload.data }
+                user: { ...state.user, messages: action.payload.data }
             };
-        case USER_NOTIFICATION_NEW:
-            const list = [...state.user.notifications.list];
+        case USER_MESSAGES_NEW:
+            const list = [...state.user.messages.list];
             list.unshift(action.payload.data);
             return {
                 ...state,
-                user: { ...state.user, notifications: {
-                    ...state.user.notifications, list, total_unread: state.user.notifications.total_unread + 1 }
+                user: { ...state.user, messages: {
+                    ...state.user.messages, list, total_unread: state.user.messages.total_unread + 1 }
+                }
+            };
+        case USER_MESSAGES_MARKED_READ:
+            const _list = [...state.user.messages.list];
+            _list.forEach(item => {
+                if (item.id === action.payload) {
+                    item.read = true;
+                }
+            });
+
+            return {
+                ...state,
+                user: {
+                    ...state.user, messages: {
+                        ...state.user.messages, _list, total_unread: state.user.messages.total_unread - 1
+                    }
                 }
             };
         default:

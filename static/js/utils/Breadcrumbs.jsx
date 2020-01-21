@@ -29,6 +29,9 @@ export default class Breadcrumbs extends React.Component {
             });
 
             if (item !== '' && !isParam && match.url.split('/').pop() !== item) {
+                if (itemsLast > 0) {
+                    urlBuild += '/';
+                }
                 urlBuild += item;
                 itemsLast++;
                 items.push({ name: item.charAt(0).toUpperCase() + item.slice(1), link: urlBuild, key: k });
