@@ -16,7 +16,7 @@ class Resource(Base):
     @staticmethod
     def query(table, key, value):
         return table.query(
-            KeyConditionExpression=Key(key).eq(str(value)),
+            KeyConditionExpression=Key(key).eq(str(value))
         )
 
     @staticmethod

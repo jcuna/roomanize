@@ -2,18 +2,20 @@ import json
 from socket import timeout
 from datetime import timedelta
 from time import sleep, time
+from base64 import b64encode, b64decode
+
+from flask_caching import Cache as CacheService
+from cryptography.fernet import Fernet
 from flask import request
+from flask_restful import Resource
+
 from config import configs
 from config.routes import no_permissions, default_access
 from dal.models import Audit
-from flask_restful import Resource
 from dal.shared import access_map
 from .router import Router
 from .utils import get_logger, app_path
 from .middleware import Middleware, error_handler
-from flask_caching import Cache as CacheService
-from cryptography.fernet import Fernet
-from base64 import b64encode, b64decode
 from core.queue_worker import MaxMessageSizeExceededError, MAX_MSG_LENGTH
 from core import mem_queue
 
@@ -49,8 +51,6 @@ class Cache:
 
 class API(Resource):
 
-    audit_tasks = []
-
     def dispatch_request(self, *args, **kwargs):
         output = super(Resource, self).dispatch_request(*args, **kwargs)
 
@@ -69,21 +69,22 @@ class API(Resource):
             'endpoint': request.path,
             'headers': json.dumps([{key: request.environ[key]} for key in request.environ if 'HTTP_' in key]),
             'method': request.method,
-            'payload': {
+            'payload': json.dumps({
                 'json': request.get_json(silent=True),
                 'query': request.args.to_dict(),
                 'form': request.form.to_dict(),
                 'all': request.get_data(as_text=True)
-            },
+            }),
             'response': {}
         }
         response = json.dumps(output)
-        if len(response) <= MAX_MSG_LENGTH - 2500:
+        if len(response) <= MAX_MSG_LENGTH - 2400:
             audit['response'] = response
         else:
+            audit['response'] = 'truncated original length = %s' % len(response)
             get_logger('app').info('Message response truncated as it was too large')
         # TODO: Identify if this is the best approach given that the
-        #  queue is not active on test unless running queue tests
+        # queue is not active on test unless running queue tests
         if not hasattr(configs, 'TESTING'):
             try:
                 mem_queue.send_msg(json.dumps(audit))
