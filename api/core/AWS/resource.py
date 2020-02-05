@@ -14,16 +14,21 @@ class Resource(Base):
 
 
     @staticmethod
-    def query(table, key, value):
+    def query(table, key1, value1, key2=None, value2=None):
+        exp = Key(key1).eq(value1)
+        if key2 is not None and value2 is not None:
+            exp = exp & Key(key2).eq(value2)
+
         return table.query(
-            KeyConditionExpression=Key(key).eq(str(value))
+            KeyConditionExpression=exp
         )
 
     @staticmethod
-    def scan(table, key, value, limit=20, start_key=None):
+    def scan(table, index, value, limit=20, start_key=None):
         args = {
-            'FilterExpression': Attr(key).eq(str(value)),
-            'Limit': limit,
+            'IndexName': index,
+            'FilterExpression': Attr(index).eq(value),
+            'Limit': limit
         }
         if start_key is not None:
             args['ExclusiveStartKey'] = start_key

@@ -53,8 +53,7 @@ class Session(_Session):
                 if table.name in resources.dynamo:
                     if 'KeyConditionExpression' in kwargs:
                         return {
-                            'Items': list(filter(lambda x: x[kwargs['KeyConditionExpression'].name]['S'] == kwargs[
-                                'KeyConditionExpression'].value, resources.dynamo[table.name]))
+                            'Items': filter_dynamo(kwargs['KeyConditionExpression'], resources.dynamo[table.name])
                         }
                 return {'Items': []}
 
@@ -135,7 +134,7 @@ def update_dict(attr, level1, level2=None, level3=None):
 
 
 def Key(name):
-    obj = Mock()
+    obj = DynamoKey()
     obj.name = name
 
     def eq(value):
@@ -234,3 +233,30 @@ def _request():
 
 request = _request()
 parse = request
+
+
+class DynamoKey(Mock):
+    def __init__(self):
+        self.filters = []
+    def __and__(self, obj):
+        self.filters.append([obj.name, obj.value])
+        return self
+
+
+def filter_dynamo(filter_obj, items):
+    result = []
+    for item in items:
+        if item[filter_obj.name]['S'] == filter_obj.value and len(filter_obj.filters) == 0:
+            result.append(item)
+        elif item[filter_obj.name]['S'] == filter_obj.value and len(filter_obj.filters) > 0:
+            found = True
+            for extra_filter in filter_obj.filters:
+                if item[extra_filter[0]]['S'] != extra_filter[1]:
+                    found = False
+                    break
+            if not found:
+                continue
+            else:
+                result.append(item)
+                break
+    return result

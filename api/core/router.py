@@ -113,23 +113,41 @@ def create_dynamo_db_table():
         TableName=configs.AWS_MONTHLY_REPORT_TABLE,
         KeySchema=[
             {
-                'AttributeName': 'uid',
+                'AttributeName': 'project_id',
                 'KeyType': 'HASH'  #Partition key
             },
             {
-                'AttributeName': 'project_id',
+                'AttributeName': 'from_date',
                 'KeyType': 'RANGE'  #Sort key
             }
         ],
         AttributeDefinitions=[
             {
-                'AttributeName': 'uid',
+                'AttributeName': 'from_date',
                 'AttributeType': 'S'
             },
             {
                 'AttributeName': 'project_id',
                 'AttributeType': 'S'
-            },
+            }
+        ],
+        LocalSecondaryIndexes=[
+            {
+                'IndexName': 'project_id',
+                'KeySchema': [
+                    {
+                        'AttributeName': 'project_id',
+                        'KeyType': 'HASH'
+                    },
+                    {
+                        'AttributeName': 'from_date',
+                        'KeyType': 'RANGE'
+                    },
+                ],
+                'Projection': {
+                    'ProjectionType': 'KEYS_ONLY'
+                }
+            }
         ],
         ProvisionedThroughput={
             'ReadCapacityUnits': 10,

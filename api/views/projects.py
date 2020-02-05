@@ -1,4 +1,5 @@
 import json
+import re
 from datetime import datetime
 
 import sqlalchemy
@@ -265,11 +266,7 @@ class Reports(API):
         if start_key_project_id is not None and start_key_uid is not None:
             start_key = {'uid': start_key_uid, 'project_id': start_key_project_id}
 
-        resp = r.scan(
-            r.get_monthly_reports_table(),
-            'project_id', project_id,
-            start_key=start_key
-        )
+        resp = r.scan(r.get_monthly_reports_table(), 'project_id', str(project_id), start_key=start_key)
 
         if len(resp['Items']) > 0:
             return {'items': resp['Items'], 'end_key': resp['LastEvaluatedKey'] if 'LastEvaluatedKey' in resp else {}}
@@ -278,12 +275,13 @@ class Reports(API):
 
     @staticmethod
     def get_by_uid(resource, report_uid):
-        project_id = report_uid.split('-')[0]
+        matches = re.match(r'([0-9]+)-([0-9-]*)', report_uid)
+        project_id, from_date = matches.group(1), matches.group(2)
         if request.user.attributes.access['projects'] != '*' and \
                 project_id not in request.user.attributes.access['projects']:
             raise HttpException('No access to project', 401)
 
-        resp = resource.query(resource.get_monthly_reports_table(), 'uid', report_uid)
+        resp = resource.query(resource.get_monthly_reports_table(), 'project_id', project_id, 'from_date', from_date)
 
         if len(resp['Items']) > 0:
             return resp['Items'][0]

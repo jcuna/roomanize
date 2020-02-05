@@ -18,7 +18,7 @@ export const REPORT_FETCHING = 'REPORT_FETCHING';
 export const REPORT_FETCHED = 'REPORT_FETCHED';
 export const REPORTS_FETCHED = 'REPORTS_FETCHED';
 export const REPORTS_FETCH_FAILED = 'REPORTS_FETCH_FAILED';
-export const REPORT_CLEAR = 'REPORTS_FETCH_FAILED';
+export const REPORT_CLEAR = 'REPORT_CLEAR';
 
 export const fetchProjects = (fail) =>
     (dispatch) => {
@@ -67,14 +67,10 @@ export const updateProject = (data, success) =>
     };
 
 export const editProject = (project) =>
-    (dispatch) => {
-        dispatch({ type: PROJECT_EDITING, payload: project });
-    };
+    dispatch => dispatch({ type: PROJECT_EDITING, payload: project });
 
 export const clearProjectEditing = () =>
-    (dispatch) => {
-        dispatch({ type: PROJECT_EDITING_CLEAR });
-    };
+    dispatch => dispatch({ type: PROJECT_EDITING_CLEAR });
 
 export const fetchTimeIntervals = () =>
     (dispatch) => {
@@ -140,7 +136,7 @@ export const fetchReports = (project_id, uid) =>
     };
 
 export const setCurrentReport = (report) =>
-    () => ({ type: REPORT_FETCHED, payload: report });
+    dispatch => dispatch({ type: REPORT_FETCHED, payload: report });
 
 export const currentReportClear = () =>
-    () => ({ type: REPORT_CLEAR });
+    dispatch => dispatch({ type: REPORT_CLEAR });

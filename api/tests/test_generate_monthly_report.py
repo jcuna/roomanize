@@ -26,11 +26,7 @@ def test_report_format(client: FlaskClient, aws, admin_login):
     assert 'monthly_report' in aws.dynamo
     assert len(aws.dynamo['monthly_report']) == 1
 
-    key = '%s-%s' % \
-          (project_id, from_date)
-
-    assert 'uid' in aws.dynamo['monthly_report'][0]
-    assert key in aws.dynamo['monthly_report'][0]['uid']['S']
+    assert str(from_date) in aws.dynamo['monthly_report'][0]['from_date']['S']
     assert 'project' in aws.dynamo['monthly_report'][0]
     assert 'project_id' in aws.dynamo['monthly_report'][0]
     assert 'address' in aws.dynamo['monthly_report'][0]
@@ -188,8 +184,7 @@ def test_report_generated(aws):
     # if from_date is the same, then report gets overwritten
     assert len(aws.dynamo['monthly_report']) == 2
 
-    key = '%s-%s' % \
-          (project.id, datetime.combine(from_date, d_time.min).astimezone(pytz.utc).date())
+    key = str(datetime.combine(from_date, d_time.min).astimezone(pytz.utc).date())
 
     assert 'expenses' in aws.dynamo['monthly_report'][1]
     assert 'income' in aws.dynamo['monthly_report'][1]
@@ -197,7 +192,7 @@ def test_report_generated(aws):
     assert 'total_expenses' in aws.dynamo['monthly_report'][1]
     assert 'revenue' in aws.dynamo['monthly_report'][1]
 
-    assert aws.dynamo['monthly_report'][1]['uid']['S'] == key
+    assert aws.dynamo['monthly_report'][1]['from_date']['S'] == key
     assert len(aws.dynamo['monthly_report'][1]['expenses']['L']) == 3
     assert aws.dynamo['monthly_report'][1]['total_expenses']['S'] == '2720.00'
 
@@ -276,11 +271,9 @@ def test_project_2_monthly_report(aws):
     # if from_date is the same, then report gets overwritten
     assert len(aws.dynamo['monthly_report']) == 3
 
-    key2 = '%s-%s' % \
-           (project.id2, datetime.combine(from_date, d_time.min).astimezone(pytz.utc).date())
+    key2 = str(datetime.combine(from_date, d_time.min).astimezone(pytz.utc).date())
 
-    assert 'uid' in aws.dynamo['monthly_report'][2]
-    assert aws.dynamo['monthly_report'][2]['uid']['S'] == key2
+    assert aws.dynamo['monthly_report'][2]['from_date']['S'] == key2
     assert 'expenses' in aws.dynamo['monthly_report'][2]
     assert 'income' in aws.dynamo['monthly_report'][2]
     assert 'total_income' in aws.dynamo['monthly_report'][2]
@@ -307,21 +300,14 @@ def test_generate_all_from_last_month(aws):
     last_month_first = (this_month_first - timedelta(days=1)).replace(day=1)
 
     assert len(aws.dynamo['monthly_report']) == 6
-    assert 'uid' in aws.dynamo['monthly_report'][3]
-    assert 'uid' in aws.dynamo['monthly_report'][4]
-    assert 'uid' in aws.dynamo['monthly_report'][5]
 
-    key = '%s-%s' % \
-          (project.id, datetime.combine(last_month_first, d_time.min).astimezone(pytz.utc).date())
+    key = str(datetime.combine(last_month_first, d_time.min).astimezone(pytz.utc).date())
 
-    assert 'uid' in aws.dynamo['monthly_report'][4]
-    assert aws.dynamo['monthly_report'][4]['uid']['S'] == key
+    assert aws.dynamo['monthly_report'][4]['from_date']['S'] == key
 
-    key2 = '%s-%s' % \
-           (project.id2, datetime.combine(last_month_first, d_time.min).astimezone(pytz.utc).date())
+    key2 = str(datetime.combine(last_month_first, d_time.min).astimezone(pytz.utc).date())
 
-    assert 'uid' in aws.dynamo['monthly_report'][5]
-    assert aws.dynamo['monthly_report'][5]['uid']['S'] == key2
+    assert aws.dynamo['monthly_report'][5]['from_date']['S'] == key2
 
 
 def test_api_get_project_report(client: FlaskClient, aws, admin_login: dict):

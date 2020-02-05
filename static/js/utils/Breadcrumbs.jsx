@@ -21,9 +21,14 @@ export default class Breadcrumbs extends React.Component {
 
         parts.forEach((item, k) => {
             let isParam = false;
+            let itemName = item;
 
             Object.values(match.params).forEach(param => {
-                if (param === item) {
+                if (this.props.paramValues.includes(item)) {
+                    if (typeof this.props.paramNames[this.props.paramValues.indexOf(item)] === 'string') {
+                        itemName = this.props.paramNames[this.props.paramValues.indexOf(item)];
+                    }
+                } else if (param === item) {
                     isParam = true;
                 }
             });
@@ -34,7 +39,7 @@ export default class Breadcrumbs extends React.Component {
                 }
                 urlBuild += item;
                 itemsLast++;
-                items.push({ name: item.charAt(0).toUpperCase() + item.slice(1), link: urlBuild, key: k });
+                items.push({ name: itemName.charAt(0).toUpperCase() + itemName.slice(1), link: urlBuild, key: k });
             } else {
                 itemsLast++;
             }
@@ -64,5 +69,11 @@ export default class Breadcrumbs extends React.Component {
         history: PropTypes.object,
         dispatch: PropTypes.func,
         title: PropTypes.string,
+        paramValues: PropTypes.array,
+        paramNames: PropTypes.array
     };
+    static defaultProps = {
+        paramValues: [],
+        paramNames: [],
+    }
 }

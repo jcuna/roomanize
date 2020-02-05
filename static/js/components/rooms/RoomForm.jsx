@@ -184,6 +184,7 @@ export default class RoomForm extends Component {
                 }
 
                 return <section key={ i } className='room-tenant'>
+                    <hr/>
                     <Table numberedRows={ false } rows={ rows }/>
                 </section>;
             })}

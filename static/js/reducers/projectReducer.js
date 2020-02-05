@@ -73,7 +73,7 @@ export default function projectReducer(state = {
         case REPORTS_FETCHED:
             return {
                 ...state,
-                reports: action.payload.items,
+                reports: action.payload.items.reverse(),
                 lastReportKey: action.payload.end_key,
                 reportsStatus: STATUS.COMPLETE
             };

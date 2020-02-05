@@ -20,7 +20,7 @@ from core import get_logger
 from core.AWS import Resource
 from core.utils import TimeLogger, dynamo_db_encode
 from dal import db
-from dal.models import Project, Expense, Payment, RentalAgreement, Balance, User, UserAttributes
+from dal.models import Project, Expense, Payment, RentalAgreement, Balance, User, UserAttributes, Room
 
 
 def get_expenses(project: Project, from_date: datetime, to_date: datetime) -> List[Expense]:
@@ -33,11 +33,10 @@ def get_expenses(project: Project, from_date: datetime, to_date: datetime) -> Li
 def get_income(project: Project, from_date: datetime, to_date: datetime) -> List[Payment]:
     return Payment.query.options(
         joinedload('balance'),
-        joinedload('balance.agreement')
-    ).join(Balance, (Balance.id == Payment.balance_id)).join(RentalAgreement).filter(
-        Payment.paid_date.between(from_date, to_date),
-        RentalAgreement.project_id == project.id
-    ).all()
+        joinedload('balance.agreement'),
+        joinedload('balance.agreement.room')
+    ).join(Balance, (Balance.id == Payment.balance_id)).join(RentalAgreement).join(Room)\
+        .filter(Payment.paid_date.between(from_date, to_date), RentalAgreement.project_id == project.id).all()
 
 
 def send_notifications(project: Project, from_date: datetime.date, to_date: datetime.date, app, logger):
@@ -103,12 +102,11 @@ def generate_report(first_date: datetime.date, project_id: int):
 
     rsrc = Resource()
     rsrc.insert_monthly_report({
-        'uid': {'S': '%s-%s' % (project.id, from_date.date())},
         'project_id': {'S': str(project.id)},
+        'from_date': {'S': str(from_date.date())},
         'project': {'S': project.name},
         'address': {'S': project.address},
         'report_day': {'S': str(datetime.utcnow().date())},
-        'from_date': {'S': str(from_date.date())},
         'to_date': {'S': str(to_date.date())},
         'expenses': dynamo_db_encode(expenses),
         'income': dynamo_db_encode(income),
@@ -120,14 +118,11 @@ def generate_report(first_date: datetime.date, project_id: int):
 
 
 def generate_all_reports():
-    from flask_socketio import SocketIO
-
     logger = get_logger('monthly_report')
     logger.info('')
     logger.info('Initiating monthly report job')
     with TimeLogger(logger):
         app = init_app('sys')
-        sio = SocketIO(app)
         this_month_first = datetime.utcnow().date().replace(day=1)
         last_month_first = (this_month_first - timedelta(days=1)).replace(day=1)
         with app.app_context():

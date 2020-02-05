@@ -6,9 +6,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Breadcrumbs from '../../../utils/Breadcrumbs';
 import { clearProjectEditing, editProject, fetchReports } from '../../../actions/projectActions';
-import { STATUS } from '../../../constants';
+import { ENDPOINTS, STATUS } from '../../../constants';
 import Project from '../Project';
 import Spinner from '../../../utils/Spinner';
+import Table from '../../../utils/Table';
+import { Link, Redirect } from 'react-router-dom';
 
 export default class Reports extends React.Component {
     constructor(props) {
@@ -50,9 +52,18 @@ export default class Reports extends React.Component {
 
     getRender({ projects, match }) {
         if (typeof match.params.project_id === 'undefined') {
-            return <h1>Custom List</h1>;
+            return <Redirect to={ ENDPOINTS.PROJECTS_URL }/>;
         } else if (projects.reportsStatus === STATUS.COMPLETE) {
-            return <h1>list of reports</h1>;
+            return <Table
+                headers={ ['Proyecto', 'Fecha'] }
+                rows={ this.props.projects.reports.map(report => [
+                    projects.editing.name,
+                    <Link
+                        key={ report.uid }
+                        to={ `${ENDPOINTS.REPORTS_URL}/${projects.editing.id}/${report.project_id}-${report.from_date}` }>
+                        {report.from_date}
+                    </Link>
+                ]) }/>;
         }
         return <Spinner/>;
     }

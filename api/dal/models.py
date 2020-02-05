@@ -3,7 +3,7 @@ import json
 
 from sqlalchemy import UniqueConstraint, and_, Sequence
 from sqlalchemy.ext.mutable import MutableList
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, deferred
 from sqlalchemy.dialects import sqlite
 import jwt
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -235,7 +235,7 @@ class Room(db.Model, ModelIter):
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'), index=True, nullable=False)
     name = db.Column(db.String(30, collation=configs.DB_COLLATION))
     description = db.Column(db.Text(collation=configs.DB_COLLATION))
-    picture = db.Column(db.String(255, collation=configs.DB_COLLATION))
+    picture = deferred(db.Column(db.String(255, collation=configs.DB_COLLATION)))
 
     project = relationship(Project, back_populates='rooms')
     rental_agreement = relationship(
