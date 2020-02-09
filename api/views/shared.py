@@ -2,6 +2,8 @@ import base64
 import re
 from datetime import datetime
 from io import BytesIO
+
+import pdfkit
 import pytz
 
 from PIL import Image
@@ -83,3 +85,26 @@ def email_html(email: str, body, template, title=''):
     )
     msg.body = '%s\n' % title + TAG_RE.sub('\n', body)
     current_app.mail(msg)
+
+
+class HtmlToPdf(API):
+
+    def post(self):
+        from config import debug
+        debug()
+        extra_css = ''
+        styles = ''
+        data = request.get_json()
+        html = base64.b64decode(data['html']).decode()
+        filename = data['uid'] = '.pdf'
+        if 'extra_css' in data:
+            extra_css = base64.b64decode(data['extra_css']).decode()
+
+        if 'style' in data:
+            styles = base64.b64decode(data['style']).decode()
+
+        template = render_template('print.html', body=html, extra_styles=styles, extra_css=extra_css)
+
+        pdfkit.from_string(template, filename)
+
+        return template

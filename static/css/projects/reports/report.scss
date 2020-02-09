@@ -1,0 +1,49 @@
+@import '../../vars';
+
+.monthly-report {
+  .report-actions {
+    text-align: right;
+    .download-button, .print-button {
+      position: relative;
+      padding: 10px;
+    }
+  }
+  > .report-body {
+
+    .report-header {
+      width: 50%;
+      display: inline-block;
+      vertical-align: top;
+    }
+
+    .period {
+      width: 30%;
+      display: inline-block;
+      margin-left: 20%;
+    }
+
+    .overview {
+      padding: 8px 0;
+      border-top: 4px $theme solid;
+      border-bottom: 4px $theme solid;
+      margin-bottom: 20px;
+
+      h5, p {
+        display: inline-block;
+        width: 40%;
+        margin: 0;
+      }
+      li {
+
+      }
+    }
+
+    .label {
+      font-weight: 900;
+      margin-bottom: 0;
+    }
+    .value {
+      margin-top: 0;
+    }
+  }
+}

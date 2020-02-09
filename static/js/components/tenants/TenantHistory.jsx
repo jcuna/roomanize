@@ -142,18 +142,18 @@ export default class TenantHistory extends React.Component {
                             ['Proximo Pago', nextPay]
                         );
                         items.push(['Arrendamiento', `RD$ ${numberWithCommas(row.rental_agreement.rate)}`]);
-                        items.push(['Balance', `$RD ${(numberWithCommas(remaining_balance.toFixed(2)))}`]);
+                        items.push(['Balance', `RD$ ${(numberWithCommas(remaining_balance.toFixed(2)))}`]);
                         hadPreviousBalance &&
                         items.push([
                             'Deuda',
                             <span
                                 key={ balance[0].previous_balance }
                                 className='urgent'>
-                                $RD ${ numberWithCommas((Number(balance[0].previous_balance) - payments).toFixed(2)) }
+                                RD$ ${ numberWithCommas((Number(balance[0].previous_balance) - payments).toFixed(2)) }
                             </span>
                         ]);
 
-                        credit > 0 && items.push(['Credito', `$RD ${ credit }`]);
+                        credit > 0 && items.push(['Credito', `RD$ ${ credit }`]);
                         items.push(['Ultimo Pago', last_pay]);
                     }
 
@@ -279,7 +279,7 @@ export default class TenantHistory extends React.Component {
         return (
             <span className='last-payment'>
                 <span>{ formatDateEs(new Date(lastPayment.date)) }</span>
-                <span className='amount'>{ `($RD ${numberWithCommas(lastPayment.amount)})` }</span>
+                <span className='amount'>{ `(RD$ ${numberWithCommas(lastPayment.amount)})` }</span>
             </span>
         );
     }

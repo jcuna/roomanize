@@ -63,7 +63,7 @@ export default class PaymentForm extends React.Component {
         const elements = [
             {
                 name: 'amount',
-                placeholder: 'Monto A Pagar $RD',
+                placeholder: 'Monto A Pagar RD$',
                 defaultValue: '',
                 validate: ['required', 'number'],
                 onChange: this.onInputChange,

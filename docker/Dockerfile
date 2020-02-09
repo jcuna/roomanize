@@ -6,7 +6,7 @@ WORKDIR /usr/src/app
 
 RUN python -m pip install --upgrade pip
 
-RUN apk add --no-cache bash jpeg-dev zlib-dev
+RUN apk add --no-cache bash jpeg-dev zlib-dev wkhtmltopdf
 
 RUN apk add --no-cache postgresql-libs \
     && apk add --no-cache --virtual .build-deps gcc libffi-dev musl-dev postgresql-dev \

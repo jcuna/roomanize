@@ -34,7 +34,8 @@ def register():
         'expenses.Expenses@expenses_url': '/expenses|/expenses/<int:expense_id>',
         'expenses.ExpenseScans@expense_scans_url': '/expense-scans|/expense-scans/<string:token>/<int:expense_id>',
 
-        'emails.Email@emails_url': '/email|/email/<string:action>',
+        'shared.Email@emails_url': '/email|/email/<string:action>',
+        'shared.HtmlToPdf@html_to_pdf_url': '/to-pdf'
     }
 
 
@@ -49,7 +50,8 @@ no_permissions = [
     'views.projects.TimeIntervals',
     'views.projects.PaymentTypes',
     'views.expenses.ExpenseScans',
-    'views.emails.Email',
+    'views.shared.Email',
+    'views.shared.HtmlToPdf',
 ]
 
 default_access = {

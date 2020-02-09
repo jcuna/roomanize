@@ -175,11 +175,11 @@ export default class RoomForm extends Component {
                     const due_cn = Number(selectedBalance.amount_due) > 0 ? 'urgent' : 'success';
                     rows.push(['Dia De Pago', formatDateEs(new Date(selectedBalance.due_date))]);
                     rows.push(['Ciclo de Pago', history.interval]);
-                    rows.push(['Arrendamiento', `$RD ${numberWithCommas(history.rate)}`]);
-                    rows.push(['Balance', `$RD ${numberWithCommas(selectedBalance.balance)}`]);
+                    rows.push(['Arrendamiento', `RD$ ${numberWithCommas(history.rate)}`]);
+                    rows.push(['Balance', `RD$ ${numberWithCommas(selectedBalance.balance)}`]);
                     rows.push([
                         'Deuda',
-                        <span key={ i } className={ due_cn }>{ `$RD ${numberWithCommas(selectedBalance.amount_due)}` }</span>
+                        <span key={ i } className={ due_cn }>{ `RD$ ${numberWithCommas(selectedBalance.amount_due)}` }</span>
                     ]);
                 }
 
