@@ -90,8 +90,6 @@ def email_html(email: str, body, template, title=''):
 class HtmlToPdf(API):
 
     def post(self):
-        from config import debug
-        debug()
         extra_css = ''
         styles = ''
         data = request.get_json()
