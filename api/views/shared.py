@@ -2,12 +2,13 @@ import base64
 import re
 from datetime import datetime
 from io import BytesIO
+from urllib.parse import unquote
 
 import pdfkit
 import pytz
 
 from PIL import Image
-from flask import request, current_app, render_template
+from flask import request, current_app, render_template, send_file
 from flask_mail import Message
 from markupsafe import Markup
 
@@ -89,20 +90,27 @@ def email_html(email: str, body, template, title=''):
 
 class HtmlToPdf(API):
 
+    @token_required
     def post(self):
-        extra_css = ''
+        extra_css = []
         styles = ''
         data = request.get_json()
-        html = base64.b64decode(data['html']).decode()
-        filename = data['uid'] = '.pdf'
+        if data is None or 'html' not in data or 'uid' not in data:
+            raise HttpException('Missing necessary arguments')
+        html = unquote(base64.b64decode(data['html']).decode())
+        filename = data['uid'] + '.pdf'
         if 'extra_css' in data:
-            extra_css = base64.b64decode(data['extra_css']).decode()
+            extra_css = [unquote(base64.b64decode(link).decode()) for link in data['extra_css']]
 
         if 'style' in data:
-            styles = base64.b64decode(data['style']).decode()
+            styles = unquote(base64.b64decode(data['style']).decode())
 
-        template = render_template('print.html', body=html, extra_styles=styles, extra_css=extra_css)
+        template = render_template('print.html', body=Markup(html), styles=Markup(styles), extra_css=extra_css)
 
-        pdfkit.from_string(template, filename)
+        with open('file.html', 'w') as pdf:
+            pdf.write(template)
 
-        return template
+        fp = BytesIO()
+        pdfkit.from_file('file.html', 'out.pdf')
+
+        return send_file('out.pdf', attachment_filename=filename)

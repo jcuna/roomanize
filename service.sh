@@ -35,7 +35,7 @@ run_tests() {
       FLAGS="$FLAGS $3"
       APPEND="${@:4}"
     fi
-    COMMAND="pytest $FLAGS tests/$APPEND"
+    COMMAND="pytest $FLAGS $APPEND"
     printf "%s\n" "$COMMAND"
 
     docker exec -ti "$CONTAINER_ID" bash -c \

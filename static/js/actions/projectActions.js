@@ -19,6 +19,9 @@ export const REPORT_FETCHED = 'REPORT_FETCHED';
 export const REPORTS_FETCHED = 'REPORTS_FETCHED';
 export const REPORTS_FETCH_FAILED = 'REPORTS_FETCH_FAILED';
 export const REPORT_CLEAR = 'REPORT_CLEAR';
+export const REPORT_DOWNLOADED = 'REPORT_CLEAR';
+export const REPORT_DOWNLOADING = 'REPORT_DOWNLOADING';
+export const REPORT_DOWNLOAD_FAILED = 'REPORT_CLEAR';
 
 export const fetchProjects = (fail) =>
     (dispatch) => {
@@ -116,7 +119,7 @@ export const fetchReportByUid = (uid) =>
     };
 
 export const fetchReports = (project_id, uid) =>
-    (dispatch) => {
+    dispatch => {
         dispatch({ type: REPORT_FETCHING });
         const q = { project_id };
         if (uid) {
@@ -127,7 +130,7 @@ export const fetchReports = (project_id, uid) =>
                 url: `/reports?${urlEncode.stringify(q)}`,
                 method: 'GET',
                 headers: header
-            }).then((resp) => {
+            }).then(resp => {
                 dispatch({ type: REPORTS_FETCHED, payload: resp.data });
             }, err => {
                 dispatch({ type: REPORTS_FETCH_FAILED, payload: err });
@@ -140,3 +143,19 @@ export const setCurrentReport = (report) =>
 
 export const currentReportClear = () =>
     dispatch => dispatch({ type: REPORT_CLEAR });
+
+export const download_report = (filename, html, styles, extra_css = []) =>
+    dispatch => {
+        dispatch({ type: REPORT_DOWNLOADING });
+        token.through().then(header =>
+            api({
+                url: '/to-pdf',
+                method: 'POST',
+                headers: header
+            }, { filename, html, styles, extra_css }).then(resp => {
+                dispatch({ type: REPORT_DOWNLOADED, payload: resp.data });
+            }, err => {
+                dispatch({ type: REPORT_DOWNLOAD_FAILED, payload: err });
+            })
+        );
+    };

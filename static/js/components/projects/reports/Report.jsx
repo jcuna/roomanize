@@ -5,7 +5,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Breadcrumbs from '../../../utils/Breadcrumbs';
-import { currentReportClear, fetchReportByUid } from '../../../actions/projectActions';
+import { currentReportClear, download_report, fetchReportByUid } from '../../../actions/projectActions';
 import Spinner from '../../../utils/Spinner';
 import Table from '../../../utils/Table';
 import { formatDateEs, numberWithCommas } from '../../../utils/helpers';
@@ -18,6 +18,7 @@ export default class Report extends React.Component {
         if (props.projects.currentReport.project_id === '') {
             props.dispatch(fetchReportByUid(props.match.params.report_uid));
         }
+        this.download = this.download.bind(this);
     }
 
     render() {
@@ -56,8 +57,7 @@ export default class Report extends React.Component {
         let html = '<div class="monthly-report"><div class="report-body">';
         html += document.querySelector('.report-body').innerHTML;
         html += '</div></div>';
-        console.log(styles);
-        console.log(html);
+        this.props.dispatch(download_report(this.props.match.params.report_uid, html, styles));
     }
 
     getRender({ projects: { currentReport }}) {
