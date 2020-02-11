@@ -29,25 +29,23 @@ const normalFetch = (url, method, data, crossDomain, headers = {}, omitContentTy
         body: headers['Content-Type'] === 'application/json' ? JSON.stringify(data) : data,
     };
 
-    return new Promise((resolve, reject) => {
-        let status;
-
-        return fetch(url, request).then(response => {
+    return new Promise((resolve, reject) =>
+        fetch(url, request).then(response => {
             const contentType = response.headers.get('content-type');
-
-            status = response.status;
-            if (contentType && contentType.indexOf('application/json') !== -1) {
+            if (contentType === 'application/json') {
                 return response.json().then(resp => {
-                    if (status < 300) {
-                        resolve({ data: resp, status });
+                    if (response.status < 300) {
+                        resolve({ data: resp, status: response.status });
                     } else {
-                        reject({ resp, status, });
+                        reject({ resp, status: response.status, });
                     }
-                }, (error) => reject({ error, status, }));
+                }, (error) => reject({ error, status: response.status, }));
             }
-            return reject('invalid contentType');
-        }, (error) => reject(error));
-    });
+            if (response.status < 300) {
+                return resolve(response);
+            }
+            return reject(response);
+        }, (error) => reject(error)));
 };
 
 /**

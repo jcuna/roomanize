@@ -5,16 +5,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Breadcrumbs from '../../../utils/Breadcrumbs';
-import { currentReportClear, download_report, fetchReportByUid } from '../../../actions/projectActions';
+import { currentReportClear, fetchReportByUid } from '../../../actions/projectActions';
 import Spinner from '../../../utils/Spinner';
 import Table from '../../../utils/Table';
 import { formatDateEs, numberWithCommas } from '../../../utils/helpers';
 import '../../../../css/projects/reports/report.scss';
 import FontAwesome from '../../../utils/FontAwesome';
+import { download_pdf } from '../../../actions/appActions';
 
 export default class Report extends React.Component {
     constructor(props) {
         super(props);
+        this.download_button = React.createRef();
         if (props.projects.currentReport.project_id === '') {
             props.dispatch(fetchReportByUid(props.match.params.report_uid));
         }
@@ -31,7 +33,7 @@ export default class Report extends React.Component {
                     paramNames={ [this.props.projects.currentReport.project] }
                 />
                 <div className='monthly-report'>
-                    <section className='report-actions'>
+                    <section ref={ this.download_button } className='action-buttons'>
                         <FontAwesome
                             className='print-button'
                             type='print'
@@ -52,12 +54,20 @@ export default class Report extends React.Component {
     }
 
     download() {
+        this.download_button.current.classList.add('loading-button');
         let styles = '';
         document.querySelectorAll('style').forEach(style => styles += `<style>${style.innerHTML}</style>`);
         let html = '<div class="monthly-report"><div class="report-body">';
         html += document.querySelector('.report-body').innerHTML;
         html += '</div></div>';
-        this.props.dispatch(download_report(this.props.match.params.report_uid, html, styles));
+        this.props.dispatch(download_pdf(
+            this.props.match.params.report_uid,
+            html,
+            styles,
+            [],
+            () => this.download_button.current.classList.remove('loading-button'),
+            () => this.download_button.current.classList.remove('loading-button')
+        ));
     }
 
     getRender({ projects: { currentReport }}) {
@@ -116,25 +126,17 @@ export default class Report extends React.Component {
     }
 
     getReportRows(income) {
-        let t = income.map(inc =>
+        return income.map(inc =>
             [
                 inc.balance.agreement.room.name,
                 `RD$ ${numberWithCommas(inc.amount)}`,
                 formatDateEs(new Date(inc.paid_date))
             ]
         );
-        t = t.concat(income.map(inc =>
-            [
-                inc.balance.agreement.room.name,
-                `RD$ ${numberWithCommas(inc.amount)}`,
-                formatDateEs(new Date(inc.paid_date))
-            ]
-        ));
-        return t;
     }
 
     componentWillUnmount() {
-        // this.props.dispatch(currentReportClear());
+        this.props.dispatch(currentReportClear());
     }
 
     static propTypes = {

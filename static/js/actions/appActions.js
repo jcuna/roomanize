@@ -1,3 +1,7 @@
+import token from '../utils/token';
+import api from '../utils/api';
+import { download_blob } from '../utils/helpers';
+
 export const TOGGLE_MOBILE_MENU = 'TOGGLE_MOBILE_MENU';
 export const NOTIFICATIONS_SET = 'NOTIFICATIONS_SET';
 export const NOTIFICATIONS_CLEAR = 'NOTIFICATIONS_CLEAR';
@@ -94,3 +98,27 @@ export const needInstall = () =>
 
 export const toggleContainer = () =>
     (dispatch) => dispatch({ type: TOGGLE_CONTAINER });
+
+export const download_pdf = (filename, html, styles, extra_css = [], done, error, template = 'print.html') => {
+    const data = {
+        filename,
+        template,
+        html: btoa(window.encodeURI(html)),
+        styles: btoa(window.encodeURI(styles)),
+        extra_css: extra_css.map(u => btoa(window.encodeURI(u)))
+    };
+    return () => {
+        return token.through().then(header =>
+            api({
+                url: '/to-pdf',
+                method: 'POST',
+                headers: header
+            }, data).then(resp => {
+                resp.blob().then(blob => {
+                    done && done();
+                    download_blob(blob, resp.headers.get('content-disposition').split('filename=').pop());
+                }, error);
+            }, error)
+        );
+    };
+};

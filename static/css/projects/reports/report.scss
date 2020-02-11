@@ -1,13 +1,6 @@
 @import '../../vars';
 
 .monthly-report {
-  .report-actions {
-    text-align: right;
-    .download-button, .print-button {
-      position: relative;
-      padding: 10px;
-    }
-  }
   > .report-body {
 
     .report-header {

@@ -18,6 +18,10 @@
     background-color: #FFFFFF;
     padding: 6px;
 
+    .action-buttons {
+      text-align: right;
+    }
+
     .header, h5 {
       text-align: center;
     }
@@ -25,10 +29,6 @@
     .divider {
       border-bottom: 1px dashed $clearBlue;
       margin: 6px 0;
-    }
-
-    .print-button {
-      right: 5px;
     }
 
     .email-button {

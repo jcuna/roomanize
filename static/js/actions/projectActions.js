@@ -1,6 +1,7 @@
 import api from '../utils/api';
 import token from '../utils/token';
 import urlEncode from 'query-string';
+
 export const PROJECT_UPDATING = 'PROJECT_UPDATING';
 export const PROJECT_UPDATED = 'PROJECT_UPDATED';
 export const PROJECT_CREATING = 'PROJECT_CREATING';
@@ -19,9 +20,6 @@ export const REPORT_FETCHED = 'REPORT_FETCHED';
 export const REPORTS_FETCHED = 'REPORTS_FETCHED';
 export const REPORTS_FETCH_FAILED = 'REPORTS_FETCH_FAILED';
 export const REPORT_CLEAR = 'REPORT_CLEAR';
-export const REPORT_DOWNLOADED = 'REPORT_CLEAR';
-export const REPORT_DOWNLOADING = 'REPORT_DOWNLOADING';
-export const REPORT_DOWNLOAD_FAILED = 'REPORT_CLEAR';
 
 export const fetchProjects = (fail) =>
     (dispatch) => {
@@ -143,19 +141,3 @@ export const setCurrentReport = (report) =>
 
 export const currentReportClear = () =>
     dispatch => dispatch({ type: REPORT_CLEAR });
-
-export const download_report = (filename, html, styles, extra_css = []) =>
-    dispatch => {
-        dispatch({ type: REPORT_DOWNLOADING });
-        token.through().then(header =>
-            api({
-                url: '/to-pdf',
-                method: 'POST',
-                headers: header
-            }, { filename, html, styles, extra_css }).then(resp => {
-                dispatch({ type: REPORT_DOWNLOADED, payload: resp.data });
-            }, err => {
-                dispatch({ type: REPORT_DOWNLOAD_FAILED, payload: err });
-            })
-        );
-    };

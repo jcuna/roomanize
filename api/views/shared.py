@@ -92,25 +92,26 @@ class HtmlToPdf(API):
 
     @token_required
     def post(self):
+
         extra_css = []
         styles = ''
+        template = request.json.get('template', 'print.html')
         data = request.get_json()
-        if data is None or 'html' not in data or 'uid' not in data:
+        if data is None or 'html' not in data or 'filename' not in data:
             raise HttpException('Missing necessary arguments')
         html = unquote(base64.b64decode(data['html']).decode())
-        filename = data['uid'] + '.pdf'
+        filename = data['filename'] + '.pdf'
         if 'extra_css' in data:
             extra_css = [unquote(base64.b64decode(link).decode()) for link in data['extra_css']]
 
-        if 'style' in data:
-            styles = unquote(base64.b64decode(data['style']).decode())
+        if 'styles' in data:
+            styles = unquote(base64.b64decode(data['styles']).decode())
 
-        template = render_template('print.html', body=Markup(html), styles=Markup(styles), extra_css=extra_css)
-
-        with open('file.html', 'w') as pdf:
-            pdf.write(template)
+        body = render_template(template, body=Markup(html), styles=Markup(styles), extra_css=extra_css)
 
         fp = BytesIO()
-        pdfkit.from_file('file.html', 'out.pdf')
+        pdf = pdfkit.from_string(body, False)
+        fp.write(pdf)
+        fp.seek(0)
 
-        return send_file('out.pdf', attachment_filename=filename)
+        return send_file(fp, attachment_filename=filename, as_attachment=True, cache_timeout=3600)

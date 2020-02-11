@@ -6,6 +6,15 @@ WORKDIR /usr/src/app
 
 RUN python -m pip install --upgrade pip
 
+
+RUN apk add --no-cache \
+            # Virtual Framebuffer 'fake' X server
+            xvfb \
+            # Additionnal dependencies for better PDF rendering
+            ttf-freefont \
+            fontconfig \
+            dbus
+
 RUN apk add --no-cache bash jpeg-dev zlib-dev wkhtmltopdf
 
 RUN apk add --no-cache postgresql-libs \

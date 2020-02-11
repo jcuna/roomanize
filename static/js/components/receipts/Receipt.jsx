@@ -14,12 +14,14 @@ import { sendEmailHtml } from '../../actions/emailActions';
 import ReactDOMServer from 'react-dom/server';
 import Spinner from '../../utils/Spinner';
 import { hasAccess } from '../../utils/config';
+import { download_pdf } from '../../actions/appActions';
 
 export default class Receipt extends React.Component {
     constructor(props) {
         super(props);
 
         this.email = this.email.bind(this);
+        this.download = this.download.bind(this);
         this.node = React.createRef();
         this.state = {
             showSpinner: false
@@ -38,16 +40,17 @@ export default class Receipt extends React.Component {
             <div id={ id || receipt.id } className={ `receipt-wrapper` + (this.state.showSpinner ? ' blocking' : '') }>
                 { this.state.showSpinner && <Spinner/> }
                 <section className='receipt'>
-                    { !renderEmail && <div>
+                    { !renderEmail && <div className='action-buttons'>
                         <FontAwesome
                             className='print-button'
                             type='print'
                             data-id={ receipt.id }
-                            title='imprimir'
+                            title='Imprimir'
                             onClick={ onPrint }
                         />
                         { receipt.user.email !== '' &&
-                            <FontAwesome className='email-button' type='paper-plane' title='email' onClick={ this.email }/> }
+                            <FontAwesome className='email-button' type='paper-plane' title='Enviar email' onClick={ this.email }/> }
+                        <FontAwesome className='download-button' type='download' title='Descargar' onClick={ this.download }/>
                     </div> }
                     <div className='content' ref={ this.node }><div className='header'>
                         <h4>{ project.name }</h4>
@@ -94,7 +97,9 @@ export default class Receipt extends React.Component {
 
     email() {
         this.setState({ showSpinner: true });
-        const body = b64EncodeUnicode(ReactDOMServer.renderToStaticMarkup(<Receipt { ...this.props } renderEmail={ true } />));
+        const body = b64EncodeUnicode(ReactDOMServer.renderToStaticMarkup(
+            <Receipt { ...this.props } renderEmail={ true } />
+        ));
         this.props.dispatch(sendEmailHtml(
             body,
             'tenant',
@@ -102,6 +107,20 @@ export default class Receipt extends React.Component {
             'email/receipt.html',
             '',
             () => this.setState({ showSpinner: false })
+        ));
+    }
+    download() {
+        this.setState({ showSpinner: true });
+        const body = ReactDOMServer.renderToStaticMarkup(
+            <Receipt { ...this.props } renderEmail={ true } />
+        );
+        this.props.dispatch(download_pdf(
+            String(this.props.receipt.id),
+            body,
+            '', [],
+            () => this.setState({ showSpinner: false }),
+            () => this.setState({ showSpinner: false }),
+            'email/receipt.html'
         ));
     }
 
