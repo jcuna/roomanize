@@ -35,7 +35,9 @@ def register():
         'expenses.ExpenseScans@expense_scans_url': '/expense-scans|/expense-scans/<string:token>/<int:expense_id>',
 
         'shared.Email@emails_url': '/email|/email/<string:action>',
-        'shared.HtmlToPdf@html_to_pdf_url': '/to-pdf'
+        'shared.HtmlToPdf@html_to_pdf_url': '/to-pdf',
+        'shared.Widgets@widgets_url': '/widgets',
+        'shared.RunWidget@run_widgets_url': '/widgets/<string:widget_name>',
     }
 
 

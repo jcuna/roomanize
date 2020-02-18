@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import json
 
 from sqlalchemy import UniqueConstraint, and_, Sequence
-from sqlalchemy.ext.mutable import MutableList
+from sqlalchemy.ext.mutable import MutableList, MutableDict
 from sqlalchemy.orm import relationship, deferred
 from sqlalchemy.dialects import sqlite
 import jwt
@@ -32,6 +32,7 @@ user_roles = db.Table(
 
 class Project(db.Model, ModelIter):
     __tablename__ = 'projects'
+    allowed_widget = True
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30, collation=configs.DB_COLLATION), unique=True)
@@ -45,6 +46,7 @@ class Project(db.Model, ModelIter):
 class User(db.Model, ModelIter):
     __tablename__ = 'users'
     fillable = ['password', 'email', 'first_name', 'last_name', 'deleted']
+    allowed_widget = True
 
     id = db.Column(BigInteger, primary_key=True)
     email = db.Column(db.String(50, collation=configs.DB_COLLATION), nullable=False, unique=True)
@@ -138,6 +140,7 @@ class UserToken(db.Model, ModelIter):
 
 class Role(db.Model, ModelIter):
     __tablename__ = 'roles'
+    allowed_widget = True
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30, collation=configs.DB_COLLATION), index=True)
@@ -170,6 +173,7 @@ class TimeInterval(db.Model, ModelIter):
 class Tenant(db.Model, ModelIter):
     __tablename__ = 'tenants'
     fillable = ['first_name', 'last_name', 'email', 'phone', 'identification_number']
+    allowed_widget = True
 
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(30, collation=configs.DB_COLLATION), nullable=False)
@@ -208,6 +212,7 @@ class TenantHistory(db.Model, ModelIter):
 class RentalAgreement(db.Model, ModelIter):
     __tablename__ = 'rental_agreements'
     fillable = ['tenant_history_id', 'room_id', 'project_id', 'time_interval_id', 'rate', 'entered_on', 'deposit']
+    allowed_widget = True
 
     id = db.Column(db.Integer, primary_key=True)
     tenant_history_id = db.Column(db.Integer, db.ForeignKey('tenants_history.id'), index=True, nullable=False)
@@ -230,6 +235,7 @@ class RentalAgreement(db.Model, ModelIter):
 class Room(db.Model, ModelIter):
     __tablename__ = 'rooms'
     fillable = ['project_id', 'name', 'rent', 'time_interval_id', 'description', 'picture']
+    allowed_widget = True
 
     id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'), index=True, nullable=False)
@@ -263,6 +269,7 @@ class Policy(db.Model, ModelIter):
 
 class Balance(db.Model, ModelIter):
     __tablename__ = 'balances'
+    allowed_widget = True
 
     id = db.Column(BigInteger, primary_key=True)
     agreement_id = db.Column(BigInteger, db.ForeignKey('rental_agreements.id'), index=True)
@@ -284,6 +291,7 @@ class PaymentType(db.Model, ModelIter):
 class Payment(db.Model, ModelIter):
     __tablename__ = 'payments'
     fillable = ['amount', 'payment_type_id']
+    allowed_widget = True
 
     id = db.Column(BigInteger, Sequence('payments_id_seq', start=1000, increment=1), primary_key=True)
     balance_id = db.Column(BigInteger, db.ForeignKey('balances.id'), index=True)
@@ -301,6 +309,7 @@ class Payment(db.Model, ModelIter):
 class Expense(db.Model, ModelIter):
     __tablename__ = 'expenses'
     fillable = ['amount', 'expense_date']
+    allowed_widget = True
 
     id = db.Column(BigInteger, primary_key=True)
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'), index=True, nullable=False)
@@ -326,7 +335,11 @@ class CompanyProfile(db.Model, ModelIter):
     address = db.Column(db.Text(collation=configs.DB_COLLATION), nullable=False)
     contact = db.Column(db.String(10, collation=configs.DB_COLLATION), nullable=False)
     logo = db.Column(db.LargeBinary)
-
+    settings = db.Column(
+        MutableDict.as_mutable(db.JSON),
+        comment='A JSON schema for global settings',
+        nullable=False,
+        server_default='{}')
 
 class Audit(db.Model, ModelIter):
     __tablename__ = 'audits'

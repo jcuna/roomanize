@@ -10,6 +10,8 @@ import pytz
 from flask import Flask
 import queue
 from logging.handlers import QueueHandler, QueueListener, TimedRotatingFileHandler
+from kanpai.validator import RequiredMixin
+
 from config import configs
 from dal.shared import ModelIter
 
@@ -131,3 +133,24 @@ def dynamo_db_encode(input_data):
         return {'M': {key: dynamo_db_encode(val) for key, val in input_data.items()}}
     elif isinstance(input_data, list):
         return {'L': list(map(lambda x: dynamo_db_encode(x), input_data))}
+
+
+class Boolean(RequiredMixin):
+
+    def __init__(self, error="Value must be a boolean."):
+        self.processors = []
+        self.processors.append({
+            'action': self.__assert_bool,
+            'attribs': {
+                'error': error
+            }
+        })
+
+    def __assert_bool(self, data, attribs):
+        if data is None:
+            return self.validation_success(data)
+
+        if type(data) != bool:
+            return self.validation_error(data, attribs['error'])
+
+        return self.validation_success(data)

@@ -147,8 +147,41 @@ def test_tenant_balance_generation(client: FlaskClient, admin_login: dict):
     assert Balance.query.count() == 4, 'Only 4 balances should exist right now since no new agreements or \
     date has changed'
 
+def test_no_balance_created_for_canceled_agreement(client: FlaskClient, admin_login: dict):
+    from dal.models import Balance
+    from core.crons.balances import balances_cron
 
-@pytest.mark.parametrize('_in, out, c', [(4500.00, 2000.00, 3), (3500.00, 3000.00, 4), (1250.99, 5249.01, 5)])
+    override = {
+        'email': 'jamal@tenant.com',
+        'first_name': 'Jamal',
+        'last_name': 'Cristof',
+        'identification_number': '244-1234567-8',
+        'phone': '5555555444'
+    }
+    tenant_resp = seed_tenant(client, admin_login, override)
+
+    start_date = datetime.utcnow() - timedelta(days=4)
+
+    tenant_id = tenant_resp.json['id']
+    # create a new agreement with a balance due today and then cancel agreement
+    agreement_resp = seed_new_agreement(client, admin_login, {'tenant_id': tenant_id, 'date': front_end_date(start_date)})
+    assert 'id' in agreement_resp.json
+    assert agreement_resp.status_code == 200
+
+    cancellation = client.put(endpoint('/agreements/{}'.format(agreement_resp.json['id'])), headers=admin_login, json={
+        'id': agreement_resp.json['id'],
+        'terminated_on': front_end_date(),
+        'refund': 0
+    })
+
+    assert cancellation.status_code == 200
+
+    assert Balance.query.count() == 5, 'Verify only 5 balances exist, the initial balance'
+    balances_cron()
+    assert Balance.query.count() == 5, 'Verify no balances where created for a cancelled agreement'
+
+
+@pytest.mark.parametrize('_in, out, c', [(4500.00, 2000.00, 4), (3500.00, 3000.00, 5), (1250.99, 5249.01, 6)])
 def test_tenant_balance_generation_with_payments(client: FlaskClient, admin_login: dict, _in, out, c):
     from dal.models import Tenant, RentalAgreement, Project, Balance
     from core.crons.balances import balances_cron
@@ -223,7 +256,7 @@ def test_tenant_balance_not_created(client: FlaskClient, admin_login: dict):
     tenant_resp = seed_tenant(client, admin_login, override)
     assert 'id' in tenant_resp.json
     assert tenant_resp.status_code == 200
-    assert Tenant.query.count() == 6
+    assert Tenant.query.count() == 7
 
     # seed another room
     room_resp = seed_room(
@@ -243,7 +276,7 @@ def test_tenant_balance_not_created(client: FlaskClient, admin_login: dict):
     }
 
     agreement_resp = seed_new_agreement(client, admin_login, override)
-    assert Balance.query.count() == 11
+    assert Balance.query.count() == 12
     agreement = RentalAgreement.query.filter(RentalAgreement.id == agreement_resp.json['id']).first()
     assert len(agreement.balances) == 1
     assert agreement.balances[0].balance == Decimal(5000)
@@ -251,7 +284,7 @@ def test_tenant_balance_not_created(client: FlaskClient, admin_login: dict):
 
     balances_cron()
 
-    assert Balance.query.count() == 11, 'no new balances should`ve been created because agreement starts in the future'
+    assert Balance.query.count() == 12, 'no new balances should`ve been created because agreement starts in the future'
     agreement2 = RentalAgreement.query.filter(RentalAgreement.id == agreement_resp.json['id']).first()
     assert len(agreement2.balances) == 1
     assert agreement2.balances[0].balance == Decimal(5000)
@@ -272,7 +305,7 @@ def test_cannot_create_agreement_older_than_5days(client: FlaskClient, admin_log
     tenant_resp = seed_tenant(client, admin_login, override)
     assert 'id' in tenant_resp.json
     assert tenant_resp.status_code == 200
-    assert Tenant.query.count() == 7
+    assert Tenant.query.count() == 8
 
     tenant_id = tenant_resp.json['id']
 

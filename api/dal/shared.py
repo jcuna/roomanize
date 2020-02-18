@@ -146,6 +146,7 @@ class Paginator:
 
 
 class ModelIter(object):
+    allowed_widget = False
     def __init__(self, *args, **kwargs):
         super(self, *args, **kwargs)
 

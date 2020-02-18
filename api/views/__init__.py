@@ -1,3 +1,6 @@
+import datetime
+
+
 class Result:
 
     @staticmethod
@@ -26,3 +29,22 @@ class Result:
             return list(map(dict, data))
 
         return dict(data)
+
+    @staticmethod
+    def query_response(data):
+        response = []
+        for row in data:
+            out = {}
+            for field in row.keys():
+                val = Result.get_field_value(row, field)
+                if not hasattr(val, 'query'):
+                    out.update({field: val})
+            response.append(out)
+        return response
+
+    @staticmethod
+    def get_field_value(obj, attr):
+        val = getattr(obj, attr)
+        if isinstance(val, datetime.date):
+            return str(val)
+        return val

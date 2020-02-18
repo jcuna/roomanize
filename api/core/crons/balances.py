@@ -10,7 +10,7 @@ from config.constants import *
 from core import get_logger
 from core.utils import TimeLogger
 from dal import db
-from dal.models import Balance
+from dal.models import Balance, RentalAgreement
 from app import init_app
 
 
@@ -26,10 +26,14 @@ def balances_cron():
             today = datetime.combine(datetime.utcnow().date(), d_time.max)
             yesterday = today - timedelta(days=1)
 
-            balances = Balance.query.options(joinedload('agreement'), joinedload('payments')).filter(
+            balances = Balance.query.options(
+                joinedload(Balance.agreement),
+                joinedload(Balance.payments)).filter(
                 Balance.due_date <= yesterday,
                 Balance.id.in_(db.session.query(functions.max(Balance.id)).group_by(Balance.agreement_id).subquery())
-            )
+            ).join(
+                Balance.agreement, isouter=True
+            ).filter(RentalAgreement.terminated_on.is_(None))
             try:
                 process_agreements(balances.all(), logger)
 

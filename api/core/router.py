@@ -1,8 +1,10 @@
 import importlib
 from sqlalchemy.exc import ProgrammingError, OperationalError
-from flask import Flask, url_for, render_template, redirect, request, Blueprint
+from flask import Flask, render_template, redirect, request, Blueprint
 from flask_restful import Api
 import json
+
+
 from config.routes import register, no_permissions
 import re
 
@@ -38,8 +40,8 @@ class Router:
             if pack_name + '.' + parts[1] not in no_permissions:
                 permissions.update({parts[2]: pack_name + '.' + parts[1]})
 
-            with app.test_request_context():
-                self.routes.update({parts[2]: url_for(parts[2])})
+            self.routes.update({parts[2]: full_routes[0]})
+
 
 
 @base.route('/status')
@@ -150,8 +152,8 @@ def create_dynamo_db_table():
             }
         ],
         ProvisionedThroughput={
-            'ReadCapacityUnits': 10,
-            'WriteCapacityUnits': 5
+            'ReadCapacityUnits': 1,
+            'WriteCapacityUnits': 1
         }
     )
     return table
