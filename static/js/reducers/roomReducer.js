@@ -4,8 +4,8 @@
 
 import { STATUS } from '../constants';
 import {
-    CLEAR_SELECTED_ROOM,
-    ROOM_HISTORY_FETCHED,
+    CLEAR_SELECTED_ROOM, ROOM_FETCHED,
+    ROOM_HISTORY_FETCHED, ROOM_HISTORY_FETCHING,
     ROOM_SELECTED,
     ROOMS_CLEAR,
     ROOMS_FETCHED,
@@ -41,10 +41,12 @@ const initState = {
 export default function roomReducer(state = initState, action) {
     switch (action.type) {
         case ROOMS_FETCHING:
+        case ROOM_HISTORY_FETCHING:
             return { ...state, status: STATUS.TRANSMITTING };
         case ROOMS_FETCHED:
-            return { ...state, status: STATUS.COMPLETE, data: action.payload };
+            return { ...state, status: STATUS.COMPLETE, data: { ...action.payload }};
         case ROOM_SELECTED:
+        case ROOM_FETCHED:
             return {
                 ...state,
                 selectedRoom: { ...initState.selectedRoom, ...action.payload },
@@ -56,7 +58,9 @@ export default function roomReducer(state = initState, action) {
             };
         case ROOM_HISTORY_FETCHED:
             return {
-                ...state, selectedRoom: { ...state.selectedRoom, rental_history: { ...action.payload }}
+                ...state,
+                status: STATUS.COMPLETE,
+                selectedRoom: { ...state.selectedRoom, rental_history: { ...action.payload }}
             };
         case ROOMS_SEARCHING:
             return { ...state, searchingBackEnd: true };

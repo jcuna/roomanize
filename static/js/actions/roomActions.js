@@ -10,6 +10,7 @@ export const ROOMS_SEARCHED = 'ROOMS_SEARCHED';
 export const ROOMS_FETCHED = 'ROOMS_FETCHED';
 export const ROOM_FETCHED = 'ROOM_FETCHED';
 export const ROOM_HISTORY_FETCHED = 'ROOM_HISTORY_FETCHED';
+export const ROOM_HISTORY_FETCHING = 'ROOM_HISTORY_FETCHING';
 export const ROOMS_CLEAR = 'ROOMS_CLEAR';
 
 export const createRoom = (data, resolve, reject) =>
@@ -54,7 +55,7 @@ export const clearSelectedRoom = () => {
     return { type: CLEAR_SELECTED_ROOM };
 };
 
-export const fetchRoom = (rom_id, reject) =>
+export const fetchRoom = (rom_id, resolve, reject) =>
     (dispatch) => {
         dispatch({ type: ROOMS_FETCHING });
         token.through().then(header => api({
@@ -62,12 +63,14 @@ export const fetchRoom = (rom_id, reject) =>
             method: 'GET',
             headers: header,
         }).then(resp => {
-            dispatch(selectRoom(resp.data));
+            resolve && resolve();
+            dispatch({ type: ROOM_FETCHED, payload: resp.data });
         }, reject), reject);
     };
 
 export const fetchRoomHistory = (rom_id, page, resolve, reject) =>
     (dispatch) => {
+        dispatch({ type: ROOM_HISTORY_FETCHING });
         token.through().then(header => api({
             url: `/rooms-history/${rom_id}?page=${ page }`,
             method: 'GET',

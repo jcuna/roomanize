@@ -43,18 +43,19 @@ export default class RoomForm extends Component {
         if (typeof params.room_id !== 'undefined' && this.state.id === 0 &&
             props.rooms.status !== STATUS.TRANSMITTING) {
             props.dispatch(fetchRoom(params.room_id, () => {
-                props.history.push('/error/404');
-            }));
-        }
-        if (typeof params.room_id !== 'undefined' && hasAccess(ENDPOINTS.ROOMS_HISTORY_URL, ACCESS_TYPES.READ)) {
-            props.dispatch(fetchRoomHistory(params.room_id, this.state.page, ({ list }) => {
-                if (hasAccess(ENDPOINTS.BALANCE_PAYMENTS_URL, ACCESS_TYPES.WRITE)) {
-                    list.forEach(agreement => {
-                        if (agreement.agreement_terminated_on === null) {
-                            props.dispatch(getAgreementBalance(agreement.agreement_id));
+                if (hasAccess(ENDPOINTS.ROOMS_HISTORY_URL, ACCESS_TYPES.READ)) {
+                    props.dispatch(fetchRoomHistory(params.room_id, this.state.page, ({ list }) => {
+                        if (hasAccess(ENDPOINTS.BALANCE_PAYMENTS_URL, ACCESS_TYPES.WRITE)) {
+                            list.forEach(agreement => {
+                                if (agreement.agreement_terminated_on === null) {
+                                    props.dispatch(getAgreementBalance(agreement.agreement_id));
+                                }
+                            });
                         }
-                    });
+                    }));
                 }
+            }, () => {
+                props.history.push('/error/404');
             }));
         }
     }
@@ -123,7 +124,7 @@ export default class RoomForm extends Component {
         const { match, rooms, receipts } = this.props;
         const creating = typeof match.params.room_id === 'undefined';
 
-        if (!creating && this.state.id === 0) {
+        if (!creating && this.state.id === 0 || rooms.status === STATUS.TRANSMITTING) {
             return <Spinner/>;
         }
 

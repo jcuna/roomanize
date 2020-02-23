@@ -34,7 +34,6 @@ export default class Room extends Component {
             this.props.history.push(`${ENDPOINTS.ROOMS_URL}/${this.state.page}`);
         }
 
-        this.selectRoom = this.selectRoom.bind(this);
         this.search = this.search.bind(this);
         this.switchPage = this.switchPage.bind(this);
     }
@@ -153,21 +152,12 @@ export default class Room extends Component {
                         <FontAwesome type='file-contract' data-id={ item.id }/>
                     </Link>,
                     canEditOrView &&
-                    <Link key={ 2 } to={ `${ENDPOINTS.ROOMS_URL }/editar/${item.id}` } onClick={ this.selectRoom }>
+                    <Link key={ 2 } to={ `${ENDPOINTS.ROOMS_URL }/editar/${item.id}` }>
                         <FontAwesome type='edit' data-id={ item.id }/>
                     </Link> ||
                     <FontAwesome key={ 2 } type='ban'/>
                 ];
             }) }/>;
-    }
-
-    selectRoom({ target }) {
-        this.props.rooms.data.list.forEach(room => {
-            if (Number(room.id) === Number(target.getAttribute('data-id'))) {
-                this.props.dispatch(selectRoom(room));
-                return;
-            }
-        });
     }
 
     static propTypes = {
